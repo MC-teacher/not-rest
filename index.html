@@ -31,13 +31,20 @@ header p{margin:8px 0 0;opacity:.75;font-size:15px}
 .card.soon{opacity:.6;pointer-events:none}
 .card.soon .go{background:#8a7a62}
 .empty{grid-column:1/-1;text-align:center;color:#f3e7cc;opacity:.7;padding:30px}
+
+.sec{grid-column:1/-1;margin:10px 0 -4px;color:#f3e7cc;font-size:18px;border-bottom:1px solid rgba(243,231,204,.25);padding-bottom:8px}
+.sec small{font-weight:400;opacity:.6;font-size:13px;margin-left:6px}
+.sec.tools{margin-top:22px}
+.card.tool{flex-direction:row;border-style:dashed;border-color:#3f9a8f;background:#e7f1ee}
+.card.tool .cover{width:96px;height:auto;min-height:96px;font-size:44px;flex:none}
+.card.tool .go{background:#2f7f86}
 footer{text-align:center;color:#f3e7cc;opacity:.5;font-size:12px;padding:0 16px 28px}
 </style>
 </head>
 <body>
 <header>
   <h1>🎲 보드게임 놀이터</h1>
-  <p>플레이할 게임을 골라 보세요</p>
+  <p>플레이할 게임이나 도구를 골라 보세요</p>
 </header>
 <div class="bar">
   <input id="q" type="search" placeholder="게임 이름이나 설명으로 검색">
@@ -53,48 +60,46 @@ footer{text-align:center;color:#f3e7cc;opacity:.5;font-size:12px;padding:0 16px 
    - soon : true 로 두면 '준비 중' 카드로 표시되고 눌리지 않아요
 */
 const GAMES = [
-  {
-    title: '대항해 탐험가',
-    href: 'voyage.html',
-    emoji: '⛵',
-    color: 'linear-gradient(135deg,#3e5d74,#6f8fa6)',
-    desc: '리스본에서 출항해 12라운드 동안 세계를 누비는 롤 앤 라이트. 물자를 나누고, 해적과 괴혈병을 견디며 명성을 쌓으세요.',
-    players: '1인',
-    time: '20~30분',
-    tags: ['롤앤라이트', '솔로'],
-    badge: 'NEW'
-  },
-  // {
-  //   title: '다음 게임 이름',
-  //   href: 'next-game.html',
-  //   emoji: '🃏',
-  //   color: 'linear-gradient(135deg,#7a3b2e,#c0714f)',
-  //   desc: '게임 소개 한두 줄',
-  //   players: '2~4인',
-  //   time: '15분',
-  //   tags: ['카드게임'],
-  //   soon: true
-  // },
+  { title:'대항해 탐험가', href:'voyage.html', emoji:'⛵', color:'linear-gradient(135deg,#3e5d74,#6f8fa6)',
+    desc:'리스본에서 출항해 12라운드 동안 세계를 누비는 롤 앤 라이트. 물자를 나누고, 해적과 괴혈병을 견디며 명성을 쌓으세요.',
+    players:'1인', time:'20~30분', tags:['롤앤라이트','솔로'], badge:'NEW' },
+  { title:'Dragon',     href:'dragon.html',     emoji:'🐉', color:'linear-gradient(135deg,#5b1f1f,#b5442f)', desc:'', tags:[] },
+  { title:'Hanmi',      href:'hanmi.html',      emoji:'🏯', color:'linear-gradient(135deg,#3b4a2a,#7d8f4e)', desc:'', tags:[] },
+  { title:'Rebirth',    href:'rebirth.html',    emoji:'🔥', color:'linear-gradient(135deg,#6a2c12,#d9822b)', desc:'', tags:[] },
+  { title:'The Ring',   href:'the ring.html',   emoji:'💍', color:'linear-gradient(135deg,#4a3a12,#c9a43a)', desc:'', tags:[] },
+  { title:'The Castle', href:'thecastle.html',  emoji:'🏰', color:'linear-gradient(135deg,#2e3442,#6b7690)', desc:'', tags:[] },
+  { title:'The Moon',   href:'themoon.html',    emoji:'🌙', color:'linear-gradient(135deg,#1d2340,#4b5a93)', desc:'', tags:[] },
+
+  // ===== 도구(게임이 아닌 유틸) — type:'tool' 을 붙이면 아래 '도구' 칸에 따로 나와요 =====
+  { type:'tool', title:'Number Dealer', href:'number-dealer.html', emoji:'🔢', color:'linear-gradient(135deg,#1f5b57,#3f9a8f)', desc:'', tags:[] },
 ];
 
 const grid=document.getElementById('grid'),q=document.getElementById('q'),tagBox=document.getElementById('tags');
 let tag='전체';
-const allTags=['전체',...new Set(GAMES.flatMap(g=>g.tags||[]))];
+const allTags=['전체',...new Set(GAMES.filter(g=>g.type!=='tool').flatMap(g=>g.tags||[]))];
 function drawTags(){tagBox.innerHTML=allTags.map(t=>`<button class="tag ${t===tag?'on':''}" data-t="${t}">${t}</button>`).join('');}
 tagBox.onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;tag=b.dataset.t;drawTags();draw();};
-function draw(){
-  const s=q.value.trim().toLowerCase();
-  const list=GAMES.filter(g=>(tag==='전체'||(g.tags||[]).includes(tag))&&(!s||(g.title+' '+g.desc+' '+(g.tags||[]).join(' ')).toLowerCase().includes(s)));
-  grid.innerHTML=list.map(g=>`
-    <a class="card ${g.soon?'soon':''}" href="${g.soon?'#':g.href}">
+function cardHTML(g){
+  const tool=g.type==='tool';
+  return `<a class="card ${g.soon?'soon':''} ${tool?'tool':''}" href="${g.soon?'#':encodeURI(g.href)}">
       <div class="cover" style="background:${g.color||'#6b4f33'}">${g.emoji||'🎲'}${g.soon?'<span class="badge">준비 중</span>':g.badge?`<span class="badge">${g.badge}</span>`:''}</div>
       <div class="body">
         <h2>${g.title}</h2>
-        <p>${g.desc||''}</p>
+        ${g.desc?`<p>${g.desc}</p>`:'<p></p>'}
         <div class="meta">${g.players?`<span>👥 ${g.players}</span>`:''}${g.time?`<span>⏱ ${g.time}</span>`:''}${(g.tags||[]).map(t=>`<span>#${t}</span>`).join('')}</div>
-        <span class="go">${g.soon?'준비 중':'플레이 ▶'}</span>
+        <span class="go">${g.soon?'준비 중':tool?'열기 ▶':'플레이 ▶'}</span>
       </div>
-    </a>`).join('')||'<div class="empty">찾는 게임이 없어요.</div>';
+    </a>`;
+}
+function draw(){
+  const s=q.value.trim().toLowerCase();
+  const ok=g=>(tag==='전체'||(g.tags||[]).includes(tag))&&(!s||(g.title+' '+(g.desc||'')+' '+(g.tags||[]).join(' ')).toLowerCase().includes(s));
+  const games=GAMES.filter(g=>g.type!=='tool'&&ok(g)), tools=GAMES.filter(g=>g.type==='tool'&&(!s||(g.title+' '+(g.desc||'')).toLowerCase().includes(s)));
+  let h='';
+  h+=`<h3 class="sec">🎲 게임 <small>${games.length}</small></h3>`;
+  h+=games.length?games.map(cardHTML).join(''):'<div class="empty">찾는 게임이 없어요.</div>';
+  if(tools.length){h+=`<h3 class="sec tools">🧰 도구 <small>게임 진행을 돕는 유틸리티</small></h3>`+tools.map(cardHTML).join('');}
+  grid.innerHTML=h;
 }
 q.oninput=draw;drawTags();draw();
 </script>
