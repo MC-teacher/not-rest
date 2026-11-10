@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스코틀랜드 타일 게임</title>
+<style>
+:root{--bg:#0f2a3a;--panel:#163b52;--ink:#eef5f8;--muted:#9fb9c7;--accent:#f4d04a;--line:#2a5670}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;font-size:15px}
+button{font:inherit;border:0;border-radius:10px;padding:9px 14px;background:#2b6a8c;color:#fff;cursor:pointer}
+button:hover{filter:brightness(1.1)}
+button.primary{background:var(--accent);color:#2a2100;font-weight:700}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.hidden{display:none!important}
+.screen{max-width:1200px;margin:0 auto;padding:14px}
+h1{font-size:22px;margin:6px 0 4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label{display:block;margin:8px 0 4px;color:var(--muted);font-size:13px}
+input[type=text],textarea,select{width:100%;padding:9px;border-radius:9px;border:1px solid var(--line);background:#0c2230;color:var(--ink);font:inherit}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px;border:2px solid #fff3}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:12px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.mapwrap{background:#2f7fa8;border-radius:14px;overflow:auto;max-height:78vh;border:1px solid var(--line);touch-action:pan-x pan-y}
+.mapwrap svg{display:block}
+.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.turn{font-weight:700;font-size:17px}
+.hand{display:flex;align-items:center;gap:8px;background:#0c2230;border-radius:12px;padding:4px 10px}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line)}
+.score-row.cur{background:#ffffff12;border-radius:8px}
+.score-num{font-size:20px;font-weight:800}
+.meta{color:var(--muted);font-size:12px}
+.log{max-height:260px;overflow:auto;font-size:13px;line-height:1.5;color:#d6e6ee}
+.log div{border-bottom:1px dashed #ffffff14;padding:3px 0}
+.confirm{position:sticky;bottom:0;display:flex;gap:8px;justify-content:center;padding:10px;background:#0f2a3aee;border-radius:12px;margin-top:8px}
+#modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:20;padding:14px}
+#modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:560px;width:100%;max-height:88vh;overflow:auto}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111d;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;z-index:30;opacity:0;transition:opacity .3s;pointer-events:none;max-width:92vw;text-align:center}
+#toast.show{opacity:1}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:6px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left}
+.mission{background:#0c2230;border-radius:10px;padding:10px;margin:6px 0}
+.ok{color:#7be08a}.no{color:#f19a9a}
+.palette button{padding:7px 10px;background:#0c2230;border:1px solid var(--line)}
+.palette button.on{background:var(--accent);color:#2a2100}
+.phases{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.ph{flex:1;min-width:120px;background:#0c2230;border:1px solid var(--line);border-radius:10px;padding:7px 9px;font-size:13px;color:var(--muted)}
+.ph b{display:block;color:var(--ink);font-size:13px}
+.ph.on{border-color:var(--accent);background:#f4d04a1f;color:var(--ink)}
+.last .st{display:flex;gap:8px;padding:4px 0;border-bottom:1px dashed #ffffff14;font-size:13px}
+.last .st span:first-child{flex:0 0 74px;color:var(--muted)}
+.rules h3{margin:14px 0 6px;font-size:16px}.rules li{margin:3px 0;line-height:1.5}.rules ul{padding-left:18px;margin:4px 0}
+.drop{animation:drop .45s cubic-bezier(.2,1.4,.4,1);transform-box:fill-box;transform-origin:center}
+@keyframes drop{0%{transform:translateY(-26px) scale(1.25);opacity:0}100%{transform:none;opacity:1}}
+.drop polygon:nth-child(3){stroke:#fffbe0;stroke-width:3.5}
+.ghost{opacity:.7;animation:hover 1s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes hover{to{transform:translateY(-4px)}}
+.turnbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px 14px 0 0;padding:8px 12px;margin-bottom:-1px;position:sticky;top:0;z-index:5}
+.turnbar + .mapwrap{border-radius:0 0 14px 14px}
+.turnbar .hand{font-size:16px;font-weight:600}
+.turnbar .hand svg{width:56px;height:56px}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend span i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+
+<!-- ===== 설정 ===== -->
+<div id="setup" class="screen">
+  <h1>🏴 스코틀랜드 타일 게임</h1>
+  <div class="sub">한 기기에서 돌아가며 두는 2~4인용 · 사진 속 스코틀랜드 맵을 육각 격자로 옮긴 버전</div>
+  <div class="card">
+    <button class="primary" style="width:100%;margin-bottom:6px" onclick="soloPreset()">🤖 혼자 하기 (나 vs 컴퓨터)</button>
+    <div class="meta">컴퓨터를 2~3명으로 늘리려면 아래에서 인원을 고르고 플레이어마다 ‘컴퓨터’를 체크하세요.</div>
+    <label>인원</label>
+    <div class="row" id="pcount"></div>
+    <label>플레이어 (위에서부터 시계 방향 순서 · 첫 사람 = 스코틀랜드를 가장 최근에 방문한 사람)</label>
+    <div id="names"></div>
+    <label>컴퓨터 난이도</label>
+    <select id="diff"><option value="0">쉬움 — 가끔 엉뚱한 수</option><option value="1" selected>보통</option><option value="2">어려움 — 미션 카드 조건까지 노림</option></select>
+    <label>컴퓨터 속도</label>
+    <select id="speed"><option value="1400">천천히</option><option value="800" selected>보통</option><option value="250">빠르게</option></select>
+    <label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="mask"> 차례마다 가림 화면 띄우기 (손 타일·미션 카드 비공개)</label>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="startGame()">게임 시작</button>
+      <button class="ghost" onclick="openEditor()">맵 편집</button>
+      <button class="ghost" onclick="showRules()">📖 규칙</button>
+    </div>
+    <div class="meta" id="mapStatus" style="margin-top:8px"></div>
+  </div>
+  <div class="card meta" style="line-height:1.6">
+    <b style="color:var(--ink)">사용법</b><br>
+    · 자기 차례에 빛나는 칸 중 하나를 누르고 <b>여기에 놓기</b>로 확정합니다. 점수는 자동으로 계산됩니다.<br>
+    · 미션 카드는 실제 카드 32장(대성당 보너스 7장 포함)을 씁니다. ‘가장 많이’ 카드는 동률이어도 충족, 하나도 없으면 미충족.<br>
+    · 손에 든 타일을 놓을 수 있는 칸이 하나도 없으면 그 타일은 버리고 새로 뽑습니다.
+  </div>
+</div>
+
+<!-- ===== 게임 ===== -->
+<div id="game" class="screen hidden">
+  <div class="topbar">
+    <button class="ghost" onclick="showAside()">빼 둔 타일</button>
+    <button class="ghost" onclick="showMissions()">내 미션</button>
+    <button class="ghost" onclick="showRules()">📖 규칙</button>
+    <span style="flex:1"></span>
+    <button class="ghost" onclick="zoom(-1)">－</button>
+    <button class="ghost" onclick="zoom(1)">＋</button>
+  </div>
+  <div class="phases" id="phases"></div>
+  <div class="layout">
+    <div>
+      <div class="turnbar">
+        <div class="turn" id="turnLabel"></div>
+        <div class="hand" id="handBox"></div>
+        <button class="ghost" id="discardBtn" onclick="discardHand()">놓을 곳 없음 → 버리기</button>
+      </div>
+      <div class="mapwrap" id="mapwrap"></div>
+      <div class="confirm hidden" id="confirmBar">
+        <button class="primary" onclick="confirmPlace()">여기에 놓기 ✓</button>
+        <button class="ghost" onclick="cancelSel()">취소</button>
+      </div>
+      <div class="legend">
+        <span><i style="background:#8b95a5"></i>에너지 농장칸</span>
+        <span><i style="background:#4f9a44"></i>식량 농장칸</span>
+        <span><i style="background:#a6d46f"></i>빈 칸(농장 아무거나)</span>
+        <span><i style="background:#ecd9b0"></i>정착촌칸</span>
+        <span><i style="background:#ef8fca"></i>성</span>
+        <span><i style="background:#f4d04a"></i>대성당</span>
+        <span><i style="background:#6cc3ee"></i>호수(2인전 중립 / 3·4인전 빈 칸)</span>
+        <span><i style="background:#fff;border:3px solid #14324a"></i>해안선 칸</span><span>🚩 국경 해안가</span><span>+1 항구(어떤 타일이든 +1)</span>
+      </div>
+    </div>
+    <div>
+      <div class="card"><b>점수</b><div id="scores"></div></div>
+      <div class="card last" id="lastTurn"></div>
+      <div class="card"><b>기록</b><div class="log" id="log"></div></div>
+      <button class="ghost" onclick="if(confirmReset())location.reload()">처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 맵 편집 ===== -->
+<div id="editor" class="screen hidden">
+  <h1>맵 편집</h1>
+  <div class="sub">사진과 다른 칸이 있으면 도구를 고른 뒤 칸을 눌러 고치세요. 붙어 있는 정착촌칸은 하나의 정착촌으로 묶입니다(스코틀랜드는 최대 3칸).</div>
+  <div class="card">
+    <div class="row palette" id="palette"></div>
+    <div class="row" style="margin-top:8px">
+      <div style="flex:1;min-width:180px"><label>성·대성당 이름 (새로 놓을 때)</label><input type="text" id="edName" placeholder="예: 에든버러"></div>
+    </div>
+  </div>
+  <div class="mapwrap" id="edMap"></div>
+  <div class="row" style="margin-top:10px">
+    <button class="primary" onclick="saveEditor()">저장하고 돌아가기</button>
+    <button class="ghost" onclick="resetEditor()">기본 맵으로 되돌리기</button>
+    <button class="ghost" onclick="closeEditor()">취소</button>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <label>맵 코드 (복사해 두거나 붙여 넣어 불러오기)</label>
+    <textarea id="edCode" rows="6"></textarea>
+    <div class="row" style="margin-top:8px"><button class="ghost" onclick="copyCode()">코드 복사</button><button class="ghost" onclick="importCode()">코드 불러오기</button></div>
+  </div>
+</div>
+
+<div id="modal" class="hidden"><div class="box" id="modalBox"></div></div>
+<div id="toast"></div>
+
+<script>
+/* ---------- 기본 맵 (사진에서 옮김, 행:반칸좌표+종류) ----------
+   G 빈칸 · E 에너지칸 · F 식량칸 · S 정착촌칸(+ 항구) · C 성 · K 대성당 · L 호수 */
+const DEFAULT_MAP=`0:-9L~ -7L+~ -3L~ -1L~ 1L 3L~
+1:-10L~ -8L -4L -2L 0L 2L~ 4S+~
+2:-9L~ -5L~ -3L -1E 1S~
+3:-6E~ -4E -2E 0C던로빈
+4:-9S+~ -7E~ -5C어쿼트 -3G -1G~ 3S~ 5K엘긴 7F~ 9F~
+5:-10G~ -8S -6E -4F -2K인버네스 0S~ 2C브레머 4S 6G 8S 10K애버딘
+6:-9C에일린도난 -7E -5G -3F -1S 1S 3G 5F 7C애버딘 9S~
+7:-8S+~ -6G -4C인버게리 -2F 0G 2E 4S 6F 8S+~
+8:-7E~ -5E -3E -1G 1C블레어 3E 5L 7L~
+9:-8C두아트 -6S -4K오반 -2F 0G 2S 4L 6L
+10:-9F~ -7F~ -5S -3G -1E 1K퍼스 3E 5L~ 7L~
+11:-6F~ -4C인베라레이 -2G 0E 2C스털링 4E~
+12:-9L~ -7L~ -5G -3E -1S 1E 3E 5S+~ 7G~ 9F~
+13:-10L~ -8L -6L~ -4G~ -2K글래스고 0S 2G 4K에든버러 6S 8C에든버러 10F#~
+14:-7L+~ -3G~ -1S 1E 3C니드패스 5G 7F 9F#
+15:-2C컬제인 0G 2E 4E 6F 8F#
+16:-3F~ -1F 1G 3K덤프리스 5G 7C허미티지
+17:-4L~ -2L 0F 2C커레버록 4S#~ 6S#
+18:-5L~ -3L -1L+~ 1G~`;
+
+const COLORS=[{n:'빨강',c:'#d94141'},{n:'틸',c:'#1f9e93'},{n:'노랑',c:'#e0b21c'},{n:'보라',c:'#7b4fc4'}];
+// 판은 연하고 평평하게(인쇄된 보드 느낌), 플레이어 타일은 진하고 입체적으로
+const FILL={G:'#cfe0b0',E:'#c3c8cf',F:'#a9c99b',S:'#f1e6cc',C:'#f2c3dc',K:'#f5e3a8',L:'#b7dcef'};
+const R=30,W=Math.sqrt(3)*R;
+const NB=[[0,2],[0,-2],[1,1],[1,-1],[-1,1],[-1,-1]];
+const key=(r,h)=>r+','+h;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+const RENAME=[['인버레리','인베라레이'],['도녹','인버네스'],['인버개리','인버게리'],['아이오나','오반'],['던베건','에일린도난'],['던켈드','퍼스'],['던노타','애버딘']];
+let mapText=store('scot-map2')||DEFAULT_MAP;
+RENAME.forEach(([a,b])=>{mapText=mapText.split(a).join(b)});
+
+function parseMap(txt){
+  const cells={};
+  txt.split('\n').forEach(line=>{
+    line=line.trim(); if(!line||line.indexOf(':')<0) return;
+    const i=line.indexOf(':'), r=parseInt(line.slice(0,i));
+    if(isNaN(r)) return;
+    line.slice(i+1).trim().split(/\s+/).forEach(tok=>{
+      const m=tok.match(/^(-?\d+)([GEFSCKL])([+#~]*)(.*)$/); if(!m) return;
+      const h=+m[1]; if(((h%2)+2)%2!==(r%2===0?1:0)) return;
+      cells[key(r,h)]={r,h,t:m[2],harbor:m[3].includes('+'),border:m[3].includes('#'),coast:m[3].includes('~'),name:(m[2]==='C'||m[2]==='K')?(m[4]||''):''};
+    });
+  });
+  return cells;
+}
+function serializeMap(cells){
+  const rows={};
+  Object.values(cells).forEach(c=>{(rows[c.r]=rows[c.r]||[]).push(c)});
+  return Object.keys(rows).map(Number).sort((a,b)=>a-b).map(r=>r+':'+rows[r].sort((a,b)=>a.h-b.h)
+    .map(c=>c.h+c.t+(c.harbor?'+':'')+(c.border?'#':'')+(c.coast?'~':'')+(c.name||'').replace(/\s/g,'')).join(' ')).join('\n');
+}
+function hexPts(x,y,s){let p=[];for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-90);p.push((x+s*Math.cos(a)).toFixed(1)+','+(y+s*Math.sin(a)).toFixed(1))}return p.join(' ')}
+const pos=c=>[c.h*W/2,c.r*1.5*R];
+
+/* ---------- 미션 카드 ---------- */
+/* 실제 미션 카드 32장 — n은 장수. ‘가장 많이’ 카드는 동률이어도 충족(0개면 미충족) */
+const MISSIONS=[
+ {t:'대성당 보너스',d:'보너스 점수 3점',p:3,n:7,col:'#f2b45c',f:()=>true},
+ {t:'소형 정착지 점령',d:'점령한 소형 정착지를 가장 많이 보유하세요.',p:5,n:1,col:'#d9b38c',f:pi=>most(i=>setCount(i,1,'any'),pi)},
+ {t:'중형 정착지 점령',d:'자신이 완전히 점령한 중형 정착지를 가장 많이 보유하세요.',p:5,n:1,col:'#d9b38c',f:pi=>most(i=>setCount(i,2,'all'),pi)},
+ {t:'중형 정착지 영향력',d:'자신이 1칸 이상 점령한 중형 정착지를 가장 많이 보유하세요.',p:5,n:1,col:'#d9b38c',f:pi=>most(i=>setCount(i,2,'any'),pi)},
+ {t:'대형 정착지 영향력',d:'자신이 1칸 이상 점령한 대형 정착지를 가장 많이 보유하세요.',p:5,n:1,col:'#e3c98f',f:pi=>most(i=>setCount(i,3,'any'),pi)},
+ {t:'가장 큰 음식 농장 무리',d:'가장 큰 음식 농장 무리를 보유하세요.',p:5,n:1,col:'#a9b94a',f:pi=>most(i=>maxCluster(i,'F'),pi)},
+ {t:'가장 많은 음식 농장',d:'3개 이상의 타일로 구성된 음식 농장 무리를 가장 많이 보유하세요.',p:5,n:1,col:'#a9b94a',f:pi=>most(i=>bigClusters(i,'F'),pi)},
+ {t:'가장 큰 에너지 공장 무리',d:'가장 큰 에너지 공장 무리를 보유하세요.',p:5,n:1,col:'#a7a9ab',f:pi=>most(i=>maxCluster(i,'E'),pi)},
+ {t:'가장 많은 에너지 공장',d:'3개 이상의 타일로 구성된 에너지 공장 무리를 가장 많이 보유하세요.',p:5,n:1,col:'#a7a9ab',f:pi=>most(i=>bigClusters(i,'E'),pi)},
+ {t:'가장 많은 항구',d:'항구 칸을 가장 많이 점령하세요.',p:5,n:1,col:'#5fb3d6',f:pi=>most(i=>Object.values(G.cells).filter(c=>c.harbor&&c.tile&&c.tile.p===i).length,pi)},
+ {t:'영국 국경 해안가',d:'영국 국경 해안가 칸(🚩)을 가장 많이 점령하세요.',p:5,n:1,col:'#3f9dbf',f:pi=>most(i=>Object.values(G.cells).filter(c=>c.border&&c.tile&&c.tile.p===i).length,pi)},
+ {t:'가장 긴 해안선',d:'해안선의 가장 긴 연속된 공간을 차지하세요. (카드의 검은 칸 = 맵의 진한 테두리 칸)',p:5,n:1,col:'#3f9dbf',f:pi=>most(i=>longestCoast(i),pi)},
+ {t:'가장 많은 성',d:'보드에 있는 성을 가장 많이 통제하세요.',p:5,n:1,col:'#e66aa8',f:pi=>most(i=>castlesOf(i),pi)},
+ {t:'가장 많은 대성당',d:'보드에 자신의 대성당을 가장 많이 배치하세요.',p:5,n:1,col:'#f2b45c',f:pi=>most(i=>cathOf(i),pi)},
+ ...[['애버딘','C'],['인베라레이','C'],['인버게리','C'],['에일린도난','C'],['에든버러','C'],['블레어','C'],['글래스고','K'],['인버네스','K'],['오반','K'],['에든버러','K'],['덤프리스','K'],['퍼스','K']].map(([nm,t])=>{
+   const disp=nm==='에일린도난'?'에일린 도난':nm, kind=t==='C'?'성':'대성당';
+   return {t:`${disp} ${kind}`,d:`${disp} ${kind} 주변 공간을 가장 많이 차지하세요.`,p:5,n:1,col:t==='C'?'#e66aa8':'#f2b45c',f:pi=>most(i=>aroundCount(nm,t,i),pi)};
+ }),
+];
+function isCoast(c){return !!c.coast}
+function longestCoast(pi){const seen=new Set();let best=0;Object.values(G.cells).forEach(c=>{const k0=key(c.r,c.h);if(seen.has(k0)||!c.tile||c.tile.p!==pi||!isCoast(c))return;let n=0;const st=[c];seen.add(k0);while(st.length){const x=st.pop();n++;nb(x).forEach(y=>{const ky=key(y.r,y.h);if(!seen.has(ky)&&y.tile&&y.tile.p===pi&&isCoast(y)){seen.add(ky);st.push(y)}})}best=Math.max(best,n)});return best}
+function most(fn,pi){if(!G)return false;const v=G.players.map((_,i)=>fn(i));return v[pi]>0&&v[pi]===Math.max(...v)}
+function setCount(pi,size,mode){return G.sgroups.filter(g=>g.length===size&&(mode==='all'?g.every(k=>G.cells[k].tile&&G.cells[k].tile.p===pi):g.some(k=>G.cells[k].tile&&G.cells[k].tile.p===pi))).length}
+function bigClusters(pi,k){const seen=new Set();let n=0;Object.values(G.cells).forEach(c=>{const kk=key(c.r,c.h);if(seen.has(kk)||!c.tile||c.tile.p!==pi||c.tile.k!==k)return;const cl=cluster(c);cl.forEach(x=>seen.add(key(x.r,x.h)));if(cl.length>=3)n++});return n}
+function aroundCount(nm,t,pi){const c=Object.values(G.cells).find(c=>c.t===t&&c.name.replace(/\s/g,'')===nm);if(!c)return 0;return nb(c).filter(n=>n.tile&&n.tile.p===pi).length}
+
+/* ---------- 상태 ---------- */
+let G=null, nPlayers=2, Z=1;
+
+function nb(c){return NB.map(([dr,dh])=>G.cells[key(c.r+dr,c.h+dh)]).filter(Boolean)}
+function full(g){return g.every(k=>G.cells[k].tile)}
+function cluster(c){
+  const seen=new Set([key(c.r,c.h)]),st=[c],out=[];
+  while(st.length){const x=st.pop();out.push(x);nb(x).forEach(n=>{const k=key(n.r,n.h);if(!seen.has(k)&&n.tile&&n.tile.k===c.tile.k&&n.tile.p===c.tile.p){seen.add(k);st.push(n)}})}
+  return out;
+}
+function maxCluster(pi,k){let m=0;Object.values(G.cells).forEach(c=>{if(c.tile&&c.tile.p===pi&&c.tile.k===k)m=Math.max(m,cluster(c).length)});return m}
+function countTiles(pi,k){return Object.values(G.cells).filter(c=>c.tile&&c.tile.p===pi&&c.tile.k===k).length}
+function castlesOf(pi){return Object.values(G.castle).filter(o=>o===pi).length}
+function cathOf(pi){return Object.values(G.cath).filter(a=>a.includes(pi)).length}
+function region(pi,f){return Object.values(G.cells).filter(c=>c.tile&&c.tile.p===pi&&f(c)).length}
+function namedOwner(nm){const c=Object.values(G.cells).find(c=>c.t==='C'&&c.name.includes(nm));if(!c)return undefined;return G.castle[key(c.r,c.h)]}
+const cname=c=>c.t==='C'?(c.name||'이름 없는')+' 성':(c.name||'이름 없는')+' 대성당';
+const kindName={E:'에너지 농장',F:'식량 농장',S:'정착촌'};
+
+/* ---------- 설정 화면 ---------- */
+function renderSetup(){
+  document.getElementById('pcount').innerHTML=[2,3,4].map(n=>`<button class="${n===nPlayers?'primary':'ghost'}" onclick="nPlayers=${n};renderSetup()">${n}인</button>`).join('');
+  const old=[...document.querySelectorAll('#names input[type=text]')].map(i=>i.value);
+  const oldAi=[...document.querySelectorAll('#names input[type=checkbox]')].map(i=>i.checked);
+  document.getElementById('names').innerHTML=COLORS.slice(0,nPlayers).map((c,i)=>{
+    const ai=oldAi[i]!==undefined?oldAi[i]:(aiDefault[i]||false);
+    return `<div class="row" style="margin:5px 0"><span class="pill" style="background:${c.c}"></span><input type="text" value="${esc(old[i]||c.n)}" style="flex:1"><label style="margin:0;display:flex;gap:4px;align-items:center;color:var(--ink);white-space:nowrap"><input type="checkbox" ${ai?'checked':''}> 🤖 컴퓨터</label></div>`}).join('');
+  document.getElementById('mapStatus').textContent=store('scot-map2')?'편집해 저장한 맵을 사용합니다.':'기본 맵을 사용합니다.';
+}
+let aiDefault=[];
+renderSetup();
+function soloPreset(){
+  nPlayers=2;document.getElementById('names').innerHTML='';aiDefault=[false,true];renderSetup();
+  const t=document.querySelectorAll('#names input[type=text]');t[0].value='나';t[1].value='컴퓨터';
+  document.getElementById('mask').checked=false;
+  startGame();
+}
+
+function startGame(){
+  const aiFlags=[...document.querySelectorAll('#names input[type=checkbox]')].map(i=>i.checked);
+  const names=[...document.querySelectorAll('#names input[type=text]')].map((i,idx)=>i.value.trim()||COLORS[idx].n);
+  const cells=parseMap(mapText);
+  Object.values(cells).forEach(c=>{c.tile=null;c.neutral=false;if(nPlayers===2&&c.t==='L')c.neutral=true});
+  const players=names.map((nm,i)=>{
+    let tiles=[];
+    for(let k=0;k<12;k++){tiles.push({k:'E'});tiles.push({k:'F'})}
+    for(let v=1;v<=4;v++)for(let k=0;k<3;k++)tiles.push({k:'S',inf:v});
+    if(nPlayers===4){
+      const rm=(pred)=>{const i=tiles.findIndex(pred);tiles.splice(i,1)};
+      for(let k=0;k<3;k++){rm(t=>t.k==='E');rm(t=>t.k==='F')}
+      [2,3,4].forEach(v=>rm(t=>t.k==='S'&&t.inf===v));
+    }
+    shuffle(tiles);
+    const aside=tiles.splice(0,2);
+    const hand=tiles.pop();
+    return {name:(aiFlags[i]?'🤖 ':'')+nm,ai:aiFlags[i],color:COLORS[i].c,score:0,supply:tiles,aside,hand,missions:[]};
+  });
+  // 정착촌 묶음
+  const sgroups=[],sgOf={};
+  Object.values(cells).forEach(c=>{
+    const k0=key(c.r,c.h); if(c.t!=='S'||sgOf[k0]!==undefined) return;
+    const g=[],st=[c]; sgOf[k0]=sgroups.length;
+    while(st.length){const x=st.pop();g.push(key(x.r,x.h));
+      NB.forEach(([dr,dh])=>{const kk=key(x.r+dr,x.h+dh),n=cells[kk];if(n&&n.t==='S'&&sgOf[kk]===undefined){sgOf[kk]=sgroups.length;st.push(n)}})}
+    sgroups.push(g);
+  });
+  const cath={};Object.values(cells).forEach(c=>{if(c.t==='K')cath[key(c.r,c.h)]=[]});
+  const deck=shuffle(MISSIONS.flatMap((m,i)=>Array(m.n).fill(i)));
+  G={cells,players,sgroups,sgOf,castle:{},cath,deck,cur:0,sel:null,log:[],over:false,mask:document.getElementById('mask').checked&&aiFlags.filter(a=>!a).length>1,diff:+document.getElementById('diff').value,speed:+document.getElementById('speed').value,twoP:nPlayers===2};
+  addLog(`게임 시작! ${players.map(p=>p.name).join(' → ')} 순서 (각자 타일 ${players[0].supply.length+1}개)`);
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  startTurn();
+}
+function confirmReset(){return G&&!G.over?true:true}
+
+/* ---------- 진행 ---------- */
+function addLog(s){G.log.unshift(s)}
+let gains=[],bucket=null;
+function add(pi,pts,why){G.players[pi].score+=pts;addLog(`<b style="color:${G.players[pi].color}">${esc(G.players[pi].name)}</b> +${pts}점 · ${why}`);if(pts)gains.push(`${G.players[pi].name} +${pts} (${why})`);if(bucket)bucket.push(`${pi===G.cur?'':G.players[pi].name+' '}+${pts} ${why}`)}
+
+function legal(t){
+  if(!t) return [];
+  const em=Object.values(G.cells).filter(c=>!c.tile&&!c.neutral&&c.t!=='C'&&c.t!=='K');
+  if(t.k==='S') return em.filter(c=>c.t==='S');
+  let a=em.filter(c=>c.t===t.k||c.t==='G'||c.t==='L');
+  if(a.length) return a;
+  return em.filter(c=>c.t===(t.k==='E'?'F':'E'));
+}
+
+function startTurn(){
+  G.sel=null;
+  render();
+  if(G.players[G.cur].ai){setTimeout(aiTurn,G.speed);return}
+  if(G.mask){
+    const P=G.players[G.cur];
+    modal(`<h2 style="margin-top:0">${esc(P.name)} 차례</h2><p class="meta">기기를 ${esc(P.name)}에게 넘겨 주세요.</p><button class="primary" onclick="closeModal()">시작</button>`);
+  }
+}
+
+function clickCell(k){
+  if(!G||G.over) return;
+  const P=G.players[G.cur];
+  if(P.ai) return;
+  if(!legal(P.hand).some(c=>key(c.r,c.h)===k)) return;
+  G.sel=k; render();
+}
+function cancelSel(){G.sel=null;render()}
+
+function confirmPlace(){
+  if(!G.sel) return;
+  const k=G.sel,c=G.cells[k],pi=G.cur,P=G.players[pi],t=P.hand;
+  gains=[];
+  const steps={s2:[],s3:[],s4:''};
+  c.tile={p:pi,k:t.k,inf:t.inf};G.lastKey=k;
+  const where=c.t==='G'||c.t==='L'?'빈 칸':c.t===t.k?'같은 아이콘 칸':c.t==='S'?'정착촌칸':'교차 배치('+kindName[c.t]+'칸)';
+  bucket=steps.s2;
+  if(c.harbor) add(pi,1,'항구 보너스');
+  if(t.k!=='S'){
+    const n=cluster(c).length;
+    add(pi,n,`${kindName[t.k]} 무리 ${n}칸`);
+  }else{
+    const g=G.sgroups[G.sgOf[k]];
+    if(g.length===1) add(pi,t.inf,`소형 정착촌 (영향력 ${t.inf})`);
+    else if(full(g)) scoreSettlement(g,pi);
+    else {const f=g.filter(x=>G.cells[x].tile).length;steps.s2.push(`${g.length===2?'중형':'대형'} 정착촌 ${f}/${g.length}칸 — 아직 미완성`)}
+  }
+  bucket=null;
+  const b3=steps.s3;
+  nb(c).forEach(n=>{
+    const nk=key(n.r,n.h);
+    if(n.t==='C'){const m=castleEval(nk,pi);if(m)b3.push(m)}
+    if(n.t==='K'&&!G.cath[nk].includes(pi)){
+      G.cath[nk].push(pi);
+      let msg=`${cname(n)}에 대성당 말을 놓음`;
+      if(G.deck.length){P.missions.push(G.deck.pop());msg+=' · 미션 카드 1장'}
+      else msg+=' · 미션 카드 더미가 비어 있음';
+      addLog(`<b style="color:${P.color}">${esc(P.name)}</b> ${msg}`);gains.push(`${P.name}: ${msg}`);b3.push(msg);
+    }
+  });
+  P.hand=P.supply.length?P.supply.pop():null;
+  steps.s4=P.hand?`보급에서 1개 뽑음 (남은 보급 ${P.supply.length})`:'보급이 비어 더 뽑지 않음';
+  G.last={pi,s1:`${t.k==='S'?'정착촌(영향력 '+t.inf+')':kindName[t.k]} → ${where}${c.harbor?' · 항구':''}`,...steps};
+  toast(gains.join('<br>'));
+  advance();
+}
+
+function scoreSettlement(g,comp){
+  const inf={};
+  g.forEach(k=>{const t=G.cells[k].tile;inf[t.p]=(inf[t.p]||0)+t.inf});
+  const ps=Object.keys(inf).map(Number),n=G.players.length,big=g.length>=3;
+  const label=big?'대형 정착촌 완성':'중형 정착촌 완성';
+  if(ps.length===1){add(ps[0],big?13:8,`${label} — 혼자 차지`);return}
+  const ord=p=>(p-comp-1+n)%n; // 완성자는 맨 뒤(n-1)
+  ps.sort((a,b)=>inf[b]-inf[a]||(big?ord(a)-ord(b):((a===comp?-1:ord(a))-(b===comp?-1:ord(b)))));
+  const pts=big?[8,5]:[5,3];
+  ps.forEach((p,i)=>{if(i<2)add(p,pts[i],`${label} ${i+1}위 (영향력 ${inf[p]})`);else addLog(`${esc(G.players[p].name)} 0점 · ${label} ${i+1}위`)});
+}
+
+function castleEval(ck,pi){
+  const c=G.cells[ck],cnt={},farm={};
+  nb(c).forEach(n=>{if(n.tile){cnt[n.tile.p]=(cnt[n.tile.p]||0)+1;if(n.tile.k!=='S')farm[n.tile.p]=(farm[n.tile.p]||0)+1}});
+  const o=G.castle[ck],P=G.players[pi];
+  if(o===undefined){G.castle[ck]=pi;const m=`${cname(c)} 차지`;addLog(`<b style="color:${P.color}">${esc(P.name)}</b> ${m}`);gains.push(`${P.name}: ${m}`);return m}
+  if(o===pi) return '';
+  const a=cnt[pi]||0,b=cnt[o]||0,fa=farm[pi]||0,fb=farm[o]||0;
+  if(a>b||(a===b&&fa>=fb)){
+    G.castle[ck]=pi;
+    const why=a>b?`인접 ${a}:${b}`:fa>fb?`인접 동률, 농장 ${fa}:${fb}`:'완전 동률 → 지금 놓은 사람';
+    const m=`${cname(c)}을 ${G.players[o].name}에게서 빼앗음 (${why})`;
+    addLog(`<b style="color:${P.color}">${esc(P.name)}</b> ${esc(m)}`);gains.push(`${P.name}: ${m}`);return m;
+  }
+  return `${cname(c)}: 지배권 유지 (${G.players[o].name} 인접 ${b} vs 나 ${a})`;
+}
+
+function discardHand(){
+  const P=G.players[G.cur];
+  if(legal(P.hand).length) return;
+  const t=P.hand;
+  addLog(`<b style="color:${P.color}">${esc(P.name)}</b> ${t.k==='S'?'정착촌(영향력 '+t.inf+')':kindName[t.k]} 타일을 놓을 곳이 없어 버림`);
+  P.hand=P.supply.length?P.supply.pop():null;
+  G.last={pi:G.cur,s1:'놓을 칸이 없어 타일을 버림',s2:[],s3:[],s4:P.hand?'보급에서 1개 뽑음':'보급이 비어 있음'};
+  advance();
+}
+
+function advance(){
+  const n=G.players.length;
+  for(let i=1;i<=n;i++){const j=(G.cur+i)%n;if(G.players[j].hand){G.cur=j;startTurn();return}}
+  endGame();
+}
+
+/* ---------- 컴퓨터 ---------- */
+function settlementPts(g,comp){
+  const inf={};
+  g.forEach(k=>{const t=G.cells[k].tile;inf[t.p]=(inf[t.p]||0)+t.inf});
+  const ps=Object.keys(inf).map(Number),n=G.players.length,big=g.length>=3,out={};
+  if(ps.length===1){out[ps[0]]=big?13:8;return out}
+  const ord=p=>(p-comp-1+n)%n;
+  ps.sort((a,b)=>inf[b]-inf[a]||(big?ord(a)-ord(b):((a===comp?-1:ord(a))-(b===comp?-1:ord(b)))));
+  const pts=big?[8,5]:[5,3];ps.forEach((p,i)=>out[p]=i<2?pts[i]:0);return out;
+}
+function wouldOwn(ck,pi){
+  const c=G.cells[ck],cnt={},farm={};
+  nb(c).forEach(n=>{if(n.tile){cnt[n.tile.p]=(cnt[n.tile.p]||0)+1;if(n.tile.k!=='S')farm[n.tile.p]=(farm[n.tile.p]||0)+1}});
+  const o=G.castle[ck];if(o===undefined||o===pi)return true;
+  const a=cnt[pi]||0,b=cnt[o]||0;return a>b||(a===b&&(farm[pi]||0)>=(farm[o]||0));
+}
+function castleSec(ck,pi){
+  // 내가 지금 이 성의 주인이라고 가정할 때 끝까지 지킬 가능성
+  const cnt={};let empty=0;
+  nb(G.cells[ck]).forEach(n=>{if(n.tile)cnt[n.tile.p]=(cnt[n.tile.p]||0)+1;else if(!n.neutral&&n.t!=='C'&&n.t!=='K')empty++});
+  const mine=cnt[pi]||0,other=Math.max(0,...Object.keys(cnt).filter(p=>+p!==pi).map(p=>cnt[p]));
+  const margin=mine-other;
+  if(empty===0)return 1;
+  if(margin>=empty)return .95;
+  if(margin>0)return .45+.12*margin;
+  return .25;
+}
+function castleGain(ck,pi,c,t){
+  // c 에는 이미 임시 타일이 놓인 상태
+  const before=G.castle[ck];
+  const tmp=c.tile;c.tile=null;
+  const secBefore=before===pi?castleSec(ck,pi):0;
+  c.tile=tmp;
+  const own=wouldOwn(ck,pi);
+  const secAfter=own?castleSec(ck,pi):0;
+  return 5*(secAfter-secBefore)+(own&&before!==undefined&&before!==pi?1:0);
+}
+function evalMove(c,pi,t){
+  const d=G.diff,k=key(c.r,c.h);let v=0;
+  const P0=G.players[pi],unmet=d>=2?P0.missions.filter(mi=>!MISSIONS[mi].f(pi)):[];
+  c.tile={p:pi,k:t.k,inf:t.inf};
+  if(c.harbor)v+=1;
+  if(t.k!=='S'){
+    v+=cluster(c).length;
+    // 앞으로 같은 종류를 이어 붙일 여지
+    if(d>=1) v+=0.5*nb(c).filter(n=>!n.tile&&!n.neutral&&(n.t===t.k||n.t==='G'||n.t==='L')).length;
+    // 정착촌칸·성 주변을 농장으로 막지 않도록 약간 감점(어려움)
+  }else{
+    const g=G.sgroups[G.sgOf[k]];
+    if(g.length===1)v+=t.inf;
+    else if(full(g)){const r=settlementPts(g,pi);v+=(r[pi]||0);if(d>=2)Object.keys(r).forEach(p=>{if(+p!==pi)v-=r[p]*0.15})}
+    else{
+      // 미완성: 현재 영향력 우위 정도로 기대값
+      const inf={};g.forEach(x=>{const tt=G.cells[x].tile;if(tt)inf[tt.p]=(inf[tt.p]||0)+tt.inf});
+      const mine=inf[pi]||0,best=Math.max(0,...Object.keys(inf).filter(p=>+p!==pi).map(p=>inf[p]));
+      v+=(mine>best?(g.length>=3?6:4.2):mine===best?3:2)*(d>=1?1:0.6);
+    }
+  }
+  // 건물
+  nb(c).forEach(n=>{const nk=key(n.r,n.h);
+    if(n.t==='C'&&d>=1) v+=castleGain(nk,pi,c,t);
+    else if(n.t==='C'){const o=G.castle[nk];if(o===undefined)v+=2.5;else if(o!==pi&&wouldOwn(nk,pi))v+=3}
+    if(n.t==='K'&&G.cath[nk]&&!G.cath[nk].includes(pi)&&G.deck.length)v+=4;
+  });
+  // 어려움: 가진 미션 조건 쪽으로
+  unmet.forEach(mi=>{if(MISSIONS[mi].f(pi))v+=MISSIONS[mi].p*0.8});
+  c.tile=null;
+  const noise=[5,1.5,0.4][d];
+  return v+Math.random()*noise;
+}
+function aiTurn(){
+  if(!G||G.over)return;
+  const pi=G.cur,P=G.players[pi];if(!P.ai)return;
+  const L=legal(P.hand);
+  if(!L.length){discardHand();return}
+  let best=null,bv=-1e9;
+  L.forEach(c=>{const v=evalMove(c,pi,P.hand);if(v>bv){bv=v;best=c}});
+  G.sel=key(best.r,best.h);render();
+  setTimeout(()=>{if(G&&!G.over&&G.cur===pi)confirmPlace()},Math.max(200,G.speed*0.8));
+}
+
+/* ---------- 게임 종료 ---------- */
+function endGame(){
+  G.over=true;G.sel=null;
+  const n=G.players.length,rows=G.players.map(p=>({base:p.score,unf:0,cas:0,mis:0,misList:[]}));
+  G.sgroups.forEach(g=>{if(g.length>1&&!full(g))g.forEach(k=>{const t=G.cells[k].tile;if(t)rows[t.p].unf+=t.inf})});
+  Object.values(G.castle).forEach(o=>rows[o].cas+=5);
+  G.players.forEach((p,i)=>p.missions.forEach(mi=>{const m=MISSIONS[mi],ok=m.f(i);rows[i].misList.push({m,ok});if(ok)rows[i].mis+=m.p}));
+  rows.forEach((r,i)=>{r.total=r.base+r.unf+r.cas+r.mis;G.players[i].score=r.total});
+  const top=Math.max(...rows.map(r=>r.total));
+  let winners=rows.map((r,i)=>i).filter(i=>rows[i].total===top),note='';
+  if(winners.length>1){
+    const ed=namedOwner('에든버러'),st=namedOwner('스털링');
+    if(ed!==undefined){winners=[ed];note='동점 → 에든버러 성을 가진 사람이 승리'}
+    else if(st!==undefined){winners=[st];note='동점 · 에든버러 성 주인 없음 → 스털링 성을 가진 사람이 승리'}
+    else note='동점 · 에든버러·스털링 성 주인 없음 → 공동 우승';
+  }
+  addLog('🏁 게임 종료');
+  render();
+  modal(`<h2 style="margin-top:0">🏁 게임 종료</h2>
+  <p style="font-size:18px">🏆 ${winners.map(w=>`<b style="color:${G.players[w].color}">${esc(G.players[w].name)}</b>`).join(', ')} 승리!</p>
+  ${note?`<p class="meta">${note}</p>`:''}
+  <table><tr><th>플레이어</th><th>진행</th><th>미완성 정착촌</th><th>성</th><th>미션</th><th>합계</th></tr>
+  ${rows.map((r,i)=>`<tr><td><span class="pill" style="background:${G.players[i].color}"></span>${esc(G.players[i].name)}</td><td>${r.base}</td><td>${r.unf}</td><td>${r.cas}</td><td>${r.mis}</td><td><b>${r.total}</b></td></tr>`).join('')}</table>
+  ${rows.map((r,i)=>r.misList.length?`<div style="margin-top:10px"><b>${esc(G.players[i].name)}의 미션</b>${r.misList.map(x=>`<div class="mission" style="border-left:6px solid ${x.m.col}"><span class="${x.ok?'ok':'no'}">${x.ok?'✔':'✘'}</span> ${x.m.t} (${x.m.p}점) <span class="meta">— ${x.m.d}</span></div>`).join('')}</div>`:'').join('')}
+  <div class="row" style="margin-top:14px"><button class="primary" onclick="location.reload()">새 게임</button><button class="ghost" onclick="closeModal()">판 보기</button></div>`);
+}
+
+/* ---------- 그리기 ---------- */
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
+  const m=v=>Math.round(f<0?v*(1+f):v+(255-v)*f);return '#'+[m(r),m(g),m(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
+// 판 위에 ‘올려놓은’ 느낌의 입체 타일: 그림자 + 옆면(두께) + 윗면 + 흰 테두리 + 아이콘 원판
+function tileSVG(t,color,x,y,s,cls){
+  const lift=s*0.13, top=y-lift;
+  let g=`<g class="${cls||''}">`;
+  g+=`<polygon points="${hexPts(x+2.5,y+4,s*0.9)}" fill="#000" opacity=".35"/>`;           // 그림자
+  g+=`<polygon points="${hexPts(x,y,s*0.88)}" fill="${shade(color,-0.45)}"/>`;               // 옆면(두께)
+  g+=`<polygon points="${hexPts(x,top,s*0.88)}" fill="${color}" stroke="#fff" stroke-width="2.6"/>`; // 윗면
+  g+=`<polygon points="${hexPts(x,top-s*0.06,s*0.66)}" fill="${shade(color,0.28)}" opacity=".55"/>`; // 윗면 하이라이트
+  g+=`<circle cx="${x}" cy="${top}" r="${s*0.43}" fill="#fff" opacity=".93"/>`;
+  if(t.k==='S') g+=`<text x="${x}" y="${top+s*0.2}" font-size="${s*0.55}" font-weight="900" fill="${shade(color,-0.35)}" text-anchor="middle">${t.inf}</text><text x="${x+s*0.42}" y="${top-s*0.3}" font-size="${s*0.32}" text-anchor="middle">🏠</text>`;
+  else g+=`<text x="${x}" y="${top+s*0.2}" font-size="${s*0.52}" text-anchor="middle">${t.k==='E'?'⚡':'🌿'}</text>`;
+  return g+'</g>';
+}
+function buildMapSVG(cells,opts){
+  opts=opts||{};
+  const all=Object.values(cells);
+  const ext=opts.grid||all;
+  let xs=ext.map(c=>pos(c)[0]),ys=ext.map(c=>pos(c)[1]);
+  const minx=Math.min(...xs)-W,maxx=Math.max(...xs)+W,miny=Math.min(...ys)-R*1.3,maxy=Math.max(...ys)+R*1.3;
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${minx} ${miny} ${maxx-minx} ${maxy-miny}" style="width:${Z*100}%;min-width:${Z*560}px">`;
+  if(opts.grid) opts.grid.forEach(c=>{if(!cells[key(c.r,c.h)]){const [x,y]=pos(c);s+=`<polygon data-k="${key(c.r,c.h)}" points="${hexPts(x,y,R*0.97)}" fill="#ffffff08" stroke="#ffffff30" stroke-width="1"/>`}});
+  const legalSet=opts.legal||new Set();
+  all.forEach(c=>{
+    const [x,y]=pos(c),k=key(c.r,c.h);
+    let fill=FILL[c.t],stroke='#00000040',sw=1;
+    if(c.t==='S'){stroke='#ffffff';sw=2.5}
+    s+=`<g data-k="${k}" style="cursor:${legalSet.has(k)||opts.grid?'pointer':'default'}">`;
+    s+=`<polygon points="${hexPts(x,y,R*0.97)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+    if(c.coast) s+=`<polygon points="${hexPts(x,y,R*0.97)}" fill="none" stroke="#14324a" stroke-width="2.5" opacity=".55"/>`;
+    if(c.tile) s+=tileSVG(c.tile,G.players[c.tile.p].color,x,y,R,G.lastKey===k?'drop':'');
+    else if(c.neutral) s+=`<polygon points="${hexPts(x+2,y+3,R*0.88)}" fill="#000" opacity=".3"/><polygon points="${hexPts(x,y,R*0.86)}" fill="#55595f"/><polygon points="${hexPts(x,y-R*0.1,R*0.86)}" fill="#8d9299" stroke="#d5d8dc" stroke-width="1.5"/><text x="${x}" y="${y+3}" font-size="14" fill="#e3e5e8" text-anchor="middle">✕</text>`;
+    else{
+      const ic={E:'⚡',F:'🌿',S:'🏠',C:'🏰',K:'⛪',L:'!',G:''}[c.t];
+      if(c.t==='L') s+=`<text x="${x}" y="${y+8}" font-size="20" font-weight="900" fill="#fff" opacity=".8" text-anchor="middle">!</text>`;
+      else if(ic) s+=`<text x="${x}" y="${y+(c.t==='C'||c.t==='K'?2:7)}" font-size="${c.t==='C'||c.t==='K'?20:19}" text-anchor="middle" opacity="${c.t==='C'||c.t==='K'?.9:.45}">${ic}</text>`;
+      if(c.t==='C'||c.t==='K') s+=`<text x="${x}" y="${y+R*0.68}" font-size="9.5" font-weight="700" fill="#3a1630" text-anchor="middle">${esc(c.name)}</text>`;
+    }
+    if(c.border) s+=`<text x="${x-R*0.6}" y="${y-R*0.38}" font-size="13" text-anchor="middle">🚩</text>`;
+    if(c.harbor) s+=`<circle cx="${x+R*0.62}" cy="${y-R*0.5}" r="9" fill="#2c7fb8" stroke="#fff" stroke-width="1.5"/><text x="${x+R*0.62}" y="${y-R*0.5+3.5}" font-size="9" font-weight="800" fill="#fff" text-anchor="middle">+1</text>`;
+    if(G&&!opts.grid){
+      if(c.t==='C'&&G.castle[k]!==undefined){
+        s+=`<polygon points="${hexPts(x,y,R*0.9)}" fill="none" stroke="${G.players[G.castle[k]].color}" stroke-width="5"/>`;
+        s+=`<path d="M${x-R*0.45},${y-R*0.25} l0,-16 l12,5 l-12,5" fill="${G.players[G.castle[k]].color}" stroke="#fff" stroke-width="1"/>`;
+      }
+      if(c.t==='K'&&G.cath[k]) G.cath[k].forEach((p,i)=>{s+=`<circle cx="${x-R*0.5+i*R*0.33}" cy="${y-R*0.55}" r="6" fill="${G.players[p].color}" stroke="#fff" stroke-width="1.5"/>`});
+    }
+    if(legalSet.has(k)) s+=`<polygon points="${hexPts(x,y,R*0.82)}" fill="#ffffff30" stroke="#fff" stroke-width="2.5" stroke-dasharray="5 3"/>`;
+    if(opts.sel===k) s+=`<polygon points="${hexPts(x,y,R*0.95)}" fill="none" stroke="#111" stroke-width="4"/>`+tileSVG(G.players[G.cur].hand,G.players[G.cur].color,x,y,R,'ghost');
+    s+=`</g>`;
+  });
+  return s+'</svg>';
+}
+
+function render(){
+  const P=G.players[G.cur];
+  const L=G.over?[]:legal(P.hand);
+  const legalSet=new Set(P.ai?[]:L.map(c=>key(c.r,c.h)));
+  const wrap=document.getElementById('mapwrap'),sl=wrap.scrollLeft,st=wrap.scrollTop;
+  wrap.innerHTML=buildMapSVG(G.cells,{legal:legalSet,sel:G.sel});
+  wrap.scrollLeft=sl;wrap.scrollTop=st;
+  wrap.querySelectorAll('g[data-k]').forEach(g=>g.addEventListener('click',()=>clickCell(g.dataset.k)));
+  document.getElementById('turnLabel').innerHTML=G.over?'🏁 게임 종료':`<span class="pill" style="background:${P.color}"></span>${esc(P.name)} 차례`;
+  const hb=document.getElementById('handBox');
+  if(!G.over&&P.hand&&P.ai){
+    hb.classList.remove('hidden');hb.innerHTML=`<span>🤖 ${esc(P.name)} 생각 중…</span>`;
+  } else if(!G.over&&P.hand){
+    hb.classList.remove('hidden');
+    hb.innerHTML=`<span class="meta">손 타일</span><svg viewBox="-33 -34 68 70" width="56" height="56">${tileSVG(P.hand,P.color,0,0,28)}</svg><span>${P.hand.k==='S'?'정착촌 · 영향력 '+P.hand.inf:kindName[P.hand.k]}</span><span class="meta">· 남은 보급 ${P.supply.length}</span>`;
+  } else hb.classList.add('hidden');
+  document.getElementById('discardBtn').classList.toggle('hidden',G.over||L.length>0||P.ai);
+  document.getElementById('confirmBar').classList.toggle('hidden',!G.sel||P.ai);
+  document.getElementById('scores').innerHTML=G.players.map((p,i)=>`<div class="score-row ${i===G.cur&&!G.over?'cur':''}">
+    <div><span class="pill" style="background:${p.color}"></span>${esc(p.name)}<div class="meta">성 ${castlesOf(i)} · 대성당 ${cathOf(i)} · 미션 ${p.missions.length}장 · 남은 타일 ${p.supply.length+(p.hand?1:0)}</div></div>
+    <div class="score-num">${p.score}</div></div>`).join('')+(G.over?'':`<div class="meta" style="margin-top:6px">※ 성(개당 5점)·미션·미완성 정착촌 점수는 게임 끝에 더해집니다. 미션 카드 더미 ${G.deck.length}장</div>`);
+  const cur=G.over?0:(G.sel?1:1);
+  const PH=[['1 타일 배치',G.sel?'칸 선택됨 → 확정하세요':'빛나는 칸을 고르세요'],['2 점수 계산','농장 무리·정착촌·항구'],['3 건물 건설','인접한 성·대성당'],['4 타일 뽑기','보급에서 1개']];
+  document.getElementById('phases').innerHTML=G.over?'':PH.map((p,i)=>`<div class="ph ${i===0?'on':''}"><b>${p[0]}</b>${i===0?p[1]:p[1]+' · 확정하면 자동'}</div>`).join('');
+  const L2=G.last;
+  document.getElementById('lastTurn').innerHTML=L2?`<b>지난 차례 · <span style="color:${G.players[L2.pi].color}">${esc(G.players[L2.pi].name)}</span></b>
+    <div class="st"><span>1 배치</span><span>${esc(L2.s1)}</span></div>
+    <div class="st"><span>2 점수</span><span>${L2.s2.length?L2.s2.map(esc).join('<br>'):'—'}</span></div>
+    <div class="st"><span>3 건설</span><span>${L2.s3.length?L2.s3.map(esc).join('<br>'):'인접한 성·대성당 없음'}</span></div>
+    <div class="st"><span>4 뽑기</span><span>${esc(L2.s4)}</span></div>`:'<b>지난 차례</b><div class="meta">아직 없음</div>';
+  document.getElementById('log').innerHTML=G.log.map(l=>`<div>${l}</div>`).join('');
+}
+
+function zoom(d){Z=Math.min(3,Math.max(1,Z+d*0.4));render()}
+
+/* ---------- 모달·알림 ---------- */
+function modal(html){document.getElementById('modalBox').innerHTML=html;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+let tt;function toast(h){if(!h)return;const t=document.getElementById('toast');t.innerHTML=h;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
+function showRules(){
+  modal(`<div class="rules"><h2 style="margin-top:0">📖 규칙 요약</h2>
+  <h3>준비</h3><ul><li>자기 색 타일을 섞어 개인 보급(공급처)을 만듭니다. 4인전은 색마다 에너지 3·식량 3·정착촌(영향력 2·3·4 각 1) 8개를 빼고 27개.</li>
+  <li>보급에서 2개를 뽑아 따로 둡니다(본인만 확인 · <b>빼 둔 타일</b> 버튼). 이번 게임엔 쓰지 않습니다.</li>
+  <li>보급에서 1개를 더 뽑아 손에 듭니다. 2인전은 호수(!) 칸에 중립 타일이 깔립니다.</li></ul>
+  <h3>차례 (4단계)</h3><ul>
+  <li><b>1 타일 배치</b> — 농장은 아이콘이 같은 칸이나 빈 칸에. 그런 칸이 하나도 없으면 반대 농장칸에 교차 배치. 정착촌은 정착촌칸에만. 성·대성당 칸에는 못 놓음.</li>
+  <li><b>2 점수 계산</b> — 농장: 같은 색·같은 종류 무리의 칸 수만큼. 정착촌: 소형은 즉시 영향력만큼, 중형·대형은 모든 칸이 차면 영향력 순위로(중형 5/3, 대형 8/5/0, 혼자면 8·13). 동점: 중형은 완성자 승, 대형은 완성자 패 후 시계 방향. 항구 칸이면 +1.</li>
+  <li><b>3 건물 건설</b> — 성: 인접 칸에 처음 놓으면 내 성. 이후 인접 타일이 더 많은 사람이 지배권을 가져감(같으면 인접 농장 수 → 지금 놓는 사람). 대성당: 처음 인접하면 내 대성당 + 미션 카드 1장(대성당마다 1장).</li>
+  <li><b>4 타일 뽑기</b> — 보급에서 1개를 손으로.</li></ul>
+  <h3>게임 종료</h3><ul><li>모두 타일을 다 놓으면 끝. 미완성 정착촌은 소형처럼 영향력만큼, 지배 중인 성 1개당 5점, 미션 달성 점수를 더합니다.</li>
+  <li>동점이면 에든버러 성 → 스털링 성 지배자 순으로 승자를 가립니다.</li></ul>
+  <p class="meta">2~4단계는 ‘여기에 놓기’를 누르면 자동으로 처리되고, 오른쪽 ‘지난 차례’ 카드에 단계별 결과가 나옵니다.</p></div>
+  <button class="primary" onclick="closeModal()">닫기</button>`);
+}
+function viewer(){if(!G.players[G.cur].ai)return G.cur;const h=G.players.findIndex(p=>!p.ai);return h<0?G.cur:h}
+function showAside(){
+  const P=G.players[viewer()];
+  modal(`<h3 style="margin-top:0">${esc(P.name)}의 빼 둔 타일 2개</h3><p class="meta">이번 게임에는 쓰지 않는 타일입니다.</p>
+  <div class="row">${P.aside.map(t=>`<div style="text-align:center"><svg viewBox="-30 -30 60 60" width="64" height="64">${tileSVG(t,P.color,0,0,28)}</svg><div class="meta">${t.k==='S'?'정착촌 '+t.inf:kindName[t.k]}</div></div>`).join('')}</div>
+  <button class="primary" style="margin-top:12px" onclick="closeModal()">닫기</button>`);
+}
+function showMissions(){
+  const pi=viewer(),P=G.players[pi];
+  modal(`<h3 style="margin-top:0">${esc(P.name)}의 미션 카드 (비공개)</h3>
+  ${P.missions.length?P.missions.map(mi=>{const m=MISSIONS[mi],ok=m.f(pi);return `<div class="mission" style="border-left:6px solid ${m.col}"><b>${m.t}</b> · ${m.p}점<br><span class="meta">${m.d}</span><br><span class="${ok?'ok':'no'}">${ok?'✔ 지금 조건 충족':'✘ 아직 미충족'}</span></div>`}).join(''):'<p class="meta">아직 없습니다. 대성당 칸에 처음 인접하게 타일을 놓으면 1장 받습니다.</p>'}
+  <button class="primary" style="margin-top:8px" onclick="closeModal()">닫기</button>`);
+}
+
+/* ---------- 맵 편집기 ---------- */
+let ED=null,tool='G';
+const TOOLS=[['G','빈 칸'],['E','⚡ 에너지'],['F','🌿 식량'],['S','🏠 정착촌'],['H','+1 항구 켜기/끄기'],['B','🚩 국경 해안가 켜기/끄기'],['W','🌊 해안선 켜기/끄기'],['C','🏰 성'],['K','⛪ 대성당'],['L','! 호수'],['X','지우기(바다)']];
+function openEditor(){
+  ED=parseMap(mapText);
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('editor').classList.remove('hidden');
+  renderEditor();
+}
+function renderEditor(){
+  document.getElementById('palette').innerHTML=TOOLS.map(([k,l])=>`<button class="${tool===k?'on':''}" onclick="tool='${k}';renderEditor()">${l}</button>`).join('');
+  const grid=[];for(let r=-1;r<=20;r++)for(let h=-13;h<=13;h++)if(((h%2)+2)%2===(r%2===0?1:0))grid.push({r,h});
+  const saveG=G;G=null;
+  const el=document.getElementById('edMap');el.innerHTML=buildMapSVG(ED,{grid});G=saveG;
+  el.querySelectorAll('[data-k]').forEach(g=>g.addEventListener('click',()=>edClick(g.dataset.k)));
+  document.getElementById('edCode').value=serializeMap(ED);
+}
+function edClick(k){
+  const [r,h]=k.split(',').map(Number),c=ED[k];
+  if(tool==='X'){delete ED[k]}
+  else if(tool==='H'){if(c)c.harbor=!c.harbor}
+  else if(tool==='W'){if(c)c.coast=!c.coast}
+  else if(tool==='B'){if(c)c.border=!c.border}
+  else{
+    const nm=(tool==='C'||tool==='K')?(document.getElementById('edName').value.trim().replace(/\s/g,'')||(c&&c.t===tool?c.name:'')):'';
+    ED[k]={r,h,t:tool,harbor:!!(c&&c.harbor),border:!!(c&&c.border),coast:!!(c&&c.coast),name:nm};
+  }
+  renderEditor();
+}
+function saveEditor(){mapText=serializeMap(ED);store('scot-map2',mapText);closeEditor()}
+function resetEditor(){ED=parseMap(DEFAULT_MAP);mapText=DEFAULT_MAP;store('scot-map2',null);renderEditor()}
+function closeEditor(){document.getElementById('editor').classList.add('hidden');document.getElementById('setup').classList.remove('hidden');renderSetup()}
+function copyCode(){const v=document.getElementById('edCode').value;try{navigator.clipboard.writeText(v).then(()=>toast('맵 코드를 복사했어요'),()=>toast('복사가 막혀 있어요 — 칸을 길게 눌러 직접 복사하세요'))}catch(e){toast('복사가 막혀 있어요')}}
+function importCode(){const c=parseMap(document.getElementById('edCode').value);if(Object.keys(c).length<10){toast('코드를 읽지 못했어요');return}ED=c;renderEditor();toast('불러왔어요 — 저장을 눌러 적용하세요')}
+</script>
+</body>
+</html>

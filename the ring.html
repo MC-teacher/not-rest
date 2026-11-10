@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반지의 제왕: 대결 — 컴퓨터와 한 판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parch:#f4e8c8; --parch2:#eadbb0; --ink:#3a2a18; --muted:#7a6447;
+  --light:#2f6b3f; --lightbg:#fbf4dd; --dark:#8f1d1d; --darkbg:#2a1515;
+  --gold:#c9962b; --line:#b89a5e;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:#231b14;
+  background-image:radial-gradient(ellipse at top,#3b2d1f 0%,#1d1610 70%);
+  color:var(--ink); font-family:'Noto Sans KR',system-ui,sans-serif; min-height:100vh;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:10px 10px 30px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 2px 8px}
+header h1{font-family:'Gowun Batang',serif;color:#f4e8c8;font-size:19px;margin:0;letter-spacing:-.3px}
+header h1 small{display:block;font-size:11px;color:#c9b48a;font-family:'Noto Sans KR';font-weight:400;letter-spacing:0}
+.hbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+button{font-family:inherit;cursor:pointer}
+.btn{background:#f4e8c8;border:1px solid #b89a5e;color:var(--ink);border-radius:8px;padding:7px 11px;font-size:13px;font-weight:500}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--gold);border-color:#8c6514;color:#2a1c08;font-weight:700}
+.btn.ghost{background:transparent;color:#f4e8c8;border-color:#7c6544}
+.btn.danger{background:#8f1d1d;color:#fff;border-color:#5e0f0f}
+.btn.green{background:#2f6b3f;color:#fff;border-color:#1d4528}
+.layout{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:880px){.layout{grid-template-columns:minmax(0,540px) 1fr}}
+.panel{background:var(--parch);border:1px solid var(--line);border-radius:12px;padding:10px;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+#status{font-weight:700;font-size:14.5px;padding:9px 12px;border-radius:10px;margin-bottom:8px;background:#efe0b8;border:1px solid var(--line);display:flex;align-items:center;gap:8px}
+#status .dot{width:10px;height:10px;border-radius:50%;flex:none}
+#boardWrap{position:relative}
+svg#board{width:100%;height:auto;display:block;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);margin-top:6px;padding:0 4px}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+#info{margin-top:8px;font-size:13px;background:#fff8e4;border:1px dashed var(--line);border-radius:8px;padding:8px 10px;min-height:38px}
+#info b{font-family:'Gowun Batang',serif}
+h3{font-family:'Gowun Batang',serif;margin:2px 0 8px;font-size:15px}
+.side-col{display:flex;flex-direction:column;gap:10px}
+.cards{display:flex;flex-wrap:wrap;gap:6px}
+.card{width:62px;min-height:84px;border-radius:8px;padding:5px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;border:2px solid;position:relative;font-size:10px;line-height:1.25;background:var(--lightbg)}
+.card.L{border-color:#2f6b3f;background:linear-gradient(#fbf4dd,#efe3bd)}
+.card.D{border-color:#8f1d1d;background:linear-gradient(#3a1d1d,#1f1010);color:#f4e2c4}
+.card .num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;border:2px solid currentColor;font-family:'Gowun Batang',serif;margin-top:4px}
+.card.L .num{color:#2f6b3f;background:#fff}
+.card.D .num{color:#f4e2c4;background:#5a1c1c}
+.card .cn{font-weight:700;font-size:11px;font-family:'Gowun Batang',serif}
+.card .cd{font-size:9px;opacity:.85}
+.card.used{opacity:.35}
+.card.pick{cursor:pointer;transition:transform .1s}
+.card.pick:hover{transform:translateY(-3px)}
+.card.big{width:84px;min-height:108px;font-size:11px}
+.card.big .cd{font-size:10px}
+.muted{color:var(--muted);font-size:12px}
+#log{max-height:220px;overflow:auto;font-size:12.5px;line-height:1.5}
+#log div{padding:3px 0;border-bottom:1px dotted #d6c39a}
+#log .L{color:#24552f}
+#log .D{color:#7c1717}
+#log .sys{color:#6b4d16;font-weight:700}
+.fallen{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:11px;border-radius:999px;padding:2px 8px;border:1px solid}
+.chip.L{border-color:#2f6b3f;color:#2f6b3f;background:#fff}
+.chip.D{border-color:#8f1d1d;color:#fff;background:#8f1d1d}
+/* modal */
+#ov{position:fixed;inset:0;background:rgba(10,6,3,.62);display:none;align-items:flex-end;justify-content:center;z-index:50}
+#ov.show{display:flex}
+@media(min-width:640px){#ov{align-items:center}}
+.sheet{background:var(--parch);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:14px 14px 18px;border:1px solid var(--line);box-shadow:0 -6px 30px rgba(0,0,0,.5)}
+@media(min-width:640px){.sheet{border-radius:16px}}
+.sheet h2{font-family:'Gowun Batang',serif;margin:0 0 10px;font-size:19px}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch;margin-bottom:10px}
+.vs .x{align-self:center;font-family:'Gowun Batang',serif;font-weight:700;color:var(--muted)}
+.ch{border-radius:10px;padding:8px;border:2px solid;position:relative;font-size:12px}
+.ch.L{border-color:#2f6b3f;background:#fbf4dd}
+.ch.D{border-color:#8f1d1d;background:#2a1515;color:#f4e2c4}
+.ch .top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ch .s{width:34px;height:34px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;font-family:'Gowun Batang',serif}
+.ch.L .s{background:#2f6b3f;color:#fff}
+.ch.D .s{background:#8f1d1d;color:#fff}
+.ch .n{font-family:'Gowun Batang',serif;font-weight:700;font-size:15px}
+.ch .t{font-size:11.5px;line-height:1.4;opacity:.92}
+.ch .t.off{text-decoration:line-through;opacity:.5}
+.badge{position:absolute;top:-9px;right:8px;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--gold);color:#2a1c08}
+#mlines{font-size:13px;line-height:1.55;margin:6px 0 10px}
+#mlines div{padding:4px 8px;border-left:3px solid var(--line);margin:4px 0;background:#fff8e4;border-radius:0 6px 6px 0}
+#mlines .D{border-left-color:#8f1d1d}
+#mlines .L{border-left-color:#2f6b3f}
+#mlines .res{font-weight:700;background:#f1dfae}
+#mchoice .q{font-weight:700;margin:4px 0 8px;font-size:14px}
+#mchoice .opts{display:flex;flex-wrap:wrap;gap:8px}
+#mchoice .opts .btn{font-size:14px;padding:9px 13px}
+.playrow{display:flex;gap:16px;justify-content:center;align-items:flex-end;margin:6px 0}
+.playrow .lab{font-size:11px;text-align:center;margin-top:3px;color:var(--muted)}
+table.ref{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px}
+table.ref td,table.ref th{border-bottom:1px solid #d9c595;padding:6px 4px;vertical-align:top;text-align:left}
+table.ref th{font-family:'Gowun Batang',serif}
+table.ref td.s{font-weight:900;text-align:center;width:28px;font-family:'Gowun Batang',serif;font-size:15px}
+.rules h4{font-family:'Gowun Batang',serif;margin:12px 0 4px;font-size:15px}
+.rules ul{margin:4px 0;padding-left:20px;font-size:13px;line-height:1.6}
+.pickside{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 12px}
+.pickside button{border-radius:12px;padding:14px 10px;border:2px solid;text-align:left}
+.pickside .L{background:#fbf4dd;border-color:#2f6b3f;color:#1f3f27}
+.pickside .D{background:#2a1515;border-color:#8f1d1d;color:#f4e2c4}
+.pickside b{display:block;font-family:'Gowun Batang',serif;font-size:17px;margin-bottom:4px}
+.pickside span{font-size:12px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>반지의 제왕: 대결<small>컴퓨터와 둘이 하는 숨겨진 전략 게임</small></h1>
+    <div class="hbtns">
+      <button class="btn ghost" id="bRules">규칙</button>
+      <button class="btn ghost" id="bRef">캐릭터·카드</button>
+      <button class="btn ghost" id="bNew">새 게임</button>
+    </div>
+  </header>
+  <div class="layout">
+    <div class="panel">
+      <div id="status"><span class="dot"></span><span id="stxt">게임을 준비하세요</span></div>
+      <div id="boardWrap"><svg id="board" viewBox="0 0 416 680"></svg></div>
+      <div class="legend">
+        <span><svg width="26" height="10"><path d="M2 5h18" stroke="#2b2b2b" stroke-width="2.4" stroke-dasharray="4 3"/><path d="M18 1l6 4-6 4z" fill="#2b2b2b"/></svg>모리아 굴 (원정대: 에레기온→팡고른)</span>
+        <span><svg width="26" height="10"><path d="M2 5h18" stroke="#2b5fd0" stroke-width="3"/><path d="M18 1l6 4-6 4z" fill="#2b5fd0"/></svg>안두인 강 (하류로 옆 이동)</span>
+        <span><svg width="26" height="10"><path d="M2 5h22" stroke="#b8322a" stroke-width="3"/><path d="M2 5h22" stroke="#fff" stroke-width="1.6" stroke-dasharray="3 3"/></svg>산맥 경계 (옆으로 못 감)</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center">
+        <button class="btn" id="bPhoto">🗺 내 지도 사진 쓰기</button>
+        <button class="btn" id="bPlain" style="display:none">기본 지도로</button>
+        <input type="file" id="fPhoto" accept="image/*" style="display:none">
+        <span class="muted" id="photoNote"></span>
+      </div>
+      <div id="info">캐릭터를 누르면 능력이 여기에 표시됩니다.</div>
+      <div id="setupBar" style="display:none;margin-top:8px;text-align:center">
+        <button class="btn primary" id="bStart">배치 완료 · 게임 시작</button>
+        <button class="btn" id="bShuffle">무작위 재배치</button>
+      </div>
+    </div>
+    <div class="side-col">
+      <div class="panel">
+        <h3>내 전투 카드 <span class="muted" id="myCount"></span></h3>
+        <div class="cards" id="myHand"></div>
+      </div>
+      <div class="panel">
+        <h3>컴퓨터 <span class="muted" id="aiCount"></span></h3>
+        <div class="muted" style="margin-bottom:5px">이미 쓴 카드 (다 쓰면 9장을 다시 가져갑니다)</div>
+        <div class="cards" id="aiUsed"></div>
+      </div>
+      <div class="panel">
+        <h3>쓰러진 캐릭터</h3>
+        <div class="fallen" id="fallen"><span class="muted">아직 없음</span></div>
+      </div>
+      <div class="panel">
+        <h3>기록</h3>
+        <div id="log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ov"><div class="sheet" id="sheet"></div></div>
+
+<script>
+// ===ENGINE START===
+const CH = {
+  frodo:   {side:'L', n:'프로도',   s:'프로도',   str:1, t:'공격받을 때, 싸우지 않고 옆 지역으로 도망칠 수 있습니다.'},
+  pippin:  {side:'L', n:'피핀',     s:'피핀',     str:1, t:'공격할 때, 싸우지 않고 뒤로 도망칠 수 있습니다.'},
+  sam:     {side:'L', n:'샘',       s:'샘',       str:2, t:'프로도와 같은 지역에 있으면 전투력이 5가 됩니다. 프로도가 공격 상대로 지목되면 대신 싸울 수 있습니다.'},
+  merry:   {side:'L', n:'메리',     s:'메리',     str:2, t:'마술사왕과 싸우면 바로 승리합니다.'},
+  gimli:   {side:'L', n:'김리',     s:'김리',     str:3, t:'오르크와 싸우면 바로 승리합니다.'},
+  legolas: {side:'L', n:'레골라스', s:'레골라스', str:3, t:'비행 나즈굴과 싸우면 바로 승리합니다.'},
+  aragorn: {side:'L', n:'아라고른', s:'아라고른', str:4, t:'인접한 어느 지역이든(옆·뒤 포함) 공격할 수 있습니다.'},
+  gandalf: {side:'L', n:'간달프',   s:'간달프',   str:5, t:'사우론이 먼저 카드를 내고, 원정대는 그 카드를 본 뒤에 카드를 냅니다.'},
+  boromir: {side:'L', n:'보로미르', s:'보로미르', str:0, t:'보로미르와 싸우는 사우론 캐릭터는 보로미르와 함께 바로 쓰러집니다.'},
+  orc:     {side:'D', n:'오르크',     s:'오르크',   str:2, t:'공격할 때, 수비하는 캐릭터에게 바로 승리합니다.'},
+  warg:    {side:'D', n:'와르그',     s:'와르그',   str:2, t:'싸우는 원정대 캐릭터의 능력을 무효로 만듭니다.'},
+  rider:   {side:'D', n:'검은 기사',  s:'검은기사', str:3, t:'원하는 만큼 여러 지역을 한 번에 전진하여 공격할 수 있습니다.'},
+  nazgul:  {side:'D', n:'비행 나즈굴',s:'나즈굴',   str:3, t:'어느 지역이든, 혼자 있는 원정대 캐릭터에게 날아가 공격할 수 있습니다.'},
+  saruman: {side:'D', n:'사루만',     s:'사루만',   str:4, t:'전투할 때, 양쪽 모두 카드를 내지 않고 싸우도록 정할 수 있습니다.'},
+  balrog:  {side:'D', n:'발로그',     s:'발로그',   str:5, t:'카라드라스에 있으면, 모리아 굴을 지나가는 원정대 캐릭터를 바로 쓰러뜨립니다.'},
+  shelob:  {side:'D', n:'쉴로브',     s:'쉴로브',   str:5, t:'원정대 캐릭터를 쓰러뜨리면 곤도르로 돌아갈 수 있습니다.'},
+  witchking:{side:'D', n:'마술사왕',  s:'마술사왕', str:5, t:'옆 지역을 공격할 수 있습니다.'},
+  troll:   {side:'D', n:'동굴 트롤',  s:'트롤',     str:9, t:'사우론이 내는 카드를 무효로 만듭니다 (카드는 내고 버립니다).'}
+};
+const L_TYPES=['frodo','sam','pippin','merry','gimli','legolas','aragorn','gandalf','boromir'];
+const D_TYPES=['orc','warg','rider','nazgul','saruman','balrog','shelob','witchking','troll'];
+const CARD_INFO = {
+  magic:{n:'마법', L:'이 카드를 내가 버린 카드 더미의 다른 카드로 바꿉니다.', D:'이 카드를 내가 버린 카드 더미의 다른 카드로 바꿉니다.'},
+  cloak:{n:'요정 망토', L:'사우론이 낸 숫자 카드를 무효로 만듭니다.'},
+  sacrifice:{n:'고귀한 희생', L:'양쪽 캐릭터가 모두 쓰러집니다.'},
+  retreat:{n:'퇴각', L:'싸우지 않고 뒤로 도망칩니다.', D:'싸우지 않고 옆으로 도망칩니다.'},
+  eye:{n:'사우론의 눈', D:'원정대가 낸 효과 카드(숫자 아닌 카드)를 무효로 만듭니다.'}
+};
+const DECK = {L:['n1','n2','n3','n4','n5','magic','cloak','sacrifice','retreat'], D:['n1','n2','n3','n4','n5','n6','magic','eye','retreat']};
+function cardNum(c){ return (c && c[0]==='n') ? +c.slice(1) : null; }
+function cardName(c){ if(!c) return '없음'; return c[0]==='n' ? '숫자 '+c.slice(1) : CARD_INFO[c].n; }
+function cardDesc(c,side){ if(!c) return ''; return c[0]==='n' ? '전투력 +'+c.slice(1) : CARD_INFO[c][side]; }
+
+const RL=[
+ ['shire','샤이어',0,0],['arthedain','아르세다인',1,0],['cardolan','카르돌란',1,1],
+ ['rhudaur','루다우르',2,0],['eregion','에레기온',2,1],['enedwaith','에네드와이스',2,2],
+ ['highpass','높은 고개',3,0],['misty','안개산맥',3,1],['caradhras','카라드라스',3,2],['gap','로한 협곡',3,3],
+ ['mirkwood','어둠숲',4,0],['fangorn','팡고른',4,1],['rohan','로한',4,2],
+ ['dagorlad','다고르라드',5,0],['gondor','곤도르',5,1],['mordor','모르도르',6,0]];
+const ROWN=[1,2,3,4,3,2,1];
+const R={}; RL.forEach(([id,name,r,j])=>R[id]={id,name,r,j,cap:(r===0||r===6)?4:(r===3?1:2)});
+const rj=(r,j)=>{const x=RL.find(q=>q[2]===r&&q[3]===j); return x?x[0]:null;};
+const FWD_L={},FWD_D={},SIDE={};
+for(const id in R){
+  const {r,j}=R[id];
+  const c = r<3 ? [[r+1,j],[r+1,j+1]] : (r<6 ? [[r+1,j-1],[r+1,j]] : []);
+  FWD_L[id]=c.map(([a,b])=>rj(a,b)).filter(Boolean);
+  SIDE[id]= r===3 ? [] : [rj(r,j-1),rj(r,j+1)].filter(Boolean);
+}
+for(const id in R) FWD_D[id]=Object.keys(R).filter(x=>FWD_L[x].includes(id));
+const RIVER={mirkwood:'fangorn', fangorn:'rohan'};
+
+let G=null;
+const opp=s=>s==='L'?'D':'L';
+const A=side=>G.pieces.filter(p=>p.alive&&p.side===side);
+const at=(reg,side)=>G.pieces.filter(p=>p.alive&&p.reg===reg&&(!side||p.side===side));
+const PT=type=>G.pieces.find(p=>p.type===type);
+const fwd=(id,side)=>side==='L'?FWD_L[id]:FWD_D[id];
+const back=(id,side)=>fwd(id,opp(side));
+const adjAll=id=>[...new Set([...FWD_L[id],...FWD_D[id],...SIDE[id]])];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[a[i],a[k]]=[a[k],a[i]];}return a;}
+function jo(w,a,b){const c=w.charCodeAt(w.length-1); if(c<0xAC00||c>0xD7A3) return w+a; return w+(((c-0xAC00)%28)?a:b);}
+function ro(w){const c=w.charCodeAt(w.length-1); if(c<0xAC00||c>0xD7A3) return w+'로'; const f=(c-0xAC00)%28; return w+((f===0||f===8)?'로':'으로');}
+
+const L_SLOTS=['shire','shire','shire','shire','arthedain','cardolan','rhudaur','eregion','enedwaith'];
+const D_SLOTS=['mordor','mordor','mordor','mordor','dagorlad','gondor','mirkwood','fangorn','rohan'];
+function newState(human){
+  G={human, ai:opp(human), pieces:[], hand:{L:[...DECK.L],D:[...DECK.D]}, disc:{L:[],D:[]}, turn:'D', over:null, turnNo:0, phase:'setup', last:null};
+  placeSide('L'); placeSide('D');
+}
+function placeSide(side){
+  G.pieces=G.pieces.filter(p=>p.side!==side);
+  const types=shuffle([...(side==='L'?L_TYPES:D_TYPES)]);
+  const slots=side==='L'?L_SLOTS:D_SLOTS;
+  types.forEach((t,i)=>G.pieces.push({id:side+'_'+t, side, type:t, reg:slots[i], alive:true, known:false}));
+}
+
+function canEnter(d,s){ return at(d,opp(s)).length>0 || at(d,s).length<R[d].cap; }
+function legalMoves(p){
+  const s=p.side, e=opp(s), out=new Map();
+  const add=(dest,kind)=>{ if(!out.has(dest)) out.set(dest,{p,dest,kind,attack:at(dest,e).length>0}); };
+  for(const d of fwd(p.reg,s)) if(canEnter(d,s)) add(d,'move');
+  if(RIVER[p.reg] && canEnter(RIVER[p.reg],s)) add(RIVER[p.reg],'river');
+  if(s==='L' && p.reg==='eregion' && canEnter('fangorn','L')) add('fangorn','moria');
+  if(p.type==='aragorn') for(const d of adjAll(p.reg)) if(at(d,e).length) add(d,'ability');
+  if(p.type==='witchking') for(const d of SIDE[p.reg]) if(at(d,e).length) add(d,'ability');
+  if(p.type==='rider'){
+    let fr=[p.reg]; const seen=new Set(fr);
+    while(fr.length){ const nx=[]; for(const r of fr) for(const d of fwd(r,'D')){ if(seen.has(d)) continue; seen.add(d); if(at(d,'L').length) add(d,'ability'); else nx.push(d);} fr=nx; }
+  }
+  if(p.type==='nazgul') for(const id in R) if(at(id,'L').length===1) add(id,'ability');
+  return [...out.values()];
+}
+function allMoves(side){ return A(side).flatMap(legalMoves); }
+function strengthOf(p,foe){
+  let s=CH[p.type].str;
+  if(p.type==='sam' && (!foe||foe.type!=='warg') && at(p.reg,'L').some(x=>x.type==='frodo')) s=5;
+  return s;
+}
+function kill(p){ p.alive=false; p.known=true; }
+function nm(p){ return (p.side===G.human||p.known) ? CH[p.type].n : (p.side==='L'?'정체 모를 원정대':'정체 모를 사우론 캐릭터'); }
+function checkWin(){
+  if(G.over) return G.over;
+  const f=PT('frodo');
+  if(!f.alive) return G.over={w:'D',why:'프로도가 쓰러졌습니다.'};
+  if(f.reg==='mordor') return G.over={w:'L',why:'프로도가 모르도르에 들어갔습니다! 반지는 파괴됩니다.'};
+  if(at('shire','D').length>=3) return G.over={w:'D',why:'사우론의 캐릭터 3명이 샤이어를 점령했습니다.'};
+  return null;
+}
+function retreatDests(p,reg,dir){
+  const list = dir==='side' ? SIDE[reg] : back(reg,p.side);
+  return list.filter(d=>at(d,opp(p.side)).length===0 && at(d,p.side).filter(x=>x!==p).length<R[d].cap);
+}
+const decide=(side,type,data)=> side===G.human ? HUMAN(type,data) : Promise.resolve(AI(side,type,data));
+
+async function runGame(){
+  G.phase='play';
+  UI.render();
+  while(!checkWin()){
+    const s=G.turn, moves=allMoves(s);
+    if(!moves.length){ G.over={w:opp(s), why:(s==='L'?'원정대':'사우론')+'에게 움직일 수 있는 캐릭터가 없습니다.'}; break; }
+    await UI.turnStart(s);
+    const m=await decide(s,'move',{moves});
+    G.last={from:m.p.reg,to:m.dest,side:s};
+    await UI.beforeMove(m);
+    await doMove(m);
+    if(checkWin()) break;
+    G.turn=opp(s); G.turnNo++;
+    UI.render();
+  }
+  G.phase='over';
+  UI.render();
+  await UI.gameOver();
+}
+async function doMove(m){
+  const p=m.p, from=p.reg;
+  UI.log(`${nm(p)}: ${R[from].name} → ${R[m.dest].name}${m.kind==='moria'?' (모리아 굴)':m.kind==='river'?' (안두인 강)':m.kind==='ability'?' (능력)':''}`, p.side);
+  if(m.kind==='moria'){
+    const b=G.pieces.find(x=>x.type==='balrog'&&x.alive&&x.reg==='caradhras');
+    if(b){ b.known=true; kill(p);
+      UI.log(`카라드라스의 발로그가 모리아 굴을 지나던 ${jo(CH[p.type].n,'을','를')} 쓰러뜨렸습니다!`,'D');
+      await UI.notice('발로그!', `카라드라스에 있던 <b>발로그</b>가 모리아 굴을 지나던 <b>${jo(CH[p.type].n,'을','를')}</b> 쓰러뜨렸습니다.`);
+      return; }
+  }
+  if(at(m.dest,opp(p.side)).length) await battle(p,m.dest,from);
+  else p.reg=m.dest;
+}
+async function battle(att,dest,origin){
+  const ds=opp(att.side), defs=at(dest,ds);
+  let def = defs.length===1 ? defs[0] : await decide(att.side,'target',{defs,att,dest});
+  att.known=true;
+  if(def.type==='frodo' && att.type!=='warg'){
+    const sam=defs.find(x=>x.type==='sam');
+    if(sam && await decide('L','samSub',{att,dest})){ def=sam; UI.log('샘이 프로도 대신 나섭니다.','L'); }
+  }
+  def.known=true;
+  const L=att.side==='L'?att:def, D=att.side==='D'?att:def;
+  const c={att,def,L,D,dest,origin,lAb:D.type!=='warg',moved:new Set(),played:{}};
+  await UI.combatStart(c);
+  if(!c.lAb) UI.line('와르그의 능력: 원정대 캐릭터의 능력이 무효가 됩니다.','D');
+  const out=await fight(c);
+  if(out.lDie) kill(L);
+  if(out.dDie) kill(D);
+  if(out.lDie||out.dDie){
+    const names=[out.lDie&&CH[L.type].n, out.dDie&&CH[D.type].n].filter(Boolean).join(', ');
+    UI.line(`쓰러짐: ${names}`,'res');
+  } else if(!c.moved.size) UI.line('아무도 쓰러지지 않았습니다.','res');
+  if(D.alive && D.type==='shelob' && !L.alive && D.reg!=='gondor' && !c.moved.has(D)){
+    const room = at('gondor','L').length===0 && at('gondor','D').filter(x=>x!==D).length<2;
+    if(room && await decide('D','shelob',c)){ D.reg='gondor'; c.moved.add(D); UI.line('쉴로브가 곤도르로 돌아갑니다.','D'); }
+  }
+  if(att.alive && !c.moved.has(att)){
+    if(at(dest,ds).length===0){ att.reg=dest; UI.line(`${jo(CH[att.type].n,'이','가')} ${ro(R[dest].name)} 들어갑니다.`, att.side); }
+    else UI.line(`${R[dest].name}에 상대가 남아 있어 ${jo(CH[att.type].n,'은','는')} 제자리에 머뭅니다.`, att.side);
+  }
+  for(const s of ['L','D']){
+    if(c.played[s]) G.disc[s].push(c.played[s]);
+    if(G.hand[s].length===0){ G.hand[s]=[...DECK[s]]; G.disc[s]=[]; UI.log(`${s==='L'?'원정대':'사우론'}가 카드 9장을 모두 써서 다시 손으로 가져갑니다.`,'sys'); }
+  }
+  UI.log(`전투(${R[dest].name}): ${CH[L.type].n} 대 ${CH[D.type].n} → ${!L.alive&&!D.alive?'둘 다 쓰러짐':!L.alive?CH[L.type].n+' 쓰러짐':!D.alive?CH[D.type].n+' 쓰러짐':'승부 없음'}`,'sys');
+  await UI.combatEnd(c);
+}
+function takeCard(side,card,c){ const h=G.hand[side]; h.splice(h.indexOf(card),1); c.played[side]=card; }
+async function fight(c){
+  const {L,D,att,def,dest,lAb}=c;
+  if(lAb && def===L && L.type==='frodo'){
+    const opts=retreatDests(L,dest,'side');
+    if(opts.length){ const d=await decide('L','frodoRetreat',{...c,opts});
+      if(d){ L.reg=d; c.moved.add(L); UI.line(`프로도의 능력: 싸우지 않고 ${ro(R[d].name)} 도망쳤습니다.`,'L'); return {}; } }
+  }
+  if(lAb && att===L && L.type==='pippin'){
+    const opts=retreatDests(L,dest,'back');
+    if(opts.length){ const d=await decide('L','pippinRetreat',{...c,opts});
+      if(d){ L.reg=d; c.moved.add(L); UI.line(`피핀의 능력: 싸우지 않고 ${ro(R[d].name)} 물러났습니다.`,'L'); return {}; } }
+  }
+  if(lAb && L.type==='boromir'){ UI.line('보로미르의 능력: 두 캐릭터가 함께 쓰러집니다.','L'); return {lDie:1,dDie:1}; }
+  if(lAb && ((L.type==='gimli'&&D.type==='orc')||(L.type==='legolas'&&D.type==='nazgul')||(L.type==='merry'&&D.type==='witchking'))){
+    UI.line(`${CH[L.type].n}의 능력: ${CH[D.type].n}에게 바로 승리!`,'L'); return {dDie:1}; }
+  if(D.type==='orc' && att===D){ UI.line('오르크의 능력: 공격할 때 바로 승리!','D'); return {lDie:1}; }
+  if(D.type==='saruman'){
+    const no=await decide('D','saruman',c);
+    if(no){ UI.line('사루만의 능력: 양쪽 모두 카드 없이 싸웁니다.','D'); return compare(c,null,null); }
+  }
+  let lc,dc;
+  if(lAb && L.type==='gandalf'){
+    c.gandalf=true;
+    dc=await decide('D','card',{...c,seen:null}); takeCard('D',dc,c);
+    UI.line(`간달프의 능력: 사우론이 먼저 냅니다 → ${cardName(dc)}`,'D');
+    lc=await decide('L','card',{...c,seen:dc}); takeCard('L',lc,c);
+  } else {
+    const ai=G.ai, hu=G.human;
+    const a=await decide(ai,'card',{...c,seen:null});
+    const h=await decide(hu,'card',{...c,seen:null});
+    if(ai==='L'){lc=a;dc=h;} else {lc=h;dc=a;}
+    takeCard('L',lc,c); takeCard('D',dc,c);
+  }
+  UI.showCards(lc,dc);
+  return await resolve(c,lc,dc);
+}
+async function resolve(c,lc,dc){
+  const {L,D,dest}=c;
+  let le=lc, de=dc;
+  if(D.type==='troll'){ UI.line('동굴 트롤의 능력: 사우론의 카드가 무효가 됩니다.','D'); de=null; }
+  if(de==='magic'){
+    const opts=G.disc.D.filter(x=>x!=='magic');
+    if(opts.length){ de=await decide('D','magic',{...c,opts,other:le}); UI.line(`사우론의 마법 → ${cardName(de)}`,'D'); }
+    else { UI.line('사우론의 마법: 버린 카드가 없어 효과가 없습니다.','D'); de=null; }
+  }
+  if(le && cardNum(le)===null && de==='eye'){ UI.line(`사우론의 눈: 원정대의 ${jo(cardName(le),'이','가')} 무효가 됩니다!`,'D'); le=null; }
+  if(le==='magic'){
+    const opts=G.disc.L.filter(x=>x!=='magic');
+    if(opts.length){ le=await decide('L','magic',{...c,opts,other:de}); UI.line(`원정대의 마법 → ${cardName(le)}`,'L'); }
+    else { UI.line('원정대의 마법: 버린 카드가 없어 효과가 없습니다.','L'); le=null; }
+  }
+  let esc=false;
+  if(le==='retreat'){
+    const o=retreatDests(L,dest,'back');
+    if(o.length){ const d=o.length===1?o[0]:await decide('L','retreatDest',{...c,piece:L,opts:o});
+      L.reg=d; c.moved.add(L); esc=true; UI.line(`퇴각: ${jo(CH[L.type].n,'이','가')} ${ro(R[d].name)} 물러났습니다.`,'L'); }
+    else UI.line('퇴각: 물러날 곳이 없어 효과가 없습니다.','L');
+  }
+  if(de==='retreat'){
+    const o=retreatDests(D,dest,'side');
+    if(o.length){ const d=o.length===1?o[0]:await decide('D','retreatDest',{...c,piece:D,opts:o});
+      D.reg=d; c.moved.add(D); esc=true; UI.line(`퇴각: ${jo(CH[D.type].n,'이','가')} ${ro(R[d].name)} 옆으로 물러났습니다.`,'D'); }
+    else UI.line('퇴각: 옆으로 물러날 곳이 없어 효과가 없습니다.','D');
+  }
+  if(esc) return {};
+  if(le==='sacrifice'){ UI.line('고귀한 희생: 두 캐릭터가 모두 쓰러집니다.','L'); return {lDie:1,dDie:1}; }
+  if(le==='cloak' && cardNum(de)) UI.line('요정 망토: 사우론의 숫자 카드가 무효가 됩니다!','L');
+  return compare(c,le,de);
+}
+function compare(c,le,de){
+  const {L,D}=c;
+  const ls=strengthOf(L,D)+(cardNum(le)||0);
+  const dsv=CH[D.type].str+(le!=='cloak'?(cardNum(de)||0):0);
+  UI.line(`전투력 — 원정대 ${CH[L.type].n} ${ls} : 사우론 ${CH[D.type].n} ${dsv}`,'res');
+  if(ls>dsv) return {dDie:1};
+  if(dsv>ls) return {lDie:1};
+  return {lDie:1,dDie:1};
+}
+
+// ---------- 컴퓨터(AI) ----------
+const VAL={frodo:0,sam:6,pippin:3,merry:4,gimli:5,legolas:5,aragorn:7,gandalf:8,boromir:3, orc:3,warg:3,rider:5,nazgul:5,saruman:6,balrog:8,shelob:7,witchking:7,troll:9};
+const val=(t,viewer)=> t==='frodo' ? (viewer==='L'?1000:300) : VAL[t];
+const pool=side=>A(side).filter(p=>!p.known).map(p=>p.type);
+function typeDist(p,viewer){ if(p.side===viewer||p.known) return [[p.type,1]]; const pl=pool(p.side); return pl.map(t=>[t,1/pl.length]); }
+const sig=x=>1/(1+Math.exp(-x));
+function pairOut(myT,foeT,iAtt,side){
+  const LT=side==='L'?myT:foeT, DT=side==='L'?foeT:myT, lAtt=side==='L'?iAtt:!iAtt, lAb=DT!=='warg';
+  let lD,dD;
+  if(lAb&&LT==='frodo'&&!lAtt){lD=0.03;dD=0;}
+  else if(lAb&&LT==='boromir'){lD=1;dD=1;}
+  else if(lAb&&((LT==='gimli'&&DT==='orc')||(LT==='legolas'&&DT==='nazgul')||(LT==='merry'&&DT==='witchking'))){lD=0;dD=1;}
+  else if(DT==='orc'&&!lAtt){lD=1;dD=0;}
+  else{
+    let ls=CH[LT].str, dsv=CH[DT].str;
+    if(LT==='sam'&&lAb) ls=3.5;
+    let d=ls-dsv-0.4;
+    if(DT==='troll') d-=1.5;
+    if(lAb&&LT==='gandalf') d+=1;
+    const pw=sig(d/1.6); lD=1-pw*0.92; dD=pw+(1-pw)*0.08;
+    if(lAb&&LT==='pippin'&&lAtt) lD*=0.35;
+    if(DT==='saruman') { /* 카드 없이도 가능 */ }
+  }
+  return side==='L'?[dD,lD]:[lD,dD];
+}
+function combatEU(me,foe,iAtt,viewer){
+  let eu=0;
+  for(const [t,w] of typeDist(foe,viewer)){ const [pf,pi]=pairOut(me.type,t,iAtt,me.side); eu+=w*(pf*val(t,viewer)-pi*val(me.type,viewer)); }
+  return eu;
+}
+function attackEU(p,dest){
+  const defs=at(dest,opp(p.side));
+  return Math.max(...defs.map(d=>{
+    if(p.side==='D' && d.known && d.type==='frodo' && p.type!=='warg' && retreatDests(d,dest,'side').length) return -1.5; // 도망칠 게 뻔함
+    if(p.type==='pippin' && d.known && CH[d.type].str>=3) return -3;
+    return combatEU(p,d,true,p.side);
+  }));
+}
+function riderReach(from,dest){
+  let fr=[from]; const seen=new Set(fr);
+  while(fr.length){ const nx=[]; for(const r of fr) for(const d of fwd(r,'D')){ if(seen.has(d)) continue; seen.add(d); if(d===dest) return true; if(!at(d,'L').length) nx.push(d);} fr=nx; }
+  return false;
+}
+function threatAt(p,dest){
+  const allies=at(dest,p.side).filter(x=>x!==p).length;
+  let acc=0;
+  for(const e of A(opp(p.side))){
+    if(e.reg===dest) continue;
+    const base = fwd(e.reg,e.side).includes(dest) || RIVER[e.reg]===dest || (e.side==='L'&&e.reg==='eregion'&&dest==='fangorn');
+    for(const [t,w] of typeDist(e,p.side)){
+      let reach=base;
+      if(!reach){
+        if(t==='aragorn') reach=adjAll(e.reg).includes(dest);
+        else if(t==='witchking') reach=SIDE[e.reg].includes(dest);
+        else if(t==='rider') reach=riderReach(e.reg,dest);
+        else if(t==='nazgul') reach=allies===0;
+      }
+      if(reach){ const [,pi]=pairOut(p.type,t,false,p.side); acc+=w*pi; }
+    }
+  }
+  if(allies){
+    const samShield = p.type==='frodo' && at(dest,'L').some(x=>x.type==='sam');
+    acc *= samShield ? 0.3 : (p.known ? 1 : 1/(allies+1));
+  }
+  return Math.min(acc,1.5);
+}
+function balrogRisk(){
+  const occ=at('caradhras','D')[0];
+  if(!occ) return 0;
+  if(occ.known) return occ.type==='balrog'?1:0;
+  const pl=pool('D'); return pl.includes('balrog')?1/pl.length:0;
+}
+function scoreMove(m){
+  const p=m.p, s=p.side;
+  const pr = s==='L' ? R[m.dest].r-R[p.reg].r : R[p.reg].r-R[m.dest].r;
+  const v=val(p.type,s);
+  let sc=Math.random()*1.5;
+  if(m.kind==='moria') sc-=balrogRisk()*v*1.1;
+  if(s==='L'){
+    if(p.type==='frodo'){
+      if(m.dest==='mordor'&&!m.attack) return 1e6;
+      sc+=12*pr;
+      if(m.attack) sc+=attackEU(p,m.dest)*0.6;
+      else sc-=threatAt(p,m.dest)*v*0.6;
+      if(m.dest==='mordor'&&m.attack) sc+=200;
+    } else {
+      sc+=2*pr;
+      if(m.attack) sc+=attackEU(p,m.dest);
+      else sc-=threatAt(p,m.dest)*v*0.5;
+      const f=PT('frodo');
+      if(f.alive){
+        if(fwd(f.reg,'L').includes(m.dest)) sc+=3;
+        if(m.dest===f.reg) sc+=1.5;
+        if(p.reg===f.reg && at(f.reg,'L').length===2) sc-=2.5;
+      }
+    }
+  } else {
+    if(m.dest==='shire'&&!m.attack&&at('shire','D').length+1>=3) return 1e6;
+    sc+=2.5*pr+(m.dest==='shire'?4:0);
+    if(m.attack) sc+=attackEU(p,m.dest);
+    else sc-=threatAt(p,m.dest)*v*0.5;
+    const home=A('D').filter(x=>R[x.reg].r>=5).length;
+    if(R[p.reg].r>=5 && R[m.dest].r<5 && home<=3) sc-=6;
+    if(p.reg==='mordor' && at('mordor','D').length===1 && A('L').some(x=>R[x.reg].r>=4)) sc-=10;
+  }
+  return sc;
+}
+function bestNum(list){ const n=list.filter(x=>cardNum(x)); return n.length?n.sort((a,b)=>cardNum(b)-cardNum(a))[0]:null; }
+function simOutcome(c,lc,dc){
+  const {L,D,dest}=c; let le=lc, de=dc;
+  if(D.type==='troll') de=null;
+  if(de==='magic') de=bestNum(G.disc.D);
+  if(le && cardNum(le)===null && de==='eye') le=null;
+  if(le==='magic') le=bestNum(G.disc.L);
+  if(le==='retreat' && retreatDests(L,dest,'back').length) return {esc:1};
+  if(de==='retreat' && retreatDests(D,dest,'side').length) return {esc:1};
+  if(le==='sacrifice') return {l:1,d:1};
+  const ls=strengthOf(L,D)+(cardNum(le)||0), dsv=CH[D.type].str+(le!=='cloak'?(cardNum(de)||0):0);
+  return ls>dsv?{d:1}:dsv>ls?{l:1}:{l:1,d:1};
+}
+function util(side,c,r){
+  if(side==='L') return (r.d?val(c.D.type,'L'):0)-(r.l?val(c.L.type,'L'):0);
+  return (r.l?val(c.L.type,'D'):0)-(r.d?val(c.D.type,'D'):0);
+}
+function cardCost(card){ const n=cardNum(card); if(n) return n*0.45; return {retreat:1.2,magic:1.8,cloak:1.5,sacrifice:1.6,eye:1.5}[card]||1; }
+function cardEUs(side,c){
+  const oh = c.seen ? [c.seen] : G.hand[opp(side)];
+  const worst = side==='D' && c.gandalf && !c.seen;
+  return G.hand[side].map(card=>{
+    const us=oh.map(o=>util(side,c, side==='L'?simOutcome(c,card,o):simOutcome(c,o,card)));
+    const eu = worst ? Math.min(...us) : us.reduce((a,b)=>a+b,0)/us.length;
+    return {card, eu: eu-cardCost(card)};
+  });
+}
+function AI(side,type,d){
+  switch(type){
+    case 'move': {
+      let best=null,bs=-Infinity;
+      for(const m of d.moves){ const s=scoreMove(m); if(s>bs){bs=s;best=m;} }
+      return best;
+    }
+    case 'target': {
+      let best=d.defs[0],bs=-Infinity;
+      for(const x of d.defs){ const s=combatEU(d.att,x,true,side)+Math.random()*0.2; if(s>bs){bs=s;best=x;} }
+      return best;
+    }
+    case 'samSub': return true;
+    case 'frodoRetreat': return d.opts.slice().sort((a,b)=>threatAt(d.L,a)-threatAt(d.L,b))[0];
+    case 'pippinRetreat': { const best=Math.max(...cardEUs('L',d).map(x=>x.eu)); return best< -0.5 ? d.opts[0] : null; }
+    case 'saruman': {
+      const r=simOutcome(d,null,null); const u0=util('D',d,r);
+      const best=Math.max(...cardEUs('D',d).map(x=>x.eu));
+      return u0>=best;
+    }
+    case 'card': {
+      const list=cardEUs(side,d); let best=list[0];
+      for(const x of list){ x.eu+=Math.random()*0.3; if(x.eu>best.eu) best=x; }
+      return best.card;
+    }
+    case 'magic': {
+      let best=d.opts[0],bs=-Infinity;
+      for(const o of d.opts){ const r= side==='L'?simOutcome(d,o,d.other):simOutcome(d,d.other,o); const u=util(side,d,r); if(u>bs){bs=u;best=o;} }
+      return best;
+    }
+    case 'retreatDest': return d.opts.slice().sort((a,b)=>threatAt(d.piece,a)-threatAt(d.piece,b))[0];
+    case 'shelob': return A('D').filter(x=>R[x.reg].r>=5).length<3;
+  }
+}
+// ===ENGINE END===
+
+// ---------- 화면 ----------
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const HR=56, HW=HR*Math.sqrt(3), X0=208, Y0=36+HR;
+const FILL={shire:'#cfe2a0',arthedain:'#f3c6b2',cardolan:'#cbe5ab',rhudaur:'#f4e3a7',eregion:'#ddd0e8',enedwaith:'#f6d8ba',
+  highpass:'#bba88d',misty:'#b5a185',caradhras:'#b09b80',gap:'#bba88d',mirkwood:'#8fbf7a',fangorn:'#c0e1a3',rohan:'#f1c5b3',
+  dagorlad:'#f0e1a2',gondor:'#c2e2aa',mordor:'#7d5d4f'};
+let sel=null, selMoves=[], swapSel=null;
+function view(){ return G?G.human:'L'; }
+function hexPos(id){ const {r,j}=R[id]; const n=ROWN[r]; const row=view()==='L'?6-r:r; return [X0+(j-(n-1)/2)*HW, Y0+row*1.5*HR]; }
+function hexPts(cx,cy,rr){ const s=[]; for(let k=0;k<6;k++){const a=Math.PI/180*(60*k-90); s.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1));} return s.join(' '); }
+function tokOffsets(cap){ if(cap===4) return [[-21,-17],[21,-17],[-21,17],[21,17]]; if(cap===2) return [[-21,9],[21,9]]; return [[0,9]]; }
+
+let PHOTO=null; // {url,w,h}
+// 업로드한 지도(2576×2434) 기준: 각 지역의 말 자리와 이름표 위치 — 경계선을 피해 지역 안쪽에 둠
+const PC={
+  shire:{s:[[230,560],[395,560],[230,700],[395,700]],l:[310,440]},
+  arthedain:{s:[[700,420],[760,610]],l:[660,290]},
+  rhudaur:{s:[[1030,390],[1060,570]],l:[1030,255]},
+  highpass:{s:[[1440,330]],l:[1450,190]},
+  mirkwood:{s:[[1960,560],[2000,780]],l:[1960,420]},
+  cardolan:{s:[[640,1000],[620,1180]],l:[720,880]},
+  eregion:{s:[[1060,850],[1110,1020]],l:[1120,745]},
+  misty:{s:[[1470,830]],l:[1470,680]},
+  fangorn:{s:[[1830,1260],[1720,1420]],l:[1860,1140]},
+  dagorlad:{s:[[2080,1270],[2150,1500]],l:[2180,1170]},
+  enedwaith:{s:[[900,1330],[880,1520]],l:[980,1215]},
+  caradhras:{s:[[1320,1330]],l:[1310,1440]},
+  gap:{s:[[1110,1790]],l:[1100,1660]},
+  rohan:{s:[[1490,1730],[1435,1895]],l:[1360,1995]},
+  gondor:{s:[[1880,1760],[1830,1990]],l:[1890,1650]},
+  mordor:{s:[[2250,1820],[2420,1820],[2250,1980],[2420,1980]],l:[2335,1695]}
+};
+function drawPhoto(){
+  const svg=$('board'), W=PHOTO.w, H=PHOTO.h, sx=W/2576, sy=H/2434, k=4*sx;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const S=id=>PC[id].s.map(([x,y])=>[x*sx,y*sy]), Lp=id=>[PC[id].l[0]*sx,PC[id].l[1]*sy];
+  const box=id=>{ const pts=[...S(id),Lp(id)]; const xs=pts.map(q=>q[0]), ys=pts.map(q=>q[1]);
+    const x0=Math.min(...xs)-24*k, x1=Math.max(...xs)+24*k, y0=Math.min(...ys)-20*k, y1=Math.max(...ys)+20*k; return [x0,y0,x1-x0,y1-y0]; };
+  let h=`<defs><filter id="sh"><feDropShadow dx="0" dy="${1.2*k}" stdDeviation="${k}" flood-opacity=".5"/></filter></defs>`;
+  h+=`<image href="${PHOTO.url}" x="0" y="0" width="${W}" height="${H}"/>`;
+  for(const id in R){ for(const [x,y] of [...S(id),Lp(id)]) h+=`<circle data-reg="${id}" cx="${x}" cy="${y}" r="${26*k}" fill="rgba(0,0,0,0)" style="cursor:pointer"/>`; }
+  const hl=(id,extra)=>{ const [x,y,w,hh]=box(id); return `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="${14*k}" pointer-events="none" ${extra}/>`; };
+  if(G && G.last) for(const id of [G.last.from,G.last.to]) h+=hl(id,`fill="none" stroke="#e0a800" stroke-width="${2.5*k}" stroke-dasharray="${6*k} ${4*k}"`);
+  for(const m of selMoves){ const col=m.attack?'#d63a3a':'#2f9e44';
+    h+=hl(m.dest,`fill="${m.attack?'rgba(214,58,58,.3)':'rgba(47,158,68,.3)'}" stroke="${col}" stroke-width="${4*k}"`).replace('/>',`><animate attributeName="stroke-opacity" values="1;.35;1" dur="1.2s" repeatCount="indefinite"/></rect>`); }
+  for(const id in R){ const [x,y]=Lp(id); const w=(R[id].name.length*11+16)*k;
+    h+=`<g pointer-events="none"><rect x="${x-w/2}" y="${y-8*k}" width="${w}" height="${16*k}" rx="${8*k}" fill="#fbf1d6" fill-opacity=".93" stroke="#a8342a" stroke-width="${k}"/><text x="${x}" y="${y+3.6*k}" text-anchor="middle" font-family="Gowun Batang,serif" font-weight="700" font-size="${11*k}" fill="#6a1610">${R[id].name}<tspan font-size="${8*k}" fill="#8a5a3a"> ·${R[id].cap}</tspan></text></g>`; }
+  if(G) for(const id in R){ const ps=at(id); const sl=S(id);
+    ps.forEach((p,i)=>{ const [x,y]=sl[i]||sl[0]; h+=`<g transform="translate(${x},${y}) scale(${k})">${token(p,0,0)}</g>`; }); }
+  svg.innerHTML=h;
+}
+function drawBoard(){
+  if(PHOTO) return drawPhoto();
+  const svg=$('board'); svg.setAttribute('viewBox','0 0 416 680'); let h='';
+  h+=`<defs>
+    <radialGradient id="pg" cx="50%" cy="45%" r="75%"><stop offset="0" stop-color="#f7ecce"/><stop offset="1" stop-color="#dcc690"/></radialGradient>
+    <marker id="ahB" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2b5fd0"/></marker>
+    <marker id="ahK" markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#2b2b2b"/></marker>
+    <filter id="sh"><feDropShadow dx="0" dy="1.2" stdDeviation="1" flood-opacity=".45"/></filter>
+  </defs>`;
+  h+=`<rect x="0" y="0" width="416" height="680" rx="14" fill="url(#pg)"/>`;
+  h+=`<rect x="5" y="5" width="406" height="670" rx="11" fill="none" stroke="#8a6a3a" stroke-width="1.2" stroke-dasharray="1 0"/>`;
+  // 방향 표시
+  const topName = view()==='L'?'모르도르 쪽 (사우론의 땅)':'샤이어 쪽 (원정대의 땅)';
+  h+=`<text x="16" y="24" font-size="10" fill="#7a5b2e" font-family="Noto Sans KR">▲ ${topName}</text>`;
+  // compass-ish deco
+  h+=`<g opacity=".28" transform="translate(372,620)"><circle r="22" fill="none" stroke="#5a3d1a" stroke-width="1.2"/><path d="M0,-26 L5,0 L0,26 L-5,0z" fill="#5a3d1a"/><path d="M-26,0 L0,4 L26,0 L0,-4z" fill="#5a3d1a"/></g>`;
+  h+=`<g opacity=".28" transform="translate(44,620)"><circle r="22" fill="none" stroke="#5a3d1a" stroke-width="1.2"/><path d="M0,-26 L5,0 L0,26 L-5,0z" fill="#5a3d1a"/><path d="M-26,0 L0,4 L26,0 L0,-4z" fill="#5a3d1a"/></g>`;
+  for(const id in R){
+    const [cx,cy]=hexPos(id);
+    h+=`<g data-reg="${id}" style="cursor:pointer"><polygon points="${hexPts(cx,cy,HR-1)}" fill="${FILL[id]}" stroke="#a8342a" stroke-width="2.6" stroke-linejoin="round"/>`;
+    h+=decor(id,cx,cy);
+    h+=`</g>`;
+  }
+  // 산맥 경계
+  ['highpass','misty','caradhras'].forEach(id=>{
+    const [cx,cy]=hexPos(id); const x=cx+HW/2;
+    h+=`<line x1="${x}" y1="${cy-HR/2}" x2="${x}" y2="${cy+HR/2}" stroke="#b8322a" stroke-width="4"/><line x1="${x}" y1="${cy-HR/2}" x2="${x}" y2="${cy+HR/2}" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>`;
+  });
+  // 안두인 강
+  [['mirkwood','fangorn'],['fangorn','rohan']].forEach(([a,b])=>{
+    const [ax,ay]=hexPos(a),[bx]=hexPos(b); const mx=(ax+bx)/2, y=ay-15; const dir=Math.sign(bx-ax);
+    h+=`<line x1="${mx-9*dir}" y1="${y}" x2="${mx+5*dir}" y2="${y}" stroke="#2b5fd0" stroke-width="3" marker-end="url(#ahB)"/>`;
+  });
+  // 모리아
+  { const [ex,ey]=hexPos('eregion'),[fx,fy]=hexPos('fangorn'); const dir=Math.sign(fy-ey);
+    const y1=ey+dir*(HR-2), y2=fy-dir*(HR+3), my=(y1+y2)/2;
+    h+=`<path d="M${ex},${y1} Q${ex+30},${my} ${fx+2},${y2}" fill="none" stroke="#2b2b2b" stroke-width="2.6" stroke-dasharray="5 3" marker-end="url(#ahK)"/>`; }
+  // 하이라이트
+  if(G && G.last){
+    for(const id of [G.last.from,G.last.to]){ const [cx,cy]=hexPos(id); h+=`<polygon points="${hexPts(cx,cy,HR-6)}" fill="none" stroke="#c9962b" stroke-width="2.5" stroke-dasharray="6 4" pointer-events="none"/>`; }
+  }
+  for(const m of selMoves){
+    const [cx,cy]=hexPos(m.dest); const col=m.attack?'#d63a3a':'#2f9e44';
+    h+=`<polygon points="${hexPts(cx,cy,HR-5)}" fill="${m.attack?'rgba(214,58,58,.18)':'rgba(47,158,68,.18)'}" stroke="${col}" stroke-width="4" pointer-events="none"><animate attributeName="stroke-opacity" values="1;.35;1" dur="1.2s" repeatCount="indefinite"/></polygon>`;
+  }
+  // 지역 이름
+  for(const id in R){
+    const [cx,cy]=hexPos(id); const cap=R[id].cap; let ly;
+    if(cap===4){ const isTop = cy<300; ly = isTop ? cy-HR-7 : cy+HR+15; }
+    else ly=cy-HR*0.5;
+    const capTxt = cap===4?' ·4':cap===1?' ·1':'';
+    h+=`<text x="${cx}" y="${ly}" text-anchor="middle" font-family="Gowun Batang,serif" font-weight="700" font-size="${cap===4?13:11}" fill="#6a1610" stroke="#fbf1d6" stroke-width="3" paint-order="stroke" pointer-events="none">${R[id].name}<tspan font-size="8" fill="#8a5a3a">${capTxt}</tspan></text>`;
+  }
+  // 말
+  if(G){
+    for(const id in R){
+      const ps=at(id); if(!ps.length) continue;
+      const [cx,cy]=hexPos(id); const offs=tokOffsets(R[id].cap);
+      ps.forEach((p,i)=>{ const o=offs[i]||[0,0]; h+=token(p,cx+o[0],cy+o[1]); });
+    }
+  }
+  svg.innerHTML=h;
+}
+function decor(id,cx,cy){
+  const r=R[id].r; let g='';
+  if(r===3){ for(const dx of [-22,0,22]) g+=`<path d="M${cx+dx-9},${cy+34} L${cx+dx},${cy+20} L${cx+dx+9},${cy+34}z" fill="#6b5236" opacity=".35"/><path d="M${cx+dx-3},${cy+24} L${cx+dx},${cy+20} L${cx+dx+3},${cy+24}z" fill="#fff" opacity=".5"/>`; }
+  if(id==='mirkwood'||id==='fangorn'){ for(const dx of [-24,-8,8,24]) g+=`<circle cx="${cx+dx}" cy="${cy+33}" r="6" fill="${id==='mirkwood'?'#2f5d2a':'#4f8a3c'}" opacity=".35"/>`; }
+  if(id==='mordor'){ g+=`<path d="M${cx-30},${cy+HR*0.55} L${cx-12},${cy+HR*0.25} L${cx},${cy+HR*0.5} L${cx+14},${cy+HR*0.2} L${cx+32},${cy+HR*0.55}z" fill="#3a2520" opacity=".45"/>`; }
+  if(id==='shire'){ g+=`<path d="M${cx-34},${cy+38} q12,-10 24,0 q12,-10 24,0 q10,-8 20,0" fill="none" stroke="#5f8a3a" stroke-width="2" opacity=".5"/>`; }
+  return g;
+}
+function token(p,x,y){
+  const mine=p.side===G.human, show=mine||p.known||G.phase==='over';
+  const isL=p.side==='L';
+  const fill=isL?'#fdf6e1':'#2a1414', stroke=isL?'#2f6b3f':'#a32323', tc=isL?'#22311f':'#f6e7c8';
+  const selected=(sel===p)||(swapSel===p);
+  let s=`<g data-pid="${p.id}" style="cursor:pointer" filter="url(#sh)">`;
+  s+=`<rect x="${x-19}" y="${y-15}" width="38" height="30" rx="7" fill="${fill}" stroke="${selected?'#e0a800':stroke}" stroke-width="${selected?3.4:2}"/>`;
+  if(show){
+    s+=`<text x="${x}" y="${y+1}" text-anchor="middle" font-family="Gowun Batang,serif" font-weight="700" font-size="13" fill="${tc}">${CH[p.type].str}</text>`;
+    s+=`<text x="${x}" y="${y+11.5}" text-anchor="middle" font-family="Noto Sans KR" font-weight="500" font-size="${CH[p.type].s.length>=4?7.6:8.6}" fill="${tc}">${CH[p.type].s}</text>`;
+    if(!mine) s+=`<rect x="${x-19}" y="${y-15}" width="38" height="30" rx="7" fill="none" stroke="${tc}" stroke-opacity=".35" stroke-dasharray="2 2"/>`;
+  } else {
+    s+=`<text x="${x}" y="${y+6}" text-anchor="middle" font-family="Gowun Batang,serif" font-weight="700" font-size="17" fill="${tc}">?</text>`;
+  }
+  if(mine && p.known && G.phase!=='over') s+=`<circle cx="${x+15}" cy="${y-11}" r="3.2" fill="#e0a800" stroke="#5a3d00" stroke-width=".8"/>`;
+  s+=`</g>`;
+  return s;
+}
+function cardHTML(c,side,cls=''){
+  const n=cardNum(c);
+  return `<div class="card ${side} ${cls}" data-card="${c}">${n?`<div class="num">${n}</div><div class="cn">숫자 카드</div>`:`<div class="cn" style="margin-top:6px">${CARD_INFO[c].n}</div><div class="cd">${CARD_INFO[c][side]}</div>`}</div>`;
+}
+function renderSide(){
+  if(!G) return;
+  const hs=G.human, as=G.ai;
+  $('myHand').innerHTML = DECK[hs].map(c=>cardHTML(c,hs,G.hand[hs].includes(c)?'':'used')).join('');
+  $('myCount').textContent=`(남은 ${G.hand[hs].length}장)`;
+  $('aiCount').textContent=`— ${as==='L'?'원정대':'사우론'} · 남은 카드 ${G.hand[as].length}장`;
+  $('aiUsed').innerHTML = G.disc[as].length ? G.disc[as].map(c=>cardHTML(c,as)).join('') : '<span class="muted">아직 없음</span>';
+  const dead=G.pieces.filter(p=>!p.alive);
+  $('fallen').innerHTML = dead.length ? dead.map(p=>`<span class="chip ${p.side}">${CH[p.type].n} ${CH[p.type].str}</span>`).join('') : '<span class="muted">아직 없음</span>';
+}
+function setStatus(txt,side){
+  $('stxt').innerHTML=txt;
+  $('status').querySelector('.dot').style.background = side==='L'?'#2f6b3f':side==='D'?'#8f1d1d':'#c9962b';
+}
+function showInfo(p){
+  const mine=p.side===G.human, show=mine||p.known||G.phase==='over';
+  if(!show){ $('info').innerHTML=`<b>${p.side==='L'?'원정대':'사우론'} 캐릭터 (정체 모름)</b> — ${R[p.reg].name}. 전투가 벌어지면 정체가 드러납니다.`; return; }
+  $('info').innerHTML=`<b>${CH[p.type].n}</b> (전투력 ${CH[p.type].str}) · ${R[p.reg].name}<br>${CH[p.type].t}${mine&&p.known?'<br><span class="muted">● 상대가 이미 정체를 알고 있습니다.</span>':''}`;
+}
+const UI={
+  render(){ drawBoard(); renderSide(); },
+  log(t,cls){ const d=document.createElement('div'); d.className=cls||''; d.textContent=`${G.turnNo+1}. ${t}`; $('log').prepend(d); },
+  async turnStart(s){
+    if(s===G.human) setStatus('<b>당신의 차례</b> — 움직일 캐릭터를 누르세요', s);
+    else setStatus('컴퓨터가 생각 중…', s);
+    UI.render();
+    if(s!==G.human) await sleep(650);
+  },
+  async beforeMove(m){
+    if(m.p.side!==G.human){ sel=m.p; selMoves=[m]; UI.render(); await sleep(750); sel=null; selMoves=[]; }
+  },
+  async combatStart(c){ openCombat(c); await sleep(150); },
+  line(t,cls){ const d=document.createElement('div'); d.className=cls||''; d.textContent=t; const ml=$('mlines'); if(ml){ ml.appendChild(d); } },
+  showCards(lc,dc){
+    const ml=$('mlines'); if(!ml) return;
+    const d=document.createElement('div'); d.style.background='transparent'; d.style.border='0';
+    d.innerHTML=`<div class="playrow"><div>${cardHTML(lc,'L','big')}<div class="lab">원정대</div></div><div>${cardHTML(dc,'D','big')}<div class="lab">사우론</div></div></div>`;
+    ml.appendChild(d);
+  },
+  async combatEnd(c){ refreshCombatHead(c); UI.render(); await askOpts('', [{label:'확인',v:1,cls:'primary'}]); closeModal(); UI.render(); },
+  async notice(title,html){ openModal(`<h2>${title}</h2><div style="font-size:14px;line-height:1.6">${html}</div><div id="mchoice"></div>`); await askOpts('',[{label:'확인',v:1,cls:'primary'}]); closeModal(); UI.render(); },
+  async gameOver(){
+    const win=G.over.w===G.human;
+    setStatus(win?'🎉 당신의 승리!':'패배했습니다', G.over.w);
+    UI.log(`게임 종료 — ${G.over.w==='L'?'원정대':'사우론'} 승리: ${G.over.why}`,'sys');
+    UI.render();
+    openModal(`<h2>${win?'승리했습니다!':'컴퓨터의 승리'}</h2><p style="font-size:15px">${G.over.why}</p><p class="muted">지도에서 모든 캐릭터의 정체를 확인할 수 있습니다.</p><div id="mchoice"></div>`);
+    const v=await askOpts('',[{label:'새 게임',v:'new',cls:'primary'},{label:'지도 보기',v:'map'}]);
+    closeModal(); if(v==='new') startScreen();
+  }
+};
+// 모달
+function openModal(html){ $('sheet').innerHTML=html; $('ov').classList.add('show'); $('sheet').scrollTop=0; }
+function closeModal(){ $('ov').classList.remove('show'); }
+function chHTML(p,c){
+  const side=p.side, off = side==='L' && !c.lAb;
+  return `<div class="ch ${side}">${p===c.att?'<span class="badge">공격</span>':'<span class="badge" style="background:#ddd">수비</span>'}
+    <div class="top"><div class="s">${CH[p.type].str}</div><div class="n">${CH[p.type].n}</div></div>
+    <div class="t ${off?'off':''}">${CH[p.type].t}</div>${p.alive?'':'<div style="font-weight:700;margin-top:4px;color:#d33">✖ 쓰러짐</div>'}</div>`;
+}
+function openCombat(c){
+  openModal(`<h2>⚔ ${R[c.dest].name}에서 전투!</h2><div class="vs" id="mvs"></div><div id="mlines"></div><div id="mchoice"></div>`);
+  refreshCombatHead(c);
+}
+function refreshCombatHead(c){ const v=$('mvs'); if(v) v.innerHTML = chHTML(c.L,c)+'<div class="x">VS</div>'+chHTML(c.D,c); }
+function askOpts(q,opts){
+  return new Promise(res=>{
+    const box=$('mchoice');
+    box.innerHTML=(q?`<div class="q">${q}</div>`:'')+`<div class="opts">${opts.map((o,i)=>`<button class="btn ${o.cls||''}" data-i="${i}">${o.label}</button>`).join('')}</div>`;
+    box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ box.innerHTML=''; res(opts[+b.dataset.i].v); });
+    box.scrollIntoView({block:'nearest'});
+  });
+}
+function askCards(q,cards,side){
+  return new Promise(res=>{
+    const box=$('mchoice');
+    box.innerHTML=`<div class="q">${q}</div><div class="cards">${cards.map(c=>cardHTML(c,side,'pick big')).join('')}</div>`;
+    box.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ box.innerHTML=''; res(b.dataset.card); });
+    box.scrollIntoView({block:'nearest'});
+  });
+}
+async function HUMAN(type,d){
+  const hs=G.human;
+  switch(type){
+    case 'move': return new Promise(res=>{ G.awaitMove=res; UI.render(); });
+    case 'target': {
+      let k=0;
+      openModal(`<h2>⚔ ${R[d.dest].name} 공격</h2><p style="font-size:13.5px">이 지역에 상대 캐릭터가 ${d.defs.length}명 있습니다. 싸울 상대를 고르세요.<br><span class="muted">숨겨진 말은 숨겨진 채로, 공개된 말은 공개된 채로 보입니다.</span></p><div id="mchoice"></div>`);
+      const id=await askOpts('누구와 싸울까요?', d.defs.map(p=>({label: p.known?`${CH[p.type].n} (${CH[p.type].str})`:`? 숨겨진 캐릭터 ${++k}`, v:p.id, cls:p.known?'':'danger'})));
+      closeModal();
+      return d.defs.find(p=>p.id===id);
+    }
+    case 'samSub': {
+      openModal(`<h2>🛡 ${jo(R[d.dest].name,'이','가')} 공격받습니다!</h2><p style="font-size:13.5px">공격자 <b>${CH[d.att.type].n}</b>(전투력 ${CH[d.att.type].str})의 상대로 <b>프로도</b>가 지목되었습니다.</p><div id="mchoice"></div>`);
+      const v=await askOpts('샘이 프로도 대신 싸울까요? (샘 전투력 5)', [{label:'샘이 대신 싸운다',v:true,cls:'green'},{label:'프로도가 싸운다',v:false}]);
+      closeModal(); return v;
+    }
+    case 'frodoRetreat': return await askOpts('프로도의 능력: 싸우지 않고 옆으로 도망칠까요?', [...d.opts.map(o=>({label:`${ro(R[o].name)} 도망`,v:o,cls:'green'})),{label:'싸운다',v:null}]);
+    case 'pippinRetreat': return await askOpts('피핀의 능력: 싸우지 않고 뒤로 물러날까요?', [...d.opts.map(o=>({label:`${ro(R[o].name)} 물러남`,v:o,cls:'green'})),{label:'싸운다',v:null}]);
+    case 'saruman': return await askOpts(`사루만의 능력: 카드 없이 싸울까요? (사루만 4 대 ${CH[d.L.type].n} ${strengthOf(d.L,d.D)})`, [{label:'카드 없이 싸운다',v:true,cls:'danger'},{label:'카드를 낸다',v:false}]);
+    case 'card': {
+      let q='전투 카드를 한 장 고르세요';
+      if(d.seen) q=`사우론이 낸 카드: <b>${cardName(d.seen)}</b> — 이제 카드를 고르세요`;
+      else if(d.gandalf && hs==='D') q='간달프의 능력 때문에 사우론이 먼저 카드를 냅니다. 카드를 고르세요 (원정대가 보고 냅니다)';
+      return await askCards(q, G.hand[hs], hs);
+    }
+    case 'magic': return await askCards('마법: 버린 카드 더미에서 바꿀 카드를 고르세요', d.opts, hs);
+    case 'retreatDest': return await askOpts('어디로 물러날까요?', d.opts.map(o=>({label:R[o].name,v:o,cls:'green'})));
+    case 'shelob': return await askOpts('쉴로브의 능력: 곤도르로 돌아갈까요?', [{label:'곤도르로',v:true,cls:'danger'},{label:'그대로',v:false}]);
+  }
+}
+// 보드 클릭
+$('board').addEventListener('click',ev=>{
+  if(!G) return;
+  const t=ev.target.closest('[data-pid]'), h=ev.target.closest('[data-reg]');
+  const p=t?G.pieces.find(x=>x.id===t.dataset.pid):null;
+  if(G.phase==='setup'){
+    if(p){ showInfo(p);
+      if(p.side===G.human){
+        if(swapSel && swapSel!==p){ const r=swapSel.reg; swapSel.reg=p.reg; p.reg=r; swapSel=null; }
+        else swapSel = swapSel===p?null:p;
+        UI.render();
+      } }
+    return;
+  }
+  let reg=h?h.dataset.reg:(p?p.reg:null);
+  if(G.awaitMove && sel && reg){
+    const m=selMoves.find(x=>x.dest===reg);
+    if(m){ const res=G.awaitMove; G.awaitMove=null; sel=null; selMoves=[]; res(m); return; }
+  }
+  if(p){
+    showInfo(p);
+    if(p.side===G.human && G.awaitMove){
+      if(sel===p){ sel=null; selMoves=[]; setStatus('<b>당신의 차례</b> — 움직일 캐릭터를 누르세요',G.human); }
+      else { sel=p; selMoves=legalMoves(p);
+        setStatus(selMoves.length?`<b>${CH[p.type].n}</b> — 갈 곳을 누르세요 (초록=이동, 빨강=공격)`:`<b>${jo(CH[p.type].n,'은','는')}</b> 지금 움직일 수 없습니다`, G.human); }
+      UI.render();
+    }
+  }
+});
+// 시작
+function startScreen(){
+  openModal(`<h2>어느 편으로 하시겠어요?</h2>
+  <div class="pickside">
+    <button class="L" data-s="L"><b>원정대</b><span>프로도를 모르도르까지 데려가면 승리. 사우론의 캐릭터는 숨겨져 있습니다.</span></button>
+    <button class="D" data-s="D"><b>사우론</b><span>프로도를 쓰러뜨리거나 샤이어에 3명이 들어가면 승리. 사우론이 먼저 둡니다.</span></button>
+  </div>
+  <p class="muted">처음이라면 상단의 <b>규칙</b>과 <b>캐릭터·카드</b>를 먼저 보세요.</p>`);
+  $('sheet').querySelectorAll('.pickside button').forEach(b=>b.onclick=()=>{ closeModal(); setup(b.dataset.s); });
+}
+function setup(side){
+  newState(side); sel=null; selMoves=[]; swapSel=null;
+  $('log').innerHTML='';
+  $('setupBar').style.display='block';
+  setStatus('<b>배치 단계</b> — 내 캐릭터 두 개를 차례로 눌러 자리를 바꿀 수 있어요', side);
+  $('info').innerHTML=side==='L'?'프로도를 어디에 숨길지 정하세요. 컴퓨터는 당신의 캐릭터 정체를 모릅니다.':'사우론의 군대를 배치하세요. 원정대의 정체는 전투로 드러납니다.';
+  UI.render();
+}
+$('bStart').onclick=()=>{ if(!G||G.phase!=='setup') return; swapSel=null; $('setupBar').style.display='none'; UI.log(`게임 시작 — 당신은 ${G.human==='L'?'원정대':'사우론'}입니다. 사우론이 먼저 둡니다.`,'sys');
+  runGame().catch(e=>{ console.error(e); setStatus('오류가 났습니다: '+e.message); }); };
+$('bShuffle').onclick=()=>{ if(G&&G.phase==='setup'){ placeSide(G.human); swapSel=null; UI.render(); } };
+$('bNew').onclick=()=>{ if(G && G.phase==='play'){ openModal(`<h2>새 게임을 시작할까요?</h2><p>진행 중인 게임은 사라집니다.</p><div id="mchoice"></div>`); askOpts('',[{label:'새 게임',v:1,cls:'primary'},{label:'취소',v:0}]).then(v=>{ closeModal(); if(v) location.reload(); }); } else startScreen(); };
+$('bRef').onclick=()=>{
+  const row=t=>`<tr><td class="s">${CH[t].str}</td><td><b>${CH[t].n}</b><br>${CH[t].t}</td></tr>`;
+  const crow=(c,s)=>`<tr><td class="s">${cardNum(c)||'★'}</td><td><b>${cardName(c)}</b><br>${cardDesc(c,s)}</td></tr>`;
+  const back = G && G.phase==='play' && $('ov').classList.contains('show') ? $('sheet').innerHTML : null;
+  if(back) return; // 전투 중에는 열지 않음
+  openModal(`<h2>캐릭터와 전투 카드</h2>
+  <h3 style="color:#2f6b3f">원정대 캐릭터</h3><table class="ref">${L_TYPES.map(row).join('')}</table>
+  <h3 style="color:#8f1d1d">사우론 캐릭터</h3><table class="ref">${D_TYPES.map(row).join('')}</table>
+  <h3 style="color:#2f6b3f">원정대 전투 카드 (9장)</h3><table class="ref">${DECK.L.map(c=>crow(c,'L')).join('')}</table>
+  <h3 style="color:#8f1d1d">사우론 전투 카드 (9장)</h3><table class="ref">${DECK.D.map(c=>crow(c,'D')).join('')}</table>
+  <div id="mchoice"></div>`);
+  askOpts('',[{label:'닫기',v:1,cls:'primary'}]).then(()=>closeModal());
+};
+$('bRules').onclick=()=>{
+  if(G && G.phase==='play' && $('ov').classList.contains('show')) return;
+  openModal(`<h2>게임 규칙</h2><div class="rules">
+  <h4>승리 조건</h4><ul>
+   <li><b>원정대</b>: 프로도가 <b>모르도르</b>에 들어가면 승리.</li>
+   <li><b>사우론</b>: 프로도를 쓰러뜨리거나, 사우론 캐릭터 <b>3명이 샤이어</b>에 들어가면 승리.</li>
+   <li>자기 차례에 움직일 수 있는 캐릭터가 하나도 없으면 패배.</li></ul>
+  <h4>준비와 진행</h4><ul>
+   <li>원정대는 샤이어에 4명, 아르세다인·카르돌란·루다우르·에레기온·에네드와이스에 1명씩. 사우론은 모르도르에 4명, 다고르라드·곤도르·어둠숲·팡고른·로한에 1명씩.</li>
+   <li>상대 캐릭터는 <b>?</b>로 숨겨져 있고, 전투에서 드러나면 계속 공개됩니다. 내 캐릭터의 노란 점은 상대가 정체를 안다는 뜻.</li>
+   <li><b>사우론이 먼저</b> 둡니다. 차례마다 캐릭터 하나를 <b>한 칸 앞으로</b> 옮깁니다 (원정대는 모르도르 쪽, 사우론은 샤이어 쪽). 옆이나 뒤로는 못 갑니다 — 능력·카드·특수 경로만 예외.</li>
+   <li>한 지역에 들어갈 수 있는 수: 샤이어·모르도르 4명, 산악 지역(높은 고개·안개산맥·카라드라스·로한 협곡) 1명, 나머지 2명.</li></ul>
+  <h4>지도의 특수 경로</h4><ul>
+   <li><b>모리아 굴</b>(검은 점선 화살표): 원정대는 에레기온에서 팡고른으로 바로 갈 수 있습니다. 단, 발로그가 카라드라스에 있으면 그 캐릭터는 바로 쓰러집니다.</li>
+   <li><b>안두인 강</b>(파란 화살표): 어둠숲→팡고른, 팡고른→로한으로 옆 이동할 수 있습니다 (양쪽 모두, 하류 방향만).</li>
+   <li><b>산맥 경계</b>(빨간 점선): 산악 지역끼리는 옆으로 갈 수 없습니다 (마술사왕 공격·퇴각 포함).</li></ul>
+  <h4>전투</h4><ul>
+   <li>상대가 있는 지역으로 들어가면 전투. 수비가 여러 명이면 <b>공격하는 쪽이 싸울 상대를 고릅니다</b> — 숨겨진 말은 숨겨진 채로 고르고, 싸우는 두 말만 공개됩니다.</li><li>지도의 빨간 네모 수가 그 지역에 있을 수 있는 최대 말 수입니다.</li>
+   <li>두 캐릭터 공개 → 즉시 발동 능력(보로미르, 김리, 레골라스, 메리, 오르크 등) → 양쪽이 전투 카드를 한 장씩 몰래 냄 → 효과 처리 → <b>캐릭터 전투력 + 숫자 카드</b> 비교. 높은 쪽이 이기고, 같으면 둘 다 쓰러집니다.</li>
+   <li>효과 처리 순서: 동굴 트롤 → 사우론의 마법 → 사우론의 눈 → 원정대의 마법 → 퇴각 → 고귀한 희생 → 요정 망토 → 전투력 비교.</li>
+   <li>공격자가 이겼는데 그 지역에 상대가 더 남아 있으면 공격자는 제자리에 머뭅니다. 상대가 없으면 그 지역으로 들어갑니다.</li>
+   <li>낸 카드는 버린 카드 더미로 갑니다. 9장을 모두 쓰면 다시 9장을 가져옵니다.</li></ul>
+  <p class="muted">캐릭터·카드 능력은 올려 주신 고전판 카드 번역을 따랐습니다. 원본 문서에 없는 세부사항(남은 수비자 처리 등)은 일반적인 방식으로 정했습니다.</p>
+  </div><div id="mchoice"></div>`);
+  askOpts('',[{label:'닫기',v:1,cls:'primary'}]).then(()=>closeModal());
+};
+function usePhoto(url){
+  const im=new Image();
+  im.onload=()=>{ PHOTO={url,w:im.naturalWidth,h:im.naturalHeight}; $('bPlain').style.display=''; $('photoNote').textContent='지역 위치는 올려 주신 지도(16지역판) 기준입니다.'; UI.render(); };
+  im.src=url;
+}
+$('bPhoto').onclick=()=>$('fPhoto').click();
+$('fPhoto').onchange=e=>{ const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader(); r.onload=()=>{ try{localStorage.setItem('lotrMap',r.result);}catch(_){} usePhoto(r.result); }; r.readAsDataURL(f); };
+$('bPlain').onclick=()=>{ PHOTO=null; try{localStorage.removeItem('lotrMap');}catch(_){} $('bPlain').style.display='none'; $('photoNote').textContent=''; UI.render(); };
+try{ const saved=localStorage.getItem('lotrMap'); if(saved) usePhoto(saved); }catch(_){}
+drawBoard();
+startScreen();
+</script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>비밀 숫자 배분기</title>
+<style>
+:root{
+  --bg:#1f3a3d;          /* 잉크 청록 */
+  --bg-deep:#152a2c;
+  --paper:#e9dcc2;       /* 크라프트지 */
+  --paper-edge:#cdb995;
+  --ink:#2a2118;
+  --stamp:#b3322a;       /* 붉은 도장 */
+  --muted:#9fb4b2;
+  --on-bg:#f2ead9;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1f21;
+    --bg-deep:#091415;
+    --paper:#d8c9ab;
+    --paper-edge:#b39f7a;
+    --ink:#21190f;
+    --stamp:#c0443a;
+    --muted:#7f9694;
+    --on-bg:#ece3d0;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:radial-gradient(120% 80% at 50% 0%,var(--bg) 0%,var(--bg-deep) 100%);
+  color:var(--on-bg);
+  font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100dvh;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+  user-select:none;-webkit-user-select:none;
+}
+.screen{display:none;flex:1;width:100%;max-width:420px;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px 0}
+.screen.on{display:flex}
+
+h1{font-size:30px;line-height:1.2;margin:0;text-align:center;font-weight:800;letter-spacing:-.5px}
+p{margin:0;text-align:center;line-height:1.6;color:var(--muted)}
+
+/* 인원 선택 */
+.stepper{display:flex;align-items:center;gap:18px}
+.stepper button{
+  width:64px;height:64px;border-radius:50%;border:2px solid var(--paper);
+  background:transparent;color:var(--on-bg);font-size:34px;line-height:1;cursor:pointer;
+}
+.stepper button:disabled{opacity:.3}
+.count{font-size:88px;font-weight:800;min-width:110px;text-align:center;font-variant-numeric:tabular-nums}
+.unit{font-size:20px;color:var(--muted);margin-top:-14px}
+
+.btn{
+  width:100%;padding:18px;border:none;border-radius:6px;cursor:pointer;
+  background:var(--paper);color:var(--ink);font-size:19px;font-weight:700;font-family:inherit;
+  box-shadow:0 3px 0 var(--paper-edge);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--paper-edge)}
+.btn.ghost{background:transparent;color:var(--on-bg);border:2px solid var(--muted);box-shadow:none}
+.btn.warn{background:var(--stamp);color:#fff;box-shadow:0 3px 0 #6e1d18}
+
+/* 진행 상단 */
+.top{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--muted)}
+.top button{background:none;border:none;color:var(--muted);font-size:15px;font-family:inherit;cursor:pointer;padding:8px 0}
+.top button.armed{color:var(--stamp);font-weight:700}
+.dots{display:flex;gap:6px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--muted);opacity:.35}
+.dots i.done{opacity:1;background:var(--paper)}
+.dots i.now{opacity:1;background:var(--stamp)}
+
+/* 봉투 카드 */
+.envelope{
+  position:relative;width:100%;aspect-ratio:3/4;max-height:60dvh;
+  background:var(--paper);border-radius:6px;color:var(--ink);cursor:pointer;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  transition:transform .12s;
+}
+.envelope:active{transform:scale(.985)}
+.envelope::before{ /* 봉투 덮개 */
+  content:"";position:absolute;left:0;right:0;top:0;height:42%;
+  background:var(--paper-edge);clip-path:polygon(0 0,100% 0,50% 100%);
+  transition:transform .35s ease, opacity .35s;transform-origin:top;
+}
+.envelope.open::before{transform:scaleY(-.15);opacity:0}
+.seal{
+  position:absolute;top:36%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);
+  border:3px solid var(--stamp);color:var(--stamp);padding:6px 14px;border-radius:4px;
+  font-weight:800;font-size:18px;letter-spacing:2px;background:var(--paper);
+  transition:opacity .2s;
+}
+.envelope.open .seal{opacity:0}
+.who{font-size:44px;font-weight:800;margin-top:28%}
+.hint{font-size:16px;color:#6d5d47;text-align:center;padding:0 20px}
+.envelope.open .who,.envelope.open .hint.closed{display:none}
+.reveal{display:none;flex-direction:column;align-items:center;gap:14px}
+.envelope.open .reveal{display:flex}
+
+/* 주사위 */
+.die{
+  width:150px;height:150px;border-radius:24px;background:#fffaf0;border:3px solid var(--ink);
+  display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:20px;gap:4px;
+  animation:pop .35s ease-out;
+}
+.die span{width:26px;height:26px;border-radius:50%;background:var(--ink);place-self:center;visibility:hidden}
+.die span.p{visibility:visible}
+.die.one span.p{background:var(--stamp)}
+.bignum{font-size:60px;font-weight:800;line-height:1}
+@keyframes pop{from{transform:scale(.6) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.die{animation:none}.envelope::before{transition:none}}
+
+/* 결과 */
+.result{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px}
+.result div{background:var(--paper);color:var(--ink);border-radius:6px;padding:10px 4px;text-align:center;font-size:14px}
+.result div b{display:block;font-size:30px}
+.result div.odd{background:var(--stamp);color:#fff}
+.col{width:100%;display:flex;flex-direction:column;gap:12px}
+/* 오리지널 마스코트: 어리둥절한 부엉이 탐정 */
+.mascot{width:180px;height:auto;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.mascot.small{width:120px}
+.mascot .blink{animation:blink 4s infinite;transform-origin:center;transform-box:fill-box}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.mascot .q{animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){.mascot .blink,.mascot .q{animation:none}}
+.doodles{position:fixed;inset:0;pointer-events:none;opacity:.10;z-index:-1}
+button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}
+</style>
+</head>
+<body>
+<svg class="doodles" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="#f2ead9" stroke-width="3" stroke-linecap="round">
+  <g transform="translate(40 90) rotate(-20)"><ellipse cx="0" cy="0" rx="10" ry="16"/><circle cx="-8" cy="-24" r="4"/><circle cx="0" cy="-27" r="4"/><circle cx="8" cy="-24" r="4"/></g>
+  <g transform="translate(80 150) rotate(-10)"><ellipse cx="0" cy="0" rx="10" ry="16"/><circle cx="-8" cy="-24" r="4"/><circle cx="0" cy="-27" r="4"/><circle cx="8" cy="-24" r="4"/></g>
+  <g transform="translate(330 620)"><circle r="16"/><path d="M12 12 l22 22"/></g>
+  <g transform="translate(320 120) rotate(15)"><circle r="10"/><path d="M10 0 h40 M40 0 v10 M48 0 v8"/></g>
+  <text x="40" y="700" font-size="60" fill="#f2ead9" stroke="none">?</text>
+  <text x="300" y="360" font-size="44" fill="#f2ead9" stroke="none">?</text>
+  <path d="M30 470 q30 -20 60 0 t60 0" stroke-dasharray="6 10"/>
+</svg>
+
+<!-- 1. 인원 선택 -->
+<section class="screen on" id="setup">
+  <svg class="mascot" viewBox="0 0 200 210" aria-hidden="true">
+  <text class="q" x="150" y="40" font-size="40" font-weight="800" fill="var(--stamp)">?</text>
+  <ellipse cx="100" cy="200" rx="60" ry="7" fill="rgba(0,0,0,.25)"/>
+  <!-- 몸 -->
+  <path d="M45 120 Q40 60 100 55 Q160 60 155 120 Q155 195 100 195 Q45 195 45 120Z" fill="#7a5a3a"/>
+  <path d="M70 135 Q100 115 130 135 Q130 185 100 188 Q70 185 70 135Z" fill="#d9c29a"/>
+  <path d="M80 150 l6 5 6-5 M96 160 l6 5 6-5 M110 150 l6 5 6-5" stroke="#a88a5e" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- 탐정 모자 -->
+  <path d="M48 72 Q100 20 152 72 Z" fill="#3e5c4f"/>
+  <path d="M40 74 H160 Q160 82 150 82 H50 Q40 82 40 74Z" fill="#2c4339"/>
+  <rect x="62" y="62" width="76" height="8" fill="#b3322a"/>
+  <!-- 눈 -->
+  <circle cx="76" cy="100" r="22" fill="#fffaf0" stroke="#2a2118" stroke-width="3"/>
+  <circle cx="124" cy="100" r="22" fill="#fffaf0" stroke="#2a2118" stroke-width="3"/>
+  <g class="blink"><circle cx="80" cy="102" r="9" fill="#2a2118"/><circle cx="120" cy="96" r="9" fill="#2a2118"/></g>
+  <path d="M93 116 L100 128 L107 116Z" fill="#e0a43a" stroke="#2a2118" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 땀방울 -->
+  <path d="M150 92 q6 10 0 14 q-6 -4 0 -14Z" fill="#8fd3e0"/>
+  <!-- 돋보기 -->
+  <line x1="40" y1="175" x2="22" y2="198" stroke="#5a3e24" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="50" cy="160" r="18" fill="rgba(200,230,240,.5)" stroke="#2a2118" stroke-width="5"/>
+  <path d="M40 130 Q30 150 44 160" stroke="#6a4c30" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>
+  <h1>비밀 숫자 배분기</h1>
+  <p>한 명만 다른 숫자를 받아요.<br>휴대폰을 돌려가며 자기 숫자만 확인하세요.</p>
+  <div class="stepper">
+    <button id="minus" aria-label="인원 줄이기">−</button>
+    <div class="count" id="count">4</div>
+    <button id="plus" aria-label="인원 늘리기">+</button>
+  </div>
+  <div class="unit">명</div>
+  <div class="col"><button class="btn" id="start">숫자 나누기</button></div>
+</section>
+
+<!-- 2. 돌려보기 -->
+<section class="screen" id="play">
+  <div class="top">
+    <div class="dots" id="dots"></div>
+    <button id="quit">처음으로</button>
+  </div>
+  <div class="envelope" id="env" role="button" tabindex="0" aria-live="polite">
+    <div class="seal">기밀</div>
+    <div class="who" id="who">플레이어 1</div>
+    <div class="hint closed">이 사람만 보세요.<br>탭하면 숫자가 보여요.</div>
+    <div class="reveal">
+      <div class="die" id="die"></div>
+      <div class="bignum" id="num"></div>
+      <div class="hint">외웠으면 탭해서 가리고<br>다음 사람에게 넘기세요.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 완료 -->
+<section class="screen" id="done">
+  <svg class="mascot small" viewBox="0 0 200 210" aria-hidden="true">
+  <text class="q" x="150" y="40" font-size="40" font-weight="800" fill="var(--stamp)">?</text>
+  <ellipse cx="100" cy="200" rx="60" ry="7" fill="rgba(0,0,0,.25)"/>
+  <!-- 몸 -->
+  <path d="M45 120 Q40 60 100 55 Q160 60 155 120 Q155 195 100 195 Q45 195 45 120Z" fill="#7a5a3a"/>
+  <path d="M70 135 Q100 115 130 135 Q130 185 100 188 Q70 185 70 135Z" fill="#d9c29a"/>
+  <path d="M80 150 l6 5 6-5 M96 160 l6 5 6-5 M110 150 l6 5 6-5" stroke="#a88a5e" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- 탐정 모자 -->
+  <path d="M48 72 Q100 20 152 72 Z" fill="#3e5c4f"/>
+  <path d="M40 74 H160 Q160 82 150 82 H50 Q40 82 40 74Z" fill="#2c4339"/>
+  <rect x="62" y="62" width="76" height="8" fill="#b3322a"/>
+  <!-- 눈 -->
+  <circle cx="76" cy="100" r="22" fill="#fffaf0" stroke="#2a2118" stroke-width="3"/>
+  <circle cx="124" cy="100" r="22" fill="#fffaf0" stroke="#2a2118" stroke-width="3"/>
+  <g class="blink"><circle cx="80" cy="102" r="9" fill="#2a2118"/><circle cx="120" cy="96" r="9" fill="#2a2118"/></g>
+  <path d="M93 116 L100 128 L107 116Z" fill="#e0a43a" stroke="#2a2118" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 땀방울 -->
+  <path d="M150 92 q6 10 0 14 q-6 -4 0 -14Z" fill="#8fd3e0"/>
+  <!-- 돋보기 -->
+  <line x1="40" y1="175" x2="22" y2="198" stroke="#5a3e24" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="50" cy="160" r="18" fill="rgba(200,230,240,.5)" stroke="#2a2118" stroke-width="5"/>
+  <path d="M40 130 Q30 150 44 160" stroke="#6a4c30" stroke-width="10" fill="none" stroke-linecap="round"/>
+</svg>
+  <h1>모두 확인했어요</h1>
+  <p>게임을 시작하세요.</p>
+  <div class="col">
+    <button class="btn" id="again">같은 인원으로 다시</button>
+    <button class="btn ghost" id="change">인원 바꾸기</button>
+    <button class="btn ghost" id="showAll">결과 공개</button>
+  </div>
+  <div class="result" id="result"></div>
+</section>
+
+<script>
+const MIN=3, MAX=10;
+const PIPS={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+let n=4, nums=[], idx=0, open=false, lock=false;
+
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function setCount(v){n=Math.min(MAX,Math.max(MIN,v));$('count').textContent=n;$('minus').disabled=n<=MIN;$('plus').disabled=n>=MAX}
+
+function deal(){
+  const r=()=>1+Math.floor(crypto.getRandomValues(new Uint32Array(1))[0]/4294967296*6);
+  const common=r(); let odd; do{odd=r()}while(odd===common);
+  const oddAt=Math.floor(Math.random()*n);
+  nums=Array.from({length:n},(_,i)=>i===oddAt?odd:common);
+  idx=0;open=false;
+  $('dots').innerHTML='<i></i>'.repeat(n);
+  resetArmed();
+  renderTurn();show('play');
+}
+
+function renderTurn(){
+  const env=$('env');env.classList.remove('open');
+  $('who').textContent='플레이어 '+(idx+1);
+  [...$('dots').children].forEach((d,i)=>{d.className=i<idx?'done':i===idx?'now':''});
+}
+
+function reveal(){
+  const v=nums[idx];
+  const die=$('die');die.className='die'+(v===1?' one':'');
+  die.innerHTML=Array.from({length:9},(_,i)=>`<span class="${PIPS[v].includes(i)?'p':''}"></span>`).join('');
+  $('num').textContent=v;
+  $('env').classList.add('open');
+}
+
+function tap(){
+  if(lock)return; lock=true; setTimeout(()=>lock=false,450); // 연타 방지
+  if(!open){reveal();open=true;return}
+  open=false;idx++;
+  if(idx>=n){$('result').innerHTML='';$('showAll').textContent='결과 공개';showArmed=false;show('done');return}
+  renderTurn();
+}
+
+/* 두 번 눌러야 실행되는 버튼(실수 방지) */
+let quitArmed=false, showArmed=false, t1, t2;
+function resetArmed(){quitArmed=false;$('quit').textContent='처음으로';$('quit').classList.remove('armed')}
+
+$('minus').onclick=()=>setCount(n-1);
+$('plus').onclick=()=>setCount(n+1);
+$('start').onclick=deal;
+$('again').onclick=deal;
+$('change').onclick=()=>show('setup');
+$('env').onclick=tap;
+$('env').onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tap()}};
+$('quit').onclick=()=>{
+  if(!quitArmed){quitArmed=true;$('quit').textContent='한 번 더 누르면 처음으로';$('quit').classList.add('armed');clearTimeout(t1);t1=setTimeout(resetArmed,2500);return}
+  resetArmed();show('setup');
+};
+$('showAll').onclick=()=>{
+  if(!showArmed){showArmed=true;$('showAll').textContent='한 번 더 누르면 모두 공개';clearTimeout(t2);t2=setTimeout(()=>{showArmed=false;$('showAll').textContent='결과 공개'},2500);return}
+  const counts={};nums.forEach(v=>counts[v]=(counts[v]||0)+1);
+  $('result').innerHTML=nums.map((v,i)=>`<div class="${counts[v]===1?'odd':''}">플레이어 ${i+1}<b>${v}</b></div>`).join('');
+  $('showAll').textContent='결과 공개됨';
+};
+setCount(4);
+</script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐슬 영토 게임 — 컴퓨터와 대결</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#efece6; --panel:#fbfaf7; --ink:#24222a; --muted:#77727d;
+  --blue:#2d5fe3; --blue-d:#1a3fa8; --blue-t:#dfe8ff;
+  --orange:#f2711c; --orange-d:#c24f06; --orange-t:#ffe6d4;
+  --board:#f6f4ef; --tile:#ffffff; --line:#d8d3ca;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans KR",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-tap-highlight-color:transparent}
+.wrap{max-width:980px;margin:0 auto;padding:16px 14px 40px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+@media (max-width:820px){.wrap{grid-template-columns:1fr}}
+header{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0;font-weight:900;letter-spacing:-.02em}
+header p{margin:0;color:var(--muted);font-size:13px}
+
+.status{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap}
+.turn{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.dot{width:14px;height:14px;border-radius:4px;display:inline-block}
+.dot.b{background:var(--blue)} .dot.o{background:var(--orange)}
+.thinking{font-size:12px;color:var(--muted);font-weight:500}
+.thinking::after{content:"";display:inline-block;width:1.2em;text-align:left;animation:dots 1s steps(4) infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+.msg{min-height:20px;font-size:13px;color:#b0361a;font-weight:500}
+
+.boardbox{background:#1d1c21;border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.board-frame{background:var(--board);border-radius:10px;padding:8px 8px 4px 4px;display:grid;
+  grid-template-columns:20px minmax(0,1fr);grid-template-rows:auto 20px}
+.rows{display:grid;grid-template-rows:repeat(9,minmax(0,1fr));gap:5px;font-size:11px;color:#9a948a;text-align:center;align-items:center}
+.cols{grid-column:2;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:5px;font-size:11px;color:#9a948a;text-align:center;align-items:center}
+.board{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));grid-template-rows:repeat(9,minmax(0,1fr));gap:5px;aspect-ratio:1/1;min-width:0}
+.cell{position:relative;border:none;padding:0;border-radius:6px;background:var(--tile);
+  box-shadow:inset 0 -3px 0 #e2ddd3, 0 1px 0 #cfc9be;cursor:default;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.cell.playable{cursor:pointer}
+.cell.playable:hover{background:#f1efe9}
+.cell.tb{background:var(--blue-t);box-shadow:inset 0 -3px 0 #c3d2fb,0 1px 0 #b9c6ec}
+.cell.to{background:var(--orange-t);box-shadow:inset 0 -3px 0 #f6caa8,0 1px 0 #e7bf9f}
+.notr .cell.tb,.notr .cell.to{background:var(--tile);box-shadow:inset 0 -3px 0 #e2ddd3,0 1px 0 #cfc9be}
+.cell.tb::before,.cell.to::before{content:"";width:22%;height:22%;border-radius:50%;opacity:.55}
+.cell.tb::before{background:var(--blue)} .cell.to::before{background:var(--orange)}
+.notr .cell.tb::before,.notr .cell.to::before{display:none}
+.cell.occ{background:#e9e5dd;box-shadow:inset 0 2px 4px rgba(0,0,0,.12)}
+.cell svg{position:absolute;left:6%;top:6%;width:88%;height:88%;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));animation:drop .22s ease-out}
+@keyframes drop{from{transform:translateY(-8px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+.cell.last::after{content:"";position:absolute;inset:-2px;border-radius:8px;border:2.5px solid #ffd23f}
+.cell.cap svg{animation:shake .5s ease-in-out 3;opacity:.55}
+.cell.cap::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:min(7vw,40px);font-weight:900;color:#d61f1f;text-shadow:0 0 4px #fff}
+@keyframes shake{0%,100%{transform:none}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+.panel{background:var(--panel);border-radius:14px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.panel+ .panel{margin-top:14px}
+.panel h2{font-size:14px;margin:0 0 10px;font-weight:700}
+.score{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.sc{border-radius:10px;padding:10px;color:#fff}
+.sc.b{background:linear-gradient(135deg,var(--blue),var(--blue-d))}
+.sc.o{background:linear-gradient(135deg,var(--orange),var(--orange-d))}
+.sc .lab{font-size:12px;opacity:.9}
+.sc .num{font-size:28px;font-weight:900;line-height:1.1}
+.sc .who{font-size:11px;opacity:.85}
+.diff{font-size:12.5px;color:var(--muted);line-height:1.5}
+.diff b{color:var(--ink)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+button.act{font:inherit;font-weight:700;font-size:14px;border-radius:10px;border:1.5px solid #cfc9be;background:#fff;padding:10px;cursor:pointer;color:var(--ink)}
+button.act:hover{background:#f4f1ec}
+button.act.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+button.act:disabled{opacity:.4;cursor:not-allowed}
+.opt{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.opt label{font-size:12px;color:var(--muted);font-weight:500}
+.seg{display:flex;background:#ece8e1;border-radius:9px;padding:3px}
+.seg button{flex:1;font:inherit;font-size:13px;border:none;background:none;padding:7px 4px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:500}
+.seg button.on{background:#fff;color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:4px;cursor:pointer}
+.log{max-height:150px;overflow:auto;font-size:12.5px;display:flex;flex-wrap:wrap;gap:4px}
+.log span{padding:2px 7px;border-radius:6px;background:#efebe4}
+.log span.b{color:var(--blue-d)} .log span.o{color:var(--orange-d)}
+details{font-size:13px;line-height:1.6}
+details summary{cursor:pointer;font-weight:700;font-size:14px}
+details ul{padding-left:18px;margin:8px 0}
+details li{margin-bottom:3px}
+.note{color:var(--muted);font-size:12px}
+
+.overlay{position:fixed;inset:0;background:rgba(20,18,24,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal h3{margin:6px 0 8px;font-size:22px;font-weight:900}
+.modal p{margin:0 0 16px;color:var(--muted);font-size:14px;line-height:1.55}
+.modal .btns{grid-template-columns:1fr 1fr}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🏰 캐슬 영토 게임</h1>
+    <p>9×9 보드 · 성으로 땅을 둘러싸 영토를 차지하세요</p>
+  </header>
+
+  <main>
+    <div class="status">
+      <div class="turn" id="turn"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+    <div class="boardbox">
+      <div class="board-frame">
+        <div class="rows" id="rows"></div>
+        <div class="board" id="board"></div>
+        <div class="cols" id="cols"></div>
+      </div>
+    </div>
+  </main>
+
+  <aside>
+    <div class="panel">
+      <div class="score">
+        <div class="sc b"><div class="lab">파랑 영토 (선공)</div><div class="num" id="sb">0</div><div class="who" id="wb"></div></div>
+        <div class="sc o"><div class="lab">주황 영토 (후공)</div><div class="num" id="so">0</div><div class="who" id="wo"></div></div>
+      </div>
+      <div class="diff" id="diff"></div>
+      <div class="btns">
+        <button class="act" id="passBtn">패스</button>
+        <button class="act" id="undoBtn">무르기</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="opt">
+        <label>내 색</label>
+        <div class="seg" id="colorSeg">
+          <button data-v="1" class="on">파랑 (선공)</button>
+          <button data-v="2">주황 (후공)</button>
+        </div>
+      </div>
+      <div class="opt">
+        <label>컴퓨터 난이도</label>
+        <div class="seg" id="levelSeg">
+          <button data-v="easy">쉬움</button>
+          <button data-v="normal" class="on">보통</button>
+          <button data-v="hard">어려움</button>
+        </div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="showTerr" checked> 영토 표시</label>
+      <div class="btns" style="grid-template-columns:1fr"><button class="act primary" id="newBtn">새 게임</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>기보</h2>
+      <div class="log" id="log"><span class="note">아직 둔 수가 없습니다.</span></div>
+    </div>
+
+    <div class="panel">
+      <details>
+        <summary>게임 규칙</summary>
+        <ul>
+          <li>중앙(E5)에 중립 성이 놓인 채로 시작합니다. 파랑이 선공입니다.</li>
+          <li>내 차례에 빈칸 하나에 성을 놓거나 패스합니다.</li>
+          <li>내 성으로 빈 땅을 상하좌우 빈틈없이 둘러싸면 내 영토입니다. 중립 성과 보드 가장자리도 벽 역할을 합니다.</li>
+          <li>영토 안에 상대 성이 하나라도 있으면 영토가 아닙니다. 중립 성을 품고 있는 것은 괜찮습니다.</li>
+          <li>가장자리 4면에 모두 닿는 영역은 영토가 아닙니다.</li>
+          <li>상대 영토 안에는 성을 놓을 수 없습니다.</li>
+          <li><b>즉시 승리:</b> 상대 성(이어진 성 묶음)을 상하좌우 빈칸 없이 완전히 포위하면 승리. 동시에 포위되면 성을 놓은 쪽이 승리.</li>
+          <li><b>점수 승리:</b> 연속 두 번 패스하면 종료. 파랑이 주황보다 영토가 <b>3칸 이상</b> 많으면 파랑 승, 아니면 주황 승.</li>
+        </ul>
+        <p class="note">이 사이트에서는 상대를 포위하지 못하면서 내 성만 갇히는 자리(자충수)는 둘 수 없게 했습니다.</p>
+      </details>
+    </div>
+  </aside>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div style="font-size:40px" id="mIcon">🏆</div>
+    <h3 id="mTitle"></h3>
+    <p id="mText"></p>
+    <div class="btns">
+      <button class="act" id="mClose">판 보기</button>
+      <button class="act primary" id="mNew">새 게임</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const N = 9, SZ = 81, B = 1, O = 2, NEU = 3, CENTER = 40, WIN = 10000;
+const COLS = "ABCDEFGHI";
+const NB = [], EDGE = new Uint8Array(SZ);
+for (let i = 0; i < SZ; i++) {
+  const r = Math.floor(i / N), c = i % N, a = [];
+  if (r > 0) a.push(i - N); if (r < N - 1) a.push(i + N);
+  if (c > 0) a.push(i - 1); if (c < N - 1) a.push(i + 1);
+  NB.push(a);
+  EDGE[i] = (r === 0 ? 1 : 0) | (r === N - 1 ? 2 : 0) | (c === 0 ? 4 : 0) | (c === N - 1 ? 8 : 0);
+}
+const coord = i => COLS[i % N] + (N - Math.floor(i / N));
+const name = p => p === B ? "파랑" : "주황";
+
+/* ---------- 규칙 엔진 ---------- */
+function territory(bd) {
+  const owner = new Int8Array(SZ), cnt = [0, 0, 0];
+  for (const p of [B, O]) {
+    const opp = 3 - p, seen = new Uint8Array(SZ);
+    for (let i = 0; i < SZ; i++) {
+      if (bd[i] === p || bd[i] === NEU || seen[i]) continue;
+      const stack = [i], cells = []; seen[i] = 1;
+      let hasOpp = false, edges = 0;
+      while (stack.length) {
+        const j = stack.pop(); cells.push(j);
+        if (bd[j] === opp) hasOpp = true;
+        edges |= EDGE[j];
+        for (const k of NB[j]) if (!seen[k] && bd[k] !== p && bd[k] !== NEU) { seen[k] = 1; stack.push(k); }
+      }
+      if (!hasOpp && edges !== 15) for (const j of cells) owner[j] = owner[j] ? -1 : p;
+    }
+  }
+  for (let i = 0; i < SZ; i++) if (owner[i] > 0) cnt[owner[i]]++;
+  return { owner, cnt };
+}
+function hasLiberty(bd, i) {
+  const c = bd[i], seen = new Uint8Array(SZ), st = [i]; seen[i] = 1;
+  while (st.length) {
+    const j = st.pop();
+    for (const k of NB[j]) {
+      if (bd[k] === 0) return true;
+      if (bd[k] === c && !seen[k]) { seen[k] = 1; st.push(k); }
+    }
+  }
+  return false;
+}
+function groupOf(bd, i) {
+  const c = bd[i], seen = new Uint8Array(SZ), st = [i], g = [i]; seen[i] = 1;
+  while (st.length) { const j = st.pop(); for (const k of NB[j]) if (bd[k] === c && !seen[k]) { seen[k] = 1; st.push(k); g.push(k); } }
+  return g;
+}
+// 놓기: 'win' | 'ok' | 'suicide'(되돌림)
+function place(bd, i, p) {
+  bd[i] = p;
+  for (const k of NB[i]) if (bd[k] === 3 - p && !hasLiberty(bd, k)) return "win";
+  if (!hasLiberty(bd, i)) { bd[i] = 0; return "suicide"; }
+  return "ok";
+}
+
+/* ---------- AI ---------- */
+const LM = new Int32Array(SZ); let stamp = 0;
+function evaluate(bd, side) {
+  const t = territory(bd), own = t.owner;
+  const seen = new Uint8Array(SZ); let safety = 0;
+  for (let i = 0; i < SZ; i++) {
+    const c = bd[i]; if ((c !== B && c !== O) || seen[i]) continue;
+    stamp++; let libs = 0, lib1 = -1; const st = [i]; seen[i] = 1;
+    while (st.length) {
+      const j = st.pop();
+      for (const k of NB[j]) {
+        const v = bd[k];
+        if (v === 0) { if (LM[k] !== stamp) { LM[k] = stamp; libs++; if (lib1 < 0) lib1 = k; } }
+        else if (v === c && !seen[k]) { seen[k] = 1; st.push(k); }
+      }
+    }
+    if (libs === 1 && own[lib1] !== c) {
+      if (3 - c === side) return WIN - 1;
+      safety += c === B ? -6 : 6;
+    } else if (libs === 2) safety += c === B ? -0.6 : 0.6;
+  }
+  const dB = bfs(bd, B), dO = bfs(bd, O);
+  let inf = 0;
+  for (let i = 0; i < SZ; i++) {
+    if (bd[i] !== 0 || own[i] !== 0) continue;
+    const a = dB[i], b = dO[i]; if (a === 99 && b === 99) continue;
+    inf += Math.max(-1, Math.min(1, (b - a) / 3)) * 0.7;
+  }
+  const s = t.cnt[B] - t.cnt[O] + inf + safety - 2.5;
+  return side === B ? s : -s;
+}
+function bfs(bd, color) {
+  const d = new Int16Array(SZ).fill(99), q = [];
+  for (let i = 0; i < SZ; i++) if (bd[i] === color) { d[i] = 0; q.push(i); }
+  for (let h = 0; h < q.length; h++) { const j = q[h]; for (const k of NB[j]) if (bd[k] === 0 && d[k] > d[j] + 1) { d[k] = d[j] + 1; q.push(k); } }
+  return d;
+}
+// 후보 수: 빈칸, 상대 영토 X, 내 영토 X(의미 없는 수)
+function candidates(bd, p) {
+  const t = territory(bd), res = [];
+  for (let i = 0; i < SZ; i++) if (bd[i] === 0 && t.owner[i] !== 3 - p && t.owner[i] !== p) res.push(i);
+  return res;
+}
+// 정렬된 [수, 1수 평가] 목록. 즉시 승리 수가 있으면 {win:i}
+function scoredMoves(bd, p) {
+  const out = [];
+  for (const i of candidates(bd, p)) {
+    const r = place(bd, i, p);
+    if (r === "suicide") continue;
+    if (r === "win") { bd[i] = 0; return { win: i }; }
+    out.push([i, -evaluate(bd, 3 - p)]); bd[i] = 0;
+  }
+  out.sort((a, b) => b[1] - a[1]);
+  return { list: out };
+}
+function negamax(bd, p, depth, alpha, beta, beam) {
+  const sm = scoredMoves(bd, p);
+  if (sm.win !== undefined) return WIN + depth;
+  if (!sm.list.length) return evaluate(bd, p);
+  if (depth === 1) return sm.list[0][1];
+  let best = -Infinity;
+  for (const [i] of sm.list.slice(0, beam)) {
+    bd[i] = p;
+    const v = -negamax(bd, 3 - p, depth - 1, -beta, -alpha, beam);
+    bd[i] = 0;
+    if (v > best) best = v;
+    if (v > alpha) alpha = v;
+    if (alpha >= beta) break;
+  }
+  return best;
+}
+const LEVELS = { easy: { depth: 1, beam: 99, noise: 3 }, normal: { depth: 2, beam: 28, noise: 0.15 }, hard: { depth: 3, beam: 13, rootBeam: 20, noise: 0 } };
+function aiChoose(bdIn, p, level, oppPassed) {
+  const bd = Int8Array.from(bdIn), cfg = LEVELS[level];
+  const t = territory(bd), winningNow = (t.cnt[B] - t.cnt[O] >= 3 ? B : O) === p;
+  const sm = scoredMoves(bd, p);
+  if (sm.win !== undefined) return sm.win;
+  if (oppPassed && winningNow) return -1;
+  if (!sm.list.length) return -1;
+  let best = -1, bestV = -Infinity;
+  const list = sm.list.slice(0, cfg.rootBeam || cfg.beam);
+  for (const [i, s] of list) {
+    let v;
+    if (cfg.depth === 1) v = s;
+    else { bd[i] = p; v = -negamax(bd, 3 - p, cfg.depth - 1, -Infinity, -bestV, cfg.beam); bd[i] = 0; }
+    v += Math.random() * cfg.noise;
+    if (v > bestV) { bestV = v; best = i; }
+  }
+  if (!oppPassed) {
+    const passV = cfg.depth === 1 ? -evaluate(bd, 3 - p) : -negamax(bd, 3 - p, cfg.depth - 1, -Infinity, Infinity, cfg.beam);
+    if (bestV <= passV + 0.05 && Math.abs(bestV) < WIN / 2) return -1;
+  }
+  return best;
+}
+
+/* ---------- 게임 상태 / UI ---------- */
+let S, aiTimer = null, human = B, level = "normal";
+const $ = id => document.getElementById(id);
+const boardEl = $("board");
+
+function newGame() {
+  clearTimeout(aiTimer); aiTimer = null;
+  const bd = new Int8Array(SZ); bd[CENTER] = NEU;
+  S = { bd, turn: B, passes: 0, last: -1, over: false, winner: 0, reason: "", cap: [], log: [], history: [], thinking: false };
+  $("overlay").classList.remove("show");
+  msg("");
+  render();
+  maybeAI();
+}
+function snapshot() {
+  return { bd: Int8Array.from(S.bd), turn: S.turn, passes: S.passes, last: S.last, log: S.log.slice() };
+}
+function msg(t) { $("msg").textContent = t; }
+
+function humanMove(i) {
+  if (S.over || S.thinking || S.turn !== human || S.bd[i] !== 0) return;
+  const t = territory(S.bd);
+  if (t.owner[i] === 3 - human) { msg("상대 영토 안에는 성을 놓을 수 없어요."); return; }
+  const snap = snapshot();
+  const r = place(S.bd, i, human);
+  if (r === "suicide") { msg("그 자리는 내 성이 스스로 포위돼요."); return; }
+  S.history.push(snap); msg("");
+  applyMove(i, r);
+}
+function applyMove(i, r) {
+  const p = S.turn;
+  S.last = i; S.passes = 0; S.log.push([p, coord(i)]);
+  if (r === "win") {
+    const cap = new Set();
+    for (const k of NB[i]) if (S.bd[k] === 3 - p && !hasLiberty(S.bd, k)) groupOf(S.bd, k).forEach(x => cap.add(x));
+    S.cap = [...cap];
+    return finish(p, `${name(p)}이 ${name(3 - p)} 성을 완전히 포위했습니다!`);
+  }
+  S.turn = 3 - p; render(); maybeAI();
+}
+function doPass(fromHuman) {
+  if (S.over) return;
+  if (fromHuman) { if (S.thinking || S.turn !== human) return; S.history.push(snapshot()); }
+  const p = S.turn;
+  S.passes++; S.log.push([p, "패스"]); S.last = -1;
+  if (S.passes >= 2) {
+    const t = territory(S.bd), d = t.cnt[B] - t.cnt[O], w = d >= 3 ? B : O;
+    return finish(w, `영토 파랑 ${t.cnt[B]} : 주황 ${t.cnt[O]} (차이 ${d >= 0 ? "+" : ""}${d}). 파랑은 3칸 이상 앞서야 이깁니다.`);
+  }
+  S.turn = 3 - p; render(); maybeAI();
+}
+function finish(w, reason) {
+  S.over = true; S.winner = w; S.reason = reason; render();
+  const me = w === human;
+  $("mIcon").textContent = me ? "🏆" : "🏳️";
+  $("mTitle").textContent = me ? "승리했습니다!" : "컴퓨터 승리";
+  $("mText").textContent = `${name(w)} 승리 — ${reason}`;
+  setTimeout(() => $("overlay").classList.add("show"), 450);
+}
+function maybeAI() {
+  if (S.over || S.turn === human) return;
+  S.thinking = true; render();
+  aiTimer = setTimeout(() => {
+    const oppPassed = S.passes === 1;
+    const i = aiChoose(S.bd, S.turn, level, oppPassed);
+    S.thinking = false; aiTimer = null;
+    if (i < 0) { doPass(false); if (!S.over) msg("컴퓨터가 패스했습니다."); return; }
+    const r = place(S.bd, i, S.turn);
+    applyMove(i, r);
+  }, 380);
+}
+function undo() {
+  if (!S.history.length || S.thinking) return;
+  clearTimeout(aiTimer);
+  const h = S.history.pop();
+  Object.assign(S, { bd: h.bd, turn: h.turn, passes: h.passes, last: h.last, log: h.log, over: false, winner: 0, cap: [], thinking: false });
+  $("overlay").classList.remove("show"); msg(""); render();
+}
+
+/* ---------- 그리기 ---------- */
+function castleSVG(p) {
+  if (p === NEU) return `<svg viewBox="0 0 40 40"><defs><linearGradient id="gn" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9d6d0"/></linearGradient></defs>
+    <path d="M9 38V18h3l8-14 8 14h3v20z" fill="url(#gn)" stroke="#a9a49b" stroke-width="1.4" stroke-linejoin="round"/>
+    <path d="M16 38v-9a4 4 0 0 1 8 0v9z" fill="#c9c4bb"/><path d="M18 20a2 2 0 0 1 4 0v4h-4z" fill="#c9c4bb"/></svg>`;
+  const [a, b, s] = p === B ? ["#5d86ff", "#2347c2", "#183690"] : ["#ff9a52", "#e8600f", "#a94505"];
+  const id = "g" + p;
+  return `<svg viewBox="0 0 40 40"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}" stop-opacity=".95"/><stop offset="1" stop-color="${b}" stop-opacity=".95"/></linearGradient></defs>
+    <path d="M7 38V14H5V5h6v4h4V5h10v4h4V5h6v9h-2v24z" fill="url(#${id})" stroke="${s}" stroke-width="1.3" stroke-linejoin="round"/>
+    <path d="M7 14h26" stroke="${s}" stroke-width="1" opacity=".5"/>
+    <path d="M14 38v-8a6 6 0 0 1 12 0v8z" fill="rgba(255,255,255,.7)"/>
+    <path d="M10 8v3" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round"/></svg>`;
+}
+function render() {
+  const t = territory(S.bd), canPlay = !S.over && !S.thinking && S.turn === human;
+  const cap = new Set(S.cap);
+  let html = "";
+  for (let i = 0; i < SZ; i++) {
+    const v = S.bd[i], cls = ["cell"];
+    if (v) cls.push("occ");
+    else {
+      if (t.owner[i] === B) cls.push("tb"); else if (t.owner[i] === O) cls.push("to");
+      if (canPlay && t.owner[i] !== 3 - human) cls.push("playable");
+    }
+    if (i === S.last) cls.push("last");
+    if (cap.has(i)) cls.push("cap");
+    html += `<button class="${cls.join(" ")}" data-i="${i}" aria-label="${coord(i)}">${v ? castleSVG(v) : ""}</button>`;
+  }
+  boardEl.innerHTML = html;
+  $("sb").textContent = t.cnt[B]; $("so").textContent = t.cnt[O];
+  $("wb").textContent = human === B ? "나" : "컴퓨터";
+  $("wo").textContent = human === O ? "나" : "컴퓨터";
+  const d = t.cnt[B] - t.cnt[O];
+  $("diff").innerHTML = `현재 차이 <b>${d >= 0 ? "+" : ""}${d}</b> (파랑 기준) → 지금 끝나면 <b>${d >= 3 ? "파랑" : "주황"}</b> 승<br>파랑은 3칸 이상 앞서야 이깁니다.`;
+  const turnEl = $("turn");
+  if (S.over) turnEl.innerHTML = `<span class="dot ${S.winner === B ? "b" : "o"}"></span>${name(S.winner)} 승리`;
+  else turnEl.innerHTML = `<span class="dot ${S.turn === B ? "b" : "o"}"></span>${name(S.turn)} 차례 ${S.turn === human ? "(나)" : `<span class="thinking">컴퓨터 생각 중</span>`}`;
+  $("passBtn").disabled = !canPlay;
+  $("undoBtn").disabled = !S.history.length || S.thinking;
+  const log = $("log");
+  log.innerHTML = S.log.length ? S.log.map(([p, m], k) => `<span class="${p === B ? "b" : "o"}">${k + 1}. ${m}</span>`).join("") : `<span class="note">아직 둔 수가 없습니다.</span>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+/* ---------- 이벤트 ---------- */
+$("rows").innerHTML = Array.from({ length: N }, (_, r) => `<div>${N - r}</div>`).join("");
+$("cols").innerHTML = COLS.split("").map(c => `<div>${c}</div>`).join("");
+boardEl.addEventListener("click", e => { const b = e.target.closest(".cell"); if (b) humanMove(+b.dataset.i); });
+$("passBtn").onclick = () => doPass(true);
+$("undoBtn").onclick = undo;
+$("newBtn").onclick = newGame;
+$("mNew").onclick = newGame;
+$("mClose").onclick = () => $("overlay").classList.remove("show");
+$("showTerr").onchange = e => boardEl.parentElement.classList.toggle("notr", !e.target.checked);
+function seg(id, fn) {
+  $(id).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    [...$(id).children].forEach(x => x.classList.toggle("on", x === b)); fn(b.dataset.v);
+  });
+}
+seg("colorSeg", v => { human = +v; newGame(); });
+seg("levelSeg", v => { level = v; });
+newGame();
+})();
+</script>
+</body>
+</html>

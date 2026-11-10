@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>드래곤 공방 듀얼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6eedf; --panel:#fffaf1; --ink:#3b2e22; --muted:#8a7660; --line:#e2d3bb;
+  --accent:#c8552d; --accent2:#2f7d5b; --gold:#e8a923; --shadow:0 2px 10px rgba(80,50,20,.12);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Gowun Dodum',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+h1,h2,h3,.jua{font-family:'Jua',sans-serif;font-weight:400}
+button{font-family:inherit;cursor:pointer}
+#app{max-width:560px;margin:0 auto;padding:10px 10px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+header h1{font-size:22px;margin:0;color:var(--accent)}
+header .sub{font-size:11px;color:var(--muted)}
+.hbtn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:6px 10px;font-size:13px;color:var(--ink)}
+.pbar{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 10px;box-shadow:var(--shadow);margin-bottom:8px}
+.pbar.active{outline:3px solid var(--gold)}
+.pbar .who{font-family:'Jua';font-size:17px;white-space:nowrap}
+.pbar .stats{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;flex:1}
+.stat b{font-size:15px}
+.back{display:flex;gap:3px}
+.back span{width:18px;height:26px;border-radius:4px;background:repeating-linear-gradient(45deg,#c8552d,#c8552d 3px,#d9693f 3px,#d9693f 6px);border:1px solid #9b3d1d}
+#boardWrap{background:radial-gradient(circle at 50% 45%,#d7e8b9,#b9d394 70%,#a5c37e);border-radius:18px;padding:6px;box-shadow:var(--shadow);position:relative}
+#board{width:100%;display:block;touch-action:manipulation}
+.hex{fill:#dcc6a1;stroke:#9a7b55;stroke-width:2}
+.hex.center{fill:#ece0c9}
+.hex.valid{fill:#fff3c4;stroke:var(--gold);stroke-width:4;animation:pulse 1.1s infinite}
+.hex.sel{fill:#ffd9c9;stroke:var(--accent);stroke-width:4}
+.hex.recent{stroke:#fff;stroke-width:4}
+.hex.match{fill:#fff1a8;stroke:#e09b00;stroke-width:5}
+@keyframes pulse{50%{stroke-opacity:.35}}
+.hexg{cursor:default}
+.hexg.clickable{cursor:pointer}
+.counters{display:flex;justify-content:center;gap:14px;font-size:13px;color:var(--muted);margin:6px 0}
+#prompt{background:#3b2e22;color:#fff;border-radius:14px;padding:10px 12px;margin:8px 0;min-height:52px;box-shadow:var(--shadow)}
+#prompt .msg{font-size:15px;line-height:1.4;display:flex;align-items:center;gap:8px}
+#prompt .desc{font-size:12px;color:#e8d9c2;margin-top:3px}
+#prompt .btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#prompt .btns:empty{display:none}
+.pbtn{border:0;border-radius:10px;padding:8px 12px;font-size:14px;background:#f6eedf;color:#3b2e22;font-weight:bold}
+.pbtn.primary{background:var(--gold);color:#3b2e22}
+.pbtn.ghost{background:transparent;color:#fff;border:1px solid #8f7b65}
+.hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0}
+.card{width:150px;background:linear-gradient(#fffdf8,#f7ead2);border:2px solid #c9ad84;border-radius:12px;padding:6px 8px 8px;position:relative;box-shadow:var(--shadow);transition:transform .15s}
+.card .nm{font-family:'Jua';font-size:15px;padding-right:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .val{position:absolute;top:4px;right:6px;background:#c8552d;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-family:'Jua';font-size:15px}
+.card .val::before{content:'♥';position:absolute;font-size:9px;top:-3px;left:-2px;color:#c8552d}
+.card svg{display:block;margin:2px auto 0;height:74px}
+.card.can{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,169,35,.55),var(--shadow)}
+.card.can::after{content:'득점 가능!';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:var(--gold);font-size:11px;padding:1px 8px;border-radius:8px;font-weight:bold;white-space:nowrap}
+.card.click{cursor:pointer}
+.card.click:active{transform:scale(.96)}
+.card.pick{border-color:var(--accent);background:#ffe3d6}
+.card.mini{width:118px}
+.card.mini svg{height:58px}
+.me-actions{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.coinbtn{border:0;border-radius:12px;padding:9px 14px;background:var(--gold);font-weight:bold;font-size:14px;color:#3b2e22}
+.coinbtn:disabled{opacity:.4}
+details.log{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin-top:8px;font-size:13px}
+details.log summary{cursor:pointer;color:var(--muted)}
+#logList{max-height:180px;overflow:auto;margin-top:6px}
+#logList div{padding:2px 0;border-bottom:1px dashed #eadfcb}
+.overlay{position:fixed;inset:0;background:rgba(40,28,15,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
+.modal{background:var(--panel);border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:16px 16px 18px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.modal h2{margin:0 0 8px;color:var(--accent)}
+.modal p,.modal li{font-size:14px;line-height:1.55}
+.modal .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.big{border:0;border-radius:12px;padding:11px 18px;font-size:16px;font-family:'Jua';background:var(--accent);color:#fff}
+.big.alt{background:#e8dcc6;color:var(--ink)}
+.diff{display:flex;gap:6px;justify-content:center;margin:10px 0}
+.diff button{border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 14px;font-family:'Jua';font-size:15px}
+.diff button.on{border-color:var(--accent);background:#ffe9dd}
+.ab{display:grid;grid-template-columns:34px 1fr;gap:6px 8px;align-items:center;margin:8px 0}
+.ab .ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+.ab div{font-size:13px}
+#toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#3b2e22;color:#fff;padding:9px 14px;border-radius:12px;font-size:14px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+.tokenrow{display:flex;gap:14px;justify-content:center;align-items:center;margin:10px 0}
+.tokenrow .tk{text-align:center;font-size:13px}
+table.res{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+table.res td,table.res th{border-bottom:1px solid var(--line);padding:6px;text-align:center}
+.small{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div><h1>🐉 드래곤 공방 듀얼</h1><div class="sub">2인 타일 배치 게임 · 컴퓨터와 대결</div></div>
+    <div style="display:flex;gap:6px"><button class="hbtn" id="btnRules">규칙</button><button class="hbtn" id="btnNew">새 게임</button></div>
+  </header>
+
+  <div class="pbar" id="aiBar"></div>
+  <div id="boardWrap"><svg id="board"></svg></div>
+  <div class="counters" id="counters"></div>
+  <div id="prompt"><div class="msg" id="pmsg">게임을 시작하세요</div><div class="desc" id="pdesc"></div><div class="btns" id="pbtns"></div></div>
+  <div class="hand" id="myHand"></div>
+  <div class="me-actions"><button class="coinbtn" id="btnCoin">🪙 코인 사용</button><button class="hbtn" id="btnScored">내 득점 카드 보기</button></div>
+  <div class="pbar" id="meBar"></div>
+  <details class="log"><summary>게임 기록</summary><div id="logList"></div></details>
+</div>
+<div id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+// ===================== 기본 데이터 =====================
+const TYPES = {
+  bread:   {ko:'빵',   em:'🍞', c:'#f2b632', rank:1, ab:'드래곤 하나 더! 주머니에서 새 토큰을 뽑아 놓고, 그 토큰의 능력도 쓸 수 있어요.'},
+  crystal: {ko:'수정', em:'💎', c:'#5cc3ec', rank:2, ab:'3개 뽑아 1개 놓기. 주머니에서 3개를 뽑아 1개를 놓고 나머지는 되돌려요. 놓은 토큰의 능력은 못 써요.'},
+  meat:    {ko:'고기', em:'🍖', c:'#e0483e', rank:3, ab:'인접한 드래곤 1개를 보드의 아무 칸으로 옮겨요. (방금 놓은 고기 드래곤 위도 가능)'},
+  iron:    {ko:'철',   em:'⚒️', c:'#34436e', rank:4, ab:'인접한 서로 다른 드래곤 1~2개를 각각 1칸씩 옮겨요.'},
+  potion:  {ko:'물약', em:'🧪', c:'#9b6fd6', rank:5, ab:'보드 위 아무 드래곤 2개의 위치를 바꿔요. (방금 놓은 물약 드래곤 포함 가능)'},
+  plant:   {ko:'식물', em:'🌿', c:'#4caf50', rank:6, ab:'인접한 드래곤 1개의 능력을 대신 발동시켜요.'}
+};
+const TK = Object.keys(TYPES);
+const DIRS = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+const COORDS = [];
+for(let q=-2;q<=2;q++)for(let r=-2;r<=2;r++){ if(Math.abs(q+r)<=2) COORDS.push([q,r]); }
+const KEYS = COORDS.map(([q,r])=>q+','+r);
+const IDX = {}; KEYS.forEach((k,i)=>IDX[k]=i);
+const NEI = {};
+for(const [q,r] of COORDS){ NEI[q+','+r] = DIRS.map(([dq,dr])=>(q+dq)+','+(r+dr)).filter(k=>k in IDX); }
+const RING1 = DIRS.map(([q,r])=>q+','+r);
+
+// ===================== 상점 카드 생성 =====================
+const SHOP_NAMES = ['따끈 빵집','반짝 보석 공방','숯불 정육점','망치 대장간','보라 물약 상점','이슬 꽃집','구름 찻집','두루마리 서점','뾰족 모자 가게','촛농 양초 공방','물레 도자기 공방','톱니 시계방','현악기 공방','향긋 향수 가게','달콤 과자점','치즈 동굴','보물 지도 상점','유리 공방','비단 상점','만물 잡화점','약초 상점','태엽 장난감 가게','무지개 우산 가게','쪽빛 염색 공방','나무 목공소','가죽 구두 가게','황금 꿀 가게','보글 수프 가게','달빛 차 상점','활자 인쇄소','등불 가게','바구니 공방','새콤 잼 가게','깃털 펜 가게','거품 비누 공방','망원경 상점','피클 항아리','리본 가게','바람 연 가게','별빛 천문대','버섯 시장','드래곤 카페'];
+const SH = {
+  line:[[0,0],[1,0],[2,0]], tri:[[0,0],[1,0],[0,1]], bent:[[0,0],[1,0],[1,1]],
+  line4:[[0,0],[1,0],[2,0],[3,0]], diamond:[[0,0],[1,0],[0,1],[1,-1]], arc:[[0,0],[1,0],[2,0],[1,1]]
+};
+function buildDeck(){
+  const defs=[]; const T=TK;
+  T.forEach((t,i)=>{ defs.push({shape:'tri',ts:[t,t,t],v:3}); defs.push({shape:i%2?'line':'bent',ts:[t,t,t],v:3}); });
+  const sh3=['line','tri','bent'];
+  const pairs=[]; for(let i=0;i<6;i++){pairs.push([T[i],T[(i+1)%6]]);pairs.push([T[i],T[(i+3)%6]]);} for(let i=0;i<4;i++)pairs.push([T[i],T[(i+2)%6]]);
+  pairs.forEach(([a,b],i)=>{ const s=sh3[i%3]; const ts = (s==='line' && i%2)? [a,b,a] : [a,a,b]; defs.push({shape:s,ts,v:2}); });
+  for(let i=0;i<8;i++){ defs.push({shape:sh3[(i+1)%3],ts:[T[i%6],T[(i+1)%6],T[(i+3)%6]],v:2}); }
+  for(let i=0;i<3;i++){ const a=T[i*2],b=T[i*2+1]; defs.push({shape:'diamond',ts:[a,b,a,b],v:4}); }
+  for(let i=0;i<3;i++){ const a=T[i*2+1],b=T[(i*2+4)%6]; defs.push({shape:i===1?'line4':'arc',ts:[a,a,a,b],v:5}); }
+  return defs.map((d,i)=>{
+    const pat = SH[d.shape].map(([q,r],j)=>({q,r,t:d.ts[j]}));
+    const card={id:i,name:SHOP_NAMES[i%SHOP_NAMES.length],v:d.v,pat,n:pat.length};
+    card.pls=placementsOf(pat); return card;
+  });
+}
+function rot(q,r){return [-r,q+r];}
+function placementsOf(pat){
+  const out=[]; const seen=new Set();
+  let cur=pat.map(p=>[p.q,p.r]);
+  for(let k=0;k<6;k++){
+    for(const [aq,ar] of COORDS){
+      const idx=[]; let ok=true;
+      for(const [q,r] of cur){ const key=(aq+q)+','+(ar+r); if(!(key in IDX)){ok=false;break;} idx.push(IDX[key]); }
+      if(!ok) continue;
+      const sig=idx.map((x,i)=>x+':'+pat[i].t).sort().join('|'); if(seen.has(sig)) continue; seen.add(sig);
+      out.push({idx,t:pat.map(p=>p.t)});
+    }
+    cur=cur.map(([q,r])=>rot(q,r));
+  }
+  return out;
+}
+
+// ===================== 상태 =====================
+let G=null, DIFF='normal', SPEED=650;
+let tokenSeq=0;
+const mkTok=types=>({id:++tokenSeq,types});
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const topOf=(b,k)=>b[k].length?b[k][b[k].length-1]:null;
+const tName=t=>t.types.length>1? t.types.map(x=>TYPES[x].ko).join('·')+' 듀얼 드래곤' : TYPES[t.types[0]].ko+' 드래곤';
+const PN=i=>i===0?'나':'컴퓨터';
+
+function newGame(){
+  tokenSeq=0;
+  const board={}; KEYS.forEach(k=>board[k]=[]);
+  const ring=shuffle(TK.map(t=>mkTok([t])));
+  RING1.forEach((k,i)=>board[k].push(ring[i]));
+  const extras=TK.map(t=>mkTok([t]));
+  const bag=[];
+  TK.forEach(t=>{for(let i=0;i<4;i++)bag.push(mkTok([t]));});
+  [['bread','crystal'],['meat','iron'],['potion','plant'],['bread','potion'],['crystal','meat'],['iron','plant']].forEach(p=>bag.push(mkTok(p)));
+  const deck=shuffle(buildDeck());
+  G={board,bag,extras,deck,cur:0,first:0,endTriggered:false,coinUsed:false,phase:'setup',
+     players:[{hand:[],scored:[],coins:3,ai:false},{hand:[],scored:[],coins:3,ai:true}],
+     recent:new Set(),sel:new Set(),match:new Set(),pending:null,scoreResolve:null,held:null,over:false,log:[]};
+  G.players.forEach(p=>{p.hand.push(G.deck.shift(),G.deck.shift());});
+  document.getElementById('logList').innerHTML='';
+  AI.plan=[];
+}
+
+// ===================== 로그/토스트 =====================
+function log(s){ G.log.push(s); const d=document.createElement('div'); d.textContent=s; const L=document.getElementById('logList'); L.prepend(d); }
+let toastT=null;
+function toast(s,ms=1800){const t=document.getElementById('toast');t.textContent=s;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),ms);}
+
+// ===================== 렌더링 =====================
+const S=36, SQ3=Math.sqrt(3);
+const hx=(q,r,s=S)=>[s*1.5*q, s*SQ3*(r+q/2)];
+function hexPath(x,y,s){let p='';for(let i=0;i<6;i++){const a=Math.PI/3*i;p+=(i?'L':'M')+(x+s*Math.cos(a)).toFixed(1)+','+(y+s*Math.sin(a)).toFixed(1);}return p+'Z';}
+function tokenSVG(t,x,y,r,extra=''){
+  let s='';
+  if(t.types.length===1){
+    const T=TYPES[t.types[0]];
+    s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${T.c}" stroke="#fff" stroke-width="${r*0.12}" ${extra}/>`;
+    s+=`<circle cx="${x}" cy="${y}" r="${r*0.74}" fill="rgba(255,255,255,.22)"/>`;
+    s+=`<text x="${x}" y="${y+r*0.36}" font-size="${r*1.0}" text-anchor="middle">${T.em}</text>`;
+  }else{
+    const A=TYPES[t.types[0]],B=TYPES[t.types[1]];
+    s+=`<path d="M${x},${y-r}A${r},${r} 0 0 0 ${x},${y+r}Z" fill="${A.c}"/>`;
+    s+=`<path d="M${x},${y-r}A${r},${r} 0 0 1 ${x},${y+r}Z" fill="${B.c}"/>`;
+    s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#fff" stroke-width="${r*0.12}"/>`;
+    s+=`<circle cx="${x}" cy="${y}" r="${r*1.08}" fill="none" stroke="#3b2e22" stroke-width="1.2" stroke-dasharray="3 2"/>`;
+    s+=`<text x="${x-r*0.42}" y="${y+r*0.25}" font-size="${r*0.68}" text-anchor="middle">${A.em}</text>`;
+    s+=`<text x="${x+r*0.42}" y="${y+r*0.25}" font-size="${r*0.68}" text-anchor="middle">${B.em}</text>`;
+  }
+  return s;
+}
+function tokenIcon(t,size=34){const r=size/2-2;return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="vertical-align:middle;flex:none">${tokenSVG(t,size/2,size/2,r)}</svg>`;}
+
+function renderBoard(){
+  const svg=document.getElementById('board');
+  const pts=COORDS.map(([q,r])=>hx(q,r));
+  const pad=S+4; const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const minx=Math.min(...xs)-pad,miny=Math.min(...ys)-pad,w=Math.max(...xs)-Math.min(...xs)+pad*2,h=Math.max(...ys)-Math.min(...ys)+pad*2;
+  svg.setAttribute('viewBox',`${minx} ${miny} ${w} ${h}`);
+  let s='';
+  const pend=G&&G.pending&&G.pending.hex?G.pending:null;
+  COORDS.forEach(([q,r],i)=>{
+    const k=KEYS[i]; const [x,y]=pts[i];
+    const cls=['hex']; if(k==='0,0')cls.push('center');
+    if(G){ if(G.match.has(k))cls.push('match'); else if(pend&&pend.valid.has(k))cls.push('valid'); else if(G.sel.has(k))cls.push('sel'); else if(G.recent.has(k))cls.push('recent'); }
+    s+=`<g class="hexg ${pend&&pend.valid.has(k)?'clickable':''}" data-k="${k}"><path class="${cls.join(' ')}" d="${hexPath(x,y,S-2)}"/>`;
+    if(G){
+      const st=G.board[k]; const n=st.length;
+      st.forEach((t,j)=>{ const off=(n-1-j)*4; const tr=S*0.6; s+=tokenSVG(t,x,y-(n-1)*2+off,tr); });
+      if(n>1){ s+=`<circle cx="${x+S*0.52}" cy="${y-S*0.5}" r="9" fill="#3b2e22"/><text x="${x+S*0.52}" y="${y-S*0.5+4}" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">${n}</text>`; }
+    }
+    s+='</g>';
+  });
+  svg.innerHTML=s;
+}
+function cardSVG(card,small){
+  const s=11; const pts=card.pat.map(p=>hx(p.q,p.r,s));
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]); const pad=s+1;
+  const minx=Math.min(...xs)-pad,miny=Math.min(...ys)-pad,w=Math.max(...xs)-Math.min(...xs)+pad*2,h=Math.max(...ys)-Math.min(...ys)+pad*2;
+  let o=`<svg viewBox="${minx} ${miny} ${w} ${h}">`;
+  card.pat.forEach((p,i)=>{const [x,y]=pts[i];o+=`<path d="${hexPath(x,y,s-0.5)}" fill="#e8d6b5" stroke="#b39468" stroke-width="1"/>`+tokenSVG({types:[p.t]},x,y,s*0.66);});
+  return o+'</svg>';
+}
+function cardHTML(card,cls='',attr=''){return `<div class="card ${cls}" ${attr}><div class="nm">${card.name}</div><div class="val">${card.v}</div>${cardSVG(card)}</div>`;}
+
+function topsOf(b){return KEYS.map(k=>{const t=topOf(b,k);return t?t.types:null;});}
+function findMatch(b,card){const tops=topsOf(b);for(const pl of card.pls){let ok=true;for(let i=0;i<pl.idx.length;i++){const tt=tops[pl.idx[i]];if(!tt||!tt.includes(pl.t[i])){ok=false;break;}}if(ok)return pl.idx.map(i=>KEYS[i]);}return null;}
+function points(p){return p.scored.reduce((a,c)=>a+c.v,0)+p.coins;}
+
+function renderPanels(){
+  const [me,ai]=G.players;
+  const aiS=ai.scored.reduce((a,c)=>a+c.v,0), meS=me.scored.reduce((a,c)=>a+c.v,0);
+  document.getElementById('aiBar').className='pbar'+(G.cur===1&&!G.over&&G.phase!=='setup'?' active':'');
+  document.getElementById('aiBar').innerHTML=`<div class="who">🤖 컴퓨터</div><div class="stats"><span class="stat">평판 <b>${aiS}</b></span><span class="stat">🪙 <b>${ai.coins}</b></span><span class="stat">득점 카드 <b>${ai.scored.length}</b></span></div><div class="back">${ai.hand.map(()=>'<span></span>').join('')}</div>`;
+  document.getElementById('meBar').className='pbar'+(G.cur===0&&!G.over&&G.phase!=='setup'?' active':'');
+  document.getElementById('meBar').innerHTML=`<div class="who">🧑 나</div><div class="stats"><span class="stat">평판 <b>${meS}</b></span><span class="stat">🪙 <b>${me.coins}</b></span><span class="stat">득점 카드 <b>${me.scored.length}</b></span><span class="stat">합계 <b>${meS+me.coins}</b></span></div>`;
+  document.getElementById('counters').innerHTML=`<span>👜 주머니 ${G.bag.length}</span><span>🃏 상점 덱 ${G.deck.length}</span><span>🧺 예비 토큰 ${G.extras.length}</span>${G.endTriggered?'<span style="color:#c8552d;font-weight:bold">⏳ 마지막 턴</span>':''}`;
+  const scoring=G.scoreResolve&&G.cur===0;
+  document.getElementById('myHand').innerHTML=me.hand.map((c,i)=>{const can=!!findMatch(G.board,c);return cardHTML(c,(can?'can ':'')+(scoring&&can?'click':''),`data-i="${i}"`);}).join('')||'<div class="small">손에 카드가 없어요</div>';
+  const cb=document.getElementById('btnCoin'); cb.disabled=!canCoin(); cb.textContent=`🪙 코인 사용 (${me.coins})`;
+}
+function render(){renderBoard();if(G)renderPanels();}
+function canCoin(){return G&&!G.over&&G.cur===0&&!G.coinUsed&&G.players[0].coins>0&&G.deck.length>0&&['play','score','final'].includes(G.phase)&&!G.modalOpen;}
+
+// ===================== 프롬프트 =====================
+function setPrompt(msg,desc='',btns=[],token=null){
+  document.getElementById('pmsg').innerHTML=(token?tokenIcon(token,36):'')+`<span>${msg}</span>`;
+  document.getElementById('pdesc').innerHTML=desc;
+  const B=document.getElementById('pbtns'); B.innerHTML='';
+  btns.forEach(b=>{const e=document.createElement('button');e.className='pbtn '+(b.cls||'');e.innerHTML=b.label;e.onclick=b.fn;B.appendChild(e);});
+}
+const HEX_KINDS=new Set(['place','meatFrom','meatTo','ironPick','ironTo','potionA','potionB','plantPick']);
+function humanAsk(kind,o){
+  return new Promise(res=>{
+    if(HEX_KINDS.has(kind)){
+      G.pending={hex:true,valid:new Set(o.valid),resolve:k=>{G.pending=null;res(k);}};
+      const btns=o.allowNone?[{label:o.noneLabel||'건너뛰기',cls:'ghost',fn:()=>{G.pending=null;res(null);}}]:[];
+      setPrompt(o.prompt,o.desc||'',btns,o.token); render(); return;
+    }
+    if(kind==='fire'){
+      const t=o.token; const btns=t.types.map(x=>({label:`${TYPES[x].em} ${TYPES[x].ko} 능력 쓰기`,cls:'primary',fn:()=>res(x)}));
+      btns.push({label:'능력 안 쓰기',cls:'ghost',fn:()=>res(null)});
+      setPrompt(`${tName(t)}의 능력을 쓸까요?`,t.types.map(x=>`<b>${TYPES[x].em} ${TYPES[x].ko}</b>: ${TYPES[x].ab}`).join('<br>'),btns,t); render(); return;
+    }
+    if(kind==='plantType'){
+      const t=o.token; if(t.types.length===1){res(t.types[0]);return;}
+      setPrompt(`어느 능력을 발동할까요?`,'',t.types.map(x=>({label:`${TYPES[x].em} ${TYPES[x].ko}`,cls:'primary',fn:()=>res(x)})),t); render(); return;
+    }
+    if(kind==='crystal'){
+      setPrompt('💎 놓을 토큰 1개를 고르세요','나머지는 주머니로 돌아가요. 고른 토큰의 능력은 쓸 수 없어요.',o.tokens.map((t,i)=>({label:tokenIcon(t,30)+' '+tName(t),cls:'primary',fn:()=>res(i)}))); render(); return;
+    }
+  });
+}
+document.getElementById('board').addEventListener('click',e=>{
+  const g=e.target.closest('.hexg'); if(!g||!G||!G.pending)return;
+  const k=g.dataset.k; if(G.pending.valid.has(k)) G.pending.resolve(k);
+});
+
+// ===================== 컴퓨터 AI =====================
+function cloneB(b){const c={};for(const k of KEYS)c[k]=b[k].slice();return c;}
+function evalB(b,hand){
+  const tops=topsOf(b); let s=0;
+  for(const card of hand){
+    let best=0;
+    for(const pl of card.pls){let m=0;for(let i=0;i<pl.idx.length;i++){const tt=tops[pl.idx[i]];if(tt&&tt.includes(pl.t[i]))m++;} if(m>best){best=m;if(m===card.n)break;}}
+    const miss=card.n-best;
+    s+= miss===0? card.v*10 : miss===1? card.v*2 : miss===2? card.v*0.4 : 0;
+  }
+  return s;
+}
+function simAbility(b,type,src,depth){
+  const out=[]; const nb=NEI[src];
+  if(type==='bread') return [{b,steps:[],bonus:0.8}];
+  if(type==='crystal') return [{b,steps:[],bonus:0.5}];
+  if(type==='meat'){
+    for(const a of nb){ if(!b[a].length)continue; for(const d of KEYS){ if(d===a||b[d].length>=3)continue; const c=cloneB(b); c[d].push(c[a].pop()); out.push({b:c,steps:[{k:'meatFrom',v:a},{k:'meatTo',v:d}]}); } }
+  }
+  if(type==='iron'){
+    for(const a1 of nb){ if(!b[a1].length)continue;
+      for(const d1 of NEI[a1]){ if(b[d1].length>=3)continue;
+        const c1=cloneB(b); const tok=c1[a1].pop(); c1[d1].push(tok);
+        out.push({b:c1,steps:[{k:'ironPick',v:a1},{k:'ironTo',v:d1},{k:'ironPick',v:null}]});
+        if(depth>0) continue;
+        for(const a2 of nb){ const t2=topOf(c1,a2); if(!t2||t2.id===tok.id)continue;
+          for(const d2 of NEI[a2]){ if(c1[d2].length>=3)continue; const c2=cloneB(c1); c2[d2].push(c2[a2].pop());
+            out.push({b:c2,steps:[{k:'ironPick',v:a1},{k:'ironTo',v:d1},{k:'ironPick',v:a2},{k:'ironTo',v:d2}]}); } }
+      } }
+  }
+  if(type==='potion'){
+    const ks=KEYS.filter(k=>b[k].length);
+    for(let i=0;i<ks.length;i++)for(let j=i+1;j<ks.length;j++){ const c=cloneB(b); const A=c[ks[i]].pop(),B=c[ks[j]].pop(); c[ks[i]].push(B); c[ks[j]].push(A); out.push({b:c,steps:[{k:'potionA',v:ks[i]},{k:'potionB',v:ks[j]}]}); }
+  }
+  if(type==='plant' && depth<2){
+    for(const a of nb){ const t=topOf(b,a); if(!t)continue;
+      for(const tt of t.types){ for(const r of simAbility(b,tt,a,depth+1)) out.push({b:r.b,steps:[{k:'plantPick',v:a},{k:'plantType',v:tt},...r.steps],bonus:r.bonus||0}); } }
+  }
+  return out;
+}
+const AI={plan:[],
+  makePlan(token,allowFire){
+    const hand=G.players[G.cur].hand; const cands=[];
+    for(const h of KEYS){ if(G.board[h].length>=3)continue;
+      const b1=cloneB(G.board); b1[h].push(token);
+      cands.push({s:evalB(b1,hand),steps:[{k:'place',v:h},{k:'fire',v:null}]});
+      if(allowFire) for(const t of token.types) for(const r of simAbility(b1,t,h,0)) cands.push({s:evalB(r.b,hand)+(r.bonus||0)+0.01,steps:[{k:'place',v:h},{k:'fire',v:t},...r.steps]});
+    }
+    let pick;
+    if(DIFF==='easy'&&Math.random()<0.4) pick=cands[Math.floor(Math.random()*cands.length)];
+    else{ const noise=DIFF==='easy'?6:DIFF==='normal'?1.2:0; let best=-1e9; for(const c of cands){const v=c.s+Math.random()*noise; if(v>best){best=v;pick=c;}} }
+    return pick.steps.slice();
+  },
+  answer(kind,o){
+    if(kind==='place'){ this.plan=this.makePlan(o.token,o.allowFire); }
+    if(kind==='crystal'){
+      let bi=0,bv=-1e9; o.tokens.forEach((t,i)=>{ for(const h of KEYS){ if(G.board[h].length>=3)continue; const b1=cloneB(G.board); b1[h].push(t); const v=evalB(b1,G.players[G.cur].hand)+(DIFF==='easy'?Math.random()*6:0); if(v>bv){bv=v;bi=i;} } });
+      return bi;
+    }
+    const nx=this.plan[0];
+    if(nx&&nx.k===kind){ this.plan.shift();
+      if(nx.v===null && (o.allowNone||kind==='fire')) return null;
+      if(o.valid&&o.valid.includes(nx.v)) return nx.v;
+      if(o.options&&o.options.includes(nx.v)) return nx.v;
+    }
+    this.plan=[];
+    if(kind==='fire') return null;
+    if(o.allowNone) return null;
+    if(o.valid) return o.valid[0];
+    if(o.options) return o.options[0];
+    if(o.token) return o.token.types[0];
+  }
+};
+async function ask(pi,kind,o){
+  if(!G.players[pi].ai) return humanAsk(kind,o);
+  setPrompt(`🤖 컴퓨터가 생각 중…`,o.prompt||'',[],o.token);
+  await sleep(SPEED);
+  const v=AI.answer(kind,o);
+  if(HEX_KINDS.has(kind)&&v){G.sel.add(v);render();await sleep(SPEED*0.5);}
+  return v;
+}
+
+// ===================== 게임 진행 =====================
+function triggerEnd(why){ if(G.endTriggered)return; G.endTriggered=true; G.endBy=G.cur; log(`⏳ ${why} — 게임 종료 조건 발동!`); toast(`⏳ ${why}! 이번 턴이 끝나면 상대가 마지막 득점 기회를 가져요`,2800); }
+function pullOne(){
+  if(!G.bag.length){ if(G.extras.length){G.bag.push(...G.extras);G.extras=[];log('👜 주머니가 비어 예비 토큰 6개를 넣었어요');} else return null; }
+  const t=G.bag.splice(Math.floor(Math.random()*G.bag.length),1)[0];
+  if(!G.bag.length) triggerEnd('주머니의 마지막 토큰을 뽑음');
+  return t;
+}
+function drawCard(p){ if(!G.deck.length)return false; p.hand.push(G.deck.shift()); if(!G.deck.length) triggerEnd('상점 덱의 마지막 카드를 뽑음'); return true; }
+function mark(...ks){G.recent=new Set(ks.filter(Boolean));G.sel=new Set();}
+
+async function placeAndMaybeFire(pi,token,allowFire){
+  const valid=KEYS.filter(k=>G.board[k].length<3);
+  G.held=token;
+  const h=await ask(pi,'place',{valid,token,allowFire,prompt:`${tName(token)}을 놓을 칸을 고르세요`,desc:'빈 칸이나 토큰이 3개 미만인 더미 위에 놓을 수 있어요.'});
+  G.held=null; G.board[h].push(token); mark(h); log(`[${PN(pi)}] ${tName(token)}을 놓음`); render();
+  if(G.players[pi].ai) await sleep(SPEED*0.4);
+  if(!allowFire) return;
+  const t=await ask(pi,'fire',{token,key:h,options:[...token.types,null],prompt:`${tName(token)}의 능력을 쓸까요?`});
+  if(t) await fire(pi,t,h);
+}
+async function fire(pi,type,src){
+  const T=TYPES[type]; log(`[${PN(pi)}] ${T.em} ${T.ko} 능력 발동!`); G.sel=new Set([src]); render();
+  const hasTok=k=>G.board[k].length>0, room=k=>G.board[k].length<3;
+  if(type==='bread'){
+    const t=pullOne(); if(!t){log('주머니가 비었어요');return;} log(`[${PN(pi)}] 추가로 ${tName(t)}을 뽑음`); render();
+    await placeAndMaybeFire(pi,t,true);
+  }else if(type==='crystal'){
+    const toks=[]; for(let i=0;i<3;i++){const t=pullOne(); if(t)toks.push(t);}
+    if(!toks.length){log('주머니가 비었어요');return;}
+    render();
+    const i=await ask(pi,'crystal',{tokens:toks,prompt:'수정: 놓을 토큰 고르기'});
+    const chosen=toks[i]; toks.forEach((t,j)=>{if(j!==i)G.bag.push(t);});
+    log(`[${PN(pi)}] ${toks.map(tName).join(', ')} 중 ${tName(chosen)}을 선택`);
+    await placeAndMaybeFire(pi,chosen,false);
+  }else if(type==='meat'){
+    const froms=NEI[src].filter(hasTok);
+    if(!froms.length){log('옮길 인접 드래곤이 없어요');toast('옮길 인접 드래곤이 없어요');return;}
+    const a=await ask(pi,'meatFrom',{valid:froms,allowNone:true,prompt:'🍖 옮길 인접 드래곤을 고르세요'}); if(!a)return;
+    G.sel=new Set([src,a]); const tos=KEYS.filter(k=>k!==a&&room(k));
+    const d=await ask(pi,'meatTo',{valid:tos,prompt:'🍖 어디로 옮길까요? (아무 칸)',token:topOf(G.board,a)});
+    const t=G.board[a].pop(); G.board[d].push(t); mark(a,d); log(`[${PN(pi)}] ${tName(t)}을 옮김`); render();
+  }else if(type==='iron'){
+    const moved=[];
+    for(let n=0;n<2;n++){
+      const froms=NEI[src].filter(k=>{const t=topOf(G.board,k);return t&&!moved.includes(t.id)&&NEI[k].some(room);});
+      if(!froms.length){ if(n===0){log('옮길 인접 드래곤이 없어요');toast('옮길 인접 드래곤이 없어요');} break; }
+      G.sel=new Set([src]);
+      const a=await ask(pi,'ironPick',{valid:froms,allowNone:true,noneLabel:n===0?'건너뛰기':'여기서 끝내기',prompt:n===0?'⚒️ 1칸 옮길 인접 드래곤을 고르세요 (1/2)':'⚒️ 두 번째로 옮길 인접 드래곤을 고르세요 (2/2)'});
+      if(!a)break;
+      G.sel=new Set([src,a]);
+      const d=await ask(pi,'ironTo',{valid:NEI[a].filter(room),prompt:'⚒️ 1칸 옮길 곳을 고르세요',token:topOf(G.board,a)});
+      const t=G.board[a].pop(); G.board[d].push(t); moved.push(t.id); mark(a,d); log(`[${PN(pi)}] ${tName(t)}을 1칸 옮김`); render();
+    }
+  }else if(type==='potion'){
+    const all=KEYS.filter(hasTok); if(all.length<2)return;
+    const a=await ask(pi,'potionA',{valid:all,allowNone:true,prompt:'🧪 위치를 바꿀 첫 번째 드래곤을 고르세요'}); if(!a)return;
+    G.sel=new Set([a]);
+    const b=await ask(pi,'potionB',{valid:all.filter(k=>k!==a),prompt:'🧪 바꿀 두 번째 드래곤을 고르세요'});
+    const A=G.board[a].pop(),B=G.board[b].pop(); G.board[a].push(B); G.board[b].push(A); mark(a,b); log(`[${PN(pi)}] ${tName(A)} ↔ ${tName(B)} 위치 교환`); render();
+  }else if(type==='plant'){
+    const froms=NEI[src].filter(hasTok);
+    if(!froms.length){log('인접한 드래곤이 없어요');toast('인접한 드래곤이 없어요');return;}
+    const a=await ask(pi,'plantPick',{valid:froms,allowNone:true,prompt:'🌿 능력을 발동시킬 인접 드래곤을 고르세요'}); if(!a)return;
+    const t=topOf(G.board,a);
+    const tt=await ask(pi,'plantType',{token:t,options:t.types});
+    await fire(pi,tt,a);
+  }
+}
+async function scoreCard(pi,i){
+  const p=G.players[pi]; const c=p.hand[i]; const m=findMatch(G.board,c); if(!m)return false;
+  G.match=new Set(m); p.hand.splice(i,1); p.scored.push(c);
+  log(`[${PN(pi)}] ⭐ '${c.name}' 득점! (+${c.v})`); toast(`${PN(pi)==='나'?'🎉 ':'🤖 '}'${c.name}' 득점 +${c.v}`); render();
+  await sleep(900); G.match=new Set(); render(); return true;
+}
+async function spendCoin(pi){
+  const p=G.players[pi]; if(p.coins<=0||G.coinUsed||!G.deck.length)return;
+  p.coins--; G.coinUsed=true; log(`[${PN(pi)}] 🪙 코인 사용: 카드 2장 뽑고 2장 되돌리기`);
+  for(let i=0;i<2;i++)drawCard(p); render();
+  const n=Math.min(2,p.hand.length); let idx;
+  if(p.ai){ await sleep(SPEED);
+    const sc=p.hand.map(c=>({c,v:evalB(G.board,[c])+c.v*0.1}));
+    idx=sc.map((x,i)=>[x.v,i]).sort((a,b)=>a[0]-b[0]).slice(0,n).map(x=>x[1]);
+  } else idx=await coinModal(p,n);
+  const back=idx.sort((a,b)=>b-a).map(i=>p.hand.splice(i,1)[0]); G.deck.push(...back); render();
+}
+function coinModal(p,n){
+  return new Promise(res=>{
+    G.modalOpen=true; const sel=new Set();
+    const root=document.getElementById('modalRoot');
+    const draw=()=>{
+      root.innerHTML=`<div class="overlay"><div class="modal"><h2>🪙 덱 아래로 되돌릴 카드 ${n}장</h2><p class="small">새로 뽑은 카드까지 포함해 손패에서 ${n}장을 골라 덱 맨 아래에 넣어요.</p><div class="hand">${p.hand.map((c,i)=>cardHTML(c,'mini click'+(sel.has(i)?' pick':'')+(findMatch(G.board,c)?' can':''),`data-ci="${i}"`)).join('')}</div><div class="row"><button class="big" id="cOk" ${sel.size===n?'':'disabled style="opacity:.5"'}>확인</button></div></div></div>`;
+      root.querySelectorAll('[data-ci]').forEach(e=>e.onclick=()=>{const i=+e.dataset.ci; if(sel.has(i))sel.delete(i); else if(sel.size<n)sel.add(i); draw();});
+      const ok=document.getElementById('cOk'); ok.onclick=()=>{ if(sel.size!==n)return; root.innerHTML=''; G.modalOpen=false; res([...sel]); };
+    };
+    draw();
+  });
+}
+async function scorePhase(pi,final){
+  G.phase=final?'final':'score'; const p=G.players[pi];
+  if(!p.ai){
+    await new Promise(res=>{
+      G.scoreResolve=()=>{G.scoreResolve=null;res();};
+      const any=p.hand.some(c=>findMatch(G.board,c));
+      setPrompt(final?'🏁 마지막 득점 기회!':'⭐ 득점 단계',
+        (any?'반짝이는 카드를 눌러 득점하세요. ':'지금 맞는 패턴이 없어요. ')+'카드는 회전해서 맞춰도 돼요. 코인을 써서 새 카드를 볼 수도 있어요.',
+        [{label:final?'게임 끝내기 ▶':'턴 마치기 ▶',cls:'primary',fn:()=>G.scoreResolve&&G.scoreResolve()}]);
+      render();
+    });
+    return;
+  }
+  setPrompt(final?'🤖 컴퓨터의 마지막 득점 기회':'🤖 컴퓨터 득점 단계','',[]);
+  await sleep(SPEED);
+  const scoreAll=async()=>{let i=0;let any=false;while(i<p.hand.length){ if(findMatch(G.board,p.hand[i])){await scoreCard(pi,i);any=true;} else i++; } return any;};
+  const scored=await scoreAll();
+  if(!G.coinUsed&&p.coins>0&&G.deck.length&&p.hand.length){
+    const far=p.hand.every(c=>evalB(G.board,[c])<c.v*1.5);
+    let go=false;
+    if(final) go=false;
+    else if(DIFF==='hard') go=!scored&&far;
+    else if(DIFF==='normal') go=!scored&&far&&Math.random()<0.5;
+    else go=Math.random()<0.12;
+    if(go){ await spendCoin(pi); await scoreAll(); }
+  }
+}
+async function takeTurn(pi){
+  G.cur=pi; G.coinUsed=false; G.phase='play'; AI.plan=[]; mark(); render();
+  const p=G.players[pi];
+  if(!p.ai){ setPrompt('🧑 내 차례! 주머니에서 드래곤을 뽑아요…'); render(); await sleep(500); }
+  const t=pullOne(); log(`— ${PN(pi)} 차례 — ${tName(t)}을 뽑음`);
+  await placeAndMaybeFire(pi,t,true);
+  await scorePhase(pi,false);
+  G.phase='refresh';
+  let drew=0; while(p.hand.length<2&&drawCard(p))drew++;
+  if(drew) log(`[${PN(pi)}] 카드 ${drew}장 보충`);
+  render();
+}
+async function gameLoop(){
+  let cur=G.first;
+  while(true){
+    await takeTurn(cur);
+    if(G.endTriggered){
+      const o=1-cur; G.cur=o; G.coinUsed=false; mark();
+      log(`🏁 ${PN(o)}의 마지막 득점 기회`); toast(`🏁 ${PN(o)}의 마지막 득점 기회!`);
+      await scorePhase(o,true); break;
+    }
+    cur=1-cur;
+  }
+  G.over=true; G.phase='over'; render(); showResult();
+}
+function showResult(){
+  const [me,ai]=G.players; const rep=p=>p.scored.reduce((a,c)=>a+c.v,0);
+  const mp=points(me),ap=points(ai); let res;
+  if(mp!==ap) res=mp>ap?'win':'lose'; else if(me.scored.length!==ai.scored.length) res=me.scored.length>ai.scored.length?'win':'lose'; else res='tie';
+  const title=res==='win'?'🎉 승리했어요!':res==='lose'?'😢 컴퓨터가 이겼어요':'🤝 공동 승리 (듀얼 빅토리)!';
+  setPrompt(title,'새 게임 버튼으로 다시 할 수 있어요.',[{label:'다시 하기',cls:'primary',fn:startScreen}]);
+  modal(`<h2>${title}</h2><table class="res"><tr><th></th><th>🧑 나</th><th>🤖 컴퓨터</th></tr>
+  <tr><td>카드 평판</td><td>${rep(me)}</td><td>${rep(ai)}</td></tr><tr><td>남은 코인</td><td>${me.coins}</td><td>${ai.coins}</td></tr>
+  <tr><th>합계</th><th>${mp}</th><th>${ap}</th></tr><tr><td>득점 카드 수</td><td>${me.scored.length}</td><td>${ai.scored.length}</td></tr></table>
+  <p class="small">동점이면 득점 카드가 더 많은 쪽이 이겨요. 그래도 같으면 함께 승리!</p>
+  <div class="row"><button class="big" onclick="closeModal();startScreen()">다시 하기</button><button class="big alt" onclick="closeModal()">보드 보기</button></div>`);
+}
+
+// ===================== 시작/선 플레이어 =====================
+function modal(html){G&&(G.modalOpen=true);document.getElementById('modalRoot').innerHTML=`<div class="overlay"><div class="modal">${html}</div></div>`;}
+function closeModal(){document.getElementById('modalRoot').innerHTML='';if(G)G.modalOpen=false;render();}
+function startScreen(){
+  modal(`<h2>🐉 드래곤 공방 듀얼</h2>
+  <p>주머니에서 드래곤 토큰을 뽑아 보드에 놓고, 드래곤의 <b>특수 능력</b>으로 배치를 바꿔 손에 든 <b>상점 카드의 패턴</b>을 완성하세요. 게임이 끝났을 때 평판(♥)이 높은 쪽이 승리!</p>
+  <div class="diff" id="diffSel"><button data-d="easy">쉬움</button><button data-d="normal">보통</button><button data-d="hard">어려움</button></div>
+  <div class="diff" id="spdSel"><button data-s="1000">천천히</button><button data-s="650">보통 속도</button><button data-s="300">빠르게</button></div>
+  <div class="row"><button class="big" id="goBtn">게임 시작</button><button class="big alt" onclick="showRules()">규칙 보기</button></div>`);
+  const upd=()=>{document.querySelectorAll('#diffSel button').forEach(b=>b.classList.toggle('on',b.dataset.d===DIFF));document.querySelectorAll('#spdSel button').forEach(b=>b.classList.toggle('on',+b.dataset.s===SPEED));};
+  document.querySelectorAll('#diffSel button').forEach(b=>b.onclick=()=>{DIFF=b.dataset.d;upd();});
+  document.querySelectorAll('#spdSel button').forEach(b=>b.onclick=()=>{SPEED=+b.dataset.s;upd();});
+  upd();
+  document.getElementById('goBtn').onclick=()=>{closeModal();begin();};
+}
+let gameToken=0;
+async function begin(){
+  gameToken++; newGame(); render();
+  log(`새 게임 시작 (난이도: ${{easy:'쉬움',normal:'보통',hard:'어려움'}[DIFF]})`);
+  // 선 플레이어 정하기
+  let first=null, html='';
+  while(first===null){
+    const a=G.bag[Math.floor(Math.random()*G.bag.length)]; let b; do{b=G.bag[Math.floor(Math.random()*G.bag.length)];}while(b===a);
+    const best=t=>Math.min(...t.types.map(x=>TYPES[x].rank));
+    const ra=best(a),rb=best(b);
+    html+=`<div class="tokenrow"><div class="tk">${tokenIcon(a,48)}<br>나: ${tName(a)}</div><b>VS</b><div class="tk">${tokenIcon(b,48)}<br>컴퓨터: ${tName(b)}</div></div>`;
+    if(ra!==rb) first=ra<rb?0:1;
+    else if(a.types.length!==b.types.length) first=a.types.length>b.types.length?0:1;
+    else html+='<p class="small" style="text-align:center">동점! 다시 뽑아요.</p>';
+  }
+  G.first=first;
+  modal(`<h2>선 플레이어 정하기</h2><p class="small">각자 토큰을 1개씩 뽑아 <b>능력 순서표</b>에서 더 위에 있는 쪽이 먼저 해요. (🍞 빵 › 💎 수정 › 🍖 고기 › ⚒️ 철 › 🧪 물약 › 🌿 식물, 듀얼은 둘 중 높은 쪽으로 보고 동점이면 이겨요)</p>${html}<p style="text-align:center;font-size:17px"><b>${first===0?'🧑 내가':'🤖 컴퓨터가'} 먼저 시작해요!</b></p><div class="row"><button class="big" id="startOk">시작!</button></div>`);
+  document.getElementById('startOk').onclick=()=>{closeModal();log(`${PN(first)} 먼저 시작`);gameLoop();};
+}
+function showRules(){
+  modal(`<h2>📜 규칙 요약</h2>
+  <p><b>준비</b> · 보드 가운데를 둘러싼 6칸에 색깔별 드래곤 1개씩, 각자 코인 3개와 상점 카드 2장(비공개). 예비 토큰 6개는 옆에 둬요.</p>
+  <p><b>내 차례 = 3단계</b></p>
+  <ol><li><b>놓기</b> · 주머니에서 토큰을 뽑아 빈 칸이나 더미 위에 놓아요 (한 칸에 최대 3개). 그 토큰의 능력을 쓸지 고를 수 있어요.</li>
+  <li><b>득점</b> · 보드 위 <b>맨 위 토큰들</b>의 배치가 손의 카드 패턴과 같으면 득점! 카드는 돌려서 맞춰도 되고, 여러 장을 한 번에 득점해도 돼요. 듀얼 토큰은 둘 중 원하는 종류로 쳐요.</li>
+  <li><b>보충</b> · 손패가 2장이 되도록 덱에서 뽑아요.</li></ol>
+  <p><b>🪙 코인</b> · 보충 전에 한 턴에 한 번, 코인 1개를 내고 카드 2장을 뽑은 뒤 손에서 2장을 덱 맨 아래로 보내요. 남은 코인은 끝날 때 1점씩!</p>
+  <h3>드래곤 능력 (위쪽일수록 순서표에서 높음)</h3>
+  ${TK.map(t=>`<div class="ab"><div class="ic" style="background:${TYPES[t].c}">${TYPES[t].em}</div><div><b>${TYPES[t].ko}</b> — ${TYPES[t].ab}</div></div>`).join('')}
+  <p class="small">능력은 각 더미의 맨 위 토큰에만 적용돼요. 인접 = 변을 맞댄 칸. 듀얼 토큰은 두 능력 중 하나만 써요. 식물은 다른 식물을 발동시켜 연쇄할 수도 있어요.</p>
+  <p><b>게임 끝</b> · 주머니의 마지막 토큰을 뽑거나 덱의 마지막 카드를 뽑으면 종료 조건 발동. 그 턴을 끝까지 하고, 상대는 마지막으로 득점·코인 사용 기회를 가져요. 진행 중 주머니가 비면 예비 토큰 6개를 넣어요.</p>
+  <p><b>승리</b> · 카드 평판 + 남은 코인이 높은 쪽. 동점이면 득점 카드가 많은 쪽, 그래도 같으면 함께 승리!</p>
+  <p class="small">※ 보드게임 Flamecraft Duals의 기본 규칙을 바탕으로 만든 비공식 연습판이에요. 상점 카드 42장(3~4칸 패턴, 평판 2~5)은 이 사이트용으로 새로 구성했고, 팬시 모드·분수 모드·솔로 모드는 포함하지 않았어요.</p>
+  <div class="row"><button class="big" onclick="closeModal()">닫기</button></div>`);
+}
+document.getElementById('btnRules').onclick=showRules;
+document.getElementById('btnNew').onclick=()=>{ if(G&&!G.over&&G.phase!=='setup'){ modal(`<h2>새 게임?</h2><p>진행 중인 게임을 그만두고 새로 시작할까요?</p><div class="row"><button class="big" id="yNew">새로 시작</button><button class="big alt" onclick="closeModal()">계속하기</button></div>`); document.getElementById('yNew').onclick=()=>location.reload(); } else startScreen(); };
+document.getElementById('btnCoin').onclick=async()=>{ if(!canCoin())return; await spendCoin(0); render(); if(G.scoreResolve){ const any=G.players[0].hand.some(c=>findMatch(G.board,c)); document.getElementById('pdesc').textContent=any?'반짝이는 카드를 눌러 득점하세요.':'지금 맞는 패턴이 없어요.'; } };
+document.getElementById('btnScored').onclick=()=>{ if(!G)return; const s=G.players[0].scored, a=G.players[1].scored;
+  modal(`<h2>득점한 카드</h2><h3>🧑 나 (${s.reduce((x,c)=>x+c.v,0)}점)</h3><div class="hand">${s.map(c=>cardHTML(c,'mini')).join('')||'<span class="small">아직 없어요</span>'}</div><h3>🤖 컴퓨터 (${a.reduce((x,c)=>x+c.v,0)}점)</h3><div class="hand">${a.map(c=>cardHTML(c,'mini')).join('')||'<span class="small">아직 없어요</span>'}</div><div class="row"><button class="big" onclick="closeModal()">닫기</button></div>`); };
+document.getElementById('myHand').addEventListener('click',async e=>{
+  const c=e.target.closest('.card'); if(!c||!G||!G.scoreResolve||G.cur!==0||G.busy)return;
+  const i=+c.dataset.i; if(!findMatch(G.board,G.players[0].hand[i])){toast('아직 패턴이 맞지 않아요');return;}
+  G.busy=true; await scoreCard(0,i); G.busy=false;
+});
+
+// 초기 화면
+newGame(); G.phase='setup'; render(); setPrompt('🐉 시작 화면에서 난이도를 고르고 게임을 시작하세요');
+startScreen();
+</script>
+</body>
+</html>
