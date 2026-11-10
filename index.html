@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>보드게임 놀이터</title>
+<style>
+:root{--ink:#2b2117;--paper:#f3e7cc;--edge:#b89a66;--red:#a8322a;--muted:#7a6a52}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;color:var(--ink);
+  background:#2a1d14 radial-gradient(circle at 30% 0%,#4a3424,#1e140d 70%) fixed}
+header{text-align:center;padding:42px 16px 22px;color:#f3e7cc}
+header h1{margin:0;font-size:clamp(26px,6vw,40px);letter-spacing:1px}
+header p{margin:8px 0 0;opacity:.75;font-size:15px}
+.bar{max-width:1080px;margin:0 auto 18px;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar input{flex:1;min-width:200px;padding:11px 14px;border-radius:10px;border:1px solid #6b4f33;background:#fff8e6;font:inherit}
+.tag{padding:7px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#f3e7cc;font:inherit;font-size:13px;cursor:pointer}
+.tag.on{background:#f3e7cc;color:var(--ink);border-color:#f3e7cc;font-weight:700}
+.grid{max-width:1080px;margin:0 auto;padding:0 16px 40px;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--paper);border:2px solid #6b4f33;border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,0,0,.45)}
+.cover{height:130px;display:grid;place-items:center;font-size:62px;position:relative}
+.cover .badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:11.5px;padding:3px 8px;border-radius:999px}
+.body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.body h2{margin:0;font-size:18px}
+.body p{margin:0;font-size:13.5px;line-height:1.55;color:#4a3b29;flex:1}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.meta span{font-size:12px;background:#fffaf0;border:1px solid #d9c49b;border-radius:6px;padding:2px 7px}
+.go{margin-top:4px;align-self:flex-start;background:var(--red);color:#fff;font-weight:700;font-size:14px;padding:8px 14px;border-radius:9px}
+.card.soon{opacity:.6;pointer-events:none}
+.card.soon .go{background:#8a7a62}
+.empty{grid-column:1/-1;text-align:center;color:#f3e7cc;opacity:.7;padding:30px}
+footer{text-align:center;color:#f3e7cc;opacity:.5;font-size:12px;padding:0 16px 28px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎲 보드게임 놀이터</h1>
+  <p>플레이할 게임을 골라 보세요</p>
+</header>
+<div class="bar">
+  <input id="q" type="search" placeholder="게임 이름이나 설명으로 검색">
+  <div id="tags" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+</div>
+<main class="grid" id="grid"></main>
+<footer>게임 진행 상황은 각자의 브라우저에 저장됩니다.</footer>
+
+<script>
+/* ===== 게임 목록 =====
+   새 게임을 추가하려면 아래 배열에 { ... } 한 덩어리를 복사해서 붙이고 내용만 바꾸세요.
+   - href : 같은 폴더에 올린 게임 파일 이름 (예: 'mygame.html' 또는 'mygame/' 폴더)
+   - soon : true 로 두면 '준비 중' 카드로 표시되고 눌리지 않아요
+*/
+const GAMES = [
+  {
+    title: '대항해 탐험가',
+    href: 'voyage.html',
+    emoji: '⛵',
+    color: 'linear-gradient(135deg,#3e5d74,#6f8fa6)',
+    desc: '리스본에서 출항해 12라운드 동안 세계를 누비는 롤 앤 라이트. 물자를 나누고, 해적과 괴혈병을 견디며 명성을 쌓으세요.',
+    players: '1인',
+    time: '20~30분',
+    tags: ['롤앤라이트', '솔로'],
+    badge: 'NEW'
+  },
+  // {
+  //   title: '다음 게임 이름',
+  //   href: 'next-game.html',
+  //   emoji: '🃏',
+  //   color: 'linear-gradient(135deg,#7a3b2e,#c0714f)',
+  //   desc: '게임 소개 한두 줄',
+  //   players: '2~4인',
+  //   time: '15분',
+  //   tags: ['카드게임'],
+  //   soon: true
+  // },
+];
+
+const grid=document.getElementById('grid'),q=document.getElementById('q'),tagBox=document.getElementById('tags');
+let tag='전체';
+const allTags=['전체',...new Set(GAMES.flatMap(g=>g.tags||[]))];
+function drawTags(){tagBox.innerHTML=allTags.map(t=>`<button class="tag ${t===tag?'on':''}" data-t="${t}">${t}</button>`).join('');}
+tagBox.onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;tag=b.dataset.t;drawTags();draw();};
+function draw(){
+  const s=q.value.trim().toLowerCase();
+  const list=GAMES.filter(g=>(tag==='전체'||(g.tags||[]).includes(tag))&&(!s||(g.title+' '+g.desc+' '+(g.tags||[]).join(' ')).toLowerCase().includes(s)));
+  grid.innerHTML=list.map(g=>`
+    <a class="card ${g.soon?'soon':''}" href="${g.soon?'#':g.href}">
+      <div class="cover" style="background:${g.color||'#6b4f33'}">${g.emoji||'🎲'}${g.soon?'<span class="badge">준비 중</span>':g.badge?`<span class="badge">${g.badge}</span>`:''}</div>
+      <div class="body">
+        <h2>${g.title}</h2>
+        <p>${g.desc||''}</p>
+        <div class="meta">${g.players?`<span>👥 ${g.players}</span>`:''}${g.time?`<span>⏱ ${g.time}</span>`:''}${(g.tags||[]).map(t=>`<span>#${t}</span>`).join('')}</div>
+        <span class="go">${g.soon?'준비 중':'플레이 ▶'}</span>
+      </div>
+    </a>`).join('')||'<div class="empty">찾는 게임이 없어요.</div>';
+}
+q.oninput=draw;drawTags();draw();
+</script>
+</body>
+</html>
