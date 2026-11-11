@@ -7,77 +7,71 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#2b2350; --panel:#fff7fa; --ink:#2a2140; --muted:#7b6f8f; --pink:#f7c9d9; --pink2:#f3a9c1;
-  --accent:#e2475b; --sea:#3d4fa3; --sea2:#5a6fc4; --gold:#ffcf4a;
-  --p0:#2f8fe0; --p1:#e2475b; --p2:#f0a51c; --p3:#2fb38a;
-}
+:root{--bg:#2b2350;--panel:#fff7fa;--ink:#2a2140;--muted:#7b6f8f;--pink2:#f3a9c1;--accent:#e2475b;--gold:#ffcf4a}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit;cursor:pointer}
-.app{max-width:1100px;margin:0 auto;padding:10px 10px 150px}
+.app{max-width:1280px;margin:0 auto;padding:10px 10px 170px}
 header{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#fff;padding:4px 2px 8px}
-header h1{font-family:"Gowun Batang",serif;font-size:24px;margin:0;letter-spacing:2px}
-@media (max-width:480px){header h1 small{display:none}}
+header h1{font-family:"Gowun Batang",serif;font-size:24px;margin:0;letter-spacing:2px;white-space:nowrap}
 header h1 small{font-family:"Noto Sans KR";font-size:12px;font-weight:400;opacity:.75;letter-spacing:0;margin-left:6px}
+@media (max-width:480px){header h1 small{display:none}}
 .hbtn{white-space:nowrap;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 12px;font-size:13px}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:12px;align-items:start}
-@media (max-width:820px){.layout{grid-template-columns:1fr}}
-.boardwrap{background:linear-gradient(#3b4aa0,#2c3a86);border-radius:16px;overflow:auto;position:relative;max-height:calc(100vh - 210px)}
-@media (max-width:820px){.boardwrap{max-height:none}}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+.boardwrap{background:linear-gradient(160deg,#5d4fb0,#3a4aa8 55%,#2a3d93);border-radius:16px;overflow:auto;position:relative}
 #board{display:block;width:100%;height:auto;touch-action:manipulation}
 .boardwrap.zoom #board{width:170%}
 .side{display:flex;flex-direction:column;gap:10px}
 .card{background:var(--panel);border-radius:14px;padding:10px 12px}
 .card h3{margin:0 0 6px;font-size:13px;color:var(--muted);font-weight:500}
 .status{background:var(--panel);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:14px;display:flex;align-items:center;gap:8px;min-height:44px}
-.status .dot{width:12px;height:12px;border-radius:50%;flex:none}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;display:inline-block}
 .prow{display:flex;align-items:center;gap:8px;padding:6px 4px;border-radius:10px;font-size:13px}
 .prow.cur{background:#ffe9f0;outline:2px solid var(--pink2)}
-.prow .nm{font-weight:700;min-width:62px}
+.prow .nm{font-weight:700}
 .prow .meta{color:var(--muted);font-size:12px}
-.toks{display:flex;gap:6px;margin-left:auto;align-items:center}
-.tok{display:inline-flex;align-items:center;gap:2px;font-weight:700;font-size:13px}
-.tok svg{width:18px;height:18px}
-.ties{display:flex;gap:8px}
+.toks{display:flex;gap:5px;margin-left:auto;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tok{display:inline-flex;align-items:center;gap:1px;font-weight:700;font-size:13px}
+.ties{display:flex;gap:8px;flex-wrap:wrap}
 .slot{width:38px;height:38px;border-radius:50%;border:2px dashed #c9b8d8;display:flex;align-items:center;justify-content:center;background:#fff}
-.slot svg{width:26px;height:26px}
-.log{max-height:180px;overflow:auto;font-size:12.5px;line-height:1.55;color:#4a3f5e}
+.log{max-height:200px;overflow:auto;font-size:12.5px;line-height:1.55;color:#4a3f5e}
 .log div{padding:1px 0;border-bottom:1px dotted #eedde6}
 .dock{position:fixed;left:0;right:0;bottom:0;background:rgba(255,247,250,.97);box-shadow:0 -6px 24px rgba(0,0,0,.25);padding:8px 10px calc(8px + env(safe-area-inset-bottom));z-index:20}
-.dock-in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.dock-in{max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .hand{display:flex;gap:4px;flex:1;min-width:250px;overflow-x:auto}
-.htile{border:none;background:none;padding:0;width:58px;height:62px;flex:none;position:relative}
+.htile{border:none;background:none;padding:0;width:58px;height:62px;flex:none}
 .htile svg{width:58px;height:62px;display:block}
-.htile.sel svg{filter:drop-shadow(0 0 0 #000) drop-shadow(0 0 5px var(--gold));transform:translateY(-5px)}
+.htile.sel svg{filter:drop-shadow(0 0 5px var(--gold));transform:translateY(-5px)}
 .htile:disabled{opacity:.35}
 .acts{display:flex;gap:6px;flex-wrap:wrap}
-.btn{border:none;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;background:#e9dff0;color:var(--ink)}
+.btn{border:none;border-radius:10px;padding:10px 13px;font-size:14px;font-weight:700;background:#e9dff0;color:var(--ink)}
 .btn.primary{background:var(--accent);color:#fff}
-.btn.torii{background:#d94a3a;color:#fff}
+.btn.abil{background:#d94a3a;color:#fff}
 .btn:disabled{opacity:.4;cursor:default}
 .pileinfo{font-size:12px;color:var(--muted);width:100%}
 .overlay{position:fixed;inset:0;background:rgba(20,12,40,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
 .overlay[hidden]{display:none}
-.modal{background:var(--panel);border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:18px 18px 16px}
+.modal{background:var(--panel);border-radius:18px;max-width:580px;width:100%;max-height:92vh;overflow:auto;padding:18px 18px 16px}
 .modal h2{font-family:"Gowun Batang",serif;margin:0 0 10px;font-size:22px}
+.modal h4{margin:14px 0 4px;font-size:15px}
 .modal p,.modal li{font-size:14px;line-height:1.65}
 .modal ul{padding-left:18px;margin:6px 0}
-.opt{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
-.opt button{border:2px solid #e3d3e6;background:#fff;border-radius:10px;padding:8px 12px;font-size:14px}
+.opt{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.opt button{border:2px solid #e3d3e6;background:#fff;border-radius:10px;padding:7px 11px;font-size:14px}
 .opt button.on{border-color:var(--accent);background:#ffe9ee;font-weight:700}
-.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0}
+.chk{display:flex;align-items:flex-start;gap:8px;font-size:14px;margin:6px 0;line-height:1.45}
+.chk input{margin-top:3px}
 table.res{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
 table.res th,table.res td{padding:6px 4px;text-align:center;border-bottom:1px solid #eedde6}
 table.res td.nm{text-align:left;font-weight:700}
-.chooser{display:flex;gap:10px;justify-content:center;margin:10px 0}
-.chooser button{background:#fff;border:2px solid #e3d3e6;border-radius:12px;padding:8px}
-.chooser svg{width:40px;height:40px}
+.chooser{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.chooser button{background:#fff;border:2px solid #e3d3e6;border-radius:12px;padding:8px;min-width:64px}
 .parkinfo table{width:100%;font-size:13px;border-collapse:collapse}
 .parkinfo td,.parkinfo th{padding:3px 4px;text-align:center}
 .parkinfo th{color:var(--muted);font-weight:500}
-.hint{font-size:12px;color:var(--muted);margin-top:4px}
-.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.sec{border-top:1px solid #eedde6;margin-top:10px;padding-top:8px}
 @keyframes pop{0%{transform:scale(.4);opacity:.2}100%{transform:scale(1);opacity:1}}
 .newtile{animation:pop .35s ease-out;transform-box:fill-box;transform-origin:center}
 </style>
@@ -97,8 +91,8 @@ table.res td.nm{text-align:left;font-weight:700}
     <div class="boardwrap" id="boardwrap"><svg id="board" xmlns="http://www.w3.org/2000/svg"></svg></div>
     <div class="side">
       <div class="card"><h3>플레이어</h3><div id="players"></div></div>
-      <div class="card"><h3>동점 구역 (4칸이 차면 즉시 게임 종료)</h3><div class="ties" id="ties"></div></div>
-      <div class="card parkinfo" id="parkinfo"><h3>공원 정보</h3><div class="hint">지도의 공원(벚나무 칸)을 누르면 플레이어별 세력이 보여요.</div></div>
+      <div class="card"><h3>동점 구역 (4개가 차면 그 차례 후 게임 종료)</h3><div class="ties" id="ties"></div></div>
+      <div class="card parkinfo" id="parkinfo"><h3>공원 정보</h3><div class="hint">지도의 공원(벚나무 칸)이나 카니·도소진을 누르면 플레이어별 세력이 보여요.</div></div>
       <div class="card"><h3>기록</h3><div class="log" id="log"></div></div>
     </div>
   </div>
@@ -108,7 +102,7 @@ table.res td.nm{text-align:left;font-weight:700}
   <div class="dock-in">
     <div class="hand" id="hand"></div>
     <div class="acts">
-      <button class="btn torii" id="toriiBtn">⛩ 도리이</button>
+      <button class="btn abil" id="abilBtn">⛩ 도리이</button>
       <button class="btn" id="undoBtn">되돌리기</button>
       <button class="btn primary" id="endBtn">턴 종료</button>
     </div>
@@ -119,14 +113,22 @@ table.res td.nm{text-align:left;font-weight:700}
 <div class="overlay" id="setup">
   <div class="modal">
     <h2>🌸 하나미 시작하기</h2>
-    <p style="margin-top:0">벚꽃 명당을 차지하는 타일 놓기 게임입니다. 라이너 크니지아의 <b>사무라이</b>를 다시 만든 <b>하나미</b> 규칙으로 컴퓨터와 대결해요.</p>
+    <p style="margin-top:0">벚꽃 명당을 차지하는 타일 놓기 게임. 원판 <b>니혼(일본)</b> 면 지도로 컴퓨터와 대결해요.</p>
     <div><b>상대 컴퓨터 수</b></div>
     <div class="opt" id="optN"><button data-v="1" class="on">1명 (2인전)</button><button data-v="2">2명 (3인전)</button><button data-v="3">3명 (4인전)</button></div>
+    <div class="hint" style="margin-top:-4px;margin-bottom:8px">2인: 가운데 섬 · 3인: 가운데 + 왼쪽 섬들 · 4인: 모든 섬(홋카이도 포함)</div>
     <div><b>난이도</b></div>
     <div class="opt" id="optD"><button data-v="0">쉬움</button><button data-v="1" class="on">보통</button><button data-v="2">어려움</button></div>
-    <label class="chk"><input type="checkbox" id="optOpen"> 컴퓨터가 딴 토큰 공개하기 (원래는 가림막 뒤에 숨김)</label>
-    <label class="chk"><input type="checkbox" id="optStrong"> 강하게 시작 — 첫 패 5장을 직접 고르기</label>
-    <div class="hint">인원에 따라 사용하는 섬: 2인 가운데 섬 · 3인 가운데+남쪽 섬 · 4인 모든 섬</div>
+    <div><b>능력 카드</b> <span class="hint">(모두 같은 카드, 게임당 1번)</span></div>
+    <div class="opt" id="optA"><button data-v="torii" class="on">⛩ 도리이</button><button data-v="takoyaki">🐙 타코야키</button><button data-v="rain">☔ 비 오는 날</button><button data-v="taiyaki">🐟 타이야키</button><button data-v="none">없음</button></div>
+    <div class="sec"><b>추가 규칙</b></div>
+    <label class="chk"><input type="checkbox" id="optSpecial"> <span><b>특별 행동 타일</b> 넣기 — 뽑기·덮기·복사 (1인당 22장)</span></label>
+    <label class="chk"><input type="checkbox" id="optStrong"> <span><b>강하게 시작</b> — 첫 패 5장을 직접 고르기</span></label>
+    <label class="chk"><input type="checkbox" id="optOpen"> <span>컴퓨터가 딴 토큰 공개 (원래는 가림막 뒤에 숨김)</span></label>
+    <div class="sec"><b>미니 확장</b> <span class="hint">(원하는 것만 골라 넣기)</span></div>
+    <label class="chk"><input type="checkbox" id="optXN"> <span><b>마네키네코 토큰</b> — 2그루 공원 하나에 추가. 와일드 타일만 세력으로 계산. 점수 낼 때 원하는 종류로 셈</span></label>
+    <label class="chk"><input type="checkbox" id="optXK"> <span><b>카니(게) 토큰</b> — 물 칸에 놓임. 둘레의 물 칸이 모두 차면 수여. 점수 낼 때 원하는 종류로 셈</span></label>
+    <label class="chk"><input type="checkbox" id="optXD"> <span><b>도소진 토큰</b> — 가운데 3그루 공원 대신 놓임. 그 둘레 세력 합이 가장 큰 사람이 도소진 카드를 가져가고, 토큰 동점에서 이김</span></label>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn primary" id="startBtn" style="flex:1">게임 시작</button>
       <button class="btn" id="setupRules">규칙 보기</button>
@@ -137,32 +139,50 @@ table.res td.nm{text-align:left;font-weight:700}
 <div class="overlay" id="rules" hidden>
   <div class="modal">
     <h2>규칙 요약</h2>
-    <p><b>목표</b> — 공원 주변에 타일을 놓아 축제 토큰(🌸 벚꽃 · 🏮 초칭 등불 · 🍙 오니기리)을 얻습니다. 게임이 끝나면 각 종류별로 토큰을 <b>가장 많이</b> 모은 사람이 그 종류의 큰 승점 1점을 받고, 승점이 가장 많은 사람이 이깁니다.</p>
-    <p><b>내 차례</b></p>
+    <p><b>목표</b> — 공원 둘레에 타일을 놓아 축제 토큰(🌸 벚꽃 · 🏮 초칭 · 🍙 오니기리)을 얻습니다. 끝나면 종류별로 토큰을 <b>가장 많이</b> 모은 사람이 큰 승점 1점을 받고, 승점이 가장 많은 사람이 이깁니다.</p>
+    <h4>내 차례</h4>
     <ul>
-      <li><b>타일 놓기</b> — 손패에서 타일 1장을 빈 땅에 놓습니다. 위에 <b>신칸센(━)</b> 표시가 있는 <b>빠른 타일</b>은 이와 별도로 원하는 만큼 더 놓을 수 있고, 빠른 타일을 그 1장으로 써도 됩니다.</li>
-      <li><b>토큰 수여</b> — 공원을 둘러싼 <b>땅 칸이 모두 차면</b> 그 공원의 토큰을 수여합니다(물 칸은 비어 있어도 됨). 토큰마다, 공원에 붙은 내 타일 중 같은 종류 + 와일드 타일의 점 합계가 가장 큰 사람이 가져갑니다.</li>
-      <li><b>보충</b> — 손패가 5장이 되도록 더미에서 뽑습니다.</li>
+      <li><b>① 플레이어 타일 1개를 놓습니다.</b> 위에 신칸센(━) 표시가 있는 <b>신속 타일</b>은 원하는 만큼 더 놓을 수 있고, 신속 타일을 그 1개로 써도 됩니다.</li>
+      <li><b>② 축제 토큰 획득</b> — 공원 칸과 인접한 <b>모든 육지 칸</b>이 채워지면 토큰을 수여합니다(물 칸은 비어도 됨). 토큰마다, 같은 종류 타일 + 와일드 타일의 점 합계가 가장 큰 사람이 가져갑니다. 동점이면 동점 구역으로.</li>
+      <li><b>③ 플레이어 타일을 5개까지 보충합니다.</b></li>
     </ul>
-    <p><b>타일 종류</b></p>
+    <h4>타일</h4>
     <ul>
-      <li><b>기본 타일</b> (벚꽃·등불·오니기리, 2~4점) — 그림과 같은 토큰에만 힘을 보탭니다.</li>
-      <li><b>마네키네코</b> 🐱 — 와일드. 세 종류 모두에 힘을 보탭니다.</li>
-      <li><b>야카타부네(배)</b> ⛵ — 와일드. <b>물 칸에만</b> 놓을 수 있어요.</li>
-      <li><b>이동 타일</b> ✈ — 이미 놓은 내 타일(빠른 타일 제외) 하나를 다른 빈 땅으로 옮기고, 비워진 자리에 이동 타일을 놓습니다(힘 0).</li>
+      <li><b>기본 타일</b>(벚꽃·초칭·오니기리 2~4점) — 같은 종류 토큰에만.</li>
+      <li><b>마네키네코</b> 🐱, <b>배</b> ⛵ — 와일드(세 종류 모두). 배는 섬에 맞닿은 <b>물 칸</b>에만.</li>
+      <li><b>이동</b> ✈ — 이미 배치된 자신의 플레이어 타일 1개를 비어 있는 다른 육지 칸으로 이동시킨 후, 이 액션 타일을 원래 있던 칸에 놓습니다. 단, 신속 타일은 이동시킬 수 없습니다.</li>
     </ul>
-    <p><b>동점</b> — 공원에서 세력이 동점이면 그 토큰은 아무도 못 갖고 <b>동점 구역</b>으로 갑니다.</p>
-    <p><b>⛩ 도리이 능력 카드</b> (게임당 1번, 내 차례 시작 시 타일을 놓기 전) — 지도 위 축제 토큰 2개의 위치를 맞바꿉니다. 같은 종류 토큰 두 개가 한 공원에 있게 할 수는 없습니다.</p>
-    <p><b>게임 종료</b> — 어떤 한 종류의 토큰이 지도에서 모두 사라지거나, 동점 구역 4칸이 차면 그 차례를 마치고 끝납니다.</p>
-    <p><b>점수</b> — 종류별 최다 보유자가 큰 승점 1점(동점이면 아무도 못 받음). 승점이 같으면 <b>자기 승점과 다른 종류</b>의 토큰 수 합으로, 그래도 같으면 전체 토큰 수로 가립니다.</p>
-    <p class="hint">원작: Reiner Knizia, <i>Hanami</i> (Keymaster Games). 이 페이지는 개인 학습·놀이용으로 규칙을 구현한 것이며, 지도는 원판과 다른 자체 지도입니다. 특별 능력 카드와 특별 행동 타일(뽑기·덮기·복사)은 넣지 않았습니다(첫 게임 규칙).</p>
+    <h4>특별 행동 타일 (선택)</h4>
+    <ul>
+      <li><b>뽑기</b> ⊕ (마네키네코 1, 신속) — 이 타일을 배치할 때, 즉시 플레이어 타일 1개를 보충합니다.</li>
+      <li><b>덮기</b> — 이전에 이미 놓아둔 자신의 타일 중 하나 위에 겹쳐서 올릴 수 있습니다(배 타일 및 액션 타일 포함). 덮은 뒤에는 3점 와일드 타일이 됩니다.</li>
+      <li><b>복사</b> — 이 타일이 가리키는 방향에 있는 아무 플레이어 타일의 축제 종류와 영향력을 그대로 복사합니다. 빈 칸을 가리키면 나중에 그 칸이 채워질 때 복사합니다. 신속 타일이 되거나 다른 액션 타일의 효과를 복사하지는 않습니다.</li>
+    </ul>
+    <p class="hint">이 앱에서는 액션 타일(이동·덮기·복사)은 이동 타일로 옮길 수 없게 했습니다.</p>
+    <h4>능력 카드 (게임당 한 번, 차례 시작 시 타일을 놓기 전)</h4>
+    <ul>
+      <li><b>⛩ 도리이</b> — 지도 위 축제 토큰 2개의 위치를 맞바꿉니다. 같은 종류 둘이 한 공원에 있으면 안 됩니다.</li>
+      <li><b>🐙 타코야키</b> — 가림막 뒤의 내 축제 토큰 1개를 동점 구역의 토큰 1개와 맞바꿉니다.</li>
+      <li><b>☔ 비 오는 날</b> — 아무 플레이어의 1점 또는 2점 타일 1개를 뒤집습니다(세력 0).</li>
+      <li><b>🐟 타이야키</b> — 내 플레이어 타일 1개를 물 칸에 놓습니다. 신속 타일처럼 취급합니다.</li>
+    </ul>
+    <h4>미니 확장</h4>
+    <ul>
+      <li><b>마네키네코 토큰</b> — 2그루 공원 중 하나에 추가. 둘레 육지가 채워지면 수여, <b>와일드 타일만</b> 세력으로 셉니다.</li>
+      <li><b>카니 토큰</b> — 섬에 맞닿은 물 칸에 놓입니다. 둘레의 물 칸이 모두 채워지면 수여(모든 타일의 점을 셈).</li>
+      <li><b>도소진 토큰</b> — 가운데 3그루 공원의 축제 토큰 3개 대신 놓습니다(그 3개는 상자로). 수여되지 않으며, 언제든 그 둘레의 내 타일 점 합계가 <b>가장 크면</b> 즉시 도소진 카드를 가져옵니다(빼앗으려면 초과해야 하고 동점으로는 부족). 카드 주인은 자신이 낀 <b>토큰 동점에서 이깁니다</b>.</li>
+      <li>마네키네코·카니 토큰은 와일드 — 점수를 내기 전에 원하는 종류에 더해 셉니다. 확장 토큰 획득으로는 게임이 끝나지 않으며, 동점이면 평소처럼 동점 구역으로 갑니다. 능력 카드는 확장 토큰에 영향을 줄 수 없습니다.</li>
+    </ul>
+    <h4>게임 종료와 점수</h4>
+    <p>한 종류의 축제 토큰이 지도에서 모두 사라지거나, 동점 구역에 토큰 4개가 차면 그 차례를 마치고 끝납니다. 종류별 최다 보유자가 큰 승점 1점(동점이면 아무도 못 받음). 승점이 같으면 <b>자기 승점과 다른 종류</b> 토큰 수로, 그래도 같으면 전체 토큰 수로 가립니다.</p>
+    <p class="hint">원작: Reiner Knizia, <i>Hanami</i> (Keymaster Games). 개인 학습·놀이용 구현입니다. 특별 능력 카드 8종과 도쿄 면 지도는 포함하지 않았습니다. 모든 타일이 떨어지면 게임이 끝나도록 한 것은 이 앱의 보조 규칙입니다.</p>
     <button class="btn primary" id="rulesClose" style="width:100%;margin-top:8px">닫기</button>
   </div>
 </div>
 
 <div class="overlay" id="chooser" hidden>
-  <div class="modal" style="max-width:340px;text-align:center">
-    <h2 style="font-size:18px" id="chooserTitle">토큰 선택</h2>
+  <div class="modal" style="max-width:380px;text-align:center">
+    <h2 style="font-size:18px" id="chooserTitle">선택</h2>
     <div class="chooser" id="chooserOpts"></div>
     <button class="btn" id="chooserCancel">취소</button>
   </div>
@@ -177,518 +197,597 @@ table.res td.nm{text-align:left;font-weight:700}
   </div>
 </div>
 
-<div class="overlay" id="over" hidden>
-  <div class="modal" id="overBody"></div>
-</div>
+<div class="overlay" id="over" hidden><div class="modal" id="overBody"></div></div>
 
 <script>
-const MAP = {"R": 25, "C": 11, "cells": [{"r": 12, "c": 4, "t": "P", "i": "M", "n": 2}, {"r": 12, "c": 7, "t": "P", "i": "M", "n": 3}, {"r": 14, "c": 4, "t": "P", "i": "M", "n": 1}, {"r": 14, "c": 1, "t": "P", "i": "M", "n": 1}, {"r": 14, "c": 7, "t": "P", "i": "M", "n": 1}, {"r": 11, "c": 2, "t": "P", "i": "M", "n": 1}, {"r": 10, "c": 6, "t": "L", "i": "M"}, {"r": 11, "c": 5, "t": "P", "i": "M", "n": 1}, {"r": 10, "c": 3, "t": "L", "i": "M"}, {"r": 13, "c": 2, "t": "P", "i": "M", "n": 2}, {"r": 13, "c": 5, "t": "P", "i": "M", "n": 1}, {"r": 16, "c": 4, "t": "P", "i": "M", "n": 1}, {"r": 15, "c": 2, "t": "P", "i": "M", "n": 1}, {"r": 16, "c": 7, "t": "P", "i": "M", "n": 1}, {"r": 15, "c": 5, "t": "P", "i": "M", "n": 1}, {"r": 13, "c": 8, "t": "P", "i": "M", "n": 1}, {"r": 15, "c": 8, "t": "P", "i": "M", "n": 1}, {"r": 12, "c": 3, "t": "L", "i": "M"}, {"r": 14, "c": 6, "t": "L", "i": "M"}, {"r": 12, "c": 6, "t": "L", "i": "M"}, {"r": 14, "c": 3, "t": "L", "i": "M"}, {"r": 14, "c": 9, "t": "L", "i": "M"}, {"r": 11, "c": 4, "t": "L", "i": "M"}, {"r": 9, "c": 4, "t": "L", "i": "M"}, {"r": 11, "c": 7, "t": "L", "i": "M"}, {"r": 10, "c": 5, "t": "L", "i": "M"}, {"r": 13, "c": 4, "t": "L", "i": "M"}, {"r": 13, "c": 1, "t": "L", "i": "M"}, {"r": 13, "c": 7, "t": "L", "i": "M"}, {"r": 15, "c": 4, "t": "L", "i": "M"}, {"r": 16, "c": 3, "t": "L", "i": "M"}, {"r": 15, "c": 1, "t": "L", "i": "M"}, {"r": 15, "c": 7, "t": "L", "i": "M"}, {"r": 16, "c": 6, "t": "L", "i": "M"}, {"r": 12, "c": 2, "t": "L", "i": "M"}, {"r": 12, "c": 5, "t": "L", "i": "M"}, {"r": 14, "c": 2, "t": "L", "i": "M"}, {"r": 12, "c": 8, "t": "L", "i": "M"}, {"r": 14, "c": 5, "t": "L", "i": "M"}, {"r": 14, "c": 8, "t": "L", "i": "M"}, {"r": 9, "c": 3, "t": "L", "i": "M"}, {"r": 10, "c": 4, "t": "P", "i": "M", "n": 1}, {"r": 11, "c": 3, "t": "L", "i": "M"}, {"r": 10, "c": 7, "t": "P", "i": "M", "n": 1}, {"r": 11, "c": 6, "t": "L", "i": "M"}, {"r": 13, "c": 3, "t": "L", "i": "M"}, {"r": 16, "c": 2, "t": "L", "i": "M"}, {"r": 15, "c": 6, "t": "L", "i": "M"}, {"r": 13, "c": 6, "t": "L", "i": "M"}, {"r": 16, "c": 5, "t": "L", "i": "M"}, {"r": 15, "c": 3, "t": "L", "i": "M"}, {"r": 16, "c": 8, "t": "L", "i": "M"}, {"r": 3, "c": 4, "t": "P", "i": "N", "n": 1}, {"r": 4, "c": 3, "t": "P", "i": "N", "n": 2}, {"r": 5, "c": 4, "t": "P", "i": "N", "n": 1}, {"r": 4, "c": 6, "t": "P", "i": "N", "n": 1}, {"r": 2, "c": 2, "t": "L", "i": "N"}, {"r": 1, "c": 6, "t": "L", "i": "N"}, {"r": 2, "c": 5, "t": "L", "i": "N"}, {"r": 1, "c": 3, "t": "L", "i": "N"}, {"r": 6, "c": 5, "t": "L", "i": "N"}, {"r": 4, "c": 2, "t": "L", "i": "N"}, {"r": 4, "c": 5, "t": "L", "i": "N"}, {"r": 3, "c": 3, "t": "L", "i": "N"}, {"r": 3, "c": 6, "t": "L", "i": "N"}, {"r": 5, "c": 3, "t": "L", "i": "N"}, {"r": 2, "c": 4, "t": "L", "i": "N"}, {"r": 2, "c": 7, "t": "L", "i": "N"}, {"r": 1, "c": 5, "t": "L", "i": "N"}, {"r": 6, "c": 4, "t": "L", "i": "N"}, {"r": 3, "c": 2, "t": "L", "i": "N"}, {"r": 3, "c": 5, "t": "L", "i": "N"}, {"r": 5, "c": 2, "t": "L", "i": "N"}, {"r": 4, "c": 4, "t": "L", "i": "N"}, {"r": 5, "c": 5, "t": "L", "i": "N"}, {"r": 1, "c": 4, "t": "P", "i": "N", "n": 1}, {"r": 2, "c": 3, "t": "P", "i": "N", "n": 1}, {"r": 2, "c": 6, "t": "P", "i": "N", "n": 1}, {"r": 6, "c": 3, "t": "P", "i": "N", "n": 1}, {"r": 20, "c": 5, "t": "L", "i": "S"}, {"r": 23, "c": 4, "t": "L", "i": "S"}, {"r": 22, "c": 8, "t": "L", "i": "S"}, {"r": 20, "c": 8, "t": "L", "i": "S"}, {"r": 22, "c": 5, "t": "L", "i": "S"}, {"r": 23, "c": 7, "t": "L", "i": "S"}, {"r": 19, "c": 6, "t": "L", "i": "S"}, {"r": 20, "c": 4, "t": "P", "i": "S", "n": 1}, {"r": 21, "c": 3, "t": "L", "i": "S"}, {"r": 20, "c": 7, "t": "P", "i": "S", "n": 1}, {"r": 22, "c": 4, "t": "P", "i": "S", "n": 1}, {"r": 21, "c": 6, "t": "L", "i": "S"}, {"r": 23, "c": 3, "t": "L", "i": "S"}, {"r": 22, "c": 7, "t": "P", "i": "S", "n": 1}, {"r": 23, "c": 6, "t": "L", "i": "S"}, {"r": 19, "c": 5, "t": "P", "i": "S", "n": 1}, {"r": 20, "c": 6, "t": "L", "i": "S"}, {"r": 21, "c": 5, "t": "P", "i": "S", "n": 2}, {"r": 20, "c": 9, "t": "L", "i": "S"}, {"r": 22, "c": 6, "t": "L", "i": "S"}, {"r": 21, "c": 8, "t": "P", "i": "S", "n": 1}, {"r": 23, "c": 5, "t": "P", "i": "S", "n": 1}, {"r": 22, "c": 3, "t": "L", "i": "S"}, {"r": 19, "c": 4, "t": "L", "i": "S"}, {"r": 19, "c": 7, "t": "L", "i": "S"}, {"r": 21, "c": 4, "t": "L", "i": "S"}, {"r": 21, "c": 7, "t": "L", "i": "S"}, {"r": 0, "c": 3, "t": "W", "i": "N"}, {"r": 0, "c": 4, "t": "W", "i": "N"}, {"r": 0, "c": 5, "t": "W", "i": "N"}, {"r": 0, "c": 6, "t": "W", "i": "N"}, {"r": 0, "c": 7, "t": "W", "i": "N"}, {"r": 1, "c": 1, "t": "W", "i": "N"}, {"r": 1, "c": 2, "t": "W", "i": "N"}, {"r": 1, "c": 7, "t": "W", "i": "N"}, {"r": 2, "c": 1, "t": "W", "i": "N"}, {"r": 2, "c": 8, "t": "W", "i": "N"}, {"r": 3, "c": 1, "t": "W", "i": "N"}, {"r": 3, "c": 7, "t": "W", "i": "N"}, {"r": 4, "c": 1, "t": "W", "i": "N"}, {"r": 4, "c": 7, "t": "W", "i": "N"}, {"r": 5, "c": 1, "t": "W", "i": "N"}, {"r": 5, "c": 6, "t": "W", "i": "N"}, {"r": 6, "c": 2, "t": "W", "i": "N"}, {"r": 6, "c": 6, "t": "W", "i": "N"}, {"r": 7, "c": 2, "t": "W", "i": "N"}, {"r": 7, "c": 3, "t": "W", "i": "N"}, {"r": 7, "c": 4, "t": "W", "i": "N"}, {"r": 7, "c": 5, "t": "W", "i": "N"}, {"r": 8, "c": 3, "t": "W", "i": "M"}, {"r": 8, "c": 4, "t": "W", "i": "M"}, {"r": 8, "c": 5, "t": "W", "i": "M"}, {"r": 9, "c": 2, "t": "W", "i": "M"}, {"r": 9, "c": 5, "t": "W", "i": "M"}, {"r": 9, "c": 6, "t": "W", "i": "M"}, {"r": 9, "c": 7, "t": "W", "i": "M"}, {"r": 10, "c": 2, "t": "W", "i": "M"}, {"r": 10, "c": 8, "t": "W", "i": "M"}, {"r": 11, "c": 1, "t": "W", "i": "M"}, {"r": 11, "c": 8, "t": "W", "i": "M"}, {"r": 12, "c": 1, "t": "W", "i": "M"}, {"r": 12, "c": 9, "t": "W", "i": "M"}, {"r": 13, "c": 0, "t": "W", "i": "M"}, {"r": 13, "c": 9, "t": "W", "i": "M"}, {"r": 14, "c": 0, "t": "W", "i": "M"}, {"r": 14, "c": 10, "t": "W", "i": "M"}, {"r": 15, "c": 0, "t": "W", "i": "M"}, {"r": 15, "c": 9, "t": "W", "i": "M"}, {"r": 16, "c": 1, "t": "W", "i": "M"}, {"r": 16, "c": 9, "t": "W", "i": "M"}, {"r": 17, "c": 1, "t": "W", "i": "M"}, {"r": 17, "c": 2, "t": "W", "i": "M"}, {"r": 17, "c": 3, "t": "W", "i": "M"}, {"r": 17, "c": 4, "t": "W", "i": "M"}, {"r": 17, "c": 5, "t": "W", "i": "M"}, {"r": 17, "c": 6, "t": "W", "i": "M"}, {"r": 17, "c": 7, "t": "W", "i": "M"}, {"r": 17, "c": 8, "t": "W", "i": "M"}, {"r": 18, "c": 4, "t": "W", "i": "S"}, {"r": 18, "c": 5, "t": "W", "i": "S"}, {"r": 18, "c": 6, "t": "W", "i": "S"}, {"r": 18, "c": 7, "t": "W", "i": "S"}, {"r": 18, "c": 8, "t": "W", "i": "S"}, {"r": 19, "c": 3, "t": "W", "i": "S"}, {"r": 19, "c": 8, "t": "W", "i": "S"}, {"r": 19, "c": 9, "t": "W", "i": "S"}, {"r": 20, "c": 3, "t": "W", "i": "S"}, {"r": 20, "c": 10, "t": "W", "i": "S"}, {"r": 21, "c": 2, "t": "W", "i": "S"}, {"r": 21, "c": 9, "t": "W", "i": "S"}, {"r": 22, "c": 2, "t": "W", "i": "S"}, {"r": 22, "c": 9, "t": "W", "i": "S"}, {"r": 23, "c": 2, "t": "W", "i": "S"}, {"r": 23, "c": 8, "t": "W", "i": "S"}, {"r": 24, "c": 3, "t": "W", "i": "S"}, {"r": 24, "c": 4, "t": "W", "i": "S"}, {"r": 24, "c": 5, "t": "W", "i": "S"}, {"r": 24, "c": 6, "t": "W", "i": "S"}, {"r": 24, "c": 7, "t": "W", "i": "S"}, {"r": 24, "c": 8, "t": "W", "i": "S"}]};
-const TYPES = ['S','C','O'];
-const TNAME = {S:'벚꽃',C:'등불',O:'오니기리'};
-const KNAME = {S:'벚꽃',C:'등불',O:'오니기리',N:'마네키네코',B:'배',M:'이동'};
-const PCOL = ['#2f8fe0','#e2475b','#f0a51c','#2fb38a'];
-const PCOLD = ['#1c63a8','#a8283a','#b87508','#1c7f61'];
-const PNAME = ['나','컴퓨터 1','컴퓨터 2','컴퓨터 3'];
-const TOKCOUNT = {2:7,3:10,4:13};
-const OPENISL = {2:'M',3:'MS',4:'MSN'};
-const HR = 20, HW = Math.sqrt(3)*HR, PAD = 6;
+const MAP = {"cells": [{"c": 23, "r": 4, "t": "P", "i": "N", "n": 2}, {"c": 10, "r": 6, "t": "L", "i": "M"}, {"c": 0, "r": 5, "t": "P", "i": "K", "n": 1}, {"c": 2, "r": 2, "t": "L", "i": "K"}, {"c": 13, "r": 8, "t": "L", "i": "M"}, {"c": 26, "r": 5, "t": "L", "i": "N"}, {"c": 3, "r": 6, "t": "P", "i": "K", "n": 1}, {"c": 5, "r": 3, "t": "P", "i": "M", "n": 1}, {"c": 11, "r": 7, "t": "L", "i": "M"}, {"c": 2, "r": 4, "t": "P", "i": "K", "n": 1}, {"c": 15, "r": 7, "t": "L", "i": "M"}, {"c": 6, "r": 4, "t": "L", "i": "M"}, {"c": 7, "r": 3, "t": "P", "i": "M", "n": 1}, {"c": 22, "r": 3, "t": "L", "i": "N"}, {"c": 14, "r": 8, "t": "P", "i": "M", "n": 3}, {"c": 5, "r": 5, "t": "L", "i": "K"}, {"c": 8, "r": 4, "t": "L", "i": "M"}, {"c": 17, "r": 7, "t": "L", "i": "M"}, {"c": 24, "r": 3, "t": "L", "i": "N"}, {"c": 15, "r": 9, "t": "L", "i": "M"}, {"c": 6, "r": 6, "t": "P", "i": "K", "n": 1}, {"c": 16, "r": 8, "t": "L", "i": "M"}, {"c": 22, "r": 5, "t": "L", "i": "N"}, {"c": 14, "r": 10, "t": "P", "i": "M", "n": 1}, {"c": 5, "r": 7, "t": "P", "i": "K", "n": 1}, {"c": 19, "r": 6, "t": "L", "i": "M"}, {"c": 9, "r": 5, "t": "L", "i": "M"}, {"c": 1, "r": 3, "t": "L", "i": "K"}, {"c": 13, "r": 5, "t": "L", "i": "M"}, {"c": 24, "r": 5, "t": "L", "i": "N"}, {"c": 25, "r": 4, "t": "L", "i": "N"}, {"c": 26, "r": 2, "t": "P", "i": "N", "n": 1}, {"c": 18, "r": 7, "t": "L", "i": "M"}, {"c": 12, "r": 6, "t": "P", "i": "M", "n": 1}, {"c": 3, "r": 3, "t": "L", "i": "K"}, {"c": 9, "r": 7, "t": "L", "i": "M"}, {"c": 13, "r": 7, "t": "L", "i": "M"}, {"c": 12, "r": 8, "t": "P", "i": "M", "n": 1}, {"c": 3, "r": 5, "t": "L", "i": "K"}, {"c": 15, "r": 6, "t": "L", "i": "M"}, {"c": 26, "r": 6, "t": "L", "i": "N"}, {"c": 20, "r": 5, "t": "P", "i": "M", "n": 1}, {"c": 14, "r": 7, "t": "L", "i": "M"}, {"c": 4, "r": 6, "t": "L", "i": "K"}, {"c": 16, "r": 7, "t": "P", "i": "M", "n": 1}, {"c": 7, "r": 4, "t": "L", "i": "M"}, {"c": 20, "r": 7, "t": "P", "i": "M", "n": 1}, {"c": 22, "r": 4, "t": "L", "i": "N"}, {"c": 23, "r": 3, "t": "L", "i": "N"}, {"c": 14, "r": 9, "t": "L", "i": "M"}, {"c": 5, "r": 6, "t": "L", "i": "K"}, {"c": 10, "r": 5, "t": "P", "i": "M", "n": 1}, {"c": 1, "r": 2, "t": "L", "i": "K"}, {"c": 0, "r": 4, "t": "L", "i": "K"}, {"c": 24, "r": 4, "t": "L", "i": "N"}, {"c": 25, "r": 3, "t": "P", "i": "N", "n": 1}, {"c": 16, "r": 9, "t": "P", "i": "M", "n": 1}, {"c": 22, "r": 6, "t": "P", "i": "N", "n": 1}, {"c": 23, "r": 5, "t": "L", "i": "N"}, {"c": 3, "r": 2, "t": "P", "i": "K", "n": 1}, {"c": 27, "r": 5, "t": "P", "i": "N", "n": 1}, {"c": 10, "r": 7, "t": "P", "i": "M", "n": 2}, {"c": 1, "r": 4, "t": "L", "i": "K"}, {"c": 11, "r": 6, "t": "L", "i": "M"}, {"c": 2, "r": 3, "t": "L", "i": "K"}, {"c": 25, "r": 5, "t": "P", "i": "N", "n": 1}, {"c": 6, "r": 3, "t": "L", "i": "M"}, {"c": 12, "r": 7, "t": "L", "i": "M"}, {"c": 17, "r": 6, "t": "L", "i": "M"}, {"c": 15, "r": 8, "t": "L", "i": "M"}, {"c": 21, "r": 3, "t": "P", "i": "N", "n": 1}, {"c": 14, "r": 6, "t": "P", "i": "M", "n": 1}, {"c": 4, "r": 5, "t": "P", "i": "K", "n": 1}, {"c": 8, "r": 5, "t": "P", "i": "M", "n": 1}, {"c": 19, "r": 5, "t": "L", "i": "M"}, {"c": 9, "r": 4, "t": "L", "i": "M"}, {"c": 6, "r": 7, "t": "L", "i": "K"}, {"c": 20, "r": 6, "t": "L", "i": "M"}, {"c": 18, "r": 6, "t": "P", "i": "M", "n": 2}, {"c": 23, "r": 2, "t": "P", "i": "N", "n": 1}, {"c": 4, "r": 7, "t": "L", "i": "K"}, {"c": 19, "r": 7, "t": "L", "i": "M"}, {"c": 8, "r": 7, "t": "P", "i": "M", "n": 1}, {"c": 1, "r": 1, "t": "P", "i": "K", "n": 1}, {"c": 0, "r": 3, "t": "P", "i": "K", "n": 1}, {"c": 9, "r": 6, "t": "L", "i": "M"}, {"c": 25, "r": 2, "t": "L", "i": "N"}, {"c": 13, "r": 6, "t": "L", "i": "M"}, {"c": 26, "r": 3, "t": "L", "i": "N"}, {"c": 18, "r": 8, "t": "P", "i": "M", "n": 1}, {"c": -1, "r": 2, "t": "W", "i": "K"}, {"c": -1, "r": 3, "t": "W", "i": "K"}, {"c": -1, "r": 4, "t": "W", "i": "K"}, {"c": -1, "r": 5, "t": "W", "i": "K"}, {"c": 0, "r": 1, "t": "W", "i": "K"}, {"c": 0, "r": 2, "t": "W", "i": "K"}, {"c": 0, "r": 6, "t": "W", "i": "K"}, {"c": 1, "r": 0, "t": "W", "i": "K"}, {"c": 1, "r": 5, "t": "W", "i": "K"}, {"c": 2, "r": 1, "t": "W", "i": "K"}, {"c": 2, "r": 5, "t": "W", "i": "K"}, {"c": 2, "r": 6, "t": "W", "i": "K"}, {"c": 2, "r": 7, "t": "W", "i": "K"}, {"c": 3, "r": 1, "t": "W", "i": "K"}, {"c": 3, "r": 4, "t": "W", "i": "K"}, {"c": 3, "r": 7, "t": "W", "i": "K"}, {"c": 4, "r": 2, "t": "W", "i": "K"}, {"c": 4, "r": 3, "t": "W", "i": "KM"}, {"c": 4, "r": 4, "t": "W", "i": "KM"}, {"c": 4, "r": 8, "t": "W", "i": "K"}, {"c": 5, "r": 2, "t": "W", "i": "M"}, {"c": 5, "r": 4, "t": "W", "i": "KM"}, {"c": 5, "r": 8, "t": "W", "i": "K"}, {"c": 6, "r": 2, "t": "W", "i": "M"}, {"c": 6, "r": 5, "t": "W", "i": "KM"}, {"c": 6, "r": 8, "t": "W", "i": "K"}, {"c": 7, "r": 2, "t": "W", "i": "M"}, {"c": 7, "r": 5, "t": "W", "i": "KM"}, {"c": 7, "r": 6, "t": "W", "i": "KM"}, {"c": 7, "r": 7, "t": "W", "i": "KM"}, {"c": 8, "r": 3, "t": "W", "i": "M"}, {"c": 8, "r": 6, "t": "W", "i": "M"}, {"c": 8, "r": 8, "t": "W", "i": "M"}, {"c": 9, "r": 3, "t": "W", "i": "M"}, {"c": 9, "r": 8, "t": "W", "i": "M"}, {"c": 10, "r": 4, "t": "W", "i": "M"}, {"c": 10, "r": 8, "t": "W", "i": "M"}, {"c": 11, "r": 4, "t": "W", "i": "M"}, {"c": 11, "r": 5, "t": "W", "i": "M"}, {"c": 11, "r": 8, "t": "W", "i": "M"}, {"c": 12, "r": 5, "t": "W", "i": "M"}, {"c": 12, "r": 9, "t": "W", "i": "M"}, {"c": 13, "r": 4, "t": "W", "i": "M"}, {"c": 13, "r": 9, "t": "W", "i": "M"}, {"c": 13, "r": 10, "t": "W", "i": "M"}, {"c": 14, "r": 5, "t": "W", "i": "M"}, {"c": 14, "r": 11, "t": "W", "i": "M"}, {"c": 15, "r": 5, "t": "W", "i": "M"}, {"c": 15, "r": 10, "t": "W", "i": "M"}, {"c": 16, "r": 6, "t": "W", "i": "M"}, {"c": 16, "r": 10, "t": "W", "i": "M"}, {"c": 17, "r": 5, "t": "W", "i": "M"}, {"c": 17, "r": 8, "t": "W", "i": "M"}, {"c": 17, "r": 9, "t": "W", "i": "M"}, {"c": 18, "r": 5, "t": "W", "i": "M"}, {"c": 18, "r": 9, "t": "W", "i": "M"}, {"c": 19, "r": 4, "t": "W", "i": "M"}, {"c": 19, "r": 8, "t": "W", "i": "M"}, {"c": 20, "r": 3, "t": "W", "i": "N"}, {"c": 20, "r": 4, "t": "W", "i": "MN"}, {"c": 20, "r": 8, "t": "W", "i": "M"}, {"c": 21, "r": 2, "t": "W", "i": "N"}, {"c": 21, "r": 4, "t": "W", "i": "MN"}, {"c": 21, "r": 5, "t": "W", "i": "MN"}, {"c": 21, "r": 6, "t": "W", "i": "MN"}, {"c": 21, "r": 7, "t": "W", "i": "M"}, {"c": 22, "r": 2, "t": "W", "i": "N"}, {"c": 22, "r": 7, "t": "W", "i": "N"}, {"c": 23, "r": 1, "t": "W", "i": "N"}, {"c": 23, "r": 6, "t": "W", "i": "N"}, {"c": 24, "r": 2, "t": "W", "i": "N"}, {"c": 24, "r": 6, "t": "W", "i": "N"}, {"c": 25, "r": 1, "t": "W", "i": "N"}, {"c": 25, "r": 6, "t": "W", "i": "N"}, {"c": 26, "r": 1, "t": "W", "i": "N"}, {"c": 26, "r": 4, "t": "W", "i": "N"}, {"c": 26, "r": 7, "t": "W", "i": "N"}, {"c": 27, "r": 1, "t": "W", "i": "N"}, {"c": 27, "r": 2, "t": "W", "i": "N"}, {"c": 27, "r": 3, "t": "W", "i": "N"}, {"c": 27, "r": 4, "t": "W", "i": "N"}, {"c": 27, "r": 6, "t": "W", "i": "N"}, {"c": 28, "r": 5, "t": "W", "i": "N"}, {"c": 28, "r": 6, "t": "W", "i": "N"}]};
+const BASIC=['S','C','O'];
+const TNAME={S:'벚꽃',C:'초칭',O:'오니기리',N:'마네키네코 토큰',K:'카니 토큰'};
+const KNAME={S:'벚꽃',C:'초칭',O:'오니기리',N:'마네키네코',B:'배',M:'이동',D:'뽑기',V:'덮기',X:'복사'};
+const WILD=new Set(['N','B','D','V']);
+const ACTION=new Set(['M','V','X']);
+const PCOL=['#2f8fe0','#e2475b','#f0a51c','#2fb38a'], PCOLD=['#1c63a8','#a8283a','#b87508','#1c7f61'];
+const PNAME=['나','컴퓨터 1','컴퓨터 2','컴퓨터 3'];
+const TOKCOUNT={2:7,3:10,4:13}, OPENISL={2:'M',3:'MK',4:'MKN'};
+const ABIL={torii:{ic:'⛩',nm:'도리이'},takoyaki:{ic:'🐙',nm:'타코야키'},rain:{ic:'☔',nm:'비 오는 날'},taiyaki:{ic:'🐟',nm:'타이야키'},none:{ic:'',nm:'없음'}};
+const HR=20, S3=Math.sqrt(3);
 
-// ---------- map geometry ----------
-const cells = MAP.cells.map((c,i)=>({...c,id:i}));
-const byRC = {}; cells.forEach(c=>byRC[c.r+','+c.c]=c.id);
-function nbrRC(r,c){
-  const d = (r%2===0)?[[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]]:[[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]];
-  return d.map(([a,b])=>byRC[(r+a)+','+(c+b)]).filter(x=>x!==undefined);
-}
-cells.forEach(c=>{c.nb=nbrRC(c.r,c.c); c.x=PAD+HW*(c.c+0.5*(c.r&1))+HW/2; c.y=PAD+HR+1.5*HR*c.r;});
-const VBW = PAD*2+HW*(MAP.C+0.5), VBH = PAD*2+HR*2+1.5*HR*(MAP.R-1);
-function hexPts(x,y,r){let s=[];for(let k=0;k<6;k++){const a=Math.PI/180*(60*k-90);s.push((x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1));}return s.join(' ');}
+// ---------- geometry (flat-top, odd columns shifted down) ----------
+const cells=MAP.cells.map((c,i)=>({...c,id:i}));
+const byCR={}; cells.forEach(c=>byCR[c.c+','+c.r]=c.id);
+const DIRS_E=[[0,-1],[1,-1],[1,0],[0,1],[-1,0],[-1,-1]], DIRS_O=[[0,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]]; // N,NE,SE,S,SW,NW
+cells.forEach(c=>{
+  const D=(c.c&1)?DIRS_O:DIRS_E;
+  c.dirs=D.map(([a,b])=>byCR[(c.c+a)+','+(c.r+b)]); // may be undefined
+  c.nb=c.dirs.filter(x=>x!==undefined);
+  c.mx=c.c*1.5*HR; c.my=c.r*S3*HR+((c.c&1)?S3*HR/2:0);
+});
+let ROT=false;
+function pos(c){ return ROT?{x:-c.my,y:c.mx}:{x:c.mx,y:c.my}; }
+function hexPts(x,y,r){const o=ROT?30:0;let s=[];for(let k=0;k<6;k++){const a=Math.PI/180*(60*k+o);s.push((x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1));}return s.join(' ');}
 
-// ---------- helpers ----------
-const rnd = a=>a[Math.floor(Math.random()*a.length)];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-const $ = id=>document.getElementById(id);
-const sleep = ms=>new Promise(r=>setTimeout(r,ms*(window.SPEED??1)));
-let tileUid = 1;
-function makeSet(){
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms*(window.SPEED??1)));
+let tileUid=1;
+function makeSet(special){
   const t=(k,s,f=false)=>({k,s,f,id:tileUid++});
-  return [t('S',2),t('S',3),t('S',4),t('C',2),t('C',3),t('C',4),t('O',2),t('O',3),t('O',4),
-    t('N',1,true),t('N',1,true),t('N',1),t('N',2),t('N',2),t('N',3),
-    t('B',1,true),t('B',1,true),t('B',2,true),t('M',0)];
+  const a=[t('S',2),t('S',3),t('S',4),t('C',2),t('C',3),t('C',4),t('O',2),t('O',3),t('O',4),
+    t('N',1,true),t('N',1,true),t('N',1),t('N',2),t('N',2),t('N',3),t('B',1,true),t('B',1,true),t('B',2,true),t('M',0)];
+  if(special) a.push(t('D',1,true),t('V',3),t('X',0));
+  return a;
 }
 
 // ---------- state ----------
-let G = null, opts = {n:1,d:1,open:false,strong:false};
-let ui = {sel:null, mode:'idle', moveFrom:null, toriiA:null, busy:false, last:new Set(), snap:null, zoom:false, info:null};
+let G=null;
+let opts={n:1,d:1,abil:'torii',open:false,strong:false,special:false,xN:false,xK:false,xD:false};
+let ui={sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,busy:false,last:new Set(),snap:null,zoom:false,info:null};
 
-function newGame(){
-  const np = opts.n+1;
-  const open = OPENISL[np];
-  G = {np, open, players:[], board:{}, ptok:{}, ties:[], cur:0, turn:{main:false,placed:0,torii:true}, over:false, log:[], round:1};
-  for(let i=0;i<np;i++){
-    const pile = shuffle(makeSet());
-    G.players.push({i, human:i===0, hand:[], pile, tok:{S:0,C:0,O:0}, toriiUsed:false});
-  }
-  // tokens
-  const sup = []; TYPES.forEach(t=>{for(let k=0;k<TOKCOUNT[np];k++)sup.push(t);});
-  const take = t=>{sup.splice(sup.indexOf(t),1);};
-  const parks = cells.filter(c=>c.t==='P' && isOpen(c));
-  parks.filter(p=>p.n===3).forEach(p=>{G.ptok[p.id]=['S','C','O']; TYPES.forEach(take);});
-  parks.filter(p=>p.n===2).forEach(p=>{
-    const a = rnd(sup); take(a);
-    const others = sup.filter(x=>x!==a); const b = rnd(others); take(b);
-    G.ptok[p.id]=[a,b].sort((x,y)=>TYPES.indexOf(x)-TYPES.indexOf(y));
-  });
-  shuffle(sup);
-  parks.filter(p=>p.n===1).forEach(p=>{G.ptok[p.id]=[sup.pop()];});
-  ui = {sel:null, mode:'idle', moveFrom:null, toriiA:null, busy:false, last:new Set(), snap:null, zoom:ui.zoom, info:null};
-  $('log').innerHTML='';
-  addLog(`새 게임 — ${np}인전, ${['쉬움','보통','어려움'][opts.d]} 난이도. 내가 먼저 시작합니다.`);
-  if(opts.strong){ openStrong(); return; }
-  G.players.forEach(p=>refill(p));
-  startTurn();
-}
 function isOpen(c){ if(c.t==='W') return [...c.i].some(ch=>G.open.includes(ch)); return G.open.includes(c.i); }
-function refill(p){ while(p.hand.length<5 && p.pile.length) p.hand.push(p.pile.pop()); }
-function addLog(s, col){ G.log.push(s); const d=document.createElement('div'); d.innerHTML=(col!==undefined?`<b style="color:${PCOLD[col]}">${PNAME[col]}</b> `:'')+s; $('log').prepend(d); }
+function newGame(){
+  const np=opts.n+1;
+  G={np,open:OPENISL[np],players:[],board:{},ptok:{},ties:[],cur:0,turn:null,over:false,log:[],round:1,
+     abil:opts.abil,special:opts.special,kani:null,doso:null};
+  for(let i=0;i<np;i++) G.players.push({i,human:i===0,hand:[],pile:shuffle(makeSet(opts.special)),tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:opts.abil==='none'});
+  const sup=[]; BASIC.forEach(t=>{for(let k=0;k<TOKCOUNT[np];k++)sup.push(t);});
+  const take=t=>sup.splice(sup.indexOf(t),1);
+  const parks=cells.filter(c=>c.t==='P'&&isOpen(c));
+  parks.filter(p=>p.n===3).forEach(p=>{ BASIC.forEach(take); if(opts.xD) G.doso={cell:p.id,holder:null}; else G.ptok[p.id]=['S','C','O']; });
+  parks.filter(p=>p.n===2).forEach(p=>{const a=rnd(sup);take(a);const b=rnd(sup.filter(x=>x!==a));take(b);G.ptok[p.id]=[a,b].sort((x,y)=>BASIC.indexOf(x)-BASIC.indexOf(y));});
+  shuffle(sup); parks.filter(p=>p.n===1).forEach(p=>G.ptok[p.id]=[sup.pop()]);
+  if(opts.xN){ const p=rnd(parks.filter(p=>p.n===2)); G.ptok[p.id].push('N'); }
+  if(opts.xK){
+    const ws=cells.filter(c=>c.t==='W'&&isOpen(c)).filter(c=>{const k=c.nb.filter(id=>cells[id].t==='W'&&isOpen(cells[id])).length; return k>=2&&k<=3;});
+    const w=rnd(ws); G.kani={cell:w.id,done:false};
+  }
+  ui={sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,busy:false,last:new Set(),snap:null,zoom:ui.zoom,info:null};
+  $('log').innerHTML='';
+  addLog(`새 게임 — ${np}인전 · ${['쉬움','보통','어려움'][opts.d]} · 능력 카드: ${ABIL[opts.abil].nm}${opts.special?' · 특별 행동 타일':''}${opts.xN||opts.xK||opts.xD?' · 미니 확장':''}. 내가 먼저 시작합니다.`);
+  if(opts.strong){ openStrong(); return; }
+  G.players.forEach(refill); startTurn();
+}
+function refill(p){ while(p.hand.length<5&&p.pile.length) p.hand.push(p.pile.pop()); }
+function addLog(s,col){ G.log.push(s); const d=document.createElement('div'); d.innerHTML=(col!==undefined?`<b style="color:${PCOLD[col]}">${PNAME[col]}</b> `:'')+s; $('log').prepend(d); }
 
 // ---------- rules ----------
-function emptyLandAround(park, board){ return park.nb.filter(id=>cells[id].t==='L' && !board[id]).length; }
-function strength(park, type, board, np){
-  const s = new Array(np).fill(0);
-  for(const id of park.nb){ const t=board[id]; if(!t) continue; if(t.k===type || t.k==='N' || t.k==='B') s[t.o]+=t.s; }
+function eff(board,id){
+  const t=board[id]; if(!t) return null;
+  if(t.down) return {k:'-',s:0,o:t.o};
+  if(t.k==='X'){
+    const tg=board[t.dir];
+    if(!tg||tg.down||ACTION.has(tg.k)&&tg.k!=='V') return {k:'-',s:0,o:t.o};
+    return {k:tg.k==='D'?'N':tg.k, s:tg.s, o:t.o};
+  }
+  return {k:t.k,s:t.s,o:t.o};
+}
+function counts(ty,k){ if(ty==='K') return true; if(ty==='N') return WILD.has(k); return k===ty||WILD.has(k); }
+function strength(cell,ty,board){
+  const s=new Array(G.np).fill(0);
+  for(const id of cell.nb){ const e=eff(board,id); if(e&&e.s>0&&counts(ty,e.k)) s[e.o]+=e.s; }
   return s;
 }
-function legalCells(tile, board){
+function dosoStrength(board){ const s=new Array(G.np).fill(0); for(const id of cells[G.doso.cell].nb){const e=eff(board,id); if(e) s[e.o]+=e.s;} return s; }
+function openWaterNb(c){ return c.nb.filter(id=>cells[id].t==='W'&&isOpen(cells[id])&&!(G.kani&&G.kani.cell===id)); }
+function emptyAround(c,board){
+  if(c.t==='W') return openWaterNb(c).filter(id=>!board[id]).length;
+  return c.nb.filter(id=>cells[id].t==='L'&&!board[id]).length;
+}
+function blocked(id){ return G.kani&&G.kani.cell===id; }
+function legalCells(tile,board,pi){
   const out=[];
+  if(tile.k==='V'){ for(const id in board) if(board[id].o===pi) out.push(+id); return out; }
   for(const c of cells){
-    if(board[c.id] || !isOpen(c)) continue;
-    if(tile.k==='B' ? c.t==='W' : c.t==='L') out.push(c.id);
+    if(board[c.id]||!isOpen(c)||blocked(c.id)) continue;
+    if(tile.k==='B'?c.t==='W':c.t==='L') out.push(c.id);
   }
   return out;
 }
-function movableFrom(pi, board){
-  return Object.keys(board).map(Number).filter(id=>{const t=board[id]; return t.o===pi && !t.f && t.k!=='M' && t.k!=='B' && cells[id].t==='L';});
+function waterCells(board){ return cells.filter(c=>c.t==='W'&&isOpen(c)&&!board[c.id]&&!blocked(c.id)).map(c=>c.id); }
+function movableFrom(pi,board){ return Object.keys(board).map(Number).filter(id=>{const t=board[id];return t.o===pi&&!t.f&&!ACTION.has(t.k)&&t.k!=='B'&&cells[id].t==='L';}); }
+function copyDirs(id){ return cells[id].dirs.map((d,i)=>({d,i})).filter(o=>o.d!==undefined&&isOpen(cells[o.d])&&cells[o.d].t!=='P'&&!blocked(o.d)); }
+function canPlaceTile(t){ return t.f||!G.turn.main; }
+function tileOptions(pi,t,board){
+  if(t.k==='M'){ return movableFrom(pi,board).length&&legalCells(t,board,pi).length; }
+  return legalCells(t,board,pi).length>0;
 }
-function canPlaceTile(tile){
-  if(tile.f) return true;
-  return !G.turn.main;
+function hasAnyLegal(p){ return p.hand.some(t=>canPlaceTile(t)&&tileOptions(p.i,t,G.board)); }
+function updateDoso(){
+  if(!G.doso) return;
+  const s=dosoStrength(G.board), mx=Math.max(...s), w=s.map((v,i)=>v===mx?i:-1).filter(i=>i>=0);
+  if(mx>0&&w.length===1&&G.doso.holder!==w[0]){ G.doso.holder=w[0]; addLog(`🗿 도소진 카드를 가져감 (세력 ${s.join(' : ')})`,w[0]); }
 }
-function hasAnyLegal(p){
-  for(const t of p.hand){
-    if(!t.f && G.turn.main) continue;
-    if(t.k==='M'){ if(movableFrom(p.i,G.board).length && legalCells(t,G.board).length) return true; }
-    else if(legalCells(t,G.board).length) return true;
-  }
-  return false;
-}
-function placeTile(pi, tile, cellId, fromId){
-  const p = G.players[pi];
-  p.hand = p.hand.filter(t=>t.id!==tile.id);
+function placeTile(pi,tile,cellId,ex={}){
+  const p=G.players[pi];
+  p.hand=p.hand.filter(t=>t.id!==tile.id);
   if(tile.k==='M'){
-    const moved = G.board[fromId]; delete G.board[fromId];
-    G.board[cellId] = moved;
-    G.board[fromId] = {...tile, o:pi};
-    ui.last.add(cellId); ui.last.add(fromId);
-    addLog(`이동 타일로 ${KNAME[moved.k]}(${moved.s}) 타일을 옮김`, pi);
+    const moved=G.board[ex.from]; delete G.board[ex.from];
+    G.board[cellId]=moved; G.board[ex.from]={...tile,o:pi};
+    ui.last.add(cellId); ui.last.add(ex.from);
+    addLog(`이동 타일로 ${KNAME[moved.k]}(${moved.s}) 타일을 옮김`,pi);
+  } else if(tile.k==='V'){
+    const under=G.board[cellId]; G.board[cellId]={...tile,o:pi,under};
+    ui.last.add(cellId); addLog(`덮기 타일로 자기 ${KNAME[under.k]} 타일을 덮음 (3점 와일드)`,pi);
   } else {
-    G.board[cellId] = {...tile, o:pi};
-    ui.last.add(cellId);
-    addLog(`${KNAME[tile.k]}${tile.s?'('+tile.s+')':''}${tile.f?' [빠름]':''} 타일을 놓음`, pi);
+    const t={...tile,o:pi}; if(tile.k==='X') t.dir=ex.dir; if(ex.taiyaki) t.f=true;
+    G.board[cellId]=t; ui.last.add(cellId);
+    addLog(`${KNAME[tile.k]}${tile.s?'('+tile.s+')':''}${tile.f?' [신속]':''} 타일을 놓음${ex.taiyaki?' (🐟 타이야키: 물 칸)':''}`,pi);
+    if(tile.k==='D'&&p.pile.length){ p.hand.push(p.pile.pop()); addLog('뽑기 타일 효과로 1장 보충',pi); }
   }
-  if(!tile.f) G.turn.main = true;
-  else if(!G.turn.main && false) G.turn.main = true;
-  G.turn.placed++; G.turn.torii=false;
+  if(!tile.f&&!ex.taiyaki) G.turn.main=true;
+  G.turn.placed++; G.turn.abil=false;
+  updateDoso();
 }
-function resolveParks(){
-  const pi = G.cur;
+function winnerOf(s){
+  const mx=Math.max(...s), w=s.map((v,i)=>v===mx?i:-1).filter(i=>i>=0);
+  if(mx>0&&w.length===1) return {w:w[0]};
+  if(mx>0&&G.doso&&G.doso.holder!==null&&w.includes(G.doso.holder)) return {w:G.doso.holder,doso:true};
+  return {w:-1};
+}
+function award(ty,s){
+  const r=winnerOf(s);
+  if(r.w>=0){ G.players[r.w].tok[ty]++; addLog(`${TNAME[ty]} 획득!${r.doso?' (도소진 카드로 동점 승리)':''} (세력 ${s.join(' : ')})`,r.w); }
+  else { G.ties.push(ty); addLog(`${TNAME[ty]} 동점 → 동점 구역 (세력 ${s.join(' : ')})`); }
+}
+function resolveAll(){
   for(const c of cells){
-    if(c.t!=='P' || !G.ptok[c.id] || !G.ptok[c.id].length) continue;
-    if(emptyLandAround(c, G.board)>0) continue;
-    for(const ty of G.ptok[c.id]){
-      const s = strength(c, ty, G.board, G.np);
-      const mx = Math.max(...s);
-      const win = s.map((v,i)=>v===mx?i:-1).filter(i=>i>=0);
-      if(mx>0 && win.length===1){ G.players[win[0]].tok[ty]++; addLog(`${TNAME[ty]} 토큰 획득! (세력 ${s.join(' : ')})`, win[0]); }
-      else { G.ties.push(ty); addLog(`${TNAME[ty]} 토큰 동점 → 동점 구역 (세력 ${s.join(' : ')})`); }
-    }
+    const tk=G.ptok[c.id]; if(c.t!=='P'||!tk||!tk.length) continue;
+    if(emptyAround(c,G.board)>0) continue;
+    for(const ty of tk) award(ty,strength(c,ty,G.board));
     G.ptok[c.id]=[];
+  }
+  if(G.kani&&!G.kani.done){
+    const c=cells[G.kani.cell];
+    if(emptyAround(c,G.board)===0){ award('K',strength(c,'K',G.board)); G.kani.done=true; }
   }
 }
 function boardCount(ty){ let n=0; for(const k in G.ptok) n+=G.ptok[k].filter(x=>x===ty).length; return n; }
 function endCondition(){
-  if(G.ties.length>=4) return '동점 구역 4칸이 모두 찼습니다';
-  for(const t of TYPES) if(boardCount(t)===0) return `${TNAME[t]} 토큰이 지도에서 모두 사라졌습니다`;
+  if(G.ties.length>=4) return '동점 구역에 토큰 4개가 찼습니다';
+  for(const t of BASIC) if(boardCount(t)===0) return `${TNAME[t]} 토큰이 지도에서 모두 사라졌습니다`;
   if(G.players.every(p=>p.hand.length===0)) return '모든 플레이어의 타일이 떨어졌습니다';
   return null;
 }
-function validSwap(a, ta, b, tb){
-  if(a===b || ta===tb) return false;
-  const A = G.ptok[a].slice(), B = G.ptok[b].slice();
-  A[A.indexOf(ta)] = tb; B[B.indexOf(tb)] = ta;
-  return new Set(A).size===A.length && new Set(B).size===B.length;
+function validSwap(a,ta,b,tb){
+  if(a===b||ta===tb||!BASIC.includes(ta)||!BASIC.includes(tb)) return false;
+  const A=G.ptok[a].slice(),B=G.ptok[b].slice(); A[A.indexOf(ta)]=tb; B[B.indexOf(tb)]=ta;
+  return new Set(A).size===A.length&&new Set(B).size===B.length;
 }
-function doSwap(a, ta, b, tb){
-  const A=G.ptok[a], B=G.ptok[b];
-  A[A.indexOf(ta)] = tb; B[B.indexOf(tb)] = ta;
-  G.players[G.cur].toriiUsed = true; G.turn.torii=false;
-  addLog(`⛩ 도리이 사용 — ${TNAME[ta]} ↔ ${TNAME[tb]} 토큰 위치 교환`, G.cur);
-}
+function useAbil(pi){ G.players[pi].abilUsed=true; G.turn.abil=false; }
+function doSwap(a,ta,b,tb){ const A=G.ptok[a],B=G.ptok[b]; A[A.indexOf(ta)]=tb; B[B.indexOf(tb)]=ta; useAbil(G.cur); addLog(`⛩ 도리이 — ${TNAME[ta]} ↔ ${TNAME[tb]} 토큰 위치 교환`,G.cur); }
+function doTako(pi,mine,tie){ const p=G.players[pi]; p.tok[mine]--; p.tok[tie]++; G.ties[G.ties.indexOf(tie)]=mine; useAbil(pi); addLog(`🐙 타코야키 — 내 토큰 1개를 동점 구역의 ${TNAME[tie]} 토큰과 맞바꿈`,pi); }
+function doRain(pi,id){ G.board[id].down=true; useAbil(pi); ui.last.add(id); addLog(`☔ 비 오는 날 — ${PNAME[G.board[id].o]}의 ${KNAME[G.board[id].k]}(${G.board[id].s}) 타일을 뒤집음`,pi); updateDoso(); }
+function rainTargets(board){ return Object.keys(board).map(Number).filter(id=>{const t=board[id];return !t.down&&t.s>=1&&t.s<=2&&!ACTION.has(t.k);}); }
 
 // ---------- turn flow ----------
 function startTurn(){
-  G.turn = {main:false, placed:0, torii:true};
-  ui.sel=null; ui.mode='idle'; ui.moveFrom=null; ui.toriiA=null;
-  const p = G.players[G.cur];
-  if(p.hand.length===0 || !hasAnyLegal(p)){
-    addLog(p.hand.length? '놓을 수 있는 곳이 없어 패스' : '남은 타일이 없어 패스', G.cur);
-    render(); setTimeout(endTurn, 500*(window.SPEED??1)); return;
+  G.turn={main:false,placed:0,abil:true};
+  Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null});
+  const p=G.players[G.cur];
+  if(p.hand.length===0||!hasAnyLegal(p)){
+    addLog(p.hand.length?'놓을 수 있는 곳이 없어 패스':'남은 타일이 없어 패스',G.cur);
+    render(); setTimeout(endTurn,500*(window.SPEED??1)); return;
   }
-  if(p.human){ ui.snap = JSON.stringify({b:G.board,pt:G.ptok,h:p.hand,tu:p.toriiUsed,log:G.log.length}); ui.busy=false; render(); }
-  else { ui.busy=true; render(); setTimeout(()=>aiTurn(G.cur), 450*(window.SPEED??1)); }
+  if(p.human){ ui.snap=JSON.stringify({G,log:G.log.length}); ui.busy=false; render(); }
+  else { ui.busy=true; render(); setTimeout(()=>aiTurn(G.cur),450*(window.SPEED??1)); }
 }
 function endTurn(){
-  resolveParks();
-  refill(G.players[G.cur]);
-  const why = endCondition();
+  resolveAll(); refill(G.players[G.cur]);
+  const why=endCondition();
   if(why){ render(); finish(why); return; }
-  G.cur = (G.cur+1)%G.np;
-  if(G.cur===0) G.round++;
-  if(G.cur===0) ui.last = new Set();
+  G.cur=(G.cur+1)%G.np;
+  if(G.cur===0){ G.round++; ui.last=new Set(); }
   startTurn();
 }
-function finish(why){
+
+// ---------- scoring ----------
+function vpOf(tots,i){ return BASIC.filter(t=>{const mx=Math.max(...tots.map(x=>x[t])); return tots[i][t]===mx&&mx>0&&tots.filter(x=>x[t]===mx).length===1;}); }
+function assignOptions(p){
+  const wl=[]; for(let k=0;k<p.tok.N;k++)wl.push('N'); for(let k=0;k<p.tok.K;k++)wl.push('K');
+  let res=[[]]; for(const w of wl){ const nx=[]; for(const r of res) for(const t of BASIC) nx.push([...r,t]); res=nx; }
+  return {wl,res};
+}
+function baseTot(p){ return {S:p.tok.S,C:p.tok.C,O:p.tok.O}; }
+function finish(why,humanChoice){
   G.over=true; ui.busy=true; render();
+  const P=G.players;
+  const hp=P[0], ho=assignOptions(hp);
+  if(ho.wl.length&&!humanChoice){
+    // ask the human first
+    const opt=ho.res.map(r=>r.join(','));
+    const uniq=[...new Set(opt)];
+    $('chooserTitle').textContent='와일드 토큰을 어느 종류로 셀까요?';
+    $('chooserOpts').innerHTML=uniq.map(o=>`<button data-o="${o}">${ho.wl.map((w,i)=>`${ico(w,26)}→${ico(o.split(',')[i],26)}`).join('<br>')}</button>`).join('');
+    $('chooserOpts').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('chooser').hidden=true; finish(why,b.dataset.o.split(','));});
+    $('chooserCancel').style.display='none'; $('chooser').hidden=false; return;
+  }
+  $('chooserCancel').style.display='';
   addLog(`게임 종료: ${why}`);
-  const P=G.players, vp=P.map(()=>[]);
-  TYPES.forEach(t=>{const mx=Math.max(...P.map(p=>p.tok[t])); const w=P.filter(p=>p.tok[t]===mx); if(mx>0 && w.length===1) vp[w[0].i].push(t);});
-  const total = p=>TYPES.reduce((a,t)=>a+p.tok[t],0);
-  const other = p=>TYPES.filter(t=>!vp[p.i].includes(t)).reduce((a,t)=>a+p.tok[t],0);
-  const maxVp = Math.max(...vp.map(v=>v.length));
-  let cand = P.filter(p=>vp[p.i].length===maxVp), how='승점';
-  if(cand.length>1 && maxVp>0){ const m=Math.max(...cand.map(other)); cand=cand.filter(p=>other(p)===m); how='승점 동점 → 다른 종류 토큰 수'; }
-  if(cand.length>1){ const m=Math.max(...cand.map(total)); cand=cand.filter(p=>total(p)===m); how += (how==='승점'?' 동점 → ':' → ')+'전체 토큰 수'; }
+  const tots=P.map(baseTot), assign=P.map(()=>[]);
+  if(humanChoice){ ho.wl.forEach((w,i)=>tots[0][humanChoice[i]]++); assign[0]=humanChoice; }
+  for(const p of P){ if(p.human) continue; const o=assignOptions(p); if(!o.wl.length) continue;
+    let best=null,bk=-1;
+    for(const r of o.res){ const t2=tots.map(x=>({...x})); r.forEach(t=>t2[p.i][t]++); const v=vpOf(t2,p.i).length*100+BASIC.reduce((a,t)=>a+t2[p.i][t],0)+Math.random()*.1; if(v>bk){bk=v;best=r;} }
+    best.forEach(t=>tots[p.i][t]++); assign[p.i]=best; }
+  const vp=P.map(p=>vpOf(tots,p.i));
+  const total=i=>BASIC.reduce((a,t)=>a+tots[i][t],0), other=i=>BASIC.filter(t=>!vp[i].includes(t)).reduce((a,t)=>a+tots[i][t],0);
+  const maxVp=Math.max(...vp.map(v=>v.length));
+  let cand=P.map(p=>p.i).filter(i=>vp[i].length===maxVp), how='승점';
   if(maxVp===0) how='아무도 승점을 못 받아 전체 토큰 수로';
-  const winners = cand.map(p=>p.i);
-  const youWin = winners.includes(0);
-  let h = `<h2>${youWin?(winners.length>1?'🌸 공동 승리!':'🌸 승리했어요!'):'게임 종료'}</h2><p class="hint" style="margin-top:0">${why}.</p>`;
-  h += `<table class="res"><tr><th></th><th>${ico('S',22)}</th><th>${ico('C',22)}</th><th>${ico('O',22)}</th><th>승점</th></tr>`;
-  P.forEach(p=>{h+=`<tr${winners.includes(p.i)?' style="background:#fff1c9"':''}><td class="nm" style="color:${PCOLD[p.i]}">${PNAME[p.i]}${winners.includes(p.i)?' 🏆':''}</td>${TYPES.map(t=>`<td>${p.tok[t]}${vp[p.i].includes(t)?' ★':''}</td>`).join('')}<td><b>${vp[p.i].length}</b></td></tr>`;});
-  h += `</table><p>승자: <b>${winners.map(i=>PNAME[i]).join(', ')}</b> <span class="hint">(${how})</span></p><p class="hint">★ = 그 종류 최다 보유로 받은 큰 승점</p>`;
-  h += `<div style="display:flex;gap:8px"><button class="btn" onclick="$('over').hidden=true">지도 보기</button><button class="btn primary" style="flex:1" onclick="$('over').hidden=true;$('setup').hidden=false">다시 하기</button></div>`;
-  $('overBody').innerHTML=h; setTimeout(()=>{$('over').hidden=false;}, 700);
+  if(cand.length>1&&maxVp>0){ const m=Math.max(...cand.map(other)); cand=cand.filter(i=>other(i)===m); how='승점 동점 → 다른 종류 토큰 수'; }
+  if(cand.length>1){ const m=Math.max(...cand.map(total)); cand=cand.filter(i=>total(i)===m); if(maxVp>0) how+=' → 전체 토큰 수'; }
+  const winners=cand, youWin=winners.includes(0);
+  let h=`<h2>${youWin?(winners.length>1?'🌸 공동 승리!':'🌸 승리했어요!'):'게임 종료'}</h2><p class="hint" style="margin-top:0">${why}.</p>`;
+  h+=`<table class="res"><tr><th></th>${BASIC.map(t=>`<th>${ico(t,22)}</th>`).join('')}<th>승점</th></tr>`;
+  P.forEach(p=>{const i=p.i; h+=`<tr${winners.includes(i)?' style="background:#fff1c9"':''}><td class="nm" style="color:${PCOLD[i]}">${PNAME[i]}${winners.includes(i)?' 🏆':''}</td>${BASIC.map(t=>`<td>${tots[i][t]}${vp[i].includes(t)?' ★':''}</td>`).join('')}<td><b>${vp[i].length}</b></td></tr>`;});
+  h+=`</table>`;
+  const wnote=P.filter(p=>assign[p.i].length).map(p=>`${PNAME[p.i]}: ${assignOptions(p).wl.map((w,k)=>`${w==='N'?'마네키네코':'카니'}→${TNAME[assign[p.i][k]]}`).join(', ')}`);
+  if(wnote.length) h+=`<p class="hint">와일드 토큰 배정 — ${wnote.join(' · ')}</p>`;
+  h+=`<p>승자: <b>${winners.map(i=>PNAME[i]).join(', ')}</b> <span class="hint">(${how})</span></p><p class="hint">★ = 그 종류 최다 보유로 받은 큰 승점</p>`;
+  h+=`<div style="display:flex;gap:8px"><button class="btn" onclick="$('over').hidden=true">지도 보기</button><button class="btn primary" style="flex:1" onclick="$('over').hidden=true;$('setup').hidden=false">다시 하기</button></div>`;
+  $('overBody').innerHTML=h; render(); setTimeout(()=>{$('over').hidden=false;},600);
 }
 
 // ---------- AI ----------
 function typeWeights(me){
-  const P=G.players, w={};
-  for(const t of TYPES){
-    const mine=P[me].tok[t], opp=Math.max(...P.filter(p=>p.i!==me).map(p=>p.tok[t]));
-    const left = boardCount(t);
-    let x = 10;
-    if(Math.abs(mine-opp)<=1) x += 5;
-    if(mine-opp > left) x -= 6;           // already safe
-    if(opp-mine > left) x -= 6;           // hopeless
-    w[t]=Math.max(3,x);
+  const P=G.players,w={};
+  for(const t of BASIC){
+    const mine=P[me].tok[t], opp=Math.max(...P.filter(p=>p.i!==me).map(p=>p.tok[t])), left=boardCount(t);
+    let x=10; if(Math.abs(mine-opp)<=1)x+=5; if(mine-opp>left)x-=6; if(opp-mine>left)x-=6; w[t]=Math.max(3,x);
   }
-  return w;
+  w.N=w.K=Math.max(w.S,w.C,w.O)+1; return w;
 }
-function evalBoard(board, me, W, hard){
-  let v=0;
-  for(const pid in G.ptok){
-    const tk=G.ptok[pid]; if(!tk.length) continue;
-    const park=cells[pid];
-    const emp = emptyLandAround(park, board);
-    for(const ty of tk){
-      const s = strength(park, ty, board, G.np);
-      const my=s[me]; let opp=0; s.forEach((x,i)=>{if(i!==me&&x>opp)opp=x;});
-      const w=W[ty];
-      if(emp===0){
-        if(my>opp) v+=w; else if(my<opp) v-=0.55*w; else v-=0.05*w;
-      } else {
-        const d = my-opp;
-        v += 0.32*w*Math.tanh(d/3);
-        if(emp===1 && hard){
-          // the next player could close it with up to 4 strength
-          if(d<4) v -= 0.25*w*(1-Math.max(0,d)/4);
-          else v += 0.15*w;
-        }
-      }
-    }
-  }
+function evalTok(v,s,me,w,emp,hard){
+  let my=s[me],opp=0; s.forEach((x,i)=>{if(i!==me&&x>opp)opp=x;});
+  const dh=G.doso&&G.doso.holder;
+  if(emp===0){ if(my>opp||(my===opp&&my>0&&dh===me)) return v+w; if(my<opp) return v-0.55*w; return v-0.05*w; }
+  const d=my-opp; v+=0.32*w*Math.tanh(d/3);
+  if(emp===1&&hard){ if(d<4) v-=0.25*w*(1-Math.max(0,d)/4); else v+=0.15*w; }
   return v;
 }
-function tileCost(t){ return t.k==='M'?1.2 : (t.f?0.4:0.6) + t.s*0.45 + ((t.k==='N'||t.k==='B')?0.6:0); }
-function aiCandidates(pi, board, mainDone){
-  const p=G.players[pi], seen=new Set(), out=[];
+function evalBoard(board,me,W,hard){
+  let v=0;
+  for(const pid in G.ptok){ const tk=G.ptok[pid]; if(!tk.length) continue; const c=cells[pid], emp=emptyAround(c,board);
+    for(const ty of tk) v=evalTok(v,strength(c,ty,board),me,W[ty],emp,hard); }
+  if(G.kani&&!G.kani.done){ const c=cells[G.kani.cell]; v=evalTok(v,strength(c,'K',board),me,W.K,emptyAround(c,board),hard); }
+  if(G.doso){ const s=dosoStrength(board); const mx=Math.max(...s); const w=s.filter(x=>x===mx).length;
+    const holder=(mx>0&&w===1)?s.indexOf(mx):G.doso.holder; if(holder===me) v+=5; else if(holder!==null) v-=2; }
+  return v;
+}
+function tileCost(t){ if(t.k==='M') return 1.2; if(t.k==='X') return 1.4; if(t.k==='V') return 2.6; if(t.k==='D') return -0.8; return (t.f?0.4:0.6)+t.s*0.45+(WILD.has(t.k)?0.6:0); }
+function aiCandidates(pi,board,mainDone){
+  const p=G.players[pi],seen=new Set(),out=[];
   for(const t of p.hand){
-    if(mainDone && !t.f) continue;
+    if(mainDone&&!t.f) continue;
     const key=t.k+t.s+t.f; if(seen.has(key)) continue; seen.add(key);
-    if(t.k==='M'){
-      const froms = movableFrom(pi, board), tos = legalCells(t, board);
-      for(const f of froms) for(const to of tos) out.push({t, to, from:f});
-    } else for(const to of legalCells(t, board)) out.push({t, to});
+    if(t.k==='M'){ const fr=movableFrom(pi,board),to=legalCells(t,board,pi); for(const f of fr) for(const x of to) out.push({t,to:x,from:f}); }
+    else if(t.k==='X'){ for(const x of legalCells(t,board,pi)) for(const o of copyDirs(x)) out.push({t,to:x,dir:o.d}); }
+    else for(const x of legalCells(t,board,pi)) out.push({t,to:x});
   }
   return out;
 }
-function applySim(board, pi, c){
+function applySim(board,pi,c){
   if(c.t.k==='M'){ const m=board[c.from]; delete board[c.from]; board[c.to]=m; board[c.from]={...c.t,o:pi}; }
-  else board[c.to]={...c.t,o:pi};
+  else if(c.t.k==='V'){ c._u=board[c.to]; board[c.to]={...c.t,o:pi,under:c._u}; }
+  else { board[c.to]={...c.t,o:pi,dir:c.dir}; }
 }
-function undoSim(board, c){
+function undoSim(board,c){
   if(c.t.k==='M'){ const m=board[c.to]; delete board[c.to]; board[c.from]=m; }
+  else if(c.t.k==='V'){ board[c.to]=c._u; }
   else delete board[c.to];
 }
-function bestMove(pi, mainDone, noise, hard){
-  const W=typeWeights(pi), board=G.board;
-  const base = evalBoard(board, pi, W, hard);
-  let best=null, bv=-1e9;
-  for(const c of aiCandidates(pi, board, mainDone)){
-    applySim(board, pi, c);
-    let v = evalBoard(board, pi, W, hard) - base - tileCost(c.t);
-    // mild preference for touching parks at all
-    const near = cells[c.to].nb.some(id=>cells[id].t==='P' && G.ptok[id] && G.ptok[id].length);
-    if(!near) v -= 1.5;
-    undoSim(board, c);
-    v += (Math.random()-0.5)*noise;
+function bestMove(pi,mainDone,noise,hard,cands){
+  const W=typeWeights(pi),board=G.board,base=evalBoard(board,pi,W,hard);
+  let best=null,bv=-1e9;
+  for(const c of (cands||aiCandidates(pi,board,mainDone))){
+    applySim(board,pi,c);
+    let v=evalBoard(board,pi,W,hard)-base-tileCost(c.t);
+    undoSim(board,c);
+    const near=cells[c.to].nb.some(id=>(G.ptok[id]&&G.ptok[id].length)||(G.kani&&!G.kani.done&&G.kani.cell===id)||(G.doso&&G.doso.cell===id));
+    if(!near) v-=1.5;
+    v+=(Math.random()-0.5)*noise;
     if(v>bv){bv=v;best=c;}
   }
   return best?{c:best,v:bv}:null;
 }
-function bestSwap(pi, hard){
-  const W=typeWeights(pi), board=G.board, base=evalBoard(board,pi,W,hard);
-  const toks=[]; for(const pid in G.ptok) G.ptok[pid].forEach(t=>toks.push([+pid,t]));
-  let best=null, bv=0;
-  for(let i=0;i<toks.length;i++) for(let j=i+1;j<toks.length;j++){
-    const [a,ta]=toks[i],[b,tb]=toks[j];
-    if(!validSwap(a,ta,b,tb)) continue;
-    const A=G.ptok[a], B=G.ptok[b], ia=A.indexOf(ta), ib=B.indexOf(tb);
-    A[ia]=tb; B[ib]=ta;
-    const v=evalBoard(board,pi,W,hard)-base;
-    A[ia]=ta; B[ib]=tb;
+function bestSwap(pi,hard){
+  const W=typeWeights(pi),base=evalBoard(G.board,pi,W,hard),toks=[];
+  for(const pid in G.ptok) G.ptok[pid].forEach(t=>{if(BASIC.includes(t))toks.push([+pid,t]);});
+  let best=null,bv=0;
+  for(let i=0;i<toks.length;i++)for(let j=i+1;j<toks.length;j++){
+    const [a,ta]=toks[i],[b,tb]=toks[j]; if(!validSwap(a,ta,b,tb)) continue;
+    const A=G.ptok[a],B=G.ptok[b],ia=A.indexOf(ta),ib=B.indexOf(tb); A[ia]=tb;B[ib]=ta;
+    const v=evalBoard(G.board,pi,W,hard)-base; A[ia]=ta;B[ib]=tb;
     if(v>bv){bv=v;best=[a,ta,b,tb];}
   }
   return best?{s:best,v:bv}:null;
 }
+function standing(pi,tok){ // how good the token race looks for pi
+  let v=0; for(const t of BASIC){ const mine=tok[t]; const opp=Math.max(...G.players.filter(p=>p.i!==pi).map(p=>p.tok[t])); const d=mine-opp; v+= d>0?3+Math.min(d,2)*.5 : d===0?1:Math.max(d,-3)*.5; } return v;
+}
+async function aiAbility(pi,d,hard){
+  const p=G.players[pi]; if(p.abilUsed||d===0||G.round<3) return;
+  const W=typeWeights(pi), thr=d===2?5:8;
+  if(G.abil==='torii'){ const sw=bestSwap(pi,hard); if(sw&&sw.v>thr){ doSwap(...sw.s); render(); await sleep(700);} }
+  else if(G.abil==='rain'){
+    const base=evalBoard(G.board,pi,W,hard); let best=null,bv=thr*0.8;
+    for(const id of rainTargets(G.board)){ if(G.board[id].o===pi) continue; G.board[id].down=true; const v=evalBoard(G.board,pi,W,hard)-base; delete G.board[id].down; if(v>bv){bv=v;best=id;} }
+    if(best!==null){ doRain(pi,best); render(); await sleep(700); }
+  } else if(G.abil==='taiyaki'){
+    const ws=waterCells(G.board), c=[]; const seen=new Set();
+    for(const t of p.hand){ if(ACTION.has(t.k)) continue; const key=t.k+t.s; if(seen.has(key)) continue; seen.add(key); for(const w of ws) c.push({t,to:w}); }
+    const m=bestMove(pi,true,0,hard,c);
+    if(m&&m.v>3){ useAbil(pi); placeTile(pi,m.c.t,m.c.to,{taiyaki:true}); render(); await sleep(700); }
+  } else if(G.abil==='takoyaki'&&G.ties.some(t=>BASIC.includes(t))){
+    const base=standing(pi,p.tok); let best=null,bv=0.9;
+    for(const a of BASIC) if(p.tok[a]>0) for(const b of new Set(G.ties.filter(t=>BASIC.includes(t)))){ if(a===b) continue; const t2={...p.tok}; t2[a]--; t2[b]++; const v=standing(pi,t2)-base; if(v>bv){bv=v;best=[a,b];} }
+    if(best&&G.round>5){ doTako(pi,best[0],best[1]); render(); await sleep(700); }
+  }
+}
 async function aiTurn(pi){
   if(G.over) return;
-  const d=opts.d, noise=[9,2.5,0][d], hard=d>=1;
-  const p=G.players[pi];
-  if(!p.toriiUsed && d>0 && G.round>2){
-    const sw=bestSwap(pi,hard);
-    if(sw && sw.v> (d===2?5:8)){ doSwap(...sw.s); render(); await sleep(700); }
-  }
-  // main tile (may be a fast tile)
-  const m = bestMove(pi, false, noise, hard);
-  if(m){ placeTile(pi, m.c.t, m.c.to, m.c.from); render(); await sleep(650); }
-  // extra fast tiles
+  const d=opts.d,noise=[9,2.5,0][d],hard=d>=1;
+  await aiAbility(pi,d,hard);
+  const m=bestMove(pi,false,noise,hard);
+  if(m){ placeTile(pi,m.c.t,m.c.to,{from:m.c.from,dir:m.c.dir}); render(); await sleep(650); }
   for(let k=0;k<6;k++){
-    const f = bestMove(pi, true, noise*0.5, hard);
-    if(!f || f.v < (d===0?0:0.8)) break;
-    placeTile(pi, f.c.t, f.c.to); render(); await sleep(550);
+    const f=bestMove(pi,true,noise*0.5,hard);
+    if(!f||f.v<(d===0?0:0.8)) break;
+    placeTile(pi,f.c.t,f.c.to,{dir:f.c.dir}); render(); await sleep(550);
   }
-  if(G.over) return;
-  endTurn();
+  if(!G.over) endTurn();
 }
 
 // ---------- human input ----------
-function humanTurn(){ return !G.over && G.players[G.cur].human && !ui.busy; }
+function humanTurn(){ return G&&!G.over&&G.players[G.cur].human&&!ui.busy; }
+function selTile(){ return G.players[0].hand.find(x=>x.id===ui.sel); }
 function selectTile(id){
   if(!humanTurn()) return;
-  const p=G.players[0], t=p.hand.find(x=>x.id===id);
-  if(!t || !canPlaceTile(t)) return;
-  if(ui.mode.startsWith('torii')) { ui.toriiA=null; }
-  if(ui.sel===id){ ui.sel=null; ui.mode='idle'; }
-  else { ui.sel=id; ui.mode = t.k==='M'?'move1':'place'; ui.moveFrom=null; }
-  render();
+  const t=G.players[0].hand.find(x=>x.id===id); if(!t) return;
+  if(ui.mode==='taiyaki1'||ui.mode==='taiyaki2'){ if(ACTION.has(t.k)) return; ui.sel=id; ui.mode='taiyaki2'; render(); return; }
+  if(!canPlaceTile(t)) return;
+  if(ui.sel===id&&!ui.mode.startsWith('copy')){ ui.sel=null; ui.mode='idle'; render(); return; }
+  ui.sel=id; ui.moveFrom=null; ui.pickA=null; ui.copyAt=null;
+  ui.mode=t.k==='M'?'move1':t.k==='X'?'copy1':'place'; render();
 }
 function validTargets(){
   if(!humanTurn()) return [];
-  const p=G.players[0];
-  if(ui.mode==='place'){ const t=p.hand.find(x=>x.id===ui.sel); return t?legalCells(t,G.board):[]; }
-  if(ui.mode==='move1') return movableFrom(0,G.board);
-  if(ui.mode==='move2'){ const t=p.hand.find(x=>x.id===ui.sel); return legalCells(t,G.board); }
-  if(ui.mode==='torii1') return Object.keys(G.ptok).filter(k=>G.ptok[k].length).map(Number);
-  if(ui.mode==='torii2'){ const [a,ta]=ui.toriiA; return Object.keys(G.ptok).map(Number).filter(b=>G.ptok[b].some(tb=>validSwap(a,ta,b,tb))); }
+  const t=selTile();
+  switch(ui.mode){
+    case 'place': return t?legalCells(t,G.board,0):[];
+    case 'move1': return movableFrom(0,G.board);
+    case 'move2': return legalCells(t,G.board,0);
+    case 'copy1': return legalCells(t,G.board,0);
+    case 'copy2': return copyDirs(ui.copyAt).map(o=>o.d);
+    case 'torii1': return Object.keys(G.ptok).map(Number).filter(k=>G.ptok[k].some(x=>BASIC.includes(x)));
+    case 'torii2': { const [a,ta]=ui.pickA; return Object.keys(G.ptok).map(Number).filter(b=>G.ptok[b].some(tb=>validSwap(a,ta,b,tb))); }
+    case 'rain': return rainTargets(G.board);
+    case 'taiyaki2': return waterCells(G.board);
+  }
   return [];
 }
 function clickCell(id){
   const c=cells[id];
-  if(c.t==='P' && !(ui.mode.startsWith('torii'))){ ui.info=id; renderInfo(); }
+  const infoable=(c.t==='P')||(G.kani&&G.kani.cell===id);
+  if(infoable&&!ui.mode.startsWith('torii')){ ui.info=id; renderInfo(); render(); }
   if(!humanTurn()) return;
-  const valid = validTargets();
-  if(!valid.includes(id)) { return; }
-  const p=G.players[0];
-  if(ui.mode==='place'){
-    const t=p.hand.find(x=>x.id===ui.sel); placeTile(0,t,id); ui.sel=null; ui.mode='idle'; render();
-  } else if(ui.mode==='move1'){ ui.moveFrom=id; ui.mode='move2'; render(); }
-  else if(ui.mode==='move2'){
-    const t=p.hand.find(x=>x.id===ui.sel); placeTile(0,t,id,ui.moveFrom); ui.sel=null; ui.mode='idle'; ui.moveFrom=null; render();
-  } else if(ui.mode==='torii1'){
-    pickToken(id, G.ptok[id], ty=>{ ui.toriiA=[id,ty]; ui.mode='torii2'; render(); });
-  } else if(ui.mode==='torii2'){
-    const [a,ta]=ui.toriiA; const opts2=G.ptok[id].filter(tb=>validSwap(a,ta,id,tb));
-    pickToken(id, opts2, tb=>{ doSwap(a,ta,id,tb); ui.mode='idle'; ui.toriiA=null; render(); });
+  if(!validTargets().includes(id)) return;
+  const t=selTile();
+  switch(ui.mode){
+    case 'place': placeTile(0,t,id); break;
+    case 'move1': ui.moveFrom=id; ui.mode='move2'; render(); return;
+    case 'move2': placeTile(0,t,id,{from:ui.moveFrom}); break;
+    case 'copy1': ui.copyAt=id; ui.mode='copy2'; render(); return;
+    case 'copy2': placeTile(0,t,ui.copyAt,{dir:id}); break;
+    case 'torii1': pick(G.ptok[id].filter(x=>BASIC.includes(x)),'옮길 토큰을 고르세요',ty=>{ui.pickA=[id,ty];ui.mode='torii2';render();}); return;
+    case 'torii2': { const [a,ta]=ui.pickA; pick(G.ptok[id].filter(tb=>validSwap(a,ta,id,tb)),'맞바꿀 토큰을 고르세요',tb=>{doSwap(a,ta,id,tb);ui.mode='idle';ui.pickA=null;render();}); return; }
+    case 'rain': doRain(0,id); break;
+    case 'taiyaki2': useAbil(0); placeTile(0,t,id,{taiyaki:true}); break;
   }
+  ui.sel=null; ui.mode='idle'; ui.moveFrom=null; ui.copyAt=null; render();
 }
-function pickToken(id, list, cb){
+function pick(list,title,cb){
   if(list.length===1){ cb(list[0]); return; }
-  $('chooserTitle').textContent = ui.mode==='torii1'?'옮길 토큰을 고르세요':'맞바꿀 토큰을 고르세요';
-  $('chooserOpts').innerHTML = list.map(t=>`<button data-t="${t}">${ico(t,40)}<div style="font-size:12px">${TNAME[t]}</div></button>`).join('');
-  $('chooserOpts').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('chooser').hidden=true; cb(b.dataset.t);});
+  $('chooserTitle').textContent=title;
+  $('chooserOpts').innerHTML=list.map(t=>`<button data-t="${t}">${ico(t,40)}<div style="font-size:12px">${TNAME[t]}</div></button>`).join('');
+  $('chooserOpts').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('chooser').hidden=true;cb(b.dataset.t);});
   $('chooser').hidden=false;
 }
 $('chooserCancel').onclick=()=>{$('chooser').hidden=true;};
-$('toriiBtn').onclick=()=>{
+$('abilBtn').onclick=()=>{
   if(!humanTurn()) return;
-  if(ui.mode.startsWith('torii')){ ui.mode='idle'; ui.toriiA=null; render(); return; }
-  if(G.players[0].toriiUsed || !G.turn.torii) return;
-  ui.sel=null; ui.mode='torii1'; render();
+  const p=G.players[0];
+  if(['torii1','torii2','rain','taiyaki1','taiyaki2'].includes(ui.mode)){ ui.mode='idle'; ui.pickA=null; ui.sel=null; render(); return; }
+  if(p.abilUsed||!G.turn.abil) return;
+  ui.sel=null;
+  if(G.abil==='torii') ui.mode='torii1';
+  else if(G.abil==='rain'){ if(!rainTargets(G.board).length) return flash('뒤집을 1~2점 타일이 없어요.'); ui.mode='rain'; }
+  else if(G.abil==='taiyaki'){ if(!waterCells(G.board).length) return flash('빈 물 칸이 없어요.'); ui.mode='taiyaki1'; }
+  else if(G.abil==='takoyaki'){
+    const mine=BASIC.filter(t=>p.tok[t]>0), tie=[...new Set(G.ties.filter(t=>BASIC.includes(t)))];
+    if(!mine.length||!tie.length) return flash('내 토큰과 동점 구역 토큰이 모두 있어야 쓸 수 있어요.');
+    pick(mine,'내 토큰 중 내줄 것',a=>{ const opts2=tie.filter(b=>b!==a); if(!opts2.length) return flash('맞바꿀 다른 종류가 동점 구역에 없어요.'); pick(opts2,'동점 구역에서 가져올 것',b=>{doTako(0,a,b);render();}); });
+    return;
+  }
+  render();
 };
+function flash(msg){ $('status').innerHTML=`<span>${msg}</span>`; setTimeout(render,1600); }
 $('undoBtn').onclick=()=>{
-  if(!humanTurn() || !ui.snap) return;
-  const s=JSON.parse(ui.snap); G.board=s.b; G.ptok=s.pt; G.players[0].hand=s.h; G.players[0].toriiUsed=s.tu;
-  G.log.length=s.log; G.turn={main:false,placed:0,torii:true}; ui.sel=null; ui.mode='idle'; ui.last=new Set();
-  addLog('이번 차례를 되돌림', 0); render();
+  if(!humanTurn()||!ui.snap) return;
+  const s=JSON.parse(ui.snap); G=s.G; G.log.length=s.log;
+  Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,last:new Set()});
+  addLog('이번 차례를 되돌림',0); render();
 };
-$('endBtn').onclick=()=>{
-  if(!humanTurn()) return;
-  if(G.turn.placed===0) return;
-  ui.busy=true; ui.sel=null; ui.mode='idle'; endTurn();
-};
+$('endBtn').onclick=()=>{ if(!humanTurn()||G.turn.placed===0) return; ui.busy=true; ui.sel=null; ui.mode='idle'; endTurn(); };
 
 // ---------- drawing ----------
 function icoInner(k){
   switch(k){
-    case 'S': return `<g>${[0,72,144,216,288].map(a=>`<ellipse cx="0" cy="-4.6" rx="3.6" ry="4.8" fill="#fff" stroke="#f2a3bd" stroke-width=".8" transform="rotate(${a})"/>`).join('')}<circle r="2.2" fill="#f27da0"/><circle r=".9" fill="#ffd9e5"/></g>`;
+    case 'S': return `<g>${[0,72,144,216,288].map(a=>`<ellipse cx="0" cy="-4.6" rx="3.6" ry="4.8" fill="#fff" stroke="#f2a3bd" stroke-width=".8" transform="rotate(${a})"/>`).join('')}<circle r="2.2" fill="#f27da0"/></g>`;
     case 'C': return `<g><rect x="-6.5" y="-8" width="13" height="16" rx="5.5" fill="#fff4ea" stroke="#d9473f" stroke-width="1.1"/><rect x="-4" y="-9.6" width="8" height="2.4" rx=".8" fill="#3a2a2a"/><rect x="-4" y="7.2" width="8" height="2.4" rx=".8" fill="#3a2a2a"/><text y="3.6" text-anchor="middle" font-size="9.5" font-weight="700" fill="#d9473f" font-family="serif">酒</text></g>`;
     case 'O': return `<g><path d="M0,-9 C3,-9 9.5,4 8.5,6.5 C7.5,9 -7.5,9 -8.5,6.5 C-9.5,4 -3,-9 0,-9Z" fill="#fff" stroke="#cfc6bd" stroke-width=".8"/><rect x="-3.6" y="1.5" width="7.2" height="7" fill="#1d1d1d"/></g>`;
-    case 'N': return `<g><path d="M-7,-3 L-6,-9.5 L-1.8,-5.5 Z M7,-3 L6,-9.5 L1.8,-5.5Z" fill="#fff" stroke="#c9a46a" stroke-width=".7"/><circle cy="0" r="7.6" fill="#fff" stroke="#c9a46a" stroke-width=".8"/><circle cx="-2.7" cy="-1" r="1" fill="#222"/><circle cx="2.7" cy="-1" r="1" fill="#222"/><path d="M-1.3,1.6 Q0,2.8 1.3,1.6" stroke="#222" stroke-width=".7" fill="none"/><circle cy="5.2" r="2.4" fill="#f5c542"/><path d="M-6,-6 l-1.5,-1" stroke="#e05" stroke-width="0"/></g>`;
-    case 'B': return `<g><path d="M-10,2 L10,2 L7,7 L-7,7Z" fill="#a8693a"/><rect x="-7" y="-5" width="14" height="7" fill="#f3e2c0" stroke="#a8693a" stroke-width=".8"/><path d="M-9,-5 L9,-5 L7,-8 L-7,-8Z" fill="#7a4524"/><line x1="-3.5" y1="-5" x2="-3.5" y2="2" stroke="#a8693a" stroke-width=".6"/><line x1="3.5" y1="-5" x2="3.5" y2="2" stroke="#a8693a" stroke-width=".6"/></g>`;
-    case 'M': return `<g fill="#fff"><path d="M-9,0 L9,0 M0,0" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M-1,-1 L-5,-8 L-2,-8 L4,-1Z M-1,1 L-5,8 L-2,8 L4,1Z M-9,-1 L-10,-4 L-8,-4 L-6,-1Z M-9,1 L-10,4 L-8,4 L-6,1Z"/></g>`;
+    case 'N': case 'D': return `<g><path d="M-7,-3 L-6,-9.5 L-1.8,-5.5 Z M7,-3 L6,-9.5 L1.8,-5.5Z" fill="#fff" stroke="#c9a46a" stroke-width=".7"/><circle r="7.6" fill="#fff" stroke="#c9a46a" stroke-width=".8"/><circle cx="-2.7" cy="-1" r="1" fill="#222"/><circle cx="2.7" cy="-1" r="1" fill="#222"/><path d="M-1.3,1.6 Q0,2.8 1.3,1.6" stroke="#222" stroke-width=".7" fill="none"/><circle cy="5.2" r="2.4" fill="#f5c542"/>${k==='D'?'<g transform="translate(-8,6)"><circle r="3.6" fill="#fff" stroke="#2a7" stroke-width="1"/><path d="M-2,0H2M0,-2V2" stroke="#2a7" stroke-width="1.3"/></g>':''}</g>`;
+    case 'B': return `<g><path d="M-10,2 L10,2 L7,7 L-7,7Z" fill="#a8693a"/><rect x="-7" y="-5" width="14" height="7" fill="#f3e2c0" stroke="#a8693a" stroke-width=".8"/><path d="M-9,-5 L9,-5 L7,-8 L-7,-8Z" fill="#7a4524"/></g>`;
+    case 'M': return `<g fill="#fff"><path d="M-9,0 L9,0" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M-1,-1 L-5,-8 L-2,-8 L4,-1Z M-1,1 L-5,8 L-2,8 L4,1Z M-9,-1 L-10,-4 L-8,-4 L-6,-1Z M-9,1 L-10,4 L-8,4 L-6,1Z"/></g>`;
+    case 'V': return `<g fill="none" stroke="#fff" stroke-width="1.6"><polygon points="${[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k;return (-2+6*Math.cos(a)).toFixed(1)+','+(-2+6*Math.sin(a)).toFixed(1);}).join(' ')}" opacity=".6"/><polygon fill="rgba(255,255,255,.25)" points="${[0,1,2,3,4,5].map(k=>{const a=Math.PI/3*k;return (2.5+6*Math.cos(a)).toFixed(1)+','+(2.5+6*Math.sin(a)).toFixed(1);}).join(' ')}"/></g>`;
+    case 'X': return `<g><circle r="8" fill="none" stroke="#fff" stroke-width="1.5"/><text y="3.8" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">복</text></g>`;
+    case 'K': return `<g><ellipse rx="7" ry="5" cy="1" fill="#e2473b"/><path d="M-7,-1 Q-11,-6 -8,-9 M7,-1 Q11,-6 8,-9" stroke="#e2473b" stroke-width="2" fill="none"/><circle cx="-8" cy="-9" r="2" fill="#e2473b"/><circle cx="8" cy="-9" r="2" fill="#e2473b"/><path d="M-6,4 l-4,3 M-5,5 l-3,4 M6,4 l4,3 M5,5 l3,4" stroke="#e2473b" stroke-width="1.3"/><circle cx="-2" cy="-3" r="1.2" fill="#222"/><circle cx="2" cy="-3" r="1.2" fill="#222"/></g>`;
+    case 'G': return `<g><path d="M-8,8 C-9,-2 -5,-9 0,-9 C5,-9 9,-2 8,8Z" fill="#9a9aa3" stroke="#5c5c66" stroke-width=".8"/><circle cx="-3" cy="-1" r="2.6" fill="#7b7b85"/><circle cx="3" cy="-1" r="2.6" fill="#7b7b85"/><path d="M-5,4 Q0,6 5,4" stroke="#5c5c66" fill="none"/></g>`;
   }
   return '';
 }
-function ico(k,size){ return `<svg viewBox="-11 -11 22 22" width="${size}" height="${size}">${icoInner(k)}</svg>`; }
-function tileSVG(t, x, y, r, opts={}){
-  const col = PCOL[t.o!==undefined?t.o:0], dark = PCOLD[t.o!==undefined?t.o:0];
-  const sc = r/20;
-  let g = `<g transform="translate(${x.toFixed(1)},${y.toFixed(1)})" ${opts.cls?`class="${opts.cls}"`:''}>`;
-  g += `<polygon points="${hexPts(0,0,r*0.93)}" fill="${col}" stroke="${opts.hl?'#ffcf4a':dark}" stroke-width="${opts.hl?2.6:1.2}"/>`;
-  if(t.f) g += `<rect x="${-7*sc}" y="${-15.5*sc}" width="${14*sc}" height="${3.2*sc}" rx="${1.6*sc}" fill="#fff"/><rect x="${-4*sc}" y="${-14.6*sc}" width="${7*sc}" height="${1.3*sc}" fill="${dark}"/>`;
-  g += `<g transform="translate(0,${-2.2*sc}) scale(${0.78*sc})">${icoInner(t.k)}</g>`;
-  if(t.s>0){
-    const n=t.s, gap=3.4*sc, x0=-(n-1)*gap/2;
-    for(let i=0;i<n;i++) g += `<circle cx="${(x0+i*gap).toFixed(2)}" cy="${(11*sc).toFixed(2)}" r="${1.25*sc}" fill="#fff"/>`;
-  }
+function tokInner(k){ // token: neko token gets a gold disc
+  if(k==='N') return `<circle r="10.5" fill="#ffd34d" stroke="#b8860b" stroke-width="1"/><g transform="scale(.85)">${icoInner('N')}</g>`;
+  return icoInner(k);
+}
+function ico(k,size){ return `<svg viewBox="-11 -11 22 22" width="${size}" height="${size}">${k==='N'||k==='K'?tokInner(k):icoInner(k)}</svg>`; }
+function tileSVG(t,x,y,r,o={}){
+  const col=t.down?'#9c93a8':PCOL[t.o??0], dark=PCOLD[t.o??0], sc=r/20;
+  let g=`<g transform="translate(${x.toFixed(1)},${y.toFixed(1)})" ${o.cls?`class="${o.cls}"`:''}>`;
+  const flat=o.flat;
+  const pts=(rr)=>{let s=[];for(let k=0;k<6;k++){const a=Math.PI/180*(60*k+(flat?0:30));s.push((rr*Math.cos(a)).toFixed(1)+','+(rr*Math.sin(a)).toFixed(1));}return s.join(' ');};
+  if(t.under) g+=`<polygon points="${pts(r*0.93)}" transform="translate(${2*sc},${2*sc})" fill="${dark}" opacity=".7"/>`;
+  g+=`<polygon points="${pts(r*0.9)}" fill="${col}" stroke="${o.hl?'#ffcf4a':dark}" stroke-width="${o.hl?2.6:1.2}"/>`;
+  if(t.down){ g+=`<text y="${5*sc}" text-anchor="middle" font-size="${12*sc}" fill="#fff">☔</text></g>`; return g; }
+  if(t.f) g+=`<rect x="${-7*sc}" y="${-14*sc}" width="${14*sc}" height="${3*sc}" rx="${1.5*sc}" fill="#fff"/><rect x="${-4*sc}" y="${-13.2*sc}" width="${7*sc}" height="${1.2*sc}" fill="${dark}"/>`;
+  g+=`<g transform="translate(0,${-1.5*sc}) scale(${0.72*sc})">${icoInner(t.k)}</g>`;
+  if(t.s>0){ const n=t.s,gap=3.4*sc,x0=-(n-1)*gap/2; for(let i=0;i<n;i++) g+=`<circle cx="${(x0+i*gap).toFixed(2)}" cy="${(10.5*sc).toFixed(2)}" r="${1.2*sc}" fill="#fff"/>`; }
   return g+'</g>';
 }
 function render(){
   if(!G) return;
-  const valid = new Set(validTargets());
-  let s = `<rect x="0" y="0" width="${VBW}" height="${VBH}" fill="none"/>`;
-  // base hexes
+  ROT = window.innerWidth<760;
+  const valid=new Set(validTargets());
+  const vis=cells.filter(isOpen);
+  let s='';
+  // decorative ocean dots for non-placeable water: draw all cells
   for(const c of cells){
-    const op = isOpen(c);
-    let fill;
-    if(c.t==='W') fill = op?'#6b84d6':'#4757a8';
-    else if(c.t==='P') fill = op?'#ffe3ee':'#b9a7c6';
-    else fill = op?'#f6bfd3':'#9a88b3';
-    s += `<polygon points="${hexPts(c.x,c.y,HR-0.6)}" fill="${fill}" stroke="${c.t==='W'?'#5a71c4':(op?'#e9a2bd':'#8a78a3')}" stroke-width=".8" data-id="${c.id}"/>`;
-    if(c.t==='W' && op) s += `<path d="M${c.x-6},${c.y+1} q3,-3 6,0 t6,0" stroke="#9fb1ea" stroke-width="1" fill="none" pointer-events="none"/>`;
+    const op=isOpen(c), {x,y}=pos(c);
+    let fill,str;
+    if(c.t==='W'){ fill=op?'#7d8fe0':'#5866b8'; str='#6476cc'; }
+    else if(c.t==='P'){ fill=op?'#ffe6f0':'#b9a7c6'; str=op?'#e9a2bd':'#8a78a3'; }
+    else { fill=op?'#f7c3d6':'#a493bd'; str=op?'#e9a2bd':'#8a78a3'; }
+    s+=`<polygon points="${hexPts(x,y,HR-0.6)}" fill="${fill}" stroke="${str}" stroke-width=".8"/>`;
+    if(c.t==='W'&&op) s+=`<path d="M${x-6},${y+1} q3,-3 6,0 t6,0" stroke="#a9b8ee" stroke-width="1" fill="none"/>`;
     if(c.t==='P'){
-      const tk = G.ptok[c.id]||[];
-      // tree marks
-      for(let k=0;k<c.n;k++){ const tx=c.x+(k-(c.n-1)/2)*7; s+=`<text x="${tx}" y="${c.y+(tk.length?14:4)}" font-size="${tk.length?6:10}" text-anchor="middle" fill="${op?'#c9799a':'#7d6a92'}" pointer-events="none">✿</text>`; }
-      const pos = tk.length===1?[[0,-1]]:tk.length===2?[[-6,-2],[6,-2]]:[[0,-8],[-6.5,2.5],[6.5,2.5]];
-      const sz = tk.length===1?0.95:0.62;
-      tk.forEach((t,i)=>{
-        const sel = ui.toriiA && ui.toriiA[0]===c.id && ui.toriiA[1]===t;
-        s += `<g transform="translate(${c.x+pos[i][0]},${c.y+pos[i][1]}) scale(${sz})" pointer-events="none">${sel?'<circle r="11" fill="#ffcf4a"/>':''}${icoInner(t)}</g>`;
-      });
+      const tk=G.ptok[c.id]||[];
+      const isDoso=G.doso&&G.doso.cell===c.id;
+      for(let k=0;k<c.n;k++){ s+=`<text x="${x+(k-(c.n-1)/2)*7}" y="${y+(tk.length||isDoso?14:4)}" font-size="${tk.length||isDoso?6:10}" text-anchor="middle" fill="${op?'#c9799a':'#7d6a92'}">✿</text>`; }
+      if(isDoso){ s+=`<g transform="translate(${x},${y-1}) scale(1)">${icoInner('G')}</g>`; }
+      const L=tk.length, ps=L===1?[[0,-1]]:L===2?[[-6,-2],[6,-2]]:L===3?[[0,-8],[-6.5,2.5],[6.5,2.5]]:[[-6,-7],[6,-7],[-6,4],[6,4]];
+      const sz=L===1?0.95:L===2?0.62:0.55;
+      tk.forEach((t,i)=>{ const sel=ui.pickA&&ui.pickA[0]===c.id&&ui.pickA[1]===t;
+        s+=`<g transform="translate(${x+ps[i][0]},${y+ps[i][1]}) scale(${sz})">${sel?'<circle r="11" fill="#ffcf4a"/>':''}${tokInner(t)}</g>`; });
     }
+    if(G.kani&&!G.kani.done&&G.kani.cell===c.id) s+=`<g transform="translate(${x},${y}) scale(1.05)"><circle r="11" fill="#fff4f0" opacity=".85"/>${icoInner('K')}</g>`;
   }
-  // tiles
   for(const id in G.board){
-    const c=cells[id], t=G.board[id];
-    s += `<g pointer-events="none">${tileSVG(t,c.x,c.y,HR,{hl:ui.last.has(+id), cls: ui.last.has(+id)?'newtile':''})}</g>`;
+    const c=cells[id],t=G.board[id],{x,y}=pos(c),hl=ui.last.has(+id);
+    s+=tileSVG(t,x,y,HR,{hl,cls:hl?'newtile':'',flat:!ROT});
+    if(t.k==='X'&&!t.down&&t.dir!==undefined){ const q=pos(cells[t.dir]); const dx=q.x-x,dy=q.y-y,L=Math.hypot(dx,dy); s+=`<path d="M${x+dx/L*9},${y+dy/L*9} L${x+dx/L*19},${y+dy/L*19}" stroke="#fff" stroke-width="2.6" marker-end="url(#ar)"/>`; }
   }
-  // highlights
-  for(const id of valid){
-    const c=cells[id];
-    s += `<polygon points="${hexPts(c.x,c.y,HR-2)}" fill="rgba(255,230,120,.32)" stroke="#ffcf4a" stroke-width="2.2" pointer-events="none"/>`;
-  }
-  if(ui.moveFrom!==null){ const c=cells[ui.moveFrom]; s+=`<polygon points="${hexPts(c.x,c.y,HR-1)}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 2" pointer-events="none"/>`; }
-  if(ui.info!==null){ const c=cells[ui.info]; s+=`<polygon points="${hexPts(c.x,c.y,HR+1)}" fill="none" stroke="#fff" stroke-width="2" pointer-events="none"/>`; }
-  // island labels
-  const lab = {N:'북쪽 섬',M:'가운데 섬',S:'남쪽 섬'};
-  for(const k of 'NMS'){ if(!G.open.includes(k)) continue; const cs=cells.filter(c=>c.i===k); const minr=Math.min(...cs.map(c=>c.r)); const top=cs.find(c=>c.r===minr);
-    const open=G.open.includes(k);
-    s+=`<text x="${PAD+4}" y="${top.y-HR*0.4}" font-size="10" fill="#fff" opacity=".85" pointer-events="none">${lab[k]}</text>`; }
-  const vis=cells.filter(isOpen); const y0=Math.min(...vis.map(c=>c.y))-HR-16, y1=Math.max(...vis.map(c=>c.y))+HR+4;
-  const svg=$('board'); svg.setAttribute('viewBox',`0 ${y0.toFixed(0)} ${VBW.toFixed(0)} ${(y1-y0).toFixed(0)}`); svg.innerHTML=s;
+  for(const id of valid){ const {x,y}=pos(cells[id]); s+=`<polygon points="${hexPts(x,y,HR-2)}" fill="rgba(255,230,120,.32)" stroke="#ffcf4a" stroke-width="2.2"/>`; }
+  for(const k of [ui.moveFrom,ui.copyAt]) if(k!==null&&k!==undefined){ const {x,y}=pos(cells[k]); s+=`<polygon points="${hexPts(x,y,HR-1)}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 2"/>`; }
+  if(ui.info!==null){ const {x,y}=pos(cells[ui.info]); s+=`<polygon points="${hexPts(x,y,HR+1)}" fill="none" stroke="#fff" stroke-width="2"/>`; }
+  const xs=vis.map(c=>pos(c).x), ys=vis.map(c=>pos(c).y);
+  const x0=Math.min(...xs)-HR-4,x1=Math.max(...xs)+HR+4,y0=Math.min(...ys)-HR-4,y1=Math.max(...ys)+HR+4;
+  const svg=$('board');
+  svg.setAttribute('viewBox',`${x0.toFixed(0)} ${y0.toFixed(0)} ${(x1-x0).toFixed(0)} ${(y1-y0).toFixed(0)}`);
+  svg.innerHTML=`<defs><marker id="ar" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="3" markerHeight="3" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#fff"/></marker></defs><g pointer-events="none">${s}</g>`;
   renderSide(); renderHand(); renderStatus(); renderInfo();
 }
+window.addEventListener('resize',()=>{ const r=window.innerWidth<760; if(r!==ROT) render(); });
 $('board').addEventListener('click',e=>{
-  const pt = $('board').createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
-  const p = pt.matrixTransform($('board').getScreenCTM().inverse());
-  let best=null, bd=1e9;
-  for(const c of cells){ const d=(c.x-p.x)**2+(c.y-p.y)**2; if(d<bd){bd=d;best=c;} }
-  if(best && bd < HR*HR) clickCell(best.id);
+  const pt=$('board').createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+  const p=pt.matrixTransform($('board').getScreenCTM().inverse());
+  let best=null,bd=1e9;
+  for(const c of cells){ if(!isOpen(c)) continue; const q=pos(c); const d=(q.x-p.x)**2+(q.y-p.y)**2; if(d<bd){bd=d;best=c;} }
+  if(best&&bd<HR*HR) clickCell(best.id);
 });
 function renderSide(){
   const P=G.players;
-  $('players').innerHTML = P.map(p=>{
-    const show = p.human || opts.open || G.over;
-    const toks = TYPES.map(t=>`<span class="tok">${ico(t,18)}${show?p.tok[t]:'?'}</span>`).join('');
-    return `<div class="prow ${G.cur===p.i&&!G.over?'cur':''}"><span class="dot" style="width:12px;height:12px;border-radius:50%;background:${PCOL[p.i]}"></span><div><div class="nm" style="color:${PCOLD[p.i]}">${PNAME[p.i]}</div><div class="meta">패 ${p.hand.length} · 더미 ${p.pile.length} · ⛩${p.toriiUsed?'사용함':'있음'}</div></div><div class="toks">${toks}</div></div>`;
-  }).join('') + `<div class="hint">지도에 남은 토큰: ${TYPES.map(t=>`${TNAME[t]} ${boardCount(t)}`).join(' · ')}</div>`;
-  let t=''; for(let i=0;i<4;i++) t+=`<div class="slot">${G.ties[i]?ico(G.ties[i],26):''}</div>`;
-  if(G.ties.length>4) t+=`<div class="hint">+${G.ties.length-4}</div>`;
+  $('players').innerHTML=P.map(p=>{
+    const show=p.human||opts.open||G.over;
+    let toks=BASIC.map(t=>`<span class="tok">${ico(t,18)}${show?p.tok[t]:'?'}</span>`).join('');
+    if(opts.xN) toks+=`<span class="tok">${ico('N',18)}${show?p.tok.N:'?'}</span>`;
+    if(opts.xK) toks+=`<span class="tok">${ico('K',18)}${show?p.tok.K:'?'}</span>`;
+    const ab=G.abil==='none'?'':` · ${ABIL[G.abil].ic}${p.abilUsed?'사용함':'있음'}`;
+    const ds=G.doso&&G.doso.holder===p.i?' · 🗿도소진':'';
+    return `<div class="prow ${G.cur===p.i&&!G.over?'cur':''}"><span class="dot" style="background:${PCOL[p.i]}"></span><div><div class="nm" style="color:${PCOLD[p.i]}">${PNAME[p.i]}</div><div class="meta">패 ${p.hand.length} · 더미 ${p.pile.length}${ab}${ds}</div></div><div class="toks">${toks}</div></div>`;
+  }).join('')+`<div class="hint">지도에 남은 토큰: ${BASIC.map(t=>`${TNAME[t]} ${boardCount(t)}`).join(' · ')}${G.doso?` · 도소진 카드: ${G.doso.holder===null?'아직 없음':PNAME[G.doso.holder]}`:''}</div>`;
+  let t=''; for(let i=0;i<Math.max(4,G.ties.length);i++) t+=`<div class="slot">${G.ties[i]?ico(G.ties[i],26):''}</div>`;
   $('ties').innerHTML=t;
 }
 function renderHand(){
-  const p=G.players[0], my=humanTurn();
-  $('hand').innerHTML = p.hand.map(t=>{
-    const dis = !my || !canPlaceTile(t);
-    return `<button class="htile ${ui.sel===t.id?'sel':''}" data-id="${t.id}" ${dis?'disabled':''} title="${KNAME[t.k]} ${t.s}${t.f?' (빠름)':''}"><svg viewBox="-24 -24 48 48">${tileSVG({...t,o:0},0,0,23)}</svg></button>`;
-  }).join('') || '<div class="hint">손패가 없습니다</div>';
+  const p=G.players[0],my=humanTurn(),tai=ui.mode.startsWith('taiyaki');
+  $('hand').innerHTML=p.hand.map(t=>{
+    const dis=!my||(tai?ACTION.has(t.k):!canPlaceTile(t));
+    return `<button class="htile ${ui.sel===t.id?'sel':''}" data-id="${t.id}" ${dis?'disabled':''} title="${KNAME[t.k]} ${t.s}${t.f?' (신속)':''}"><svg viewBox="-24 -24 48 48">${tileSVG({...t,o:0},0,0,23,{flat:false})}</svg></button>`;
+  }).join('')||'<div class="hint">손패가 없습니다</div>';
   $('hand').querySelectorAll('.htile').forEach(b=>b.onclick=()=>selectTile(+b.dataset.id));
-  $('endBtn').disabled = !my || G.turn.placed===0;
-  $('undoBtn').disabled = !my || (G.turn.placed===0 && !(G.players[0].toriiUsed && JSON.parse(ui.snap||'{}').tu===false));
-  const tb=$('toriiBtn'); tb.disabled = !my || ((p.toriiUsed || !G.turn.torii) && !ui.mode.startsWith('torii'));
-  tb.textContent = ui.mode.startsWith('torii')?'도리이 취소':(p.toriiUsed?'⛩ 사용함':'⛩ 도리이');
-  $('pileinfo').textContent = `내 더미 ${p.pile.length}장 · 이번 차례 놓은 타일 ${my?G.turn.placed:0}장${my&&G.turn.main?' (일반 타일 놓음 — 빠른 타일만 더 가능)':''}`;
+  $('endBtn').disabled=!my||G.turn.placed===0;
+  $('undoBtn').disabled=!my||(G.turn.placed===0&&G.turn.abil);
+  const ab=$('abilBtn'), A=ABIL[G.abil], inAb=['torii1','torii2','rain','taiyaki1','taiyaki2'].includes(ui.mode);
+  ab.style.display=G.abil==='none'?'none':'';
+  ab.disabled=!my||((p.abilUsed||!G.turn.abil)&&!inAb);
+  ab.textContent=inAb?'취소':(p.abilUsed?`${A.ic} 사용함`:`${A.ic} ${A.nm}`);
+  $('pileinfo').textContent=`내 더미 ${p.pile.length}장 · 이번 차례 놓은 타일 ${my?G.turn.placed:0}장${my&&G.turn.main?' (일반 타일 놓음 — 신속 타일만 더 가능)':''}`;
 }
 function renderStatus(){
-  const p=G.players[G.cur]; let msg;
-  if(G.over) msg='게임이 끝났습니다. <b>새 게임</b>으로 다시 시작할 수 있어요.';
-  else if(!p.human) msg=`<b>${PNAME[p.i]}</b>가 생각 중…`;
-  else if(ui.mode==='place') msg='빛나는 칸을 눌러 타일을 놓으세요.';
-  else if(ui.mode==='move1') msg='옮길 <b>내 타일</b>을 고르세요 (빠른 타일·배 제외).';
-  else if(ui.mode==='move2') msg='옮겨 갈 <b>빈 땅</b>을 고르세요.';
-  else if(ui.mode==='torii1') msg='⛩ 맞바꿀 첫 번째 토큰이 있는 공원을 누르세요.';
-  else if(ui.mode==='torii2') msg='⛩ 맞바꿀 두 번째 토큰이 있는 공원을 누르세요.';
-  else if(G.turn.placed===0) msg='내 차례 — 손패에서 타일을 고르세요.'+(p.toriiUsed?'':' (먼저 ⛩ 도리이를 쓸 수도 있어요)');
-  else if(!G.turn.main) msg='빠른 타일을 더 놓거나, 일반 타일 1장을 놓거나, <b>턴 종료</b>를 누르세요.';
-  else msg='빠른 타일을 더 놓거나 <b>턴 종료</b>를 누르세요.';
-  $('status').innerHTML = `<span class="dot" style="background:${PCOL[G.cur]}"></span><span>${msg}</span><span style="margin-left:auto;font-size:12px;color:var(--muted)">${G.round}라운드</span>`;
+  const p=G.players[G.cur]; let m;
+  if(G.over) m='게임이 끝났습니다. <b>새 게임</b>으로 다시 시작할 수 있어요.';
+  else if(!p.human) m=`<b>${PNAME[p.i]}</b>가 생각 중…`;
+  else m={place:'빛나는 칸을 눌러 타일을 놓으세요.',move1:'옮길 <b>내 타일</b>을 고르세요 (신속·배·액션 타일 제외).',move2:'옮겨 갈 <b>빈 육지</b>를 고르세요.',
+    copy1:'복사 타일을 놓을 <b>빈 육지</b>를 고르세요.',copy2:'복사할 <b>방향</b>(이웃 칸)을 고르세요. 빈 칸이면 나중에 채워질 때 복사돼요.',
+    torii1:'⛩ 맞바꿀 첫 번째 토큰이 있는 공원을 누르세요.',torii2:'⛩ 맞바꿀 두 번째 토큰이 있는 공원을 누르세요.',
+    rain:'☔ 뒤집을 1~2점 타일을 누르세요 (아무 플레이어).',taiyaki1:'🐟 물 칸에 놓을 손패 타일을 고르세요.',taiyaki2:'🐟 놓을 <b>물 칸</b>을 고르세요.'}[ui.mode]
+    || (G.turn.placed===0?'내 차례 — 손패에서 타일을 고르세요.'+(!p.abilUsed&&G.abil!=='none'?` (먼저 ${ABIL[G.abil].ic} 능력 카드를 쓸 수도 있어요)`:'')
+       : !G.turn.main?'신속 타일을 더 놓거나, 일반 타일 1개를 놓거나, <b>턴 종료</b>를 누르세요.':'신속 타일을 더 놓거나 <b>턴 종료</b>를 누르세요.');
+  $('status').innerHTML=`<span class="dot" style="background:${PCOL[G.cur]}"></span><span>${m}</span><span style="margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap">${G.round}라운드</span>`;
 }
 function renderInfo(){
-  const el=$('parkinfo');
-  if(ui.info===null||!G){ return; }
-  const c=cells[ui.info], tk=G.ptok[c.id]||[];
-  if(!tk.length){ el.innerHTML=`<h3>공원 정보</h3><div class="hint">이 공원의 토큰은 이미 수여되었습니다.</div>`; return; }
-  const emp=emptyLandAround(c,G.board);
-  let h=`<h3>공원 정보 — 남은 빈 땅 ${emp}칸</h3><table><tr><th></th>${tk.map(t=>`<th>${ico(t,20)}</th>`).join('')}</tr>`;
-  G.players.forEach(p=>{ h+=`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${PNAME[p.i]}</td>${tk.map(t=>`<td>${strength(c,t,G.board,G.np)[p.i]}</td>`).join('')}</tr>`; });
-  el.innerHTML=h+'</table>';
+  const el=$('parkinfo'); if(ui.info===null||!G) return;
+  const c=cells[ui.info];
+  if(G.doso&&G.doso.cell===c.id){
+    const s=dosoStrength(G.board);
+    el.innerHTML=`<h3>🗿 도소진 — 둘레 타일 점 합계 (카드: ${G.doso.holder===null?'없음':PNAME[G.doso.holder]})</h3><table>${G.players.map(p=>`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${PNAME[p.i]}</td><td>${s[p.i]}</td></tr>`).join('')}</table>`; return;
+  }
+  let tk=G.ptok[c.id]||[];
+  if(G.kani&&G.kani.cell===c.id) tk=G.kani.done?[]:['K'];
+  if(!tk.length){ el.innerHTML=`<h3>공원 정보</h3><div class="hint">이곳의 토큰은 이미 수여되었습니다.</div>`; return; }
+  const emp=emptyAround(c,G.board);
+  let h=`<h3>${c.t==='W'?'카니 — 남은 빈 물 칸':'공원 — 남은 빈 육지'} ${emp}칸</h3><table><tr><th></th>${tk.map(t=>`<th>${ico(t,20)}</th>`).join('')}</tr>`;
+  G.players.forEach(p=>{h+=`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${PNAME[p.i]}</td>${tk.map(t=>`<td>${strength(c,t,G.board)[p.i]}</td>`).join('')}</tr>`;});
+  el.innerHTML=h+'</table>'+(tk.includes('N')?'<div class="hint">마네키네코 토큰은 와일드 타일만 셉니다.</div>':'');
 }
 
 // ---------- setup UI ----------
-function bindOpt(id,key){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{ $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); opts[key]=+b.dataset.v; }); }
-bindOpt('optN','n'); bindOpt('optD','d');
-$('startBtn').onclick=()=>{ opts.open=$('optOpen').checked; opts.strong=$('optStrong').checked; $('setup').hidden=true; $('over').hidden=true; newGame(); };
+function bindOpt(id,key,num){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{ $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); opts[key]=num?+b.dataset.v:b.dataset.v; }); }
+bindOpt('optN','n',1); bindOpt('optD','d',1); bindOpt('optA','abil',0);
+$('startBtn').onclick=()=>{
+  Object.assign(opts,{open:$('optOpen').checked,strong:$('optStrong').checked,special:$('optSpecial').checked,xN:$('optXN').checked,xK:$('optXK').checked,xD:$('optXD').checked});
+  $('setup').hidden=true; $('over').hidden=true; newGame();
+};
 $('newBtn').onclick=()=>{ $('setup').hidden=false; };
 $('rulesBtn').onclick=$('setupRules').onclick=()=>{ $('rules').hidden=false; };
 $('rulesClose').onclick=()=>{ $('rules').hidden=true; };
@@ -696,7 +795,7 @@ $('zoomBtn').onclick=()=>{ ui.zoom=!ui.zoom; $('boardwrap').classList.toggle('zo
 let strongSel=new Set();
 function openStrong(){
   const p=G.players[0]; strongSel=new Set();
-  const all=p.pile.slice().sort((a,b)=>('SCONBM'.indexOf(a.k)-'SCONBM'.indexOf(b.k))||a.s-b.s);
+  const all=p.pile.slice().sort((a,b)=>('SCONBDVXM'.indexOf(a.k)-'SCONBDVXM'.indexOf(b.k))||a.s-b.s);
   const draw=()=>{
     $('strongTiles').innerHTML=all.map(t=>`<button class="htile ${strongSel.has(t.id)?'sel':''}" data-id="${t.id}"><svg viewBox="-24 -24 48 48">${tileSVG({...t,o:0},0,0,23)}</svg></button>`).join('');
     $('strongTiles').querySelectorAll('button').forEach(b=>b.onclick=()=>{const id=+b.dataset.id; if(strongSel.has(id))strongSel.delete(id); else if(strongSel.size<5)strongSel.add(id); draw();});
@@ -705,13 +804,13 @@ function openStrong(){
   draw(); $('strong').hidden=false;
   $('strongOk').onclick=()=>{
     p.hand=p.pile.filter(t=>strongSel.has(t.id)); p.pile=shuffle(p.pile.filter(t=>!strongSel.has(t.id)));
-    // computers pick a balanced strong hand
-    G.players.slice(1).forEach(q=>{ const pick=[]; for(const k of ['S','C','O']){const t=q.pile.filter(x=>x.k===k).sort((a,b)=>b.s-a.s)[0]; pick.push(t.id);} const n=q.pile.find(x=>x.k==='N'&&x.s===3); pick.push(n.id); const f=q.pile.find(x=>x.k==='N'&&x.f); pick.push(f.id); q.hand=q.pile.filter(t=>pick.includes(t.id)); q.pile=shuffle(q.pile.filter(t=>!pick.includes(t.id))); });
+    G.players.slice(1).forEach(q=>{ const pick=[]; for(const k of BASIC) pick.push(q.pile.filter(x=>x.k===k).sort((a,b)=>b.s-a.s)[0].id);
+      pick.push(q.pile.find(x=>x.k==='N'&&x.s===3).id); pick.push(q.pile.find(x=>x.k==='N'&&x.f).id);
+      q.hand=q.pile.filter(t=>pick.includes(t.id)); q.pile=shuffle(q.pile.filter(t=>!pick.includes(t.id))); });
     $('strong').hidden=true; startTurn();
   };
 }
-// preview board before start
-G={np:2,open:'M',players:[{i:0,human:true,hand:[],pile:[],tok:{S:0,C:0,O:0},toriiUsed:false},{i:1,hand:[],pile:[],tok:{S:0,C:0,O:0}}],board:{},ptok:{},ties:[],cur:0,turn:{main:false,placed:0,torii:true},over:true,log:[],round:1};
+G={np:2,open:'M',players:[{i:0,human:true,hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:false},{i:1,hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0}}],board:{},ptok:{},ties:[],cur:0,turn:{main:false,placed:0,abil:true},over:true,log:[],round:1,abil:'torii',kani:null,doso:null};
 render();
 </script>
 </body>
