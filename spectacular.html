@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스펙터큘러 — 컴퓨터 대전</title>
+<style>
+:root{--bg:#f3efe3;--card:#fffdf6;--ink:#2b2a26;--muted:#77725f;--accent:#2f7d4a;--warn:#c0392b;--line:#ddd5bd}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:15px;-webkit-tap-highlight-color:transparent}
+#app{max-width:760px;margin:0 auto;padding:10px 10px 40px}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+header h1{font-size:19px;margin:0;flex:1;white-space:nowrap}
+.chip{background:#e6dfc8;border-radius:20px;padding:3px 10px;font-size:13px;font-weight:600}
+button{font:inherit;border:1px solid #bfb595;background:#fff;border-radius:10px;padding:7px 12px;cursor:pointer;color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+button.undo{background:#fff4d6;border-color:#e0b84a;font-weight:700}
+button.small{padding:4px 9px;font-size:13px}
+.msg{background:#fff8dc;border:1px solid #ecd78f;border-radius:10px;padding:8px 11px;margin:8px 0;font-size:14px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 10px;margin:8px 0}
+.card h3{margin:0 0 6px;font-size:14px;color:var(--muted);font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.tabs{display:flex;gap:6px;margin-top:8px}
+.tabs button{flex:1}
+.tabs button.on{background:#2b2a26;color:#fff;border-color:#2b2a26}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.item{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid transparent;padding:1px;cursor:pointer;background:transparent}
+.item.sel{border-color:#e0a800;background:#fff3b8}
+.item.dis{cursor:default;opacity:.55}
+.die{width:34px;height:34px;border-radius:8px;color:#fff;font-weight:800;font-size:18px;display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.die.mini{width:26px;height:26px;font-size:14px;border-radius:6px}
+.prep{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.slot{border:2px dashed #c9bf9f;border-radius:12px;padding:6px;min-height:104px;display:flex;flex-direction:column;align-items:center;gap:5px;background:#faf6ea}
+.slot .lab{font-size:12px;color:var(--muted);font-weight:700}
+.slot.done{opacity:.6}
+.ctrl{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.park svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.workers{display:flex;gap:5px;flex-wrap:wrap}
+.wk{border-radius:16px;padding:3px 9px;font-size:12px;font-weight:700;color:#fff}
+.wk.used{opacity:.25;text-decoration:line-through}
+table.sc{width:100%;border-collapse:collapse;font-size:14px}
+table.sc td,table.sc th{padding:4px 6px;border-bottom:1px solid #eee5cc;text-align:right}
+table.sc td:first-child,table.sc th:first-child{text-align:left}
+table.sc tr.tot td{font-weight:800;border-top:2px solid #cfc5a5}
+.log{font-size:12.5px;color:#55513f;line-height:1.5;max-height:170px;overflow:auto}
+.big{display:flex;gap:8px;margin:10px 0}
+.big button{flex:1;padding:12px;font-size:16px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;z-index:9;overflow:auto;padding:20px 10px}
+.modal .box{background:#fff;border-radius:14px;max-width:620px;padding:14px 16px;line-height:1.55;font-size:14px}
+.modal h2{margin:4px 0 8px;font-size:18px}
+.modal h4{margin:12px 0 4px}
+.modal ul{padding-left:18px;margin:4px 0}
+.hint{font-size:12px;color:var(--muted)}
+.pane{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.over{font-size:20px;font-weight:800;text-align:center;padding:6px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs><clipPath id="hexclip"><polygon points="50,0 25,43.301 -25,43.301 -50,0 -25,-43.301 25,-43.301"/></clipPath></defs></svg>
+<div id="app"></div>
+<script>
+"use strict";
+// ---------- 상수 ----------
+const R=50,S3=Math.sqrt(3),HP="50,0 25,43.301 -25,43.301 -50,0 -25,-43.301 25,-43.301";
+const CK=['g','b','m','o'];
+const COL={g:{n:'숲',die:'#2e9e44',tile:'#7cc77a',dark:'#1f6b2e'},b:{n:'물',die:'#2a5fcf',tile:'#6e9be8',dark:'#1b3f8a'},m:{n:'산',die:'#7d7a88',tile:'#bdbac4',dark:'#5c5966'},o:{n:'초원',die:'#e0860f',tile:'#f6be5c',dark:'#a35f05'}};
+const TW={k:{n:'검정',c:'#262626'},n:{n:'갈색',c:'#8b5a2b'},e:{n:'베이지',c:'#efe3c4'}};
+const ANIM={g:[['오랑우탄','🦧'],['나무늘보','🦥'],['고릴라','🦍'],['레서판다','🐼']],b:[['펭귄','🐧'],['바다거북','🐢'],['해달','🦦'],['물범','🦭']],m:[['순록','🦌'],['산양','🐐'],['들소','🦬'],['늑대','🐺']],o:[['사자','🦁'],['코뿔소','🦏'],['기린','🦒'],['코끼리','🐘']]};
+const STARS=[{c:'m',n:'눈표범',e:'🐆'},{c:'g',n:'사올라',e:'🐃'}];
+const ANI_TABLE={10:6,11:13,12:21,13:30,14:40,15:51,16:63,17:80};
+const HEXES=[[0,6],[0,8],[1,3],[1,5],[1,7],[2,0],[2,2],[2,4],[2,6],[2,8],[3,1],[3,3],[3,5],[3,7],[4,2],[4,4],[4,6],[4,8],[5,5],[5,7]].map(([c,r])=>({c,r,k:c+','+r}));
+const HSET=new Set(HEXES.map(h=>h.k));
+const STAR='3,7',ENTR=['3,7','2,8','4,8'];
+const START=[{h:'1,5',k:1},{h:'3,3',k:3},{h:'4,6',k:0}];
+const DIRS=[[0,-2],[0,2],[1,-1],[1,1],[-1,-1],[-1,1]];
+const CN=[[[1,-1],[1,1]],[[1,1],[0,2]],[[0,2],[-1,1]],[[-1,1],[-1,-1]],[[-1,-1],[0,-2]],[[0,-2],[1,-1]]];
+function hxy(k){const [c,r]=k.split(',').map(Number);return [c*1.5*R,r*S3/2*R];}
+const NB={},VK={},VPOS={},VHEX={},INTERIOR={};
+for(const h of HEXES){
+  NB[h.k]=DIRS.map(([dc,dr])=>(h.c+dc)+','+(h.r+dr)).filter(k=>HSET.has(k));
+  const [x,y]=hxy(h.k);VK[h.k]=[];INTERIOR[h.k]=[];
+  for(let i=0;i<6;i++){const a=Math.PI/3*i,vx=x+R*Math.cos(a),vy=y+R*Math.sin(a);const v=Math.round(vx)+'_'+Math.round(vy);
+    VK[h.k][i]=v;VPOS[v]=[vx,vy];(VHEX[v]||(VHEX[v]=[])).push(h.k);}
+}
+for(const h of HEXES)for(let i=0;i<6;i++)if(VHEX[VK[h.k][i]].length===3)INTERIOR[h.k].push(i);
+
+// ---------- 상태 ----------
+let S=null,HIST=[];
+let UI={sel:null,rot:{},view:0,reroll:new Set(),modal:null};
+function rnd(){let t=(S.rng=(S.rng+0x6D2B79F5)|0);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function roll(){return 1+Math.floor(rnd()*6);}
+function nid(){return S.nid++;}
+function mkTile(c,ai,kind){const t={id:nid(),c,a:c+ai,kind:kind==='h'?'h':'t',rot:0};if(kind!=='h')t.tw=kind;return t;}
+function mkDie(c){return{id:nid(),c,v:roll()};}
+function aName(a){if(a==='S')return'별 동물';return ANIM[a[0]][+a[1]][0];}
+function aEmoji(t){if(t.star)return t.e;return ANIM[t.a[0]][+t.a[1]][1];}
+function tileName(t){if(t.star)return t.n;return `${COL[t.c].n} ${aName(t.a)}${t.kind==='h'?'(번식❤)':'('+TW[t.tw].n+' 전망대)'}`;}
+function dieName(d){return `${COL[d.c].n} ${d.v}`;}
+
+function newGame(){
+  S={rng:(Date.now()^Math.floor(Math.random()*1e9))|0,nid:1,round:1,turn:1,phase:'setup',front:[0,1],log:[],stacks:{},players:[],boards:[],aiLast:''};
+  for(const c of CK){
+    const animals=shuffle([0,1,2,3,0,1,2,3,Math.floor(rnd()*4)]);
+    const kinds=shuffle(['h','h','h','k','k','n','n','e','e']);
+    S.stacks[c]=shuffle(animals.map((a,i)=>mkTile(c,a,kinds[i])));
+  }
+  for(let i=0;i<2;i++)S.players.push(mkPlayer(i));
+  S.boards=[{no:1,items:[]},{no:2,items:[]}];
+  S.boards.forEach(b=>fillBoard(b,1));
+  HIST=[];UI.sel=null;UI.reroll=new Set();UI.view=0;
+  log('새 게임을 시작했어요. 준비 단계입니다.');
+  save();
+}
+function mkPlayer(i){
+  const st=STARS[i];
+  const pool=[];for(const c of CK)for(let a=0;a<4;a++)pool.push([c,a]);
+  shuffle(pool);const sp=pool.slice(0,6);
+  const list=sp.concat(shuffle(sp.slice()).slice(0,4));
+  const kinds=shuffle(['h','h','h','h','k','k','n','n','e','e']);
+  const stack=shuffle(list.map(([c,a],j)=>mkTile(c,a,kinds[j])));
+  const park={};park[STAR]={t:{star:true,c:st.c,a:'S',n:st.n,e:st.e,kind:'s'},d:null};
+  const P={name:i===0?'나':'컴퓨터',star:st,park,stack,display:{tiles:[],dice:[]},workers:{g:true,b:true,m:true,o:true,x:true},prep:{N:null,W:null},entrance:0,swapped:false,rerolled:false};
+  for(let j=0;j<3;j++)P.display.tiles.push(P.stack.pop());
+  START.forEach(s=>{const t=P.stack.pop();if(t.kind==='t')t.rot=s.k;park[s.h]={t,d:null};});
+  for(const c of CK){P.display.dice.push(mkDie(c));P.display.dice.push(mkDie(c));}
+  return P;
+}
+function fillBoard(b,round){
+  b.items=b.items||[];
+  for(const c of CK){
+    if(!b.items.find(x=>x.slot==='t'+c)&&S.stacks[c].length)b.items.push({slot:'t'+c,type:'t',o:S.stacks[c].pop()});
+    if(!b.items.find(x=>x.slot==='d'+c))b.items.push({slot:'d'+c,type:'d',o:mkDie(c)});
+    if(round===2&&!b.items.find(x=>x.slot==='i'+c))b.items.push({slot:'i'+c,type:'d',o:mkDie(c)});
+  }
+}
+function log(s){S.log.unshift(s);if(S.log.length>60)S.log.pop();}
+function save(){try{localStorage.setItem('spectacular_vs_cpu',JSON.stringify(S));}catch(e){}}
+function load(){try{const s=localStorage.getItem('spectacular_vs_cpu');if(s){S=JSON.parse(s);return true;}}catch(e){}return false;}
+function pushHist(){HIST.push(JSON.stringify(S));if(HIST.length>400)HIST.shift();}
+function undo(){if(!HIST.length)return;S=JSON.parse(HIST.pop());UI.sel=null;UI.reroll=new Set();save();render();}
+
+// ---------- 규칙 / 점수 ----------
+function analyze(park){
+  const keys=Object.keys(park);const vm={};
+  for(const k of keys){const t=park[k].t;if(t.kind==='t'){const v=VK[k][t.rot];(vm[v]||(vm[v]=[])).push(k);}}
+  const built=[],builtHex=new Set(),partial=[];
+  for(const v in vm){const hs=vm[v];const cs=new Set(hs.map(k=>park[k].t.tw));
+    if(hs.length===3&&cs.size===1){built.push({v,tw:park[hs[0]].t.tw,hexes:hs});hs.forEach(h=>builtHex.add(h));}
+    else partial.push({v,hs,ok:cs.size===1});}
+  const seen=new Set(),comps=[];let hab=0;
+  for(const k of keys){if(seen.has(k))continue;const c=park[k].t.c;const st=[k];seen.add(k);
+    const comp={c,keys:[],sum:0,mult:0,emptyBreed:0,dice:0};
+    while(st.length){const x=st.pop();comp.keys.push(x);const cell=park[x];
+      if(cell.d){comp.sum+=cell.d.v;comp.dice++;if(cell.t.kind==='h')comp.mult++;}else if(cell.t.kind==='h')comp.emptyBreed++;
+      for(const n of NB[x])if(!seen.has(n)&&park[n]&&park[n].t.c===c){seen.add(n);st.push(n);}}
+    comp.score=comp.sum*comp.mult;hab+=comp.score;comps.push(comp);}
+  let tow=0;const towDetail=[];
+  for(const b of built){const full=b.hexes.every(h=>park[h].d);const s=full?b.hexes.reduce((a,h)=>a+park[h].d.v,0):0;tow+=s;towDetail.push({...b,full,s});}
+  const set=new Set(keys.map(k=>park[k].t.a));const cnt=set.size;
+  const ani=ANI_TABLE[cnt]||0;
+  let emptySlots=0;for(const k of keys)if(!park[k].d)emptySlots++;
+  let breedTie=0;for(const k of keys)if(park[k].d&&park[k].t.kind==='h')breedTie+=park[k].d.v;
+  return{hab,tow,ani,cnt,built,builtHex,partial,comps,towDetail,emptySlots,breedTie};
+}
+function entranceScore(park){
+  const seen=new Set();let total=0;
+  for(const k in park){if(!park[k].d||seen.has(k))continue;const st=[k];seen.add(k);let sum=0,hit=false;
+    while(st.length){const x=st.pop();sum+=park[x].d.v;if(ENTR.includes(x))hit=true;
+      for(const n of NB[x])if(!seen.has(n)&&park[n]&&park[n].d){seen.add(n);st.push(n);}}
+    if(hit)total+=sum;}
+  return total;
+}
+function dieOK(park,k,c,v,builtHex){
+  const cell=park[k];if(!cell||cell.d)return false;if(cell.t.c!==c)return false;
+  if(cell.t.kind==='s')return v===6;
+  if(cell.t.kind==='h')return v<=2;
+  if(v===6)return(builtHex||analyze(park).builtHex).has(k);
+  return true;
+}
+function wrap(v,d){return((v-1+d+12)%6)+1;}
+function totals(P){const A=analyze(P.park);const ent=S.round===1&&S.phase!=='over'&&!P.entDone?entranceScore(P.park):P.entrance;return{A,ent,total:ent+A.hab+A.tow+A.ani};}
+
+// ---------- 컴퓨터 ----------
+function turnsLeft(){return 15-(S.round===1?S.turn:8+S.turn);}
+function evalPark(P,park,workers,ctx){
+  const A=analyze(park);let v=A.hab+A.tow+A.ani;
+  v+=ctx.round===1?entranceScore(park):P.entrance;
+  const f=ctx.left/15;
+  if(f>0){
+    for(const c of A.comps){if(c.mult===0)v+=(c.sum*(c.emptyBreed?0.6:0.25)+c.emptyBreed*2.5)*f;else v+=c.emptyBreed*(c.sum*0.5+2)*f;}
+    v+=A.emptySlots*1.6*f;
+    for(const p of A.partial){if(!p.ok||VHEX[p.v].length<3)continue;const e=VHEX[p.v].filter(h=>!park[h]).length;if(p.hs.length+e===3)v+=(p.hs.length===2?5.5:1.3)*f;}
+    for(const t of A.towDetail)if(!t.full)v+=t.hexes.filter(h=>!park[h].d).length*3*f;
+    if(!park[STAR].d)v+=5*f;
+    v+=A.cnt*3*f;
+  }
+  for(const w in workers)if(workers[w])v+=1.4;
+  return v;
+}
+function options(park,item,workers){
+  const out=[{kind:'x'}];
+  if(item.type==='t'){const t=item.o;
+    for(const h of HEXES){if(park[h.k])continue;
+      const rots=t.kind==='t'?(INTERIOR[h.k].length?INTERIOR[h.k]:[0]):[0];
+      for(const r of rots)out.push({kind:'t',hex:h.k,rot:r});}
+  }else{const d=item.o;const vars=[{v:d.v,w:[]}];
+    const cw=workers[d.c],xw=workers.x;
+    if(cw){vars.push({v:wrap(d.v,1),w:[d.c]},{v:wrap(d.v,-1),w:[d.c]});}
+    if(xw&&!cw){vars.push({v:wrap(d.v,1),w:['x']},{v:wrap(d.v,-1),w:['x']});}
+    if(xw&&cw){vars.push({v:wrap(d.v,2),w:[d.c,'x']},{v:wrap(d.v,-2),w:[d.c,'x']});}
+    const bh=analyze(park).builtHex;
+    for(const k in park)for(const va of vars)if(dieOK(park,k,d.c,va.v,bh))out.push({kind:'d',hex:k,v:va.v,w:va.w});
+  }
+  return out;
+}
+function applyOpt(park,workers,item,o){
+  const p=Object.assign({},park),w=Object.assign({},workers);
+  if(o.kind==='t'){p[o.hex]={t:Object.assign({},item.o,{rot:o.rot}),d:null};}
+  else if(o.kind==='d'){p[o.hex]=Object.assign({},p[o.hex],{d:{id:item.o.id,c:item.o.c,v:o.v}});o.w.forEach(x=>w[x]=false);}
+  return[p,w];
+}
+function ranked(P,park,workers,item,ctx,n){
+  const res=options(park,item,workers).map(o=>{const[p,w]=applyOpt(park,workers,item,o);return{o,p,w,val:evalPark(P,p,w,ctx)};});
+  res.sort((a,b)=>b.val-a.val);return res.slice(0,n);
+}
+function sig(it){return it.type==='t'?'t'+it.o.c+it.o.a+it.o.kind+(it.o.tw||''):'d'+it.o.c+it.o.v;}
+function uniq(arr){const m=new Map();for(const it of arr){const s=sig(it);if(!m.has(s))m.set(s,it);}return[...m.values()];}
+function aiTurn(i){
+  const P=S.players[i],B=S.boards[S.front[i]];
+  const ctx={round:S.round,left:turnsLeft()};
+  const sItems=uniq(B.items);
+  const pItems=uniq(P.display.tiles.map(t=>({type:'t',o:t})).concat(P.display.dice.map(d=>({type:'d',o:d}))));
+  let best=null;
+  const tryOrder=(firstList,secondList,firstIsS)=>{
+    for(const a of firstList){for(const ra of ranked(P,P.park,P.workers,a,ctx,3)){
+      for(const b of secondList){const rb=ranked(P,ra.p,ra.w,b,ctx,1)[0];
+        if(!best||rb.val>best.val)best={val:rb.val,s:firstIsS?a:b,p:firstIsS?b:a,steps:[[a,ra.o],[b,rb.o]],park:rb.p,workers:rb.w};}}}
+  };
+  tryOrder(sItems,pItems,true);tryOrder(pItems,sItems,false);
+  // 적용
+  B.items=B.items.filter(x=>x!==best.s);
+  if(best.p.type==='t')P.display.tiles=P.display.tiles.filter(x=>x!==best.p.o);else P.display.dice=P.display.dice.filter(x=>x!==best.p.o);
+  P.park=best.park;P.workers=best.workers;
+  const desc=best.steps.map(([it,o])=>{const nm=it.type==='t'?tileName(it.o):dieName(it.o);
+    if(o.kind==='x')return nm+' → 버림';if(o.kind==='d'&&o.v!==it.o.v)return `${nm} → 일꾼으로 ${o.v} 만들어 배치`;return nm+' → 배치';});
+  S.aiLast=`공급판: ${best.s.type==='t'?tileName(best.s.o):dieName(best.s.o)} / 개인: ${best.p.type==='t'?tileName(best.p.o):dieName(best.p.o)}`;
+  log('🤖 컴퓨터 — '+desc.join(', '));
+}
+function aiSetup(i){const P=S.players[i];P.display.dice.forEach(d=>{if(d.v===3||d.v===4)d.v=roll();});P.rerolled=true;}
+function aiWorkersEnd(i){
+  const P=S.players[i];const ctx={round:S.round,left:0};let used=0;
+  for(let guard=0;guard<6;guard++){
+    const base=evalPark(P,P.park,P.workers,ctx);let best=null;
+    for(const k in P.park){const d=P.park[k].d;if(!d)continue;
+      for(const w of [d.c,'x'])if(P.workers[w])for(const dv of[1,-1]){
+        const nv=wrap(d.v,dv);const p2=Object.assign({},P.park);p2[k]={t:P.park[k].t,d:null};
+        if(!dieOK(p2,k,d.c,nv))continue;p2[k]={t:P.park[k].t,d:{...d,v:nv}};const w2={...P.workers,[w]:false};
+        const val=evalPark(P,p2,w2,ctx);if(val>base+0.01&&(!best||val>best.val))best={val,p2,w2};}}
+    if(!best)break;P.park=best.p2;P.workers=best.w2;used++;
+  }
+  if(used)log(`🤖 컴퓨터가 일꾼 토큰 ${used}개로 주사위 값을 조정했어요.`);
+}
+
+// ---------- 사람 행동 ----------
+const me=()=>S.players[0];
+function act(fn){pushHist();fn();save();render();}
+function pickSupply(slot){const P=me(),B=S.boards[S.front[0]];if(S.phase!=='play'||P.prep.N)return;
+  act(()=>{const it=B.items.find(x=>x.slot===slot);B.items=B.items.filter(x=>x!==it);P.prep.N={item:it,done:false};autoSel();});}
+function pickDisplay(type,id){const P=me();
+  if(S.phase==='setup'){
+    if(type==='d'){if(P.rerolled)return;UI.reroll.has(id)?UI.reroll.delete(id):UI.reroll.add(id);render();return;}
+    if(type==='t'&&UI.sel&&UI.sel.kind==='swap'){const k=UI.sel.k;act(()=>{const nt=P.display.tiles.find(t=>t.id===id);const old=P.park[k].t;
+      const s=START.find(x=>x.h===k);if(nt.kind==='t')nt.rot=s.k;P.park[k]={t:nt,d:null};P.display.tiles=P.display.tiles.map(t=>t.id===id?old:t);P.swapped=true;UI.sel=null;log(`시작 타일 교체: ${tileName(old)} ↔ ${tileName(nt)}`);});}
+    return;}
+  if(S.phase!=='play'||P.prep.W)return;
+  act(()=>{let it;if(type==='t'){const o=P.display.tiles.find(t=>t.id===id);P.display.tiles=P.display.tiles.filter(t=>t!==o);it={type:'t',o};}
+    else{const o=P.display.dice.find(t=>t.id===id);P.display.dice=P.display.dice.filter(t=>t!==o);it={type:'d',o};}
+    P.prep.W={item:it,done:false};autoSel();});
+}
+function bothPicked(){const P=me();return P.prep.N&&P.prep.W;}
+function autoSel(){const P=me();if(!bothPicked()){UI.sel=null;return;}for(const w of['N','W'])if(!P.prep[w].done){UI.sel={kind:'prep',w};return;}UI.sel=null;}
+function selPrep(w){const P=me();if(!bothPicked()||!P.prep[w]||P.prep[w].done)return;UI.sel={kind:'prep',w};render();}
+function rotate(w){const P=me();const t=P.prep[w].item.o;UI.rot[t.id]=((UI.rot[t.id]??defaultRot(t))+1)%6;render();}
+function defaultRot(t){return 0;}
+function adjust(w,dv){const P=me();const d=P.prep[w].item.o;const use=P.workers[d.c]?d.c:(P.workers.x?'x':null);if(!use)return;
+  act(()=>{P.workers[use]=false;d.v=wrap(d.v,dv);log(`일꾼(${use==='x'?'만능':COL[use].n}) 사용: 준비 주사위 → ${d.v}`);});}
+function discard(w){const P=me();act(()=>{const it=P.prep[w].item;P.prep[w].done=true;P.prep[w].discarded=true;log(`버림: ${it.type==='t'?tileName(it.o):dieName(it.o)}`);autoSel();});}
+function clickHex(k){
+  const P=me();
+  if(UI.view!==0)return;
+  if(S.phase==='setup'){if(START.some(s=>s.h===k)&&!P.swapped){UI.sel=(UI.sel&&UI.sel.k===k)?null:{kind:'swap',k};render();}return;}
+  if(S.phase==='roundEnd'){if(P.park[k]&&P.park[k].d){UI.sel=(UI.sel&&UI.sel.k===k)?null:{kind:'pd',k};render();}return;}
+  if(S.phase!=='play'||!UI.sel||UI.sel.kind!=='prep')return;
+  const w=UI.sel.w,slot=P.prep[w],it=slot.item;
+  if(it.type==='t'){if(!HSET.has(k)||P.park[k])return;
+    act(()=>{const t=Object.assign({},it.o,{rot:it.o.kind==='t'?(UI.rot[it.o.id]??0):0});P.park[k]={t,d:null};slot.done=true;log(`배치: ${tileName(t)}`);
+      const A=analyze(P.park);const nb=A.built.filter(b=>b.hexes.includes(k));if(nb.length)log(`🗼 ${TW[nb[0].tw].n} 전망대 완성!`);autoSel();});}
+  else{if(!dieOK(P.park,k,it.o.c,it.o.v))return;
+    act(()=>{P.park[k]=Object.assign({},P.park[k],{d:{...it.o}});slot.done=true;log(`배치: ${dieName(it.o)}`);autoSel();});}
+}
+function adjustPark(dv){const P=me();const k=UI.sel.k;const d=P.park[k].d;const use=P.workers[d.c]?d.c:(P.workers.x?'x':null);if(!use)return;
+  const nv=wrap(d.v,dv);const p2=Object.assign({},P.park);p2[k]={t:P.park[k].t,d:null};if(!dieOK(p2,k,d.c,nv)){flash('그 값으로는 이 칸 규칙(번식 1·2, 별 6, 전망대 옆 6)을 어겨요.');return;}
+  act(()=>{P.workers[use]=false;P.park[k]={t:P.park[k].t,d:{...d,v:nv}};log(`일꾼(${use==='x'?'만능':COL[use].n}) 사용: 공원 주사위 ${d.v} → ${nv}`);});}
+function doReroll(){const P=me();if(!UI.reroll.size)return;act(()=>{P.display.dice.forEach(d=>{if(UI.reroll.has(d.id))d.v=roll();});P.rerolled=true;log(`개인 주사위 ${UI.reroll.size}개를 다시 굴렸어요.`);UI.reroll=new Set();});}
+function startGame(){act(()=>{aiSetup(1);S.phase='play';UI.sel=null;log('1라운드 시작!');});}
+function endTurn(){const P=me();if(!(bothPicked()&&P.prep.N.done&&P.prep.W.done))return;
+  act(()=>{
+    aiTurn(1);
+    P.prep={N:null,W:null};
+    for(const Q of S.players){if(Q.display.tiles.length===2&&Q.stack.length)Q.display.tiles.push(Q.stack.pop());}
+    S.front=[S.front[1],S.front[0]];
+    if(S.round===1&&S.boards.every(b=>!b.items.length)){S.phase='roundEnd';aiWorkersEnd(1);log('1라운드 종료 — 일꾼 사용 후 입구 점수를 계산해요.');}
+    else if(S.round===2&&S.players.every(Q=>!Q.display.tiles.length&&!Q.display.dice.length)){S.phase='roundEnd';aiWorkersEnd(1);log('2라운드 종료 — 일꾼 사용 후 최종 점수를 계산해요.');}
+    else S.turn++;
+    UI.sel=null;
+  });}
+function finishRound(){act(()=>{
+  if(S.round===1){for(const Q of S.players){Q.entrance=entranceScore(Q.park);Q.entDone=true;}
+    log(`입구 점수 — 나 ${S.players[0].entrance}점, 컴퓨터 ${S.players[1].entrance}점`);
+    S.boards.forEach(b=>fillBoard(b,2));S.round=2;S.turn=1;S.phase='play';log('2라운드 시작! 공급판이 다시 채워졌어요 (주사위 8개 + 타일 4개).');}
+  else{S.phase='over';const t=S.players.map(totals);log(`게임 종료 — 나 ${t[0].total}점, 컴퓨터 ${t[1].total}점`);}
+  UI.sel=null;});}
+let flashMsg='';function flash(m){flashMsg=m;render();setTimeout(()=>{flashMsg='';render();},2500);}
+
+// ---------- 그리기 ----------
+function dieSVG(d,x,y,s){const c=COL[d.c].die;return `<g transform="translate(${x},${y})"><rect x="${-s/2}" y="${-s/2}" width="${s}" height="${s}" rx="${s*.2}" fill="${c}" stroke="#fff" stroke-width="2"/><text y="${s*.33}" text-anchor="middle" font-size="${s*.8}" font-weight="800" fill="#fff">${d.v}</text></g>`;}
+function tileSVG(t,d,x,y,opt={}){
+  const col=COL[t.c];let s=`<g transform="translate(${x},${y})">`;
+  s+=`<polygon points="${HP}" fill="${col.tile}" stroke="${opt.stroke||'#fff'}" stroke-width="${opt.sw||3}"/>`;
+  if(t.kind==='t'){const a=Math.PI/3*t.rot;s+=`<g clip-path="url(#hexclip)"><circle cx="${R*Math.cos(a)}" cy="${R*Math.sin(a)}" r="${R*0.42}" fill="${TW[t.tw].c}" stroke="#333" stroke-width="1.5"/></g>`;}
+  if(t.kind==='h')s+=`<text x="22" y="-14" font-size="17" text-anchor="middle">❤️</text>`;
+  if(t.kind==='s')s+=`<text x="24" y="-13" font-size="16" text-anchor="middle">⭐</text>`;
+  s+=`<text y="32" font-size="27" text-anchor="middle">${aEmoji(t)}</text>`;
+  if(d)s+=dieSVG(d,0,-14,28);
+  else s+=`<rect x="-13" y="-28" width="26" height="26" rx="5" fill="rgba(255,255,255,.35)" stroke="${col.dark}" stroke-dasharray="3 2" stroke-width="1.5"/>`+(t.kind==='h'?`<text y="-9" font-size="11" text-anchor="middle" fill="${col.dark}" font-weight="700">1·2</text>`:t.kind==='s'?`<text y="-9" font-size="12" text-anchor="middle" fill="${col.dark}" font-weight="800">6</text>`:'');
+  return s+'</g>';
+}
+function miniTile(t,opt={}){return `<svg width="${opt.w||62}" viewBox="-53 -47 106 94">${tileSVG(t,null,0,0,{})}</svg>`;}
+function dieHTML(d,mini){return `<span class="die${mini?' mini':''}" style="background:${COL[d.c].die}">${d.v}</span>`;}
+function parkSVG(P,interactive){
+  const A=analyze(P.park);let s=`<svg viewBox="-60 -52 495 482">`;
+  const sel=interactive?UI.sel:null;let legal=new Set();
+  if(interactive&&S.phase==='play'&&sel&&sel.kind==='prep'){const it=P.prep[sel.w].item;
+    if(it.type==='t')HEXES.forEach(h=>{if(!P.park[h.k])legal.add(h.k);});else for(const k in P.park)if(dieOK(P.park,k,it.o.c,it.o.v,A.builtHex))legal.add(k);}
+  // 입구
+  const [ex,ey]=hxy('3,9');s+=`<g transform="translate(${ex},${ey-6})"><rect x="-34" y="-12" width="68" height="26" rx="6" fill="#d9534f"/><text y="6" text-anchor="middle" font-size="14" fill="#fff" font-weight="800">🎫 입구</text></g>`;
+  for(const h of HEXES){const [x,y]=hxy(h.k);const cell=P.park[h.k];const L=legal.has(h.k);
+    s+=`<g data-a="hex" data-k="${h.k}" style="cursor:pointer">`;
+    if(cell){s+=tileSVG(cell.t,cell.d,x,y,L?{stroke:'#ffcc00',sw:6}:(sel&&sel.k===h.k?{stroke:'#ff6a00',sw:6}:{}));}
+    else s+=`<polygon transform="translate(${x},${y})" points="${HP}" fill="${L?'#fff3a6':'#dfe8cf'}" stroke="${L?'#e0a800':'#a9bf95'}" stroke-width="${L?4:2}"/>`;
+    s+='</g>';}
+  if(S.phase==='setup'&&interactive){START.forEach((st,i)=>{const [x,y]=hxy(st.h);const v=VK[st.h][st.k];const [vx,vy]=VPOS[v];
+    s+=`<circle cx="${vx}" cy="${vy}" r="14" fill="none" stroke="#333" stroke-dasharray="4 3" stroke-width="2" pointer-events="none"/><text x="${x-30}" y="${y-22}" font-size="15" font-weight="800" fill="#333" pointer-events="none">${'①②③'[i]}</text>`;
+    if(UI.sel&&UI.sel.kind==='swap'&&UI.sel.k===st.h)s+=`<polygon transform="translate(${x},${y})" points="${HP}" fill="none" stroke="#ff6a00" stroke-width="6" pointer-events="none"/>`;});}
+  for(const b of A.built){const [vx,vy]=VPOS[b.v];s+=`<g pointer-events="none"><circle cx="${vx}" cy="${vy}" r="17" fill="${TW[b.tw].c}" stroke="#fff" stroke-width="3"/><text x="${vx}" y="${vy+6}" text-anchor="middle" font-size="16">🗼</text></g>`;}
+  return s+'</svg>';
+}
+function workersHTML(P){const L=[['g','숲'],['b','물'],['m','산'],['o','초원'],['x','만능']];
+  return `<div class="workers">${L.map(([k,n])=>`<span class="wk ${P.workers[k]?'':'used'}" style="background:${k==='x'?'linear-gradient(90deg,#2e9e44,#2a5fcf,#7d7a88,#e0860f)':COL[k].die}">${n} ±1</span>`).join('')}</div>`;}
+function scoreTable(){
+  const t=S.players.map(totals);const pre=S.round===1&&S.phase!=='over'&&!(S.players[0].entDone);
+  const row=(n,a,b)=>`<tr><td>${n}</td><td>${a}</td><td>${b}</td></tr>`;
+  return `<table class="sc"><tr><th></th><th>나</th><th>컴퓨터</th></tr>`+
+   row('🎫 입구'+(pre?' <span class="hint">(1라운드 끝에 확정)</span>':''),t[0].ent,t[1].ent)+
+   row('🌿 서식지',t[0].A.hab,t[1].A.hab)+row('🗼 전망대',t[0].A.tow,t[1].A.tow)+
+   row('🐾 동물 종',`${t[0].A.ani} <span class="hint">(${t[0].A.cnt}종)</span>`,`${t[1].A.ani} <span class="hint">(${t[1].A.cnt}종)</span>`)+
+   `<tr class="tot"><td>합계</td><td>${t[0].total}</td><td>${t[1].total}</td></tr></table>`+
+   `<div class="hint" style="margin-top:4px">동물 점수표: 10종 6 · 11종 13 · 12종 21 · 13종 30 · 14종 40 · 15종 51 · 16종 63 · 17종 80 (9종 이하 0)</div>`;
+}
+function message(){
+  const P=me();
+  if(flashMsg)return '⚠️ '+flashMsg;
+  if(S.phase==='setup')return '<b>게임 준비</b> — (선택) 공원의 시작 타일 ①②③ 중 하나를 누르고 개인 진열 타일을 누르면 1번 교체돼요. (선택) 진열 주사위를 골라 1번 다시 굴릴 수 있어요. 준비되면 <b>게임 시작</b>!';
+  if(S.phase==='play'){
+    if(!P.prep.N&&!P.prep.W)return '공급판에서 <b>1개</b>, 개인 진열에서 <b>1개</b>를 고르세요 (타일 또는 주사위).';
+    if(!P.prep.N)return '이제 <b>공급판</b>에서 1개를 고르세요.';
+    if(!P.prep.W)return '이제 <b>개인 진열</b>에서 1개를 고르세요.';
+    if(!(P.prep.N.done&&P.prep.W.done)){const it=P.prep[UI.sel?.w||'N'].item;
+      return it.type==='t'?'노란 칸에 타일을 놓으세요. 전망대 조각이 있으면 먼저 <b>⟳ 회전</b>으로 방향을 정하세요.':'노란 칸에 주사위를 놓으세요 (같은 색 타일, 번식❤은 1·2만, 별은 6만, 6은 완성된 전망대 옆만). 일꾼으로 ±1 가능.';}
+    return '둘 다 처리했어요. <b>턴 종료</b>를 누르면 컴퓨터가 두고 공급판이 교환돼요.';}
+  if(S.phase==='roundEnd')return `<b>${S.round}라운드 정산</b> — 남은 일꾼 토큰으로 공원 주사위 값을 바꿀 수 있어요 (공원의 주사위를 누르세요). 끝나면 아래 버튼을 누르세요.`;
+  if(S.phase==='over'){const t=S.players.map(totals);let w;if(t[0].total!==t[1].total)w=t[0].total>t[1].total?0:1;else{const a=t[0].A.breedTie,b=t[1].A.breedTie;w=a===b?-1:(a>b?0:1);}
+    return w===0?'🎉 승리했어요!':w===1?'🤖 컴퓨터가 이겼어요. 무르기로 다시 도전해 보세요!':'🤝 무승부!';}
+  return '';
+}
+function render(){
+  const P=me(),C=S.players[1];let h='';
+  h+=`<header><h1>🐾 스펙터큘러 <span style="font-size:13px;color:var(--muted)">vs 컴퓨터</span></h1>
+   <span class="chip">${S.phase==='setup'?'준비':S.phase==='over'?'종료':`R${S.round} · 턴 ${S.turn}/${S.round===1?8:7}`}</span>
+   <button class="undo" data-a="undo" ${HIST.length?'':'disabled'}>↶ 무르기</button>
+   <a class="small" href="index.html" style="text-decoration:none;border:1px solid #bfb595;border-radius:10px;padding:4px 9px;font-size:13px;color:inherit;background:#fff">🏠</a><button class="small" data-a="rules">규칙</button><button class="small" data-a="new">새 게임</button></header>`;
+  h+=`<div class="msg">${message()}</div>`;
+  h+=`<div class="tabs"><button data-a="view" data-v="0" class="${UI.view===0?'on':''}">내 공원 (${totals(P).total})</button><button data-a="view" data-v="1" class="${UI.view===1?'on':''}">컴퓨터 공원 (${totals(C).total})</button></div>`;
+  if(UI.view===0){
+    if(S.phase==='play'||S.phase==='setup'){
+      const B=S.boards[S.front[0]];const can=S.phase==='play'&&!P.prep.N;
+      h+=`<div class="card"><h3>내 앞의 공급판 #${B.no} <span class="hint">${S.phase==='play'&&!P.prep.N?'1개 고르기':''}</span></h3><div class="row">`;
+      h+=B.items.map(it=>`<span class="item ${can?'':'dis'}" data-a="sup" data-s="${it.slot}">${it.type==='t'?miniTile(it.o):dieHTML(it.o)}</span>`).join('')||'<span class="hint">비어 있음</span>';
+      h+=`</div></div>`;}
+    if(S.phase==='play'){
+      h+=`<div class="prep">`;
+      for(const [w,lab] of [['N','N · 공급판에서'],['W','W · 개인 진열에서']]){const sl=P.prep[w];
+        h+=`<div class="slot ${sl&&sl.done?'done':''}"><span class="lab">${lab}</span>`;
+        if(!sl)h+=`<span class="hint" style="margin-top:20px">아직 선택 안 함</span>`;
+        else if(sl.done)h+=`<span class="hint" style="margin-top:20px">${sl.discarded?'🗑 버림':'✅ 배치 완료'}</span>`;
+        else{const it=sl.item;const isSel=UI.sel&&UI.sel.w===w;
+          const tv=it.type==='t'?Object.assign({},it.o,{rot:UI.rot[it.o.id]??0}):null;
+          h+=`<span class="item ${isSel?'sel':''}" data-a="selprep" data-w="${w}">${it.type==='t'?miniTile(tv,{w:70}):dieHTML(it.o)}</span><div class="ctrl">`;
+          if(it.type==='t'&&it.o.kind==='t')h+=`<button class="small" data-a="rot" data-w="${w}" ${bothPicked()?'':'disabled'}>⟳ 회전</button>`;
+          if(it.type==='d'){const ok=P.workers[it.o.c]||P.workers.x;h+=`<button class="small" data-a="adj" data-w="${w}" data-d="-1" ${ok&&bothPicked()?'':'disabled'}>−1</button><button class="small" data-a="adj" data-w="${w}" data-d="1" ${ok&&bothPicked()?'':'disabled'}>+1</button>`;}
+          h+=`<button class="small" data-a="disc" data-w="${w}" ${bothPicked()?'':'disabled'}>🗑 버리기</button></div>`;}
+        h+=`</div>`;}
+      h+=`</div>`;}
+    h+=`<div class="card park"><h3>내 공원 · 별 동물 ${P.star.e} ${P.star.n}(${COL[P.star.c].n})</h3>${parkSVG(P,true)}`;
+    if(S.phase==='roundEnd'&&UI.sel&&UI.sel.kind==='pd'){const d=P.park[UI.sel.k].d;const ok=P.workers[d.c]||P.workers.x;
+      h+=`<div class="pane" style="justify-content:center;margin-top:6px">선택한 주사위 ${dieHTML(d,true)} <button data-a="padj" data-d="-1" ${ok?'':'disabled'}>−1</button><button data-a="padj" data-d="1" ${ok?'':'disabled'}>+1</button>${ok?'':'<span class="hint">맞는 일꾼이 없어요</span>'}</div>`;}
+    h+=`</div>`;
+    if(S.phase==='setup'||S.phase==='play'){
+      const can=S.phase==='play'&&!P.prep.W;
+      h+=`<div class="card"><h3>내 개인 진열 <span class="hint">개인 더미 ${P.stack.length}장</span></h3><div class="row">`;
+      h+=P.display.tiles.map(t=>`<span class="item ${can||(S.phase==='setup'&&UI.sel&&UI.sel.kind==='swap')?'':'dis'}" data-a="disp" data-t="t" data-id="${t.id}">${miniTile(t,{w:58})}</span>`).join('');
+      h+=`</div><div class="row" style="margin-top:6px">`;
+      h+=P.display.dice.map(d=>`<span class="item ${UI.reroll.has(d.id)?'sel':''} ${can||(S.phase==='setup'&&!P.rerolled)?'':'dis'}" data-a="disp" data-t="d" data-id="${d.id}">${dieHTML(d)}</span>`).join('')||'<span class="hint">주사위 없음</span>';
+      h+=`</div></div>`;}
+    h+=`<div class="card"><h3>내 일꾼 토큰</h3>${workersHTML(P)}<div class="hint" style="margin-top:4px">같은 색 주사위를 ±1 (6↔1 순환). 만능은 아무 색. 준비 영역의 주사위 또는 라운드 끝 공원 주사위에 사용.</div></div>`;
+  }else{
+    h+=`<div class="card park"><h3>컴퓨터 공원 · 별 동물 ${C.star.e} ${C.star.n}(${COL[C.star.c].n})</h3>${parkSVG(C,false)}</div>`;
+    if(S.aiLast)h+=`<div class="msg">🤖 지난 턴: ${S.aiLast}</div>`;
+    h+=`<div class="card"><h3>컴퓨터 개인 진열 <span class="hint">개인 더미 ${C.stack.length}장</span></h3><div class="row">${C.display.tiles.map(t=>miniTile(t,{w:50})).join('')}</div><div class="row" style="margin-top:6px">${C.display.dice.map(d=>dieHTML(d,true)).join('')}</div></div>`;
+    h+=`<div class="card"><h3>컴퓨터 앞 공급판 #${S.boards[S.front[1]].no}</h3><div class="row">${S.boards[S.front[1]].items.map(it=>it.type==='t'?miniTile(it.o,{w:50}):dieHTML(it.o,true)).join('')||'<span class="hint">비어 있음</span>'}</div></div>`;
+    h+=`<div class="card"><h3>컴퓨터 일꾼 토큰</h3>${workersHTML(C)}</div>`;
+  }
+  // 큰 버튼
+  h+=`<div class="big">`;
+  if(S.phase==='setup')h+=`<button data-a="reroll" ${!P.rerolled&&UI.reroll.size?'':'disabled'}>🎲 선택 주사위 다시 굴리기${P.rerolled?' (완료)':''}</button><button class="primary" data-a="start">게임 시작 ▶</button>`;
+  if(S.phase==='play')h+=`<button class="primary" data-a="end" ${bothPicked()&&P.prep.N.done&&P.prep.W.done?'':'disabled'}>턴 종료 ▶</button>`;
+  if(S.phase==='roundEnd')h+=`<button class="primary" data-a="finish">${S.round===1?'입구 점수 계산 & 2라운드 시작 ▶':'최종 점수 계산 ▶'}</button>`;
+  if(S.phase==='over')h+=`<button class="primary" data-a="new">새 게임</button>`;
+  h+=`</div>`;
+  h+=`<div class="card"><h3>점수 ${S.phase==='over'?'(최종)':'(현재 상태 기준)'}</h3>${scoreTable()}</div>`;
+  h+=`<div class="card"><h3>기록</h3><div class="log">${S.log.map(l=>`<div>• ${l}</div>`).join('')}</div></div>`;
+  if(UI.modal==='rules')h+=rulesHTML();
+  if(UI.modal==='new')h+=`<div class="modal" data-a="close"><div class="box" onclick="event.stopPropagation()"><h2>새 게임을 시작할까요?</h2><p>지금 게임은 사라져요.</p><div class="big"><button data-a="close">취소</button><button class="primary" data-a="newok">새 게임</button></div></div></div>`;
+  document.getElementById('app').innerHTML=h;
+}
+function rulesHTML(){return `<div class="modal" data-a="close"><div class="box" onclick="event.stopPropagation()"><h2>규칙 요약</h2>
+<p>멸종위기 동물 공원을 꾸며 점수를 가장 많이 얻으세요. 2라운드(8턴 + 7턴).</p>
+<h4>매 턴</h4><ul><li><b>공급판</b>(내 앞)에서 1개, <b>개인 진열</b>에서 1개를 고릅니다 (타일 또는 주사위).</li>
+<li>두 아이템을 원하는 순서로 공원에 놓거나 버립니다.</li><li>개인 진열 타일이 2장이면 개인 더미에서 1장 보충, 공급판은 상대와 교환.</li></ul>
+<h4>타일</h4><ul><li>빈 칸 어디든, 방향 자유. ❤ 번식 타일 / 전망대 조각(⅓ 원) 타일.</li>
+<li>같은 색 전망대 조각 3개가 한 꼭짓점에 모이면 <b>전망대 완성</b>🗼.</li></ul>
+<h4>주사위</h4><ul><li>같은 색 타일의 빈 주사위 칸에만.</li><li>번식❤ 타일은 1·2만, 별 동물 타일은 6만.</li><li>그 외 타일에 6은 완성된 전망대에 붙은 타일만.</li></ul>
+<h4>일꾼 토큰</h4><ul><li>같은 색 주사위 ±1(6↔1 순환), 만능은 아무 색. 각 1회. 준비 중 주사위 또는 라운드 끝 공원 주사위에 사용.</li></ul>
+<h4>점수</h4><ul><li><b>입구</b>(1라운드 끝): 입구에 닿은 타일(별 동물 포함 3칸)의 주사위가 속한 주사위 무리의 합.</li>
+<li><b>서식지</b>: 같은 색으로 이어진 영역의 주사위 합 × 그 영역 번식 타일 위 주사위 <b>개수</b>. 번식 주사위 없으면 0.</li>
+<li><b>전망대</b>: 주사위 3개가 다 놓인 완성 전망대의 주사위 합.</li>
+<li><b>동물 종</b>: 서로 다른 동물 수(별 동물 포함) → 점수표.</li><li>동점이면 번식 타일 주사위 합이 큰 쪽 승.</li></ul>
+<h4>이 사이트에서</h4><ul><li><b>↶ 무르기</b>로 내 행동을 하나씩 되돌릴 수 있어요(턴 종료도 되돌림).</li><li>2인 대전이라 각 공급판은 타일 4 + 주사위 4(2라운드는 주사위 8). 미션 모드·솔로 모드는 빠져 있어요.</li><li>타일 구성(동물 종류·전망대 색 분포)은 실제 게임과 다를 수 있어요.</li></ul>
+<div class="big"><button class="primary" data-a="close">닫기</button></div></div></div>`;}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+  switch(a){
+    case'undo':undo();break;
+    case'rules':UI.modal='rules';render();break;
+    case'new':UI.modal='new';render();break;
+    case'newok':UI.modal=null;newGame();render();break;
+    case'close':UI.modal=null;render();break;
+    case'view':UI.view=+el.dataset.v;render();break;
+    case'sup':pickSupply(el.dataset.s);break;
+    case'disp':pickDisplay(el.dataset.t,+el.dataset.id);break;
+    case'selprep':selPrep(el.dataset.w);break;
+    case'rot':rotate(el.dataset.w);break;
+    case'adj':adjust(el.dataset.w,+el.dataset.d);break;
+    case'disc':discard(el.dataset.w);break;
+    case'hex':clickHex(el.dataset.k);break;
+    case'padj':adjustPark(+el.dataset.d);break;
+    case'reroll':doReroll();break;
+    case'start':startGame();break;
+    case'end':endTurn();break;
+    case'finish':finishRound();break;
+  }
+});
+if(!load())newGame();
+render();
+</script>
+</body>
+</html>
