@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마리 퀴리의 발자취 — 컴퓨터 대전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4efe4;--paper:#fffaf0;--ink:#2a2420;--sub:#6b5f55;--line:#d9cdb8;--accent:#7b3f8c;--accent2:#b5502f;--gold:#c9a14a;--ok:#2f7d5b;--vp:#2b5aa8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",sans-serif;font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:"Gowun Batang",serif;margin:0}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;color:var(--ink)}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.warn{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+.wrap{max-width:1180px;margin:0 auto;padding:10px}
+header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+header h1{font-size:20px;flex:1;min-width:150px}
+header button{padding:5px 8px;font-size:13px}
+header h1 small{font-family:"Noto Sans KR";font-size:12px;color:var(--sub);font-weight:400}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.panel h3{font-size:15px;margin-bottom:6px}
+.cube{display:inline-block;width:13px;height:13px;border-radius:3px;vertical-align:-2px;margin:0 1px;border:1px solid rgba(0,0,0,.35)}
+.cube.P{background:#2b2b2b}.cube.U{background:#e9bb3c}.cube.R{background:#e8eef5;box-shadow:0 0 5px #9fd3ff}
+.cube.big{width:22px;height:22px;border-radius:5px}
+.vp{color:var(--vp);font-weight:800}
+.tl{display:flex;gap:4px;overflow-x:auto;padding-bottom:4px}
+.tl .sp{flex:0 0 92px;border:1px solid var(--line);border-radius:8px;padding:5px;background:#fff;font-size:11px;min-height:78px;position:relative}
+.tl .sp b{display:block;font-size:13px}
+.tl .sp.past{opacity:.45}
+.tl .sp.cur{border:2px solid var(--accent2);background:#fff1e8}
+.tl .sp.cur::after{content:"⏳";position:absolute;top:3px;right:5px}
+.status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:600}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;background:#efe6f3;color:var(--accent);font-size:12px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.card{border:1px solid var(--line);border-radius:10px;padding:7px;background:#fff;font-size:12px}
+.card .hd{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin-bottom:3px}
+.card ol{margin:2px 0 6px;padding-left:18px}
+.card ol li.now{font-weight:700;color:var(--accent)}
+.c-adv{border-top:5px solid #c9567c}.c-ins{border-top:5px solid #4f86b8}.c-res{border-top:5px solid #7b5fb3}.c-wor{border-top:5px solid #c4813a}.c-uni{border-top:5px solid #3c8c6e}
+.tile{border:1px dashed var(--line);border-radius:8px;padding:5px;background:#fff;font-size:12px;min-height:44px}
+.tile.v{background:#e9f6ef;border:1px solid #9ccdb3}
+.tile .ty{font-size:11px;color:var(--sub)}
+.ws{display:flex;gap:4px;flex-wrap:wrap}
+.ws .s{border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:#fff;font-size:12px}
+.ws .s.on{border:2px solid var(--gold);background:#fff7df}
+.pb{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
+.pb.me{border:2px solid var(--accent)}
+.pb.turn{box-shadow:0 0 0 3px #f5c9b4}
+.pb .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px;flex-wrap:wrap}
+.pb .name{font-weight:800;font-size:15px}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0}
+.th{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:5px;font-family:"Gowun Batang";font-weight:700;font-size:12px;color:#bbb}
+.th.on{background:#7b3f8c;color:#fff;border-color:#7b3f8c}
+.labs{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.small{font-size:12px;color:var(--sub)}
+.act{position:sticky;bottom:0;z-index:5;background:#fffdf7;border:2px solid var(--accent);box-shadow:0 -4px 16px rgba(0,0,0,.08)}
+.act .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.sel{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:8px;padding:3px 6px;background:#fff}
+.sel button{padding:1px 8px}
+.log{max-height:220px;overflow:auto;font-size:12px}
+.log div{padding:2px 0;border-bottom:1px dotted #e6dccb}
+.log .ai{color:#5b5048}.log .me{color:var(--accent)}.log .sys{color:var(--accent2)}
+.ov{position:fixed;inset:0;background:rgba(30,20,15,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:12px}
+.mo{background:var(--paper);border-radius:14px;max-width:520px;width:100%;max-height:88vh;overflow:auto;padding:16px;border:1px solid var(--line)}
+.mo h2{font-size:18px;margin-bottom:8px}
+.mo .opts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.mo .opts button{text-align:left;padding:9px 12px}
+.mc{display:inline-block;padding:1px 7px;border-radius:6px;background:#3a2f4d;color:#fff;font-size:11px;font-weight:700}
+table.res{width:100%;border-collapse:collapse;margin-top:8px}
+table.res td,table.res th{border-bottom:1px solid var(--line);padding:6px;text-align:center}
+.help p,.help li{font-size:13px}
+.zone{border-radius:18px;padding:12px;margin:18px 0 14px;position:relative}
+.zone>.zt{position:absolute;top:-13px;left:14px;padding:3px 12px;border-radius:99px;font-weight:800;font-size:13px;color:#fff;letter-spacing:.5px}
+.zone .zsub{font-size:12px;margin:2px 0 8px;opacity:.85}
+.z-board{background:#33503f;border:3px solid #1f3328;box-shadow:inset 0 0 0 3px #c9a14a55}
+.z-board>.zt{background:#1f3328}
+.z-board .zsub{color:#e7efe9}
+.z-board .panel{background:#fbf6ea;border-color:#c9b98f}
+.z-mine{background:#e6eefb;border:3px solid #2f5ea8}
+.z-mine>.zt{background:#2f5ea8}
+.z-opp{background:#f6e8e2;border:2px dashed #b5502f}
+.z-opp>.zt{background:#b5502f}
+.z-mine .pb,.z-opp .pb{border:none;background:transparent;padding:0}
+.z-opp .pb{background:#fffaf6;border:1px solid #e3c7ba;border-radius:12px;padding:10px}
+.z-opp .grid{gap:10px}
+.act{position:sticky;bottom:0;z-index:5;background:#fffdf7;border:3px solid var(--accent2);border-radius:14px 14px 0 0;box-shadow:0 -6px 18px rgba(0,0,0,.15);margin:0 -2px}
+.act .who{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;margin-bottom:4px;color:var(--sub)}
+.act .tag{background:var(--accent2);color:#fff;border-radius:99px;padding:1px 9px;font-weight:700;font-size:12px}
+.sec{font-weight:800;font-size:13px;margin:8px 0 4px;color:var(--sub)}
+details.logbox summary{cursor:pointer;font-weight:700}
+@media (max-width:600px){.tl .sp{flex-basis:80px}header h1{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="modalRoot"></div>
+<script>
+"use strict";
+// ======================= 데이터 =======================
+const CN={P:'피치블렌드',U:'우라늄',R:'라듐'};
+const CATS=['adv','ins','res','wor','uni'];
+const CAT={
+ adv:{n:'홍보',ic:'📣',cost:{R:1},max:3,copies:7,b:[[{t:'tl'}],[{t:'vp',n:1},{t:'tl'}],[{t:'mc'},{t:'vp',n:1}]]},
+ ins:{n:'실험기구',ic:'🔬',cost:{P:2},max:4,copies:9,b:[[{t:'g',c:'U'}],[{t:'g',c:'R'}],[{t:'g',c:'U'},{t:'tl'}],[{t:'mc'},{t:'g',c:'R'}]]},
+ res:{n:'연구',ic:'📚',cost:{P:1},max:4,copies:9,b:[[{t:'th'}],[],[{t:'th'}],[{t:'vp',n:1}]]},
+ wor:{n:'작업장',ic:'🛠️',cost:{P:1,U:1},max:5,copies:11,b:[[{t:'exp'}],[{t:'exp'}],[{t:'g',c:'P'}],[{t:'vp',n:1}],[{t:'mc'},{t:'vp',n:1}]]},
+ uni:{n:'대학',ic:'🎓',cost:{U:1},max:5,copies:11,b:[[{t:'g',c:'P'},{t:'tl'}],[{t:'g',c:'R'}],[{t:'mc'}],[{t:'th'}],[{t:'vp',n:2}]]}
+};
+const g=(c,n=1)=>({t:'g',c,n});
+const EXP={
+ b:[ {c:{U:3},f:[g('R')]},{c:{R:1},f:[g('U')]},{c:{P:1,R:3},f:[{t:'vp',n:1},{t:'th'}]},{c:{P:1,U:3},f:[{t:'vp',n:1}]},
+     {c:{U:1,R:1},f:[{t:'card'}]},{c:{P:1,R:2},f:[{t:'vp',n:1}]},{c:{U:2},f:[g('P',2)]},{c:{U:4},f:[{t:'card'},{t:'mc'}]},
+     {c:{P:3},f:[{t:'tl'}]},{c:{R:1},f:[g('P'),{t:'mc'}]},{c:{P:3},f:[g('U')]},{c:{R:1},f:[{t:'refresh'}]} ],
+ f:[ {c:{U:1},f:[g('P',3)]},{c:{P:1},f:[{t:'mc'}]},{c:{P:1,U:1},f:[{t:'th'}]},{c:{P:3,U:1},f:[g('R',2)]},
+     {c:{P:3},f:[{t:'card'}]},{c:{U:2},f:[g('R',2)]},{c:{U:1,R:3},f:[{t:'vp',n:2}]},{c:{P:2},f:[g('U',2)]},
+     {c:{U:1},f:[{t:'card'}]},{c:{P:1,U:1,R:1},f:[{t:'vp',n:1}]},{c:{P:3,U:1},f:[{t:'vp',n:1}]},{c:{R:2},f:[{t:'vp',n:1},{t:'tl'}]} ]
+};
+const THESIS=[
+ [[{t:'exp'}],[{t:'exp'}],[g('P')],[g('P')]],
+ [[g('P',2)],[g('U')],[{t:'exp'}],[{t:'exp'}]],
+ [[g('P'),g('U')],[g('P'),g('U'),{t:'tl'}],[g('R')],[g('R'),{t:'tl'}]],
+ [[g('R'),g('U'),{t:'tl'}],[g('R'),{t:'mc'}],[{t:'vp',n:1}],[{t:'vp',n:1},{t:'tl'}]]
+];
+const ROMAN=['I','II','III','IV'];
+const TL=[
+ {y:1867,d:'출생 (시작)',k:'none'},
+ {y:1883,d:'모두 실험 타일 1장',k:'gain',f:[{t:'exp'}]},
+ {y:1891,d:'모두 피치블렌드 1',k:'gain',f:[g('P')]},
+ {y:1893,d:'피치블렌드 1 → 실험 타일',k:'pay',c:{P:1},f:[{t:'exp'}]},
+ {y:1894,d:'—',k:'none'},
+ {y:1895,d:'라듐 1 → 1점',k:'pay',c:{R:1},f:[{t:'vp',n:1}]},
+ {y:1897,d:'논문 1개: 우라늄 / 2개+: 라듐',k:'thc',m:[null,[g('U')],[g('R')],[g('R')],[g('R')]]},
+ {y:1898,d:'활동 카드 4장 교체',k:'refresh'},
+ {y:1902,d:'모두 라듐 1',k:'gain',f:[g('R')]},
+ {y:1903,d:'노벨상: 우라늄+라듐 → 1점',k:'pay',c:{U:1,R:1},f:[{t:'vp',n:1}],nobel:1},
+ {y:1904,d:'타워 바닥 큐브 모두 공급처로',k:'radia'},
+ {y:1906,d:'피치블렌드 1 → 실험 타일',k:'pay',c:{P:1},f:[{t:'exp'}]},
+ {y:1910,d:'우라늄 1 → 라듐 1',k:'pay',c:{U:1},f:[g('R')]},
+ {y:1911,d:'노벨상: 라듐 2 → 1점',k:'pay',c:{R:2},f:[{t:'vp',n:1}],nobel:2},
+ {y:1914,d:'활동 카드 4장 교체',k:'refresh'},
+ {y:1921,d:'논문 1: 우라늄 / 2: 라듐 / 3+: 1점',k:'thc',m:[null,[g('U')],[g('R')],[{t:'vp',n:1}],[{t:'vp',n:1}]]},
+ {y:1925,d:'—',k:'none'},
+ {y:1934,d:'게임 종료 (라운드 마무리)',k:'end'}
+];
+const LAST=TL.length-1;
+const WS=[
+ [{P:4,tl:1},{P:2,U:1},{P:3,U:1},{P:2,U:1,R:1},{P:2,U:2}],
+ [{P:2,U:1,R:1,tl:1},{P:1,U:1,R:1},{P:1,U:2,R:1},{P:3},{U:2}]
+];
+const OBJ={
+ th4:{n:'논문 4개를 쓰면 1점',vp:1},
+ all:{n:'활동 카드 5종류를 모두 1장 이상 가지면 2점',vp:2},
+ max:{n:'한 종류 활동 카드를 최대치까지 모으면 1점',vp:1},
+ exp5:{n:'실험 타일 5장을 보유하면 1점 (검증 불필요)',vp:1},
+ nobel:{n:'노벨상(1903·1911) 칸에서 비용을 내면 추가 1점씩',vp:1}
+};
+const TRANS=[
+ {id:'t1',c:{P:2},f:[g('U')]},
+ {id:'t2',c:{U:2},f:[g('R')]},
+ {id:'t3',c:{R:2,U:1},f:[{t:'vp',n:1}]},
+ {id:'mc',c:{R:2},f:[{t:'vp',n:1}],mc:1}
+];
+const TOTAL={P:24,U:18,R:12};
+const COLORS=['#7b3f8c','#2f6fa8','#b5502f','#2f7d5b'];
+const AINAMES=['피에르','앙리','이렌'];
+
+// ======================= 상태/유틸 =======================
+let s=null, undoStack=[], busy=false, ui={sel:{P:0,U:0,R:0},speed:550,showLog:true};
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function rnd(){s.rng=(s.rng+0x6D2B79F5)>>>0;let t=s.rng;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const P=i=>s.players[i];
+const cube=(c,big)=>`<span class="cube ${c}${big?' big':''}" title="${CN[c]}"></span>`;
+function cubesHTML(o){let h='';for(const c of ['P','U','R'])for(let i=0;i<(o[c]||0);i++)h+=cube(c);return h||'<span class="small">없음</span>';}
+function fxHTML(f){if(!f||!f.length)return '<span class="small">효과 없음</span>';return f.map(e=>{switch(e.t){
+ case 'g':return cube(e.c).repeat(e.n||1);case 'vp':return `<span class="vp">${e.n}점</span>`;case 'th':return '📜논문';
+ case 'exp':return '🧪실험타일';case 'mc':return '<span class="mc">마리 퀴리</span>';case 'tl':return '⏳타임라인+1';
+ case 'card':return '🃏카드 무료';case 'refresh':return '🔄카드 교체';}}).join(' + ');}
+function costHTML(c){return cubesHTML(c);}
+function canPay(p,c){return ['P','U','R'].every(k=>(p.cubes[k]||0)>=(c[k]||0));}
+function pay(p,c){for(const k in c){p.cubes[k]-=c[k];s.supply[k]+=c[k];}}
+function nCubes(p){return p.cubes.P+p.cubes.U+p.cubes.R;}
+function takeCap(p){return Math.min(6,3+p.beakers.filter(t=>t.v).length);}
+function storeCap(p){return Math.min(6,3+p.flasks.filter(t=>t.v).length);}
+function log(msg,cls='sys'){s.log.push({m:msg,c:cls});if(s.log.length>300)s.log.shift();}
+function who(i){return P(i).ai?'ai':'me';}
+function nameOf(i){return P(i).name;}
+
+function newGame(nAI,humanName){
+ s={rng:(Date.now()^Math.floor(Math.random()*1e9))>>>0,players:[],mc:null,supply:{...TOTAL},tower:{P:0,U:0,R:0},bottom:{P:0,U:0,R:0},
+  deck:[],market:[],expPiles:{b:[],f:[]},thesisPiles:[],workshop:{side:0,pos:0},timeline:0,current:0,first:0,phase:'research',
+  turnNo:1,endTriggered:false,bought:false,log:[],over:false,lastThrow:null};
+ for(const k of CATS)for(let i=0;i<CAT[k].copies;i++)s.deck.push(k);
+ shuffle(s.deck);s.market=[s.deck.pop(),s.deck.pop(),s.deck.pop(),s.deck.pop()];
+ s.expPiles.b=shuffle([...Array(12).keys()]);s.expPiles.f=shuffle([...Array(12).keys()]);
+ s.thesisPiles=THESIS.map(l=>shuffle([...Array(l.length).keys()]));
+ const objs=shuffle(Object.keys(OBJ));
+ const n=nAI+1;
+ for(let i=0;i<n;i++){
+  s.players.push({name:i===0?(humanName||'나'):AINAMES[i-1]+' (컴퓨터)',ai:i>0,color:COLORS[i],cubes:{P:0,U:0,R:0},vp:0,
+   theses:[],cards:{adv:0,ins:0,res:0,wor:0,uni:0},beakers:[],flasks:[],obj:objs[i],objDone:false,nobelN:0});
+ }
+ s.first=Math.floor(rnd()*n);s.current=s.first;
+ log(`새 게임 시작! 시작 플레이어: ${nameOf(s.first)}`);
+ undoStack=[];
+}
+
+// ======================= 선택(모달/AI) =======================
+function modal(html,setup){return new Promise(res=>{const root=document.getElementById('modalRoot');
+ root.innerHTML=`<div class="ov"><div class="mo">${html}</div></div>`;setup(root.querySelector('.mo'),v=>{root.innerHTML='';res(v);});});}
+async function choose(pi,title,opts,aiScore){
+ const valid=opts.filter(o=>!o.disabled);if(!valid.length)return null;
+ if(P(pi).ai){let best=valid[0],bs=-1e9;for(const o of valid){const sc=aiScore(o.value);if(sc>bs){bs=sc;best=o;}}return best.value;}
+ render();
+ return modal(`<h2>${title}</h2><div class="small">${nameOf(pi)}님의 선택</div><div class="opts">${opts.map((o,i)=>`<button data-i="${i}" ${o.disabled?'disabled':''}>${o.label}</button>`).join('')}</div>`,
+  (el,done)=>el.querySelectorAll('button[data-i]').forEach(b=>b.onclick=()=>done(opts[+b.dataset.i].value)));
+}
+
+// ======================= AI 가치 평가 =======================
+function finalTurnFor(pi){return s.endTriggered&&((pi+1)%s.players.length)===s.first;}
+function cv(c,pi){const late=s.timeline>=15;const f=(pi!=null&&finalTurnFor(pi))?0.02:(late?0.7:1);return {P:1,U:1.8,R:2.8}[c]*f;}
+function costVal(c,pi){let v=0;for(const k in c)v+=cv(k,pi)*c[k];return v;}
+function canThesis(p){const l=p.theses.length;return l<4&&s.thesisPiles[l].length>0;}
+function canExp(p){return (p.beakers.length<3&&s.expPiles.b.length)||(p.flasks.length<3&&s.expPiles.f.length);}
+function fxVal(pi,f){const p=P(pi);let v=0;const late=s.timeline>=15,fin=finalTurnFor(pi);
+ for(const e of f){switch(e.t){
+  case 'g':v+=cv(e.c,pi)*Math.min(e.n||1,s.supply[e.c]);break;
+  case 'vp':v+=6*e.n;break;
+  case 'th':v+=canThesis(p)?(fin?0.5:late?2:4):0;break;
+  case 'exp':v+=canExp(p)?(fin?0:s.timeline<=12?3:late?0.6:1.5):0;break;
+  case 'mc':v+=s.mc===pi?0:(fin?6:late?4:2.5);break;
+  case 'card':v+=fin?1:3.5;break;
+  case 'refresh':v+=0.1;break;}}
+ return v;}
+
+// ======================= 게임 효과 =======================
+function gain(pi,c,n=1){const k=Math.min(n,s.supply[c]);s.supply[c]-=k;P(pi).cubes[c]+=k;if(k<n)log(`공급처에 ${CN[c]}이(가) 부족합니다.`);return k;}
+async function applyFx(pi,f){for(const e of f){switch(e.t){
+ case 'g':gain(pi,e.c,e.n||1);break;
+ case 'vp':P(pi).vp+=e.n;break;
+ case 'th':await drawThesis(pi);break;
+ case 'exp':await drawExp(pi);break;
+ case 'mc':if(s.mc!==pi){s.mc=pi;log(`${nameOf(pi)}: 마리 퀴리 타일을 가져옴`,who(pi));}break;
+ case 'tl':await advanceTimeline();break;
+ case 'card':await freeCard(pi);break;
+ case 'refresh':refreshMarket();break;}}}
+async function drawThesis(pi){const p=P(pi);if(!canThesis(p)){return;}
+ const lv=p.theses.length;const id=s.thesisPiles[lv].pop();p.theses.push(id);
+ const f=THESIS[lv][id];log(`${nameOf(pi)}: 논문 ${ROMAN[lv]} 작성 → ${stripHTML(fxHTML(f))}`,who(pi));
+ await applyFx(pi,f);}
+function stripHTML(h){return h.replace(/<span class="cube (\w)"[^>]*><\/span>/g,(m,c)=>({P:'■',U:'🟨',R:'⬜'})[c]).replace(/<[^>]+>/g,'');}
+function expDesc(type,id){const t=EXP[type][id];return `${costHTML(t.c)} → ${fxHTML(t.f)}`;}
+async function drawExp(pi){const p=P(pi);
+ const okB=p.beakers.length<3&&s.expPiles.b.length,okF=p.flasks.length<3&&s.expPiles.f.length;
+ if(!okB&&!okF)return;
+ const tb=s.expPiles.b[s.expPiles.b.length-1],tf=s.expPiles.f[s.expPiles.f.length-1];
+ const ch=await choose(pi,'실험 타일을 고르세요',[
+  {label:`🥛 비커 (검증 시 가져오기 +1)<br><span class="small">${okB?expDesc('b',tb):'불가'}</span>`,value:'b',disabled:!okB},
+  {label:`⚗️ 둥근 플라스크 (검증 시 보관 +1)<br><span class="small">${okF?expDesc('f',tf):'불가'}</span>`,value:'f',disabled:!okF}],
+  v=>{const id=v==='b'?tb:tf;const t=EXP[v][id];return fxVal(pi,t.f)-costVal(t.c,pi)*0.6+(v==='b'?(takeCap(p)<6?1.5:0):(storeCap(p)<6?1.2:0))+rnd()*0.3;});
+ if(!ch)return;
+ const id=s.expPiles[ch].pop();(ch==='b'?p.beakers:p.flasks).push({id,v:false});
+ log(`${nameOf(pi)}: ${ch==='b'?'비커':'둥근 플라스크'} 실험 타일 획득`,who(pi));}
+function refreshMarket(){const old=s.market.filter(Boolean);s.deck.unshift(...old);s.market=[];for(let i=0;i<4;i++)s.market.push(s.deck.length?s.deck.pop():null);log('활동 카드 4장이 교체되었습니다.');}
+function cardScore(pi,k,free){const p=P(pi);const n=p.cards[k];if(n>=CAT[k].max)return -1e9;
+ let v=fxVal(pi,CAT[k].b[n])+1;if(p.obj==='all'&&!p.objDone&&n===0)v+=3;if(p.obj==='max'&&!p.objDone&&n+1===CAT[k].max)v+=4;
+ return free?v:v-costVal(CAT[k].cost,pi);}
+async function takeCard(pi,idx,free){const p=P(pi);const k=s.market[idx];if(!free)pay(p,CAT[k].cost);
+ p.cards[k]++;s.market[idx]=s.deck.length?s.deck.pop():null;
+ const f=CAT[k].b[p.cards[k]-1];log(`${nameOf(pi)}: ${CAT[k].ic}${CAT[k].n} 카드 ${free?'무료 획득':'구매'} (${p.cards[k]}장째) → ${stripHTML(fxHTML(f))}`,who(pi));
+ await applyFx(pi,f);}
+async function freeCard(pi){const p=P(pi);
+ const opts=s.market.map((k,i)=>k?{label:`${CAT[k].ic} ${CAT[k].n} (${p.cards[k]+1}장째 보너스: ${fxHTML(CAT[k].b[p.cards[k]]||[])})`,value:i,disabled:p.cards[k]>=CAT[k].max}:null).filter(Boolean);
+ const ch=await choose(pi,'활동 카드 1장을 무료로 가져오세요',opts,i=>cardScore(pi,s.market[i],true));
+ if(ch==null){log(`${nameOf(pi)}: 가져올 수 있는 카드가 없습니다.`);return;}
+ await takeCard(pi,ch,true);}
+async function advanceTimeline(){if(s.timeline>=LAST)return;s.timeline++;const sp=TL[s.timeline];
+ log(`⏳ 타임라인 → ${sp.y}년: ${sp.d}`);render();
+ if(sp.k==='end'){s.endTriggered=true;log('타임라인이 마지막 칸에 도달! 이번 라운드를 마치면 게임이 끝납니다.');return;}
+ if(sp.k==='refresh'){refreshMarket();return;}
+ if(sp.k==='radia'){for(const c of ['P','U','R']){s.supply[c]+=s.bottom[c];s.bottom[c]=0;}log('타워 바닥의 큐브가 모두 공급처로 돌아갔습니다.');return;}
+ if(sp.k==='none')return;
+ const n=s.players.length;
+ for(let j=0;j<n;j++){const pi=(s.current+j)%n;const p=P(pi);
+  if(sp.k==='gain'){await applyFx(pi,sp.f);}
+  else if(sp.k==='thc'){const f=sp.m[Math.min(4,p.theses.length)];if(f){log(`${nameOf(pi)}: 논문 ${p.theses.length}개 → ${stripHTML(fxHTML(f))}`,who(pi));await applyFx(pi,f);}}
+  else if(sp.k==='pay'){if(!canPay(p,sp.c))continue;
+   const bonus=(sp.nobel&&p.obj==='nobel'&&!p.objDone)?1:0;
+   const yes=await choose(pi,`${sp.y}년: ${sp.d}`,[{label:`예: ${costHTML(sp.c)} 내고 ${fxHTML(sp.f)}${bonus?' (+목표 1점)':''}`,value:'y'},{label:'아니요',value:'n'}],
+     v=>v==='y'?fxVal(pi,sp.f)+bonus*6-costVal(sp.c,pi):0);
+   if(yes==='y'){pay(p,sp.c);log(`${nameOf(pi)}: ${sp.y}년 효과 사용`,who(pi));await applyFx(pi,sp.f);if(bonus){p.vp+=1;log(`${nameOf(pi)}: 노벨상 목표 +1점`,who(pi));}}
+  }
+  if(sp.nobel===2&&p.obj==='nobel'&&!p.objDone){p.objDone=true;}
+ }}
+function checkObj(pi){const p=P(pi);if(p.objDone||p.obj==='nobel')return;
+ let ok=false;
+ if(p.obj==='th4')ok=p.theses.length>=4;
+ if(p.obj==='all')ok=CATS.every(k=>p.cards[k]>0);
+ if(p.obj==='max')ok=CATS.some(k=>p.cards[k]>=CAT[k].max);
+ if(p.obj==='exp5')ok=p.beakers.length+p.flasks.length>=5;
+ if(ok){p.objDone=true;p.vp+=OBJ[p.obj].vp;log(`${nameOf(pi)}: 목표 달성! +${OBJ[p.obj].vp}점`,who(pi));}}
+async function validateExp(pi,type,slot){const p=P(pi);const arr=type==='b'?p.beakers:p.flasks;const t=arr[slot];const d=EXP[type][t.id];
+ pay(p,d.c);t.v=true;log(`${nameOf(pi)}: ${type==='b'?'비커':'플라스크'} 실험 검증 → ${stripHTML(fxHTML(d.f))}`,who(pi));
+ await applyFx(pi,d.f);
+ const other=type==='b'?p.flasks:p.beakers;if(other[slot]&&other[slot].v){p.vp+=1;log(`${nameOf(pi)}: 마주 보는 실험 한 쌍 완성 +1점`,who(pi));}}
+async function doTrans(pi,tr){const p=P(pi);pay(p,tr.c);await applyFx(pi,tr.f);
+ log(`${nameOf(pi)}: 변환 ${stripHTML(costHTML(tr.c))} → ${stripHTML(fxHTML(tr.f))}`,who(pi));}
+
+// ======================= 턴 진행 =======================
+async function workshopStep(){const pi=s.current;const sp=WS[s.workshop.side][s.workshop.pos];
+ if(sp.tl){log('작업장 시작 칸: 타임라인 전진');await advanceTimeline();}
+ const thrown={P:0,U:0,R:0};for(const c of ['P','U','R']){const k=Math.min(sp[c]||0,s.supply[c]);s.supply[c]-=k;thrown[c]=k;}
+ const fell={P:0,U:0,R:0};
+ for(const c of ['P','U','R']){
+  for(let i=0;i<s.tower[c];i++)if(rnd()<0.35){fell[c]++;}
+  s.tower[c]-=fell[c];
+  for(let i=0;i<thrown[c];i++){if(rnd()<0.72)fell[c]++;else s.tower[c]++;}
+  s.bottom[c]+=fell[c];}
+ s.lastThrow={thrown,fell};
+ log(`${nameOf(pi)}의 턴 — 타워에 ${stripHTML(cubesHTML(thrown))} 투입, ${stripHTML(cubesHTML(fell))||'0개'} 떨어짐`,who(pi));}
+async function startTurn(){s.bought=false;s.phase='workshop';ui.sel={P:0,U:0,R:0};render();
+ await workshopStep();
+ if(P(s.current).ai){render();await aiTurn(s.current);await endTurn();}
+ else{s.phase='research';}}
+async function endTurn(){const pi=s.current;const p=P(pi);checkObj(pi);
+ const ex=nCubes(p)-storeCap(p);
+ if(ex>0){let d;
+  if(p.ai){d={P:0,U:0,R:0};for(let i=0;i<ex;i++){const c=['P','U','R'].filter(c=>p.cubes[c]-d[c]>0).sort((a,b)=>cv(a)-cv(b))[0];d[c]++;}}
+  else d=await discardModal(p,ex);
+  for(const c in d){p.cubes[c]-=d[c];s.supply[c]+=d[c];}
+  log(`${nameOf(pi)}: 보관 한도 초과로 ${stripHTML(cubesHTML(d))} 버림`,who(pi));}
+ s.workshop.pos++;if(s.workshop.pos>=5){s.workshop.side^=1;s.workshop.pos=0;log(`작업장 타일이 ${s.workshop.side?'II':'I'}면으로 뒤집혔습니다.`);}
+ const next=(pi+1)%s.players.length;
+ if(s.endTriggered&&next===s.first){s.over=true;s.phase='over';log('게임 종료!');render();showResults();return;}
+ s.current=next;s.turnNo++;
+ if(P(next).ai)await sleep(ui.speed);
+ await startTurn();}
+function discardModal(p,ex){return modal(`<h2>보관 한도 초과</h2><p>플라스크에 ${storeCap(p)}개까지만 보관할 수 있어요. <b>${ex}개</b>를 버려야 합니다.</p><div id="dsel" class="row"></div><div class="opts"><button class="pri" id="dok" disabled>버리기</button></div>`,(el,done)=>{
+ const d={P:0,U:0,R:0};const draw=()=>{const sum=d.P+d.U+d.R;
+  el.querySelector('#dsel').innerHTML=['P','U','R'].map(c=>`<span class="sel">${cube(c,1)} ${p.cubes[c]-d[c]}개 남김 <button data-c="${c}" data-d="1" ${p.cubes[c]-d[c]<=0||sum>=ex?'disabled':''}>버림+</button><button data-c="${c}" data-d="-1" ${d[c]<=0?'disabled':''}>−</button></span>`).join('');
+  el.querySelector('#dok').disabled=sum!==ex;el.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{d[b.dataset.c]+=+b.dataset.d;draw();});};
+ draw();el.querySelector('#dok').onclick=()=>done(d);});}
+
+async function aiTurn(pi){const p=P(pi);await sleep(ui.speed);
+ // 연구 단계
+ const cap=takeCap(p);const pool=[];for(const c of ['R','U','P'])for(let i=0;i<s.bottom[c];i++)pool.push(c);
+ pool.sort((a,b)=>cv(b,pi)-cv(a,pi));const take=pool.slice(0,cap);
+ let tv=take.reduce((a,c)=>a+cv(c,pi),0);
+ const thv=canThesis(p)?(finalTurnFor(pi)?0:4.2+(p.obj==='th4'?1.5:0)):-1;
+ if(thv>tv){await drawThesis(pi);}
+ else{const t={P:0,U:0,R:0};take.forEach(c=>t[c]++);for(const c in t){s.bottom[c]-=t[c];p.cubes[c]+=t[c];}
+  log(`${nameOf(pi)}: 큐브 ${stripHTML(cubesHTML(t))||'0개'} 가져옴`,'ai');}
+ s.phase='exp';render();await sleep(ui.speed);
+ // 실험 단계
+ for(let it=0;it<30;it++){const cands=[];const excess=nCubes(p)-storeCap(p);
+  const press=(red)=>excess>0?Math.min(excess,red)*1.1:0;
+  ['b','f'].forEach(ty=>(ty==='b'?p.beakers:p.flasks).forEach((t,i)=>{if(t.v)return;const d=EXP[ty][t.id];if(!canPay(p,d.c))return;
+   const other=(ty==='b'?p.flasks:p.beakers)[i];
+   let sc=fxVal(pi,d.f)-costVal(d.c,pi)+(s.timeline<15?(ty==='b'?(takeCap(p)<6?2.2:0):(storeCap(p)<6?1.8:0)):0.2)+(other&&other.v?6:0);
+   const red=Object.values(d.c).reduce((a,b)=>a+b,0);sc+=press(red);
+   cands.push({sc,run:()=>validateExp(pi,ty,i)});}));
+  if(!s.bought)s.market.forEach((k,i)=>{if(!k||!canPay(p,CAT[k].cost)||p.cards[k]>=CAT[k].max)return;
+   cands.push({sc:cardScore(pi,k,false)+press(Object.values(CAT[k].cost).reduce((a,b)=>a+b,0)),run:async()=>{s.bought=true;await takeCard(pi,i,false);}});});
+  for(const tr of TRANS){if(tr.mc&&s.mc!==pi)continue;if(!canPay(p,tr.c))continue;
+   const red=Object.values(tr.c).reduce((a,b)=>a+b,0)-1;
+   cands.push({sc:fxVal(pi,tr.f)-costVal(tr.c,pi)+press(red),run:()=>doTrans(pi,tr)});}
+  cands.sort((a,b)=>b.sc-a.sc);if(!cands.length||cands[0].sc<=0.05)break;
+  await cands[0].run();checkObj(pi);render();await sleep(ui.speed*0.6);}
+ checkObj(pi);}
+
+// ======================= 사람 행동 =======================
+function snapshot(){undoStack.push(JSON.stringify(s));if(undoStack.length>300)undoStack.shift();}
+async function act(fn){if(busy||s.over&&fn!==null)return;busy=true;snapshot();
+ try{await fn();if(!s.over)checkObj(s.current);}catch(e){console.error(e);log('오류: '+e.message);}
+ busy=false;save();render();}
+function undo(){if(busy||!undoStack.length)return;s=JSON.parse(undoStack.pop());ui.sel={P:0,U:0,R:0};
+ log('↶ 무르기','me');document.getElementById('modalRoot').innerHTML='';save();render();}
+function save(){try{localStorage.setItem('curie-save',JSON.stringify({s,u:undoStack.slice(-40)}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('curie-save'));if(d&&d.s&&d.s.players){s=d.s;undoStack=d.u||[];return true;}}catch(e){}return false;}
+
+const H={
+ sel(c,d){const p=P(0);const sum=ui.sel.P+ui.sel.U+ui.sel.R;if(d>0&&(sum>=takeCap(p)||ui.sel[c]>=s.bottom[c]))return;if(d<0&&ui.sel[c]<=0)return;ui.sel[c]+=d;render();},
+ take(){act(async()=>{const p=P(0);const t={...ui.sel};for(const c in t){s.bottom[c]-=t[c];p.cubes[c]+=t[c];}
+  log(`${nameOf(0)}: 큐브 ${stripHTML(cubesHTML(t))||'0개'} 가져옴`,'me');ui.sel={P:0,U:0,R:0};s.phase='exp';});},
+ thesis(){act(async()=>{await drawThesis(0);s.phase='exp';});},
+ buy(i){act(async()=>{s.bought=true;await takeCard(0,i,false);});},
+ trans(id){act(async()=>{await doTrans(0,TRANS.find(t=>t.id===id));});},
+ val(ty,i){act(async()=>{await validateExp(0,ty,i);});},
+ end(){act(async()=>{await endTurn();});}
+};
+
+// ======================= 화면 =======================
+function render(){const app=document.getElementById('app');if(!s){app.innerHTML='';return;}
+ const cur=s.current,me=P(0);
+ const tl=TL.map((t,i)=>`<div class="sp ${i<s.timeline?'past':''} ${i===s.timeline?'cur':''}"><b>${t.y}</b>${t.d}</div>`).join('');
+ const phaseName={workshop:'작업장 (큐브 던지기)',research:'연구 단계',exp:'실험 단계',over:'게임 종료'}[s.phase];
+ const ws=WS[s.workshop.side].map((sp,i)=>`<div class="s ${i===s.workshop.pos?'on':''}">${i===0?'◯ ':''}${cubesHTML(sp)}${sp.tl?' ⏳':''}</div>`).join('')+'<div class="s">↻ 뒤집기</div>';
+ const myTurn=!s.over&&!busy&&cur===0;
+ const market=s.market.map((k,i)=>{if(!k)return `<div class="card">빈 칸</div>`;const c=CAT[k];const n=me.cards[k];
+  const can=myTurn&&s.phase==='exp'&&!s.bought&&canPay(me,c.cost)&&n<c.max;
+  return `<div class="card c-${k}"><div class="hd"><span>${c.ic} ${c.n}</span><span>${costHTML(c.cost)}</span></div>
+  <div class="small">최대 ${c.max}장 · 내 보유 ${n}장</div><ol>${c.b.map((b,j)=>`<li class="${j===n?'now':''}">${fxHTML(b)}</li>`).join('')}</ol>
+  ${s.phase==='exp'&&cur===0&&!s.over?`<button ${can?'':'disabled'} onclick="H.buy(${i})">구매</button>`:''}</div>`;}).join('');
+ const topB=s.expPiles.b.length?expDesc('b',s.expPiles.b[s.expPiles.b.length-1]):'없음';
+ const topF=s.expPiles.f.length?expDesc('f',s.expPiles.f[s.expPiles.f.length-1]):'없음';
+ let action='';
+ if(s.over){action=`<h3>게임이 끝났습니다</h3><div class="btns"><button class="pri" onclick="showResults()">결과 보기</button><button onclick="setupScreen()">새 게임</button></div>`;}
+ else if(cur!==0||busy&&cur!==0){action=`<h3>🤖 ${nameOf(cur)} 진행 중… <span class="badge">${phaseName}</span></h3><div class="small">컴퓨터가 생각하고 있어요.</div>`;}
+ else if(s.phase==='research'){const cap=takeCap(me);const sum=ui.sel.P+ui.sel.U+ui.sel.R;
+  action=`<h3>② 연구 단계 — 큐브 가져오기 또는 논문 쓰기</h3>
+  <div class="small">타워 바닥에서 최대 <b>${cap}개</b>까지 가져올 수 있어요 (턴 끝 보관 한도 ${storeCap(me)}개).</div>
+  <div class="row">${['P','U','R'].map(c=>`<span class="sel">${cube(c,1)} ${ui.sel[c]}/${s.bottom[c]} <button onclick="H.sel('${c}',-1)">−</button><button onclick="H.sel('${c}',1)">+</button></span>`).join('')}</div>
+  <div class="btns"><button class="pri" ${busy?'disabled':''} onclick="H.take()">선택한 큐브 ${sum}개 가져오기</button>
+  <button ${canThesis(me)&&!busy?'':'disabled'} onclick="H.thesis()">📜 논문 ${ROMAN[me.theses.length]||''} 쓰기 (큐브 대신)</button></div>`;}
+ else if(s.phase==='exp'){const tb=TRANS.filter(t=>!t.mc||s.mc===0).map(t=>`<button ${canPay(me,t.c)&&!busy?'':'disabled'} onclick="H.trans('${t.id}')">${costHTML(t.c)} → ${fxHTML(t.f)}${t.mc?' (마리 퀴리)':''}</button>`).join('');
+  const ex=nCubes(me)-storeCap(me);
+  action=`<h3>③ 실험 단계 <span class="small">(순서 자유 · 모두 선택)</span></h3>
+  <div class="small">• 카드 구매(턴당 1장): ${s.bought?'완료':'아래 시장에서 «구매»'} · 실험 검증: 내 보드의 «검증» 버튼 · 변환:</div>
+  <div class="btns">${tb}</div>
+  <div class="btns"><button class="warn" ${busy?'disabled':''} onclick="H.end()">④ 턴 종료</button>${ex>0?`<span class="small" style="color:var(--accent2)">⚠ 보관 한도 초과 ${ex}개 — 턴 종료 시 버려야 해요</span>`:''}</div>`;}
+ else action=`<h3>작업장 진행 중…</h3>`;
+
+ const opps=s.players.map((p,i)=>i?playerBoard(p,i):'').join('');
+ const lg=s.log.slice(-80).reverse().map(l=>`<div class="${l.c}">${l.m}</div>`).join('');
+ const lastLog=s.log.length?s.log[s.log.length-1].m:'';
+ app.innerHTML=`<header><h1>마리 퀴리의 발자취</h1>
+  <button onclick="undo()" ${undoStack.length&&!busy?'':'disabled'}>↶ 무르기 (${undoStack.length})</button>
+  <button onclick="showHelp()">규칙</button><button onclick="setupScreen()">새 게임</button></header>
+
+ <section class="zone z-board"><span class="zt">🟩 공용 보드판</span>
+  <div class="zsub">모든 플레이어가 함께 쓰는 판 — 타임라인 · 큐브 타워 · 작업장 · 카드 시장 · 공급처</div>
+  <div class="panel"><h3>⏳ 타임라인 <span class="small">(1934년 도달 시 그 라운드 후 종료)</span></h3><div class="tl" id="tlbar">${tl}</div></div>
+ <div class="grid">
+  <div class="panel"><h3>🗼 큐브 타워</h3>
+   <div>바닥 (가져갈 수 있음): ${cubesHTML(s.bottom)}</div>
+   <div class="small">타워 속에 걸린 큐브: ${s.tower.P+s.tower.U+s.tower.R}개 (다음 투입 때 떨어질 수도!)</div>
+   ${s.lastThrow?`<div class="small">직전 투입: ${cubesHTML(s.lastThrow.thrown)} → 떨어짐 ${cubesHTML(s.lastThrow.fell)}</div>`:''}
+   <h3 style="margin-top:8px">🏛️ 작업장 타일 (${s.workshop.side?'II':'I'}면)</h3><div class="ws">${ws}</div>
+   <div class="small">테두리 칸의 큐브가 이번 턴 타워에 들어갑니다. ◯ 시작 칸에서는 타임라인 ⏳ 전진.</div></div>
+  <div class="panel"><h3>📦 공급처 · 더미</h3>
+   <div>공급처: ${cube('P')}×${s.supply.P} ${cube('U')}×${s.supply.U} ${cube('R')}×${s.supply.R}</div>
+   <div class="row"><span class="mc">마리 퀴리 타일</span> <span>${s.mc==null?'중앙':nameOf(s.mc)} <span class="small">(라듐2→1점 변환, 게임 끝 +1점)</span></span></div>
+   <div class="tile"><div class="ty">🥛 비커 더미 (${s.expPiles.b.length}) 맨 위</div>${topB}</div>
+   <div class="tile" style="margin-top:4px"><div class="ty">⚗️ 플라스크 더미 (${s.expPiles.f.length}) 맨 위</div>${topF}</div>
+   <div class="small" style="margin-top:4px">논문 더미: ${s.thesisPiles.map((p,i)=>ROMAN[i]+' '+p.length).join(' · ')} · 카드 덱 ${s.deck.length}장</div></div>
+ </div>
+ <div class="panel"><h3>🃏 활동 카드 시장 <span class="small">(굵은 줄 = 내가 지금 사면 받는 보너스)</span></h3><div class="cards">${market}</div></div>
+ </section>
+
+ <section class="zone z-mine"><span class="zt">🧪 내 실험실 (개인판)</span>
+  <div class="zsub">내 큐브 · 점수 · 논문 · 활동 카드 · 실험 타일 · 목표</div>
+  ${playerBoard(me,0)}
+ </section>
+
+ <section class="zone z-opp"><span class="zt">🤖 상대 실험실</span>
+  <div class="zsub">컴퓨터 플레이어의 개인판</div>
+  <div class="grid">${opps}</div>
+ </section>
+
+ <div class="panel"><details class="logbox"><summary>📝 진행 기록 (최근: ${lastLog})</summary><div class="log">${lg}</div></details></div>
+
+ <div class="panel act"><div class="who"><span class="tag">지금 할 일</span> 턴 ${s.turnNo} · <b style="color:${P(cur).color}">${nameOf(cur)}</b> · ${phaseName}
+  ${s.endTriggered?'· <b style="color:var(--accent2)">마지막 라운드</b>':''}</div>${action}</div>`;
+ const c=document.querySelector('#tlbar .cur');if(c)c.scrollIntoView({block:'nearest',inline:'center'});}
+
+function playerBoard(p,i){const me=i===0;const canAct=me&&!s.over&&!busy&&s.current===0&&s.phase==='exp';
+ const slot=(ty,j)=>{const arr=ty==='b'?p.beakers:p.flasks;const t=arr[j];
+  if(!t)return `<div class="tile"><span class="ty">${ty==='b'?'🥛 비커':'⚗️ 플라스크'} 빈 칸</span></div>`;
+  const d=EXP[ty][t.id];
+  return `<div class="tile ${t.v?'v':''}"><div class="ty">${ty==='b'?'🥛 비커':'⚗️ 플라스크'} ${t.v?'✔ 검증됨':''}</div>${costHTML(d.c)} → ${fxHTML(d.f)}
+   ${canAct&&!t.v?`<br><button ${canPay(p,d.c)?'':'disabled'} onclick="H.val('${ty}',${j})">검증</button>`:''}</div>`;};
+ let labs='';for(let j=0;j<3;j++)labs+=slot('b',j)+slot('f',j);
+ return `<div class="pb ${me?'me':''} ${s.current===i&&!s.over?'turn':''}">
+  <div class="top"><span class="name" style="color:${p.color}">${p.name}${s.mc===i?' <span class="mc">마리 퀴리</span>':''}</span><span class="vp" style="font-size:18px">${p.vp}점</span></div>
+  <div class="row">${['P','U','R'].map(c=>`${cube(c,1)}×${p.cubes[c]}`).join(' ')} <span class="small">· 가져오기 ${takeCap(p)} / 보관 ${storeCap(p)}</span></div>
+  <div class="row">${[0,1,2,3].map(l=>`<span class="th ${p.theses.length>l?'on':''}" title="${p.theses.length>l?stripHTML(fxHTML(THESIS[l][p.theses[l]])):''}">${ROMAN[l]}</span>`).join('')}
+   <span class="small">카드: ${CATS.map(k=>`${CAT[k].ic}${p.cards[k]}/${CAT[k].max}`).join(' ')}</span></div>
+  <div class="labs">${labs}</div>
+  <div class="small" style="margin-top:6px">🎯 목표: ${OBJ[p.obj].n} ${p.objDone?'<b style="color:var(--ok)">✔</b>':''}</div></div>`;}
+
+function results(){const rows=s.players.map((p,i)=>({i,name:p.name,vp:p.vp+(s.mc===i?1:0),R:p.cubes.R,U:p.cubes.U,P:p.cubes.P,mc:s.mc===i}));
+ rows.sort((a,b)=>b.vp-a.vp||b.R-a.R||b.U-a.U||b.P-a.P);return rows;}
+function showResults(){const r=results();const w=r[0];
+ modal(`<h2>🏆 ${w.i===0?'승리했어요!':w.name+' 승리'}</h2><table class="res"><tr><th>순위</th><th>이름</th><th>점수</th><th>${cube('R')}</th><th>${cube('U')}</th><th>${cube('P')}</th></tr>
+ ${r.map((x,k)=>`<tr><td>${k+1}</td><td>${x.name}${x.mc?' <span class="mc">+1</span>':''}</td><td class="vp">${x.vp}</td><td>${x.R}</td><td>${x.U}</td><td>${x.P}</td></tr>`).join('')}</table>
+ <p class="small">동점 시 라듐 → 우라늄 → 피치블렌드 순으로 비교합니다. 마리 퀴리 타일 보유자 +1점 포함.</p>
+ <div class="opts"><button class="pri" data-x="new">새 게임</button><button data-x="undo">↶ 마지막 행동 무르기</button><button data-x="close">닫기</button></div>`,
+ (el,done)=>el.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>{done();const x=b.dataset.x;if(x==='new')setupScreen();if(x==='undo')undo();}));}
+
+function showHelp(){modal(`<div class="help"><h2>규칙 요약</h2>
+<p>타임라인 마커가 <b>1934년</b>에 닿으면 그 라운드까지 마치고 끝. 승점이 가장 높은 사람이 승리!</p>
+<ol><li><b>작업장</b>: 작업장 타일 표시 칸의 큐브를 타워에 넣습니다(자동). 일부는 타워 속에 걸렸다가 나중에 떨어져요.</li>
+<li><b>연구</b>: 타워 바닥에서 큐브를 가져오기(처음 3개, 비커 검증마다 +1, 최대 6) <i>또는</i> 논문을 순서대로(I→IV) 쓰고 보너스 받기.</li>
+<li><b>실험</b>(자유 순서): 활동 카드 1장 구매(장수에 따라 보너스) · 자원 변환(${cube('P')}${cube('P')}→${cube('U')}, ${cube('U')}${cube('U')}→${cube('R')}, ${cube('R')}${cube('R')}${cube('U')}→1점, 마리 퀴리 보유 시 ${cube('R')}${cube('R')}→1점) · 실험 타일 검증 · 목표 달성(자동).</li>
+<li><b>휴식</b>: 보관 한도(처음 3, 플라스크 검증마다 +1)를 넘는 큐브는 버리고, 작업장 마커 이동.</li></ol>
+<p>⏳ 표시 효과가 나오면 타임라인이 1칸 전진하고 그 칸의 효과를 모든 플레이어가 적용합니다. 같은 줄의 비커·플라스크를 모두 검증하면 +1점.</p>
+<p><b>무르기</b>: 내 행동 하나씩 되돌립니다. 턴 종료를 무르면 컴퓨터의 턴도 함께 되돌아가요. 타워 결과는 같은 시드로 재현되어 다시 던져도 같습니다.</p>
+<p class="small">※ 규칙서에 없는 타임라인 칸 설명·작업장 타일 수치는 보드 그림을 바탕으로 재구성했습니다.</p></div>
+<div class="opts"><button class="pri" data-x>닫기</button></div>`,(el,done)=>el.querySelector('[data-x]').onclick=()=>done());}
+
+function setupScreen(){if(busy)return;modal(`<h2>새 게임</h2>
+ <p>이름 <input id="nm" value="${(s&&s.players&&s.players[0].name)||'나'}" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:140px"></p>
+ <p>컴퓨터 상대 수</p><div class="opts"><button data-n="1">컴퓨터 1명 (2인)</button><button data-n="2">컴퓨터 2명 (3인)</button><button data-n="3">컴퓨터 3명 (4인)</button></div>
+ <p class="small">컴퓨터 속도</p><div class="row"><label><input type="radio" name="sp" value="900"> 느리게</label><label><input type="radio" name="sp" value="550" checked> 보통</label><label><input type="radio" name="sp" value="150"> 빠르게</label></div>
+ ${s?'<div class="opts"><button data-n="0">취소</button></div>':''}`,(el,done)=>{
+ el.querySelectorAll('input[name=sp]').forEach(r=>{if(+r.value===ui.speed)r.checked=true;});
+ el.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;const nm=el.querySelector('#nm').value.trim()||'나';
+  ui.speed=+el.querySelector('input[name=sp]:checked').value;done();if(!n)return;
+  newGame(n,nm);busy=true;render();(async()=>{try{await startTurn();}finally{busy=false;save();render();}})();});});}
+
+// ======================= 시작 =======================
+if(load()){
+ if(s.over){render();}
+ else if(P(s.current).ai||s.phase==='workshop'){ // 컴퓨터 턴 도중 저장된 경우: 마지막 내 행동 전으로
+  if(undoStack.length){s=JSON.parse(undoStack.pop());}render();
+ } else render();
+} else {render();setupScreen();}
+</script>
+</body>
+</html>
