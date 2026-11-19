@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>듄: 임페리움 업라이징 – 한글판 (컴퓨터 대전)</title>
+<style>
+:root{--bg:#1b1510;--panel:#2a2119;--panel2:#352a1f;--line:#4a3b2b;--text:#f3e7d3;--dim:#b9a78c;--gold:#e9b44c;--hi:#ffd36b;
+--emp:#b8453a;--guild:#c77d2a;--bg-f:#7b5aa6;--fremen:#3e8a8a;--land:#5d7f3b;--city:#7a6a55;--spice:#c6902e;--spy:#555}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:14px;line-height:1.35}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:8px 8px 230px}
+.top{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin-bottom:8px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.title{font-size:12px;color:var(--dim);margin-bottom:4px;letter-spacing:.02em}
+.conf{flex:1 1 300px}
+.conf .nm{font-size:17px;font-weight:700;color:var(--hi)}
+.lvl{display:inline-block;background:#6b3a1c;border-radius:4px;padding:0 6px;font-size:12px;margin-right:6px}
+.rw{font-size:13px;margin-top:3px}
+.rw b{color:var(--gold)}
+.status{flex:1 1 200px;font-size:13px}
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:6px;margin-bottom:8px}
+.pl{border-left:5px solid;border-radius:10px;background:var(--panel);padding:6px 8px;font-size:12.5px;position:relative}
+.pl.cur{outline:2px solid var(--hi)}
+.pl .h{display:flex;justify-content:space-between;align-items:baseline}
+.pl .h b{font-size:14px}
+.vp{font-size:20px;font-weight:800;color:var(--hi)}
+.res{display:flex;gap:8px;flex-wrap:wrap;margin:2px 0}
+.tag{display:inline-block;border-radius:4px;padding:0 5px;font-size:11px;margin:1px 2px 1px 0;background:#444;color:#fff;white-space:nowrap}
+.t-emp{background:var(--emp)}.t-guild{background:var(--guild)}.t-bg{background:var(--bg-f)}.t-fremen{background:var(--fremen)}.t-land{background:var(--land)}.t-city{background:var(--city)}.t-spice{background:var(--spice)}.t-spy{background:#333;border:1px solid #888}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:6px;margin-bottom:8px}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px}
+.sec h3{font-size:13px;margin-bottom:4px;display:flex;justify-content:space-between}
+.sp{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 7px;margin-bottom:4px;position:relative}
+.sp .n{font-weight:700}
+.sp .d{font-size:11.5px;color:var(--dim)}
+.sp.legal{border:2px solid var(--hi);background:#4a3a1c;box-shadow:0 0 8px #ffd36b66}
+.sp.dim{opacity:.45}
+.occ{position:absolute;right:6px;top:5px;display:flex;gap:3px}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid #000;display:inline-block}
+.cmb{color:#ff8a6b;font-size:11px}
+.post{font-size:11px;color:var(--dim);margin:2px 0 4px}
+.inf table{width:100%;border-collapse:collapse;font-size:12.5px}
+.inf td,.inf th{border-bottom:1px solid var(--line);padding:3px;text-align:center}
+.inf td:first-child,.inf th:first-child{text-align:left}
+.market{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.card{flex:0 0 150px;width:150px;background:#f1e4cc;color:#2a1d10;border-radius:9px;padding:5px 6px 6px;font-size:11px;position:relative;border:2px solid transparent;text-align:left}
+.card .cn{font-weight:800;font-size:12.5px;padding-right:22px;line-height:1.2}
+.card .en{font-size:9.5px;color:#7a6650}
+.card .cost{position:absolute;right:5px;top:4px;background:#2a1d10;color:#ffd36b;border-radius:50%;width:20px;height:20px;text-align:center;font-weight:800;line-height:20px;font-size:12px}
+.card .ab{margin-top:3px;border-top:1px dashed #b49b78;padding-top:2px}
+.card .ab b{color:#6b3a1c}
+.card .fc{height:4px;border-radius:2px;margin:3px 0}
+.card.sel{border-color:#ff5a00;transform:translateY(-6px);box-shadow:0 6px 14px #000a}
+.card.can{border-color:#3aa35a}
+.card.no{opacity:.5}
+.handbar{position:fixed;left:0;right:0;bottom:0;background:#120e0aee;border-top:2px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(4px);z-index:5}
+.handbar .row{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px;max-width:1100px;margin:0 auto}
+.hb-top{display:flex;gap:6px;align-items:center;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+.msg{flex:1;font-size:13px;color:var(--hi);min-width:160px}
+.btn{background:#8a4a1c;border:1px solid #c27a3c;border-radius:8px;padding:7px 12px;font-weight:700}
+.btn.sec2{background:#3a2e22;border-color:var(--line)}
+.btn:disabled{opacity:.4}
+.ic{background:#2d2440;border:1px solid #7b5aa6;border-radius:8px;padding:4px 7px;font-size:11.5px;text-align:left;max-width:170px}
+.ic.combat{border-color:#b8453a;background:#3a1f1c}.ic.end{border-color:#c6902e;background:#3a2c15}
+.ic:disabled{opacity:.5}
+.log{max-height:240px;overflow:auto;font-size:12px}
+.log div{padding:1px 0;border-bottom:1px solid #2f261c}
+.log .l-round{color:var(--hi);font-weight:700}.log .l-imp{color:#ff9d6b}.log .l-vp{color:#9be07a}.log .l-int{color:#c4a7ff}.log .l-act{color:#fff}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.mbox{background:var(--panel);border:1px solid var(--line);border-radius:14px 14px 0 0;width:100%;max-width:560px;max-height:82vh;overflow:auto;padding:14px 12px calc(14px + env(safe-area-inset-bottom))}
+@media(min-width:700px){.modal{align-items:center}.mbox{border-radius:14px}}
+.mbox h2{font-size:16px;margin-bottom:6px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;margin:5px 0}
+.opt small{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+.opt:disabled{opacity:.35}
+.grid{display:flex;flex-wrap:wrap;gap:6px}.grid .opt{width:auto;min-width:54px;text-align:center;font-size:18px;font-weight:700}
+.start{max-width:720px;margin:20px auto;padding:10px}
+.start h1{font-size:24px;color:var(--hi)}
+.choice{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.choice button{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.choice button.on{border-color:var(--hi);background:#4a3a1c}
+.ld{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px;margin:6px 0 14px}
+.ld button{text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px}
+.ld button.on{border-color:var(--hi);background:#4a3a1c}
+.ld small{display:block;color:var(--dim);font-size:12px;margin-top:3px}
+.note{font-size:12px;color:var(--dim)}
+details summary{cursor:pointer;color:var(--hi);font-weight:700}
+.help p,.help li{font-size:13px}
+.flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mb{margin-bottom:8px}
+
+.mapwrap{overflow-x:auto;max-width:820px;margin-left:auto;margin-right:auto;margin-bottom:8px;border-radius:12px}
+.map{position:relative;width:100%;aspect-ratio:100/122;container-type:inline-size;border-radius:12px;overflow:hidden;
+ background:radial-gradient(ellipse at 70% 85%,#d9a35a 0,#b97a3a 35%,transparent 60%),radial-gradient(ellipse at 20% 95%,#c88e4a 0,transparent 45%),linear-gradient(#2a2119 0 52%,#a8692f 52.5%,#c98c47 100%);border:1px solid var(--line)}
+.map.zoom{min-width:640px}
+.map svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.pn{position:absolute;border-radius:1.4cqw;border:1px solid #0006}
+.pt{position:absolute;font-weight:800;font-size:max(9px,2.3cqw);color:#fff;text-shadow:0 1px 2px #000}
+.tile{position:absolute;border-radius:1.2cqw;border:1px solid #0008;background:#2b2118ee;color:var(--text);text-align:left;padding:.5cqw .8cqw;overflow:hidden;box-shadow:0 .4cqw .8cqw #0007}
+.tile .tn{font-weight:800;font-size:max(9.5px,2.25cqw);line-height:1.15}
+.tile .tc{font-size:max(8px,1.75cqw);color:#f0d9b5;line-height:1.2;margin-top:.2cqw}
+.tile .ti{display:inline-block;border-radius:.6cqw;padding:0 .6cqw;font-size:max(7.5px,1.6cqw);color:#fff;margin-right:.4cqw}
+.tile.legal{border:.5cqw solid var(--hi);background:#5a4318f2;box-shadow:0 0 2cqw #ffd36bbb;z-index:2}
+.tile.dim{opacity:.45}
+.tile.city{background:#3d3226ee}.tile.desert{background:#5b3b17ee}
+.pawns{position:absolute;right:.5cqw;bottom:.5cqw;display:flex;gap:.4cqw}
+.pawn{width:3.2cqw;height:3.2cqw;border-radius:50% 50% 30% 30%;border:.35cqw solid #000;min-width:11px;min-height:11px}
+.flag{position:absolute;right:.6cqw;top:.4cqw;font-size:max(9px,2cqw)}
+.bonus{position:absolute;left:.8cqw;bottom:.4cqw;font-size:max(8px,1.7cqw);color:#ffd36b;font-weight:700}
+.eye{position:absolute;width:4.6cqw;height:4.6cqw;min-width:16px;min-height:16px;transform:translate(-50%,-50%);border-radius:50%;background:#1a1410;border:.4cqw solid #c9b38f;display:flex;align-items:center;justify-content:center;font-size:max(9px,2.2cqw);z-index:1}
+.chips{position:absolute;display:flex;gap:.6cqw;flex-wrap:wrap;align-items:center;font-size:max(8.5px,1.9cqw);color:#fff}
+.chip{display:inline-flex;align-items:center;gap:.3cqw;background:#0006;border-radius:.8cqw;padding:0 .7cqw;font-weight:700}
+.chip i{display:inline-block;width:1.9cqw;height:1.9cqw;min-width:8px;min-height:8px;border-radius:50%}
+.cz{position:absolute;color:var(--text)}
+.cz .cname{font-weight:800;font-size:max(11px,2.8cqw);color:var(--hi)}
+.cz .crw{font-size:max(8.5px,1.85cqw);line-height:1.3}
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:.8cqw;margin-top:.8cqw}
+.q{min-width:0;background:#0005;border-radius:1cqw;padding:.6cqw .9cqw;font-size:max(8.5px,1.9cqw);border-left:.8cqw solid}
+.q .cubes{display:flex;flex-wrap:wrap;gap:.3cqw;margin-top:.3cqw;min-height:2cqw}
+.cube{width:2cqw;height:2cqw;min-width:7px;min-height:7px;border-radius:.3cqw;border:1px solid #000}
+.wall{position:absolute;left:1%;right:1%;height:1.6cqw;border-radius:1cqw;background:repeating-linear-gradient(90deg,#6d5a45 0 3cqw,#857059 3cqw 6cqw);border:1px solid #2a1d10;display:flex;align-items:center;justify-content:center;font-size:max(8px,1.7cqw);font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
+.wall.broken{background:repeating-linear-gradient(90deg,#6d5a45 0 3cqw,transparent 3cqw 8cqw);opacity:.75}
+.maptool{max-width:820px;margin-left:auto!important;margin-right:auto!important;display:flex;justify-content:flex-end;gap:6px;margin:-2px 0 4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal"></div>
+<script>
+// ===== 듄: 임페리움 – 업라이징 (한글 웹판) 게임 엔진 =====
+const HEADLESS = typeof document === 'undefined';
+let SPEED = 650;
+const sleep = ms => (HEADLESS || SPEED === 0) ? Promise.resolve() : new Promise(r => setTimeout(r, ms));
+function shuffle(a) { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+const FAC = ['emp', 'guild', 'bg', 'fremen'];
+const FN = { emp: '황제', guild: '우주 길드', bg: '베네 게세리트', fremen: '프레멘' };
+const ICN = { emp: '황제', guild: '길드', bg: 'BG', fremen: '프레멘', land: '란드스라드', city: '도시', spice: '향신료 교역', spy: '첩자' };
+const BATTLE = { crysknife: '크리스나이프', desertMouse: '사막쥐', ornithopter: '오니솝터' };
+const COLORS = ['#e2574c', '#4a90d9', '#59b36b', '#e0b43a'];
+const R = { spice: 1.3, solari: 0.6, water: 1.7, troop: 1.1, card: 1.1, intrigue: 1.4, vp: 6 };
+
+let G = null;
+let UI = { // UI 훅 (헤드리스에서는 빈 함수)
+  render() {}, log() {}, ask: null, waitHuman: null, toast() {}
+};
+
+function log(msg, cls) { if (!G) return; G.log.unshift({ msg, cls, r: G.round }); if (G.log.length > 300) G.log.pop(); UI.log(msg, cls); }
+
+// ---------- 선택 ----------
+async function ask(p, title, opts, o = {}) {
+  const en = opts.filter(x => !x.disabled);
+  if (!en.length) return null;
+  if (p.ai || !UI.ask) {
+    let best = en[0];
+    for (const x of en) if ((x.ai ?? 0) > (best.ai ?? 0)) best = x;
+    if (o.cancel && (best.ai ?? 0) < (o.cancelAi ?? -0.01)) return null;
+    return best.value;
+  }
+  return await UI.ask(title, opts, o);
+}
+async function askYN(p, title, aiYes, desc) {
+  return await ask(p, title, [{ label: '예', value: true, ai: aiYes ? 1 : 0 }, { label: '아니오', value: false, ai: aiYes ? 0 : 1 }], { desc });
+}
+async function askNum(p, title, min, max, aiVal, desc) {
+  const opts = []; for (let i = min; i <= max; i++) opts.push({ label: String(i), value: i, ai: i === aiVal ? 1 : 0 });
+  return await ask(p, title, opts, { desc, grid: true });
+}
+async function askCard(p, title, cards, aiFn, cancel, desc) {
+  if (!cards.length) return null;
+  const opts = cards.map(c => ({ label: c.n, sub: c.icons ? cardLine(c) : c.t, value: c, ai: aiFn ? aiFn(c) : 0, card: c }));
+  return await ask(p, title, opts, { cancel, desc, cancelAi: 0 });
+}
+
+// ---------- 카드 정의 ----------
+const DEFS = {};
+function D(id, n, en, o) { DEFS[id] = Object.assign({ id, n, en, cost: 0, fac: [], icons: [], p: 0, s: 0, count: 1 }, o); }
+const hasInf = (p, f, n = 2) => p.inf[f] >= n;
+const otherFremen = (p, card) => [...p.inPlay, ...p.revealed].some(c => c !== card && c.fac.includes('fremen'));
+
+// 기본 덱
+D('conv', '설득력 있는 논거', 'Convincing Argument', { start: 2, p: 2 });
+D('dagger', '단검', 'Dagger', { start: 2, icons: ['land'], s: 1 });
+D('diplo', '외교', 'Diplomacy', { start: 1, icons: ['emp', 'guild', 'bg', 'fremen'], p: 1 });
+D('dune', '사막 행성 듄', 'Dune, the Desert Planet', { start: 2, icons: ['spice'], p: 1 });
+D('recon', '정찰', 'Reconnaissance', { start: 1, icons: ['city'], p: 1 });
+D('seek', '동맹 모색', 'Seek Allies', { start: 1, icons: ['emp', 'guild', 'bg', 'fremen'], at: '이 카드를 제거', agent: async (p, c) => trashSpecific(p, c.card), aiA: 1 });
+D('signet', '인장 반지', 'Signet Ring', { start: 1, icons: ['land', 'city', 'spice'], p: 1, at: '리더의 인장 능력 사용', aiA: 1.5 });
+// 예비 카드
+D('ptw', '길을 준비하라', 'Prepare the Way', { reserve: true, cost: 2, fac: ['bg'], icons: ['land', 'city'], p: 2, at: 'BG 영향력 2+: 카드 1장', agent: async (p) => { if (hasInf(p, 'bg')) draw(p, 1); }, aiA: p => hasInf(p, 'bg') ? R.card : 0 });
+D('tsmf', '향신료는 흘러야 한다', 'The Spice Must Flow', { reserve: true, cost: 9, fac: ['guild'], act: '승점 +1', rt: '향신료 +1', acquire: async p => addVP(p, 1, '향신료는 흘러야 한다'), reveal: async p => gain(p, 'spice', 1) });
+
+// 임페리움 덱 (업라이징)
+D('sardSoldier', '사다우카 병사', 'Sardaukar Soldier', { cost: 1, fac: ['emp'], icons: ['city'], p: 1, s: 1, xt: '제거될 때: 음모 카드 1장', onTrash: p => drawIntrigue(p, 1) });
+D('harvester', '밀수꾼의 수확기', "Smuggler's Harvester", { count: 2, cost: 1, fac: ['guild'], icons: ['spice'], p: 1, at: '이번 턴 메이커 공간에 보냈다면: 향신료 +1', agent: async (p, c) => { if (c.maker) gain(p, 'spice', 1); }, aiA: (p, sid) => SP[sid].maker ? R.spice : 0 });
+D('folding', '시공간 접기', 'Space-time Folding', { cost: 1, fac: ['guild'], icons: ['guild'], p: 1, at: '카드 1장 버림 → 1장 뽑기. 버린 카드가 길드면 1장 더', agent: async (p) => { const d = await discardFromHand(p, false, '버릴 카드 (취소 가능)'); if (d) { draw(p, 1); if (d.fac.includes('guild')) draw(p, 1); } }, aiA: 0.6 });
+D('loyalty', '굳건한 충성', 'Unswerving Loyalty', { count: 2, cost: 1, fac: ['fremen'], p: 1, rt: '병력 +1', bt: '병력 1 배치 또는 후퇴', reveal: async (p) => recruit(p, 1), bond: async (p, c) => { if (p.garrison > 0 && (p.conflict + p.worms > 0 || G.conflict)) { if (await askYN(p, '굳건한 충성: 수비대 병력 1을 분쟁에 배치할까요?', G.conflict.level >= 2)) { p.garrison--; p.conflict++; } } } });
+D('weirding', '기묘한 여인', 'Weirding Woman', { count: 2, cost: 1, fac: ['bg'], icons: ['city', 'spice'], p: 1, s: 1, at: 'BG 영향력 2+: 이 카드를 손으로 되돌림', agent: async (p, c) => { if (hasInf(p, 'bg')) c.returnToHand = true; }, aiA: p => hasInf(p, 'bg') ? 2 : 0 });
+D('survival', '사막 생존', 'Desert Survival', { count: 2, cost: 2, fac: ['fremen'], icons: ['spice'], p: 1, s: 1, at: '카드 1장 제거', agent: async p => trashAny(p), aiA: 1 });
+D('stilltent', '페다이킨 증류천막', 'Fedaykin Stilltent', { cost: 2, fac: ['fremen'], icons: ['spice'], rt: '물 +1', at: '이번 턴 메이커 공간: 병력 +1', agent: async (p, c) => { if (c.maker) recruit(p, 1, c); }, reveal: async p => gain(p, 'water', 1), aiA: (p, sid) => SP[sid].maker ? R.troop : 0 });
+D('missive', '숨겨진 밀서', 'Hidden Missive', { cost: 2, fac: ['bg'], icons: ['land'], p: 1, s: 1, at: 'BG 영향력 2+: 병력 +1, 카드 1장', agent: async (p, c) => { if (hasInf(p, 'bg')) { recruit(p, 1, c); draw(p, 1); } }, aiA: p => hasInf(p, 'bg') ? 2.2 : 0 });
+D('spymaster', '제국 첩보대장', 'Imperial Spymaster', { cost: 2, fac: ['emp'], icons: ['emp', 'spy'], at: '이번 턴 첩자를 회수했다면: 음모 카드 1장', agent: async (p, c) => { if (c.recalledSpy) drawIntrigue(p, 1); }, aiA: 0.5 });
+D('makerKeeper', '메이커 수호자', 'Maker Keeper', { count: 2, cost: 2, fac: ['bg', 'fremen'], icons: ['city'], p: 2, at: 'BG 2+: 물 +1 / 프레멘 2+: 향신료 +1', agent: async p => { if (hasInf(p, 'bg')) gain(p, 'water', 1); if (hasInf(p, 'fremen')) gain(p, 'spice', 1); }, aiA: p => (hasInf(p, 'bg') ? R.water : 0) + (hasInf(p, 'fremen') ? R.spice : 0) });
+D('informant', '믿을 만한 정보원', 'Reliable Informant', { cost: 2, fac: ['guild'], icons: ['guild'], p: 1, at: '황제/BG/프레멘 감시초소에 첩자 배치', rt: '솔라리 +1', agent: async p => placeSpy(p, po => ['emp', 'bg', 'fremen'].includes(POSTS[po].fac)), reveal: async p => gain(p, 'solari', 1), aiA: 0.8 });
+D('spyNetwork', '첩보망', 'Spy Network', { cost: 2, fac: ['guild', 'emp'], p: 2, s: 1, act: '첩자 배치', rt: '첩자 2개 이상: 첩자 회수 → 음모 카드 1장', acquire: async p => placeSpy(p), reveal: async p => { if (spiesOnBoard(p) >= 2 && await askYN(p, '첩보망: 첩자를 회수하고 음모 카드를 받을까요?', true)) { await recallSpy(p, '회수할 첩자'); drawIntrigue(p, 1); } } });
+D('undercover', '위장 요원', 'Undercover Asset', { cost: 2, fac: ['guild', 'emp'], icons: ['land', 'city', 'spice'], at: '이번 턴 공간의 영향력 조건 무시', rt: '첩자 배치 또는 검 +2', reveal: async (p, c) => { const v = await ask(p, '위장 요원: 선택', [{ label: '첩자 1 배치', value: 'spy', ai: p.spies > 0 ? 1 : 0 }, { label: '검 +2', value: 'sw', ai: p.conflict + p.worms > 0 ? 2 : 0.5 }]); if (v === 'spy') await placeSpy(p); else c.swords += 2; }, aiA: 0.3 });
+D('wheels', '음모 속의 음모', 'Wheels Within Wheels', { cost: 2, fac: ['guild', 'emp'], icons: ['spy'], p: 1, at: '황제 2+: 솔라리 +2 / 길드 2+: 향신료 +1', rt: '첩자 배치', agent: async p => { if (hasInf(p, 'emp')) gain(p, 'solari', 2); if (hasInf(p, 'guild')) gain(p, 'spice', 1); }, reveal: async p => placeSpy(p), aiA: p => (hasInf(p, 'emp') ? 2 * R.solari : 0) + (hasInf(p, 'guild') ? R.spice : 0) });
+D('bgOperative', '베네 게세리트 공작원', 'Bene Gesserit Operative', { count: 2, cost: 3, fac: ['bg'], icons: ['bg'], p: 1, at: '첩자 배치', rt: '첩자 2개 이상: 설득 +2', agent: async p => placeSpy(p), reveal: async (p, c) => { if (spiesOnBoard(p) >= 2) c.persuasion += 2; }, aiA: 0.8 });
+D('branching', '갈림길', 'Branching Path', { cost: 3, fac: ['bg'], icons: ['city', 'bg'], p: 2, at: 'BG 동맹: 음모 1장 버림 → 음모 1장, 향신료 +2', agent: async p => { if (G.alliance.bg === p.i && p.intrigue.length) { const ic = await askCard(p, '갈림길: 버릴 음모 카드', p.intrigue, c => -1, true); if (ic) { p.intrigue.splice(p.intrigue.indexOf(ic), 1); G.intDiscard.push(ic); drawIntrigue(p, 1); gain(p, 'spice', 2); } } }, aiA: p => G.alliance.bg === p.i && p.intrigue.length ? 2.6 : 0 });
+D('calculus', '권력의 계산', 'Calculus of Power', { count: 2, cost: 3, fac: ['emp'], icons: ['city', 'spy'], p: 2, at: '카드 1장 제거', rt: '사용 중인 다른 황제 카드 제거 → 검 +3', agent: async p => trashAny(p), reveal: async (p, c, self) => { const cand = [...p.inPlay, ...p.revealed].filter(x => x !== self && x.fac.includes('emp')); if (cand.length && p.conflict + p.worms > 0) { const t = await askCard(p, '권력의 계산: 제거할 황제 카드 (검 +3)', cand, x => (G.conflict.level >= 2 ? 3 : 0) - x.cost, true); if (t) { trashSpecific(p, t); c.swords += 3; } } }, aiA: 1 });
+D('covert', '비밀 작전', 'Covert Operation', { cost: 3, icons: ['spy'], at: '각 상대는 카드 1장 버림', rt: '첩자 2개 배치', agent: async p => { for (const o of G.players) if (o !== p && o.hand.length) await discardFromHand(o, true, `${p.name}의 비밀 작전: 버릴 카드를 고르세요`); }, reveal: async p => { await placeSpy(p); await placeSpy(p); }, aiA: 1.2 });
+D('rhetoric', '위험한 연설', 'Dangerous Rhetoric', { cost: 3, icons: ['land', 'spy'], p: 1, s: 1, at: '원하는 세력 영향력 +1, 이 카드 제거', agent: async (p, c) => { await chooseInf(p, 1); trashSpecific(p, c.card); }, aiA: 2.5 });
+D('doubleAgent', '이중 첩자', 'Double Agent', { count: 2, cost: 3, fac: ['guild', 'emp'], icons: ['land', 'city', 'spice'], p: 1, s: 1, at: '이번에 간 공간과 연결된 초소에 첩자 배치', agent: async (p, c) => placeSpy(p, po => POSTS[po].spaces.includes(c.sid)), aiA: 0.7 });
+D('ecoStation', '생태 시험장', 'Ecological Testing Station', { cost: 3, fac: ['fremen'], icons: ['city'], p: 1, at: '물 2 지불 → 카드 2장', bt: '물 +1', agent: async p => { if (p.water >= 2 && await askYN(p, '생태 시험장: 물 2를 내고 카드 2장을 뽑을까요?', p.water >= 3)) { p.water -= 2; draw(p, 2); } }, bond: async p => gain(p, 'water', 1), aiA: p => p.water >= 3 ? 0.8 : 0 });
+D('envoy', '길드 사절', 'Guild Envoy', { cost: 3, fac: ['guild'], icons: ['emp', 'guild', 'bg', 'fremen'], p: 1, at: '카드 1장 반드시 버림. 길드 카드면 카드 2장', agent: async p => { const d = await discardFromHand(p, true, '길드 사절: 버릴 카드', c => c.fac.includes('guild') ? 5 : -cardVal(c)); if (d && d.fac.includes('guild')) draw(p, 2); }, aiA: 0.3 });
+D('guildSpy', '길드 첩자', 'Guild Spy', { cost: 3, fac: ['guild'], icons: ['spy'], p: 2, act: '첩자 배치', at: '카드 1장 버림 → 1장 뽑기. 길드 카드였다면 음모 1장', acquire: async p => placeSpy(p), agent: async p => { const d = await discardFromHand(p, false, '길드 첩자: 버릴 카드 (취소 가능)'); if (d) { draw(p, 1); if (d.fac.includes('guild')) drawIntrigue(p, 1); } }, aiA: 0.6 });
+D('maula', '마울라 권총', 'Maula Pistol', { count: 2, cost: 3, fac: ['fremen'], icons: ['city', 'spice'], p: 1, s: 1, at: '카드 1장', agent: async p => draw(p, 1), aiA: R.card });
+D('watermaster', '북부 물 관리인', 'Northern Watermaster', { cost: 3, fac: ['fremen'], icons: ['city'], p: 1, at: '물 +1', bt: '향신료 +2', agent: async p => gain(p, 'water', 1), bond: async p => gain(p, 'spice', 2), aiA: R.water });
+D('rebel', '반군 보급책', 'Rebel Supplier', { count: 2, cost: 3, fac: ['fremen'], icons: ['city'], s: 1, at: '이번 턴 첩자를 회수했다면: 병력 +2', rt: '향신료 +1', agent: async (p, c) => { if (c.recalledSpy) recruit(p, 2, c); }, reveal: async p => gain(p, 'spice', 1), aiA: 0.6 });
+D('paracompass', '파라나침반', 'Paracompass', { cost: 4, icons: ['city'], at: '솔라리 +2', rt: '대의회 의석: 설득 +2, 소드마스터도 있으면 +1 더', agent: async p => gain(p, 'solari', 2), reveal: async (p, c) => { if (p.councilor) { c.persuasion += 2; if (p.hasSword) c.persuasion += 1; } }, aiA: 2 * R.solari });
+D('spectacle', '공개 구경거리', 'Public Spectacle', { count: 2, cost: 4, fac: ['emp'], icons: ['spy'], p: 1, at: '이번 턴 첩자를 회수했다면: 원하는 영향력 +1', rt: '첩자 배치', agent: async (p, c) => { if (c.recalledSpy) await chooseInf(p, 1); }, reveal: async p => placeSpy(p), aiA: 0.8 });
+D('sardCoord', '사다우카 협동', 'Sardaukar Coordination', { count: 2, cost: 4, fac: ['emp'], icons: ['land', 'emp'], p: 2, at: '이번 턴 모집한 병력을 모두 분쟁에 배치 가능', rt: '공개한 황제 카드마다 검 +1 (자신 포함)', agent: async (p, c) => { c.deployAny = true; }, reveal: async (p, c) => { c.swords += c.revealed.filter(x => x.fac.includes('emp')).length; }, aiA: 0.5 });
+D('shishakli', '시샤클리', 'Shishakli', { cost: 4, fac: ['fremen'], icons: ['city', 'spice'], s: 2, at: '카드 1장 제거 → 카드 1장', bt: '프레멘 영향력 +1', agent: async p => { const t = await trashAny(p); if (t) draw(p, 1); }, bond: async p => influence(p, 'fremen', 1), aiA: 1.8 });
+D('haven', '밀수꾼의 은신처', "Smuggler's Haven", { cost: 4, fac: ['guild'], icons: ['spice', 'guild'], at: '향신료 4 지불 → 승점 +1', rt: '메이커 공간 초소에 첩자가 있으면: 향신료 +2', agent: async p => { if (p.spice >= 4 && await askYN(p, '밀수꾼의 은신처: 향신료 4를 내고 승점 1을 얻을까요?', true)) { p.spice -= 4; addVP(p, 1, '밀수꾼의 은신처'); } }, reveal: async p => { if (POSTS.p_desert.occ === p.i) gain(p, 'spice', 2); }, aiA: p => p.spice >= 4 ? 5 : 0 });
+D('elders', '남부 원로들', 'Southern Elders', { cost: 4, fac: ['bg', 'fremen'], icons: ['bg', 'fremen'], at: 'BG 2+: 병력 +2', rt: '물 +1', bt: '설득 +2', agent: async (p, c) => { if (hasInf(p, 'bg')) recruit(p, 2, c); }, reveal: async p => gain(p, 'water', 1), bond: async (p, c) => { c.persuasion += 2; }, aiA: p => hasInf(p, 'bg') ? 2 * R.troop : 0 });
+D('tread', '어둠 속을 걷다', 'Tread in Darkness', { count: 2, cost: 4, fac: ['bg'], icons: ['land', 'city', 'spice'], p: 2, s: 1, at: 'BG 2+: 카드 1장 제거, 카드 1장', agent: async p => { if (hasInf(p, 'bg')) { await trashAny(p); draw(p, 1); } }, aiA: p => hasInf(p, 'bg') ? 2 : 0 });
+D('truthtrance', '진실의 무아경', 'Truthtrance', { count: 2, cost: 4, fac: ['bg'], icons: ['emp', 'guild', 'bg', 'fremen'], p: 1 });
+D('mentat', '포로 멘타트', 'Captured Mentat', { cost: 5, icons: ['land', 'spice'], p: 1, at: '카드 1장 버림 → 음모 1장, 카드 1장', rt: '영향력 1 잃음 → 다른 세력 영향력 1', agent: async p => { const d = await discardFromHand(p, false, '포로 멘타트: 버릴 카드 (취소 가능)'); if (d) { drawIntrigue(p, 1); draw(p, 1); } }, reveal: async p => { if (p.ai) return; const from = await ask(p, '포로 멘타트: 영향력을 잃을 세력 (취소 = 사용 안 함)', FAC.filter(f => p.inf[f] > 0).map(f => ({ label: FN[f] + ` (${p.inf[f]})`, value: f })), { cancel: true }); if (from) { await influence(p, from, -1); await chooseInf(p, 1, '포로 멘타트: 영향력을 얻을 세력'); } }, aiA: 1.5 });
+D('chani', '차니, 영리한 전술가', 'Chani, Clever Tactician', { cost: 5, fac: ['fremen'], icons: ['city', 'spice', 'fremen'], at: '분쟁에 유닛 3 이상: 음모 1장', rt: '병력 2 후퇴 → 검 +4', bt: '설득 +2', agent: async p => { if (p.conflict + p.worms >= 3) drawIntrigue(p, 1); }, reveal: async (p, c) => { if (p.conflict >= 2 && await askYN(p, '차니: 병력 2를 후퇴시키고 검 +4를 얻을까요?', p.conflict >= 3)) { p.conflict -= 2; p.garrison += 2; c.swords += 4; } }, bond: async (p, c) => { c.persuasion += 2; }, aiA: p => p.conflict + p.worms >= 3 ? R.intrigue : 0 });
+D('highPlaces', '높은 자리에서', 'In High Places', { cost: 5, fac: ['bg', 'emp'], icons: ['emp', 'bg'], p: 2, act: '첩자 배치', at: 'BG 2+: 카드 1장, 첩자 배치', rt: '첩자 2개 회수 → 설득 +3', acquire: async p => placeSpy(p), agent: async p => { if (hasInf(p, 'bg')) { draw(p, 1); await placeSpy(p); } }, reveal: async (p, c) => { if (spiesOnBoard(p) >= 2 && await askYN(p, '높은 자리에서: 첩자 2개를 회수하고 설득 +3?', true)) { await recallSpy(p); await recallSpy(p); c.persuasion += 3; } }, aiA: p => hasInf(p, 'bg') ? 2 : 0 });
+D('leadership', '지도력', 'Leadership', { cost: 5, fac: ['fremen'], icons: ['spice', 'fremen'], p: 2, s: 1, at: '분쟁의 모래벌레마다 카드 1장', rt: '검을 주는 다른 공개 카드마다 검 +1', agent: async p => draw(p, p.worms), reveal: async (p, c, self) => { c.swords += c.revealed.filter(x => x !== self && (x.s > 0 || ['sardCoord', 'chani', 'calculus', 'undercover'].includes(x.id))).length; }, aiA: p => p.worms * R.card });
+D('favor', '우주 길드의 호의', "Spacing Guild's Favor", { count: 2, cost: 5, fac: ['guild'], icons: ['spice', 'guild'], p: 2, at: '카드 1장', rt: '향신료 3 지불 → 원하는 영향력 +1', xt: '손에서 버려질 때: 향신료 +2', agent: async p => draw(p, 1), reveal: async p => { if (p.spice >= 3 && await askYN(p, '우주 길드의 호의: 향신료 3을 내고 영향력 +1?', p.spice >= 5)) { p.spice -= 3; await chooseInf(p, 1); } }, onDiscard: p => gain(p, 'spice', 2), aiA: R.card });
+D('strikeFleet', '기습 함대', 'Strike Fleet', { cost: 5, icons: ['spy'], p: 1, s: 3, act: '첩자 배치', at: '이번 턴 첩자를 회수했다면: 병력 +3', acquire: async p => placeSpy(p), agent: async (p, c) => { if (c.recalledSpy) recruit(p, 3, c); }, aiA: 0.5 });
+D('subversive', '전복적 조언자', 'Subversive Advisor', { cost: 5, icons: ['spy'], p: 1, act: '첩자 배치', at: '세력 공간이면: 영향력 1 대신 2, 이 카드 제거', acquire: async p => placeSpy(p), pre: async (p, c) => { if (SP[c.sid].fac) { c.infAmt = 2; trashSpecific(p, c.card); } }, aiA: (p, sid) => SP[sid].fac ? 2 : 0 });
+D('treacherous', '배신의 책략', 'Treacherous Maneuver', { cost: 5, fac: ['emp'], icons: ['emp', 'guild', 'bg', 'fremen'], p: 1, at: '이 카드와 손의 황제 카드 1장 제거 → 영향력 1 대신 2', rt: '음모 1장', pre: async (p, c) => { const em = p.hand.filter(x => x.fac.includes('emp')); if (em.length) { const t = await askCard(p, '배신의 책략: 함께 제거할 황제 카드 (취소 = 사용 안 함)', em, x => 2 - x.cost * 0.4, true); if (t) { trashSpecific(p, t); trashSpecific(p, c.card); c.infAmt = 2; } } }, reveal: async p => drawIntrigue(p, 1), aiA: 0.5 });
+D('corrinth', '코린 시', 'Corrinth City', { cost: 6, fac: ['emp'], icons: ['land', 'emp'], at: '카드 2장 버림 + 솔라리 5 → 승점 +1', rt: '솔라리 +5, 또는 솔라리 5 지불 → 대의회 의석', agent: async p => { if (p.hand.length >= 2 && p.solari >= 5 && await askYN(p, '코린 시: 카드 2장을 버리고 솔라리 5를 내어 승점 +1?', true)) { await discardFromHand(p, true, '버릴 카드 (1/2)'); await discardFromHand(p, true, '버릴 카드 (2/2)'); p.solari -= 5; addVP(p, 1, '코린 시'); } }, reveal: async p => { const opts = [{ label: '솔라리 +5', value: 's', ai: 1 }]; if (!p.councilor && p.solari >= 5) opts.push({ label: '솔라리 5 지불 → 대의회 의석', value: 'c', ai: G.round < 7 ? 2 : 0 }); const v = await ask(p, '코린 시: 선택', opts); if (v === 'c') { p.solari -= 5; p.councilor = true; log(`${p.name} 대의회 의석 획득`); } else gain(p, 'solari', 5); }, aiA: p => p.solari >= 5 ? 4 : 0 });
+D('desertPower', '사막의 힘', 'Desert Power', { cost: 6, fac: ['fremen'], icons: ['guild'], at: '이번 턴 메이커 공간: 향신료 +2', rt: '설득 +2, 또는 메이커 훅: 물 1 → 모래벌레 1', agent: async (p, c) => { if (c.maker) gain(p, 'spice', 2); }, reveal: async (p, c) => { const ok = p.hooks && p.water >= 1 && !wallProtects(); const v = await ask(p, '사막의 힘: 선택', [{ label: '설득 +2', value: 'p', ai: 1 }, { label: '물 1 → 모래벌레 소환', value: 'w', disabled: !ok, ai: G.conflict.level >= 2 ? 3 : 0.5 }]); if (v === 'w') { p.water--; summonWorm(p, 1); } else c.persuasion += 2; } });
+D('junction', '정션 본부', 'Junction Headquarters', { cost: 6, fac: ['guild'], icons: ['land', 'city', 'spice'], p: 1, at: '길드 동맹: 음모 1장 버림 + 향신료 2 → 승점 +1', rt: '병력 +1, 물 +1', agent: async p => { if (G.alliance.guild === p.i && p.intrigue.length && p.spice >= 2 && await askYN(p, '정션 본부: 음모 1장 + 향신료 2 → 승점 +1?', true)) { const ic = await askCard(p, '버릴 음모 카드', p.intrigue, () => 0); p.intrigue.splice(p.intrigue.indexOf(ic), 1); G.intDiscard.push(ic); p.spice -= 2; addVP(p, 1, '정션 본부'); } }, reveal: async p => { recruit(p, 1); gain(p, 'water', 1); }, aiA: p => G.alliance.guild === p.i && p.spice >= 2 && p.intrigue.length ? 5 : 0 });
+D('priceless', '값은 문제가 아니다', 'Price is No Object', { cost: 6, fac: ['bg', 'fremen'], icons: ['emp', 'bg'], p: 2, act: '솔라리 +2', rt: '솔라리 +2', at: '솔라리로 임페리움 줄의 카드 1장을 손으로 획득', acquire: async p => gain(p, 'solari', 2), agent: async p => { const c = await askCard(p, '값은 문제가 아니다: 솔라리로 살 카드 (취소 가능)', G.row.filter(x => x.cost <= p.solari), x => x.cost, true); if (c) { p.solari -= c.cost; await acquire(p, c, 'hand'); } }, reveal: async p => gain(p, 'solari', 2), aiA: p => Math.min(p.solari, 6) * 0.5 });
+D('stilgar', '스틸가, 헌신자', 'Stilgar, the Devoted', { cost: 6, fac: ['fremen'], icons: ['city', 'spice', 'fremen'], at: '병력 +2', rt: '사용 중인 프레멘 카드마다 설득 +2 (자신 포함)', agent: async (p, c) => recruit(p, 2, c), reveal: async (p, c) => { c.persuasion += 2 * [...p.inPlay, ...p.revealed].filter(x => x.fac.includes('fremen')).length; }, aiA: 2 * R.troop });
+D('fighters', '전사들이여 영원하라', 'Long Live the Fighters', { cost: 7, fac: ['fremen'], icons: ['city', 'fremen'], p: 2, s: 3, at: '덱 위 3장: 1장 손, 1장 버림, 1장 제거', agent: async p => { if (p.deck.length < 3) return; const top = [p.deck.pop(), p.deck.pop(), p.deck.pop()]; const a = await askCard(p, '전사들이여: 손으로 가져갈 카드', top, c => cardVal(c)); top.splice(top.indexOf(a), 1); p.hand.push(a); const t = await askCard(p, '전사들이여: 제거할 카드 (나머지는 버림)', top, c => -cardVal(c)); top.splice(top.indexOf(t), 1); p.discard.push(t); trashSpecific(p, t); p.discard.push(top[0]); }, aiA: 2 });
+D('overthrow', '전복', 'Overthrow', { cost: 8, icons: ['emp', 'guild', 'bg', 'fremen'], p: 2, s: 2, act: '음모 1장', at: '영향력 1 대신 2', rt: '병력 +1', acquire: async p => drawIntrigue(p, 1), pre: async (p, c) => { c.infAmt = 2; }, reveal: async p => recruit(p, 1), aiA: 1.5 });
+D('steersman', '조타수', 'Steersman', { cost: 8, fac: ['guild'], icons: ['land', 'city', 'spice', 'guild'], p: 2, act: '길드 영향력 +1', at: '카드 1장, 다른 요원 1명 회수', rt: '향신료 +2', acquire: async p => influence(p, 'guild', 1), agent: async (p, c) => { draw(p, 1); await recallAgent(p, c.sid); }, reveal: async p => gain(p, 'spice', 2), aiA: p => R.card + (p.agentsTotal - p.agentsAvail > 0 ? 2 : 0) });
+
+function cardVal(c) { return (c.cost || 0) + (c.p || 0) * 0.6 + (c.s || 0) * 0.4 + (c.id === 'signet' ? 3 : 0); }
+function cardLine(c) {
+  const a = [];
+  if (c.icons.length) a.push('요원: ' + c.icons.map(i => ICN[i]).join('·'));
+  if (c.at) a.push('▶ ' + c.at);
+  const r = []; if (c.p) r.push(`설득 ${c.p}`); if (c.s) r.push(`검 ${c.s}`); if (c.rt) r.push(c.rt);
+  if (r.length) a.push('공개: ' + r.join(', '));
+  if (c.bt) a.push('프레멘 유대: ' + c.bt);
+  return a.join(' / ');
+}
+
+// ---------- 음모 카드 (단순화) ----------
+const INTRIGUE = [
+  { id: 'smuggle', n: '밀수 거래', type: 'plot', t: '향신료 +2', count: 3, eff: async p => gain(p, 'spice', 2), ai: 2 },
+  { id: 'bribe', n: '뒷돈', type: 'plot', t: '솔라리 +3', count: 3, eff: async p => gain(p, 'solari', 3), ai: 2 },
+  { id: 'cistern', n: '비밀 저수조', type: 'plot', t: '물 +1, 카드 1장', count: 2, eff: async p => { gain(p, 'water', 1); draw(p, 1); }, ai: 2 },
+  { id: 'politics', n: '정치 공작', type: 'plot', t: '원하는 세력 영향력 +1', count: 3, eff: async p => chooseInf(p, 1), ai: 2 },
+  { id: 'levy', n: '비밀 징집', type: 'plot', t: '병력 2 모집 (수비대로)', count: 3, eff: async p => recruit(p, 2), ai: 2 },
+  { id: 'informant', n: '정보원 포섭', type: 'plot', t: '첩자 1 배치, 카드 1장', count: 2, eff: async p => { await placeSpy(p); draw(p, 1); }, ai: 2 },
+  { id: 'allies', n: '예기치 못한 동맹', type: 'plot', t: '물 2 지불 → 방어벽 제거, 모래벌레 1 소환', count: 2, can: p => p.water >= 2 && G.conflict, eff: async p => { p.water -= 2; if (G.shieldWall) { G.shieldWall = false; log('방어벽이 파괴되었습니다!', 'imp'); } summonWorm(p, 1); }, ai: 0 },
+  { id: 'trade', n: '은밀한 거래', type: 'plot', t: '향신료 2 지불 → 원하는 세력 영향력 +1', count: 2, can: p => p.spice >= 2, eff: async p => { p.spice -= 2; await chooseInf(p, 1); }, ai: 1 },
+  { id: 'contingency', n: '비상 계획', type: 'combat', t: '전투력 +3', count: 3, eff: async p => { p.cbonus += 3; }, str: 3 },
+  { id: 'feint', n: '양동 작전', type: 'combat', t: '전투력 +2, 솔라리 +1', count: 3, eff: async p => { p.cbonus += 2; gain(p, 'solari', 1); }, str: 2 },
+  { id: 'reinforce', n: '긴급 증원', type: 'combat', t: '보급고에서 병력 2를 분쟁에 바로 배치 (전투력 +4)', count: 3, eff: async p => { const k = Math.min(2, p.supply); p.supply -= k; p.conflict += k; }, str: 4 },
+  { id: 'ambush', n: '사막 매복', type: 'combat', t: '향신료 1 지불 → 전투력 +5', count: 2, can: p => p.spice >= 1, eff: async p => { p.spice--; p.cbonus += 5; }, str: 5 },
+  { id: 'wormcall', n: '벌레 부르기', type: 'combat', t: '메이커 훅 & 방어벽 미보호: 모래벌레 1 소환', count: 2, can: p => p.hooks && !wallProtects(), eff: async p => summonWorm(p, 1), str: 3 },
+  { id: 'treasure', n: '숨겨둔 재산', type: 'end', t: '향신료 4 이상 보유 시 승점 +1', count: 2, can: p => p.spice >= 4, eff: async p => addVP(p, 1, '숨겨둔 재산') },
+  { id: 'legacy', n: '정치적 유산', type: 'end', t: '동맹 2개 이상 보유 시 승점 +1', count: 2, can: p => FAC.filter(f => G.alliance[f] === p.i).length >= 2, eff: async p => addVP(p, 1, '정치적 유산') },
+  { id: 'hero', n: '전쟁 영웅', type: 'end', t: '분쟁 카드 2장 이상 획득 시 승점 +1', count: 2, can: p => p.won.length >= 2, eff: async p => addVP(p, 1, '전쟁 영웅') },
+  { id: 'patron', n: '후원자', type: 'end', t: '솔라리 6 지불 → 승점 +1', count: 2, can: p => p.solari >= 6, eff: async p => { p.solari -= 6; addVP(p, 1, '후원자'); } },
+];
+const ITYPE = { plot: '계략', combat: '전투', end: '종반' };
+
+// ---------- 분쟁 카드 (단순화) ----------
+const CONFLICTS = {
+  1: [
+    { n: '사막 순찰전', icon: 'crysknife', r: [[{ inf: 1 }, { solari: 2 }], [{ solari: 2 }], [{ solari: 1 }]] },
+    { n: '향신료 밭 습격', icon: 'desertMouse', r: [[{ inf: 1 }, { spice: 1 }], [{ spice: 2 }], [{ spice: 1 }]] },
+    { n: '제국 분지 확보', loc: 'imperialBasin', icon: 'desertMouse', r: [[{ spice: 2 }, { troop: 1 }, { control: 'imperialBasin' }], [{ water: 2 }, { troop: 1 }], [{ spice: 1 }]] },
+  ],
+  2: [
+    { n: '아라킨 확보', loc: 'arrakeen', icon: 'ornithopter', r: [[{ vp: 1 }, { control: 'arrakeen' }], [{ intrigue: 1 }, { solari: 2 }], [{ solari: 2 }]] },
+    { n: '정제소 확보', loc: 'refinery', icon: 'crysknife', r: [[{ vp: 1 }, { control: 'refinery' }], [{ spice: 2 }], [{ solari: 2 }]] },
+    { n: '사막 매복전', icon: 'crysknife', r: [[{ vp: 1 }, { water: 1 }], [{ inf: 1 }], [{ troop: 1 }]] },
+    { n: '밀수 경로 차단', icon: 'desertMouse', r: [[{ vp: 1 }, { spice: 2 }], [{ spice: 2 }], [{ spice: 1 }]] },
+    { n: '길드 교섭', icon: 'ornithopter', r: [[{ vp: 1 }, { solari: 3 }], [{ solari: 3 }], [{ solari: 1 }]] },
+    { n: '시에치 방어', icon: 'crysknife', r: [[{ vp: 1 }, { troop: 2 }], [{ water: 1 }, { troop: 1 }], [{ water: 1 }]] },
+    { n: '궁정 음모', icon: 'desertMouse', r: [[{ vp: 1 }, { intrigue: 1 }], [{ intrigue: 1 }, { spice: 1 }], [{ spice: 1 }]] },
+    { n: '전선 확장', icon: 'ornithopter', r: [[{ vp: 1 }, { inf: 1 }], [{ spiceVP: 1 }, { solari: 1 }], [{ troop: 1 }]] },
+    { n: '제국 분지 공방', loc: 'imperialBasin', icon: 'desertMouse', r: [[{ vp: 1 }, { control: 'imperialBasin' }], [{ spice: 3 }], [{ spice: 1 }]] },
+  ],
+  3: [
+    { n: '아라킨 대전투', loc: 'arrakeen', icon: 'ornithopter', r: [[{ vp: 2 }, { control: 'arrakeen' }], [{ spiceVP: 1 }, { solari: 2 }], [{ intrigue: 1 }]] },
+    { n: '대계획', icon: 'crysknife', r: [[{ vp: 2 }, { inf: 1 }], [{ spiceVP: 1 }, { troop: 2 }], [{ spice: 2 }]] },
+    { n: '향신료 전쟁', icon: 'desertMouse', r: [[{ vp: 2 }, { spice: 3 }], [{ spiceVP: 1 }, { water: 1 }], [{ water: 1 }]] },
+    { n: '황좌를 향하여', icon: 'ornithopter', r: [[{ vp: 2 }, { intrigue: 1 }], [{ vp: 1 }], [{ solari: 3 }]] },
+  ]
+};
+function rewardText(items) {
+  return items.map(it => {
+    if (it.vp) return `승점 ${it.vp}`; if (it.spice) return `향신료 ${it.spice}`; if (it.solari) return `솔라리 ${it.solari}`;
+    if (it.water) return `물 ${it.water}`; if (it.troop) return `병력 ${it.troop}`; if (it.intrigue) return `음모 ${it.intrigue}`;
+    if (it.inf) return `영향력 ${it.inf}(선택)`; if (it.control) return `${SP[it.control].n} 장악`; if (it.spiceVP) return '향신료 3 → 승점 1';
+    return '';
+  }).join(', ');
+}
+
+// ---------- 리더 (규칙서에 능력 정보가 없어 단순화) ----------
+const LEADERS = {
+  gurney: { n: '거니 할렉', pt: '공개 턴에 전투력 6 이상이면 설득 +1', st: '병력 1 모집 (분쟁 배치 가능)', signet: async (p, c) => recruit(p, 1, c) },
+  staban: { n: '스타반 투크', pt: '정보 수집으로 첩자 회수 시 향신료 +1', st: '첩자 1 배치', signet: async p => placeSpy(p) },
+  margot: { n: '마고 펜링', pt: '세력 영향력 2 도달 시 음모 카드 1장', st: 'BG 감시초소에 첩자 배치, 없으면 솔라리 +1', signet: async p => { if (POSTS.p_bg.occ == null || p.spies === 0) await placeSpy(p, po => po === 'p_bg'); else gain(p, 'solari', 1); } },
+  irulan: { n: '이룰란 공주', pt: '세력 영향력 2 도달 시 카드 1장', st: '음모 카드 1장', signet: async p => drawIntrigue(p, 1) },
+  muaddib: { n: '무앗딥', pt: '메이커 공간에 요원을 보내면 카드 1장', st: '물 +1', signet: async p => gain(p, 'water', 1) },
+  amber: { n: '앰버 메툴리', pt: '계약 보상(솔라리 2) 받을 때 솔라리 +1', st: '향신료 +1, 솔라리 +1', signet: async p => { gain(p, 'spice', 1); gain(p, 'solari', 1); } },
+};
+
+// ---------- 보드 ----------
+const SP = {
+  dutiful: { n: '충실한 봉사', icon: 'emp', fac: 'emp', t: '솔라리 +2', eff: async p => contract(p), ai: p => 2 * R.solari },
+  sardaukar: { n: '사다우카', icon: 'emp', fac: 'emp', cost: { spice: 4 }, t: '음모 1, 병력 +4', eff: async (p, c) => { drawIntrigue(p, 1); recruit(p, 4, c); }, ai: p => R.intrigue + 4 * troopV() },
+  deliver: { n: '보급품 전달', icon: 'guild', fac: 'guild', t: '물 +1', eff: async p => gain(p, 'water', 1), ai: p => R.water },
+  heighliner: { n: '하이라이너', icon: 'guild', fac: 'guild', combat: true, cost: { spice: 5 }, t: '병력 +5', eff: async (p, c) => recruit(p, 5, c), ai: p => 5 * troopV() },
+  espionage: { n: '첩보 활동', icon: 'bg', fac: 'bg', cost: { spice: 1 }, t: '카드 1, 첩자 배치', eff: async p => { draw(p, 1); await placeSpy(p); }, ai: p => R.card + 0.8 },
+  secrets: { n: '비밀', icon: 'bg', fac: 'bg', t: '음모 1, 음모 4장↑인 상대에게서 1장 강탈', eff: async p => { drawIntrigue(p, 1); for (const o of G.players) if (o !== p && o.intrigue.length >= 4) { const k = o.intrigue.splice(Math.floor(Math.random() * o.intrigue.length), 1)[0]; p.intrigue.push(k); log(`${p.name}이(가) ${o.name}의 음모 카드를 빼앗음`); } }, ai: p => R.intrigue },
+  desertTactics: { n: '사막 전술', icon: 'fremen', fac: 'fremen', combat: true, cost: { water: 1 }, t: '병력 +1, 카드 1장 제거', eff: async (p, c) => { recruit(p, 1, c); await trashAny(p); }, ai: p => troopV() + 1 },
+  fremkit: { n: '프렘킷', icon: 'fremen', fac: 'fremen', combat: true, t: '카드 1장', eff: async p => draw(p, 1), ai: p => R.card },
+  highCouncil: { n: '대의회', icon: 'land', cost: { solari: 5 }, t: '첫 방문: 의석(공개 턴마다 설득 +2) / 이후: 향신료 2, 음모 1, 병력 +3', eff: async (p, c) => { if (!p.councilor) { p.councilor = true; log(`${p.name} 대의회 의석 획득`); } else { gain(p, 'spice', 2); drawIntrigue(p, 1); recruit(p, 3, c); } }, ai: p => p.councilor ? 2 * R.spice + R.intrigue + 3 * troopV() : Math.max(1, 10 - G.round) },
+  privilege: { n: '제국 특권', icon: 'land', req: p => hasInf(p, 'emp'), reqT: '황제 2+', cost: { solari: 3 }, t: '음모 교체 가능, 다른 요원 회수, 카드 1장', eff: async (p, c) => { if (p.intrigue.length) { const ic = await askCard(p, '제국 특권: 교체할 음모 카드 (취소 가능)', p.intrigue, x => x.type === 'end' && G.round < 6 ? 1 : -1, true); if (ic) { p.intrigue.splice(p.intrigue.indexOf(ic), 1); G.intDiscard.push(ic); drawIntrigue(p, 1); } } await recallAgent(p, c.sid); draw(p, 1); }, ai: p => R.card + (p.agentsTotal - p.agentsAvail > 0 ? 2.5 : 0) },
+  swordmaster: { n: '소드마스터', icon: 'land', t: '세 번째 요원 획득 (게임당 1회)', costF: () => ({ solari: G.players.some(x => x.hasSword) ? 6 : 8 }), req: p => !p.hasSword, reqT: '미보유', eff: async p => { p.hasSword = true; p.agentsTotal = 3; p.agentsAvail++; log(`${p.name}이(가) 소드마스터를 얻었습니다`, 'imp'); }, ai: p => Math.max(0, 13 - G.round * 1.3) },
+  assembly: { n: '회의장', icon: 'land', t: '음모 1 (공개 턴에 설득 +1)', eff: async p => drawIntrigue(p, 1), ai: p => R.intrigue + 0.8 },
+  gatherSupport: { n: '지지 결집', icon: 'land', t: '병력 +2 (솔라리 2 지불 시 물 +1)', eff: async (p, c) => { if (p.solari >= 2 && await askYN(p, '지지 결집: 솔라리 2를 내고 물 1을 얻을까요?', p.water < 2)) { p.solari -= 2; gain(p, 'water', 1); } recruit(p, 2, c); }, ai: p => 2 * troopV() + (p.solari >= 2 && p.water < 2 ? 0.5 : 0) },
+  acceptContract: { n: '계약 수락', icon: 'spice', t: '카드 1장, 솔라리 +2', eff: async p => { draw(p, 1); contract(p); }, ai: p => R.card + 2 * R.solari },
+  shipping: { n: '선적', icon: 'spice', req: p => hasInf(p, 'guild'), reqT: '길드 2+', cost: { spice: 3 }, t: '솔라리 +5, 원하는 영향력 +1', eff: async p => { gain(p, 'solari', 5); await chooseInf(p, 1); }, ai: p => 5 * R.solari + bestInfV(p) },
+  arrakeen: { n: '아라킨', icon: 'city', combat: true, ctrl: 'solari', t: '병력 +1, 카드 1장', eff: async (p, c) => { recruit(p, 1, c); draw(p, 1); }, ai: p => troopV() + R.card },
+  refinery: { n: '향신료 정제소', icon: 'city', combat: true, ctrl: 'solari', t: '솔라리 +2 (향신료 1 지불 시 +4)', eff: async p => { if (p.spice >= 1 && await askYN(p, '향신료 정제소: 향신료 1을 내고 솔라리 4를 받을까요?', p.spice >= 3)) { p.spice--; gain(p, 'solari', 4); } else gain(p, 'solari', 2); }, ai: p => p.spice >= 3 ? 4 * R.solari - R.spice : 2 * R.solari },
+  research: { n: '연구소', icon: 'city', combat: true, cost: { water: 2 }, t: '병력 +2, 카드 2장', eff: async (p, c) => { recruit(p, 2, c); draw(p, 2); }, ai: p => 2 * troopV() + 2 * R.card },
+  sietch: { n: '시에치 타브르', icon: 'city', combat: true, req: p => hasInf(p, 'fremen'), reqT: '프레멘 2+', t: '메이커 훅+병력+물 / 또는 물+방어벽 제거', eff: async (p, c) => { const v = await ask(p, '시에치 타브르: 선택', [{ label: (p.hooks ? '' : '메이커 훅 + ') + '병력 +1, 물 +1', value: 'a', ai: 2 }, { label: '물 +1, 방어벽 제거 가능', value: 'b', ai: p.hooks && G.shieldWall && wallProtects() ? 3 : 0 }]); if (v === 'a') { if (!p.hooks) { p.hooks = true; log(`${p.name} 메이커 훅 획득`); } recruit(p, 1, c); gain(p, 'water', 1); } else { gain(p, 'water', 1); if (G.shieldWall && await askYN(p, '방어벽을 제거할까요? (모래벌레가 어디서든 소환 가능해짐)', p.hooks)) { G.shieldWall = false; log(`${p.name}이(가) 방어벽을 파괴!`, 'imp'); } } }, ai: p => (p.hooks ? 0 : 3) + troopV() + R.water },
+  imperialBasin: { n: '제국 분지', icon: 'spice', combat: true, maker: true, ctrl: 'spice', t: '향신료 +1 (+누적 보너스)', eff: async p => { takeBonus(p, 'imperialBasin'); gain(p, 'spice', 1); }, ai: p => (1 + G.maker.imperialBasin) * R.spice },
+  hagga: { n: '하가 분지', icon: 'spice', combat: true, maker: true, cost: { water: 1 }, t: '향신료 +2 또는 (메이커 훅) 모래벌레 1', eff: async p => { takeBonus(p, 'hagga'); await harvestOrWorm(p, 2, 1); }, ai: p => (2 + G.maker.hagga) * R.spice + (p.hooks && !wallProtects() ? 1.5 : 0) },
+  deep: { n: '깊은 사막', icon: 'spice', combat: true, maker: true, cost: { water: 3 }, t: '향신료 +4 또는 (메이커 훅) 모래벌레 2', eff: async p => { takeBonus(p, 'deep'); await harvestOrWorm(p, 4, 2); }, ai: p => (4 + G.maker.deep) * R.spice + (p.hooks && !wallProtects() ? 3 : 0) },
+};
+const SECTIONS = [
+  { n: '황제', fac: 'emp', s: ['dutiful', 'sardaukar'] },
+  { n: '우주 길드', fac: 'guild', s: ['deliver', 'heighliner'] },
+  { n: '베네 게세리트', fac: 'bg', s: ['espionage', 'secrets'] },
+  { n: '프레멘', fac: 'fremen', s: ['fremkit', 'desertTactics'] },
+  { n: '란드스라드', s: ['highCouncil', 'privilege', 'swordmaster', 'assembly', 'gatherSupport'] },
+  { n: 'CHOAM', s: ['acceptContract', 'shipping'] },
+  { n: '도시', s: ['arrakeen', 'refinery', 'research', 'sietch'] },
+  { n: '사막', s: ['imperialBasin', 'hagga', 'deep'] },
+];
+const POSTS_DEF = {
+  p_emp: { fac: 'emp', spaces: ['dutiful', 'sardaukar'] },
+  p_guild: { fac: 'guild', spaces: ['deliver', 'heighliner'] },
+  p_bg: { fac: 'bg', spaces: ['espionage', 'secrets'] },
+  p_fremen: { fac: 'fremen', spaces: ['fremkit', 'desertTactics'] },
+  p_land1: { spaces: ['highCouncil', 'privilege', 'swordmaster'] },
+  p_land2: { spaces: ['assembly', 'gatherSupport'] },
+  p_choam: { spaces: ['acceptContract', 'shipping'] },
+  p_city1: { spaces: ['arrakeen', 'refinery'] },
+  p_city2: { spaces: ['research', 'sietch'] },
+  p_desert: { spaces: ['imperialBasin', 'hagga', 'deep'] },
+};
+let POSTS = {};
+const INF_BONUS = { emp: { t: '병력 +2', f: p => recruit(p, 2) }, guild: { t: '솔라리 +3', f: p => gain(p, 'solari', 3) }, bg: { t: '음모 1', f: p => drawIntrigue(p, 1) }, fremen: { t: '물 +1', f: p => gain(p, 'water', 1) } };
+
+// ---------- 기본 동작 ----------
+const RES_N = { spice: '향신료', solari: '솔라리', water: '물' };
+function gain(p, r, n) { if (!n) return; p[r] = Math.max(0, p[r] + n); }
+function addVP(p, n, why) { p.vp += n; log(`${p.name} 승점 ${n > 0 ? '+' : ''}${n}${why ? ' (' + why + ')' : ''} → ${p.vp}`, 'vp'); }
+function troopV() { return R.troop + (G.conflict ? (G.conflict.level - 1) * 0.3 : 0); }
+function contract(p) { gain(p, 'solari', 2 + (p.leader === 'amber' ? 1 : 0)); }
+function takeBonus(p, sid) { if (G.maker[sid]) { gain(p, 'spice', G.maker[sid]); log(`${p.name} 누적 향신료 ${G.maker[sid]} 획득`); G.maker[sid] = 0; } }
+function wallProtects() { return G.shieldWall && G.conflict && G.conflict.loc; }
+function summonWorm(p, n) { if (wallProtects()) { log('방어벽이 이 분쟁을 보호해 모래벌레를 소환할 수 없습니다'); return; } p.worms += n; log(`${p.name} 모래벌레 ${n} 소환!`, 'imp'); }
+async function harvestOrWorm(p, sp, w) {
+  const can = p.hooks && !wallProtects();
+  const v = can ? await ask(p, '선택', [{ label: `향신료 +${sp}`, value: 's', ai: sp * R.spice }, { label: `모래벌레 ${w} 소환`, value: 'w', ai: w * (G.conflict.level >= 2 ? 3.5 : 1.5) }]) : 's';
+  if (v === 'w') summonWorm(p, w); else gain(p, 'spice', sp);
+}
+function draw(p, n) {
+  for (let i = 0; i < n; i++) {
+    if (!p.deck.length) { if (!p.discard.length) return; p.deck = shuffle(p.discard); p.discard = []; }
+    p.hand.push(p.deck.pop());
+  }
+}
+function drawIntrigue(p, n) {
+  for (let i = 0; i < n; i++) {
+    if (!G.intDeck.length) { G.intDeck = shuffle(G.intDiscard); G.intDiscard = []; }
+    if (!G.intDeck.length) return;
+    p.intrigue.push(G.intDeck.pop());
+  }
+}
+function recruit(p, n, ctx) { const k = Math.min(n, p.supply); p.supply -= k; p.garrison += k; if (ctx) ctx.recruited += k; }
+function spiesOnBoard(p) { return Object.values(POSTS).filter(x => x.occ === p.i).length; }
+function bestInfV(p) { return Math.max(...FAC.map(f => infV(p, f, 1))); }
+function infV(p, f, n) {
+  let v = 0, cur = p.inf[f];
+  for (let k = 0; k < n; k++) {
+    cur++; if (cur > 6) break;
+    if (cur === 2) v += R.vp * 0.9 + 1;
+    else if (cur === 4) v += 2 + (G.alliance[f] == null || G.players[G.alliance[f]].inf[f] < cur ? R.vp : 0);
+    else if (cur > 4 && G.alliance[f] !== p.i && G.alliance[f] != null && G.players[G.alliance[f]].inf[f] < cur) v += R.vp + 1;
+    else v += 1.2 + (cur === 3 ? 0.8 : 0);
+  }
+  return v;
+}
+async function influence(p, f, n) {
+  const step = n > 0 ? 1 : -1;
+  for (let k = 0; k < Math.abs(n); k++) {
+    const old = p.inf[f], nw = old + step;
+    if (nw < 0 || nw > 6) break;
+    p.inf[f] = nw;
+    if (step > 0) {
+      if (nw === 2) { addVP(p, 1, FN[f] + ' 영향력 2'); if (p.leader === 'margot') drawIntrigue(p, 1); if (p.leader === 'irulan') draw(p, 1); }
+      if (nw === 4 && !p.ai) INF_BONUS[f].f(p); else if (nw === 4) INF_BONUS[f].f(p);
+    } else if (old === 2) addVP(p, -1, FN[f] + ' 영향력 2 미만');
+    checkAlliance(f, p);
+  }
+}
+function checkAlliance(f, mover) {
+  const h = G.alliance[f];
+  if (h == null) {
+    if (mover.inf[f] >= 4) { G.alliance[f] = mover.i; addVP(mover, 1, FN[f] + ' 동맹'); log(`${mover.name}이(가) ${FN[f]}와(과) 동맹!`, 'imp'); }
+  } else {
+    const holder = G.players[h];
+    const top = G.players.filter(x => x !== holder && x.inf[f] > holder.inf[f] && x.inf[f] >= 4).sort((a, b) => b.inf[f] - a.inf[f])[0];
+    if (top) { G.alliance[f] = top.i; addVP(holder, -1, FN[f] + ' 동맹 상실'); addVP(top, 1, FN[f] + ' 동맹'); log(`${top.name}이(가) ${FN[f]} 동맹을 빼앗음!`, 'imp'); }
+  }
+}
+async function chooseInf(p, n, title) {
+  for (let k = 0; k < n; k++) {
+    const f = await ask(p, title || '영향력을 올릴 세력', FAC.map(x => ({ label: `${FN[x]} (${p.inf[x]})`, value: x, ai: infV(p, x, 1) + Math.random() * 0.1, disabled: p.inf[x] >= 6 })));
+    if (f) await influence(p, f, 1);
+  }
+}
+async function placeSpy(p, filter) {
+  const free = Object.keys(POSTS).filter(k => POSTS[k].occ == null && (!filter || filter(k)));
+  if (!free.length) return false;
+  if (p.spies <= 0) {
+    if (!spiesOnBoard(p)) return false;
+    const ok = await askYN(p, '남은 첩자가 없습니다. 첩자 하나를 회수해서 다시 배치할까요?', true);
+    if (!ok) return false;
+    await recallSpy(p, '다시 배치하기 위해 회수할 첩자');
+  }
+  const fr = Object.keys(POSTS).filter(k => POSTS[k].occ == null && (!filter || filter(k)));
+  if (!fr.length) return false;
+  const k = await ask(p, '첩자를 놓을 감시 초소', fr.map(k => ({ label: postLabel(k), value: k, ai: postAi(p, k) })));
+  if (!k) return false;
+  POSTS[k].occ = p.i; p.spies--; log(`${p.name} 첩자 배치: ${postLabel(k)}`);
+  return true;
+}
+function postLabel(k) { return POSTS[k].spaces.map(s => SP[s].n).join('·'); }
+function postAi(p, k) { return POSTS[k].spaces.reduce((a, s) => a + Math.max(0, SP[s].ai(p)), 0) / POSTS[k].spaces.length + Math.random() * 0.3 + (k === 'p_desert' && p.hand.concat(p.deck, p.discard).some(c => c.id === 'haven') ? 3 : 0); }
+async function recallSpy(p, title, onlyPosts) {
+  const mine = Object.keys(POSTS).filter(k => POSTS[k].occ === p.i && (!onlyPosts || onlyPosts.includes(k)));
+  if (!mine.length) return null;
+  const k = mine.length === 1 ? mine[0] : await ask(p, title || '회수할 첩자', mine.map(k => ({ label: postLabel(k), value: k, ai: -postAi(p, k) })));
+  POSTS[k].occ = null; p.spies++;
+  return k;
+}
+async function recallAgent(p, exceptSid) {
+  const mine = Object.keys(G.occ).filter(s => s !== exceptSid && G.occ[s].includes(p.i));
+  if (!mine.length) return;
+  const s = await ask(p, '회수할 요원 (다시 사용 가능)', mine.map(s => ({ label: SP[s].n, value: s, ai: 1 })));
+  if (!s) return;
+  G.occ[s].splice(G.occ[s].indexOf(p.i), 1); p.agentsAvail++; log(`${p.name} 요원 회수: ${SP[s].n}`);
+}
+async function discardFromHand(p, mandatory, title, aiFn) {
+  if (!p.hand.length) return null;
+  const c = await askCard(p, title || '버릴 카드', p.hand, aiFn || (x => (p.ai && !mandatory) ? (x.reserve || ['conv'].includes(x.id) ? -0.5 : -cardVal(x)) : -cardVal(x)), !mandatory);
+  if (!c) return null;
+  p.hand.splice(p.hand.indexOf(c), 1); p.discard.push(c);
+  if (c.onDiscard) c.onDiscard(p);
+  log(`${p.name} 카드 버림: ${c.n}`);
+  return c;
+}
+const TRASH_PRI = { dagger: 6, recon: 5, dune: 5, seek: 4, diplo: 3, conv: 2, ptw: 1 };
+async function trashAny(p, title) {
+  const pool = [...p.hand, ...p.discard, ...p.inPlay, ...p.revealed];
+  if (!pool.length) return null;
+  const sz = p.deck.length + pool.length;
+  const c = await askCard(p, title || '제거할 카드 (취소 가능)', pool, x => (TRASH_PRI[x.id] || -cardVal(x)) - (sz < 9 ? 5 : 0), true);
+  if (!c) return null;
+  trashSpecific(p, c);
+  return c;
+}
+function trashSpecific(p, c) {
+  for (const k of ['hand', 'discard', 'inPlay', 'revealed', 'deck']) { const i = p[k].indexOf(c); if (i >= 0) { p[k].splice(i, 1); break; } }
+  if (c.reserve) G.reserve[c.id]++;
+  log(`${p.name} 카드 제거: ${c.n}`);
+  if (c.onTrash) c.onTrash(p);
+}
+let UID = 0;
+function mkCard(id) { const c = Object.create(DEFS[id]); c.uid = ++UID; return c; }
+async function acquire(p, c, where = 'discard') {
+  const ri = G.row.indexOf(c);
+  if (ri >= 0) { G.row.splice(ri, 1); if (G.impDeck.length) G.row.splice(ri, 0, G.impDeck.pop()); }
+  else if (c.reserve) G.reserve[c.id]--;
+  p[where].push(c);
+  log(`${p.name} 카드 획득: ${c.n}`);
+  if (c.acquire) await c.acquire(p);
+}
+function strength(p) { const u = p.conflict + p.worms; return u ? p.conflict * 2 + p.worms * 3 + p.swords + p.cbonus : 0; }
+
+// ---------- 공간 이용 가능 여부 ----------
+function spaceCost(sid) { const s = SP[sid]; return s.costF ? s.costF() : (s.cost || {}); }
+function canPay(p, cost) { return Object.keys(cost).every(r => p[r] >= cost[r]); }
+function legalVia(p, card, sid) {
+  const s = SP[sid];
+  let via = null;
+  if (card.icons.includes(s.icon)) via = 'icon';
+  else if (card.icons.includes('spy') && Object.keys(POSTS).some(k => POSTS[k].occ === p.i && POSTS[k].spaces.includes(sid))) via = 'spy';
+  if (!via) return null;
+  if (s.req && !(card.id === 'undercover' && sid !== 'swordmaster') && !s.req(p)) return null;
+  if (sid === 'swordmaster' && p.hasSword) return null;
+  if (!canPay(p, spaceCost(sid))) return null;
+  const occ = G.occ[sid];
+  if (occ.includes(p.i)) return null;
+  if (occ.length) {
+    const myPosts = Object.keys(POSTS).filter(k => POSTS[k].occ === p.i && POSTS[k].spaces.includes(sid));
+    if (!myPosts.length) return null;
+    return { via, infiltrate: true };
+  }
+  return { via, infiltrate: false };
+}
+function legalMoves(p) {
+  const out = [];
+  if (p.agentsAvail <= 0) return out;
+  for (const c of p.hand) for (const sid of Object.keys(SP)) { const l = legalVia(p, c, sid); if (l) out.push({ card: c, sid, ...l }); }
+  return out;
+}
+
+// ---------- 요원 턴 ----------
+async function doAgentTurn(p, card, sid) {
+  const s = SP[sid];
+  const lv = legalVia(p, card, sid);
+  p.hand.splice(p.hand.indexOf(card), 1); p.inPlay.push(card);
+  const ctx = { card, sid, recruited: 0, recalledSpy: false, maker: !!s.maker, infAmt: 1, deployAny: false };
+  log(`${p.name}: [${card.n}] → ${s.n}`, 'act');
+  let usedPost = null;
+  if (lv.infiltrate) {
+    const posts = Object.keys(POSTS).filter(k => POSTS[k].occ === p.i && POSTS[k].spaces.includes(sid));
+    usedPost = await recallSpy(p, '잠입: 회수할 첩자', posts); ctx.recalledSpy = true;
+    log(`${p.name} 첩자로 잠입!`);
+  }
+  G.occ[sid].push(p.i); p.agentsAvail--;
+  const intel = Object.keys(POSTS).filter(k => k !== usedPost && POSTS[k].occ === p.i && POSTS[k].spaces.includes(sid));
+  if (intel.length && await askYN(p, '정보 수집: 연결된 첩자를 회수하고 카드 1장을 뽑을까요?', spiesOnBoard(p) >= 2 || p.hand.some(c => ['rebel', 'strikeFleet', 'spectacle', 'spymaster'].includes(c.id)) || ['rebel', 'strikeFleet', 'spectacle', 'spymaster'].includes(card.id))) {
+    await recallSpy(p, '정보 수집: 회수할 첩자', intel); ctx.recalledSpy = true; draw(p, 1);
+    if (p.leader === 'staban') gain(p, 'spice', 1);
+  }
+  const cost = spaceCost(sid); for (const r in cost) p[r] -= cost[r];
+  if (card.pre) await card.pre(p, ctx);
+  if (s.ctrl) { const ck = sid; const h = G.control[ck]; if (h != null) { gain(G.players[h], s.ctrl, 1); } }
+  if (s.fac) await influence(p, s.fac, ctx.infAmt);
+  await s.eff(p, ctx);
+  if (card.agent) await card.agent(p, ctx);
+  if (card.id === 'signet') { log(`${p.name} 인장 능력: ${LEADERS[p.leader].st}`); await LEADERS[p.leader].signet(p, ctx); }
+  if (s.maker && p.leader === 'muaddib') draw(p, 1);
+  // 배치
+  let max = 0;
+  if (s.combat) max = Math.min(p.garrison, ctx.recruited + 2);
+  else if (ctx.deployAny) max = Math.min(p.garrison, ctx.recruited);
+  if (max > 0) {
+    const n = await askNum(p, `분쟁 「${G.conflict.n}」에 배치할 병력 수`, 0, max, aiDeploy(p, max), `수비대 ${p.garrison} · 이번 턴 모집 ${ctx.recruited}`);
+    p.garrison -= n; p.conflict += n;
+    if (n) log(`${p.name} 병력 ${n} 분쟁에 배치`);
+  }
+  if (ctx.returnToHand && p.inPlay.includes(card)) { p.inPlay.splice(p.inPlay.indexOf(card), 1); p.hand.push(card); }
+}
+function aiDeploy(p, max) {
+  const lvl = G.conflict.level;
+  const others = Math.max(0, ...G.players.filter(x => x !== p).map(x => x.conflict * 2 + x.worms * 3));
+  const mine = p.conflict * 2 + p.worms * 3;
+  if (lvl === 1) return Math.min(max, mine > others + 4 ? 0 : 2);
+  if (mine > others + 8) return Math.min(max, 1);
+  return max;
+}
+
+// ---------- 공개 턴 ----------
+async function doReveal(p) {
+  p.revealed = p.hand.splice(0);
+  p.revealedDone = true;
+  log(`${p.name} 공개 턴: ${p.revealed.map(c => c.n).join(', ') || '(없음)'}`, 'act');
+  const ctx = { persuasion: 0, swords: 0, revealed: p.revealed };
+  for (const c of p.revealed) { ctx.persuasion += c.p || 0; ctx.swords += c.s || 0; }
+  for (const c of [...p.revealed]) if (c.reveal) await c.reveal(p, ctx, c);
+  for (const c of [...p.revealed]) if (c.bond && otherFremen(p, c)) { log(`${p.name} 프레멘 유대: ${c.n}`); await c.bond(p, ctx, c); }
+  if (p.councilor) ctx.persuasion += 2;
+  if (G.occ.assembly.includes(p.i)) ctx.persuasion += 1;
+  p.swords = ctx.swords;
+  if (p.leader === 'gurney' && strength(p) >= 6) ctx.persuasion += 1;
+  G.rctx = ctx;
+  if (p.ai) await aiBuy(p, ctx); else await UI.waitHuman('buy', ctx);
+  G.rctx = null;
+  p.discard.push(...p.inPlay, ...p.revealed); p.inPlay = []; p.revealed = [];
+  log(`${p.name} 전투력 ${strength(p)}`);
+}
+function buyable() { const r = [...G.row]; if (G.reserve.ptw > 0) r.push(G.reserveCard.ptw); if (G.reserve.tsmf > 0) r.push(G.reserveCard.tsmf); return r; }
+async function buy(p, ctx, c) {
+  if (c.cost > ctx.persuasion) return;
+  ctx.persuasion -= c.cost;
+  const card = c.reserve ? mkCard(c.id) : c;
+  if (c.reserve) { G.reserve[c.id]--; p.discard.push(card); log(`${p.name} 카드 획득: ${card.n}`); if (card.acquire) await card.acquire(p); }
+  else await acquire(p, card);
+}
+async function aiBuy(p, ctx) {
+  for (let guard = 0; guard < 10; guard++) {
+    const opts = buyable().filter(c => c.cost <= ctx.persuasion && c.cost > 0);
+    if (!opts.length) break;
+    let best = null, bv = -1;
+    for (const c of opts) {
+      let v = c.cost + Math.random() * 1.5;
+      if (c.id === 'tsmf') v = 13;
+      if (c.id === 'ptw') v = hasInf(p, 'bg') ? 3 : 2;
+      for (const f of c.fac) if (p.inf[f] >= 2) v += 0.6;
+      if (v > bv) { bv = v; best = c; }
+    }
+    if (best.cost <= 1 && G.round > 6) break;
+    await buy(p, ctx, best);
+  }
+}
+
+// ---------- AI 턴 ----------
+async function aiPlotIntrigue(p) {
+  for (const ic of [...p.intrigue]) {
+    if (ic.type !== 'plot' || (ic.can && !ic.can(p))) continue;
+    let play = ic.ai >= 2;
+    if (ic.id === 'allies') play = p.water >= 3 && G.conflict.level >= 2 && (p.conflict + p.worms) > 0;
+    if (ic.id === 'trade') play = p.spice >= 4;
+    if (play) await playIntrigue(p, ic);
+  }
+}
+async function playIntrigue(p, ic) {
+  p.intrigue.splice(p.intrigue.indexOf(ic), 1); G.intDiscard.push(ic);
+  log(`${p.name} 음모 카드 사용: 「${ic.n}」 (${ic.t})`, 'int');
+  await ic.eff(p);
+}
+async function aiTurn(p) {
+  await sleep(SPEED);
+  await aiPlotIntrigue(p);
+  const moves = legalMoves(p);
+  let best = null, bv = 0.3;
+  for (const m of moves) {
+    const s = SP[m.sid], c = m.card;
+    let v = s.ai(p);
+    const cost = spaceCost(m.sid); for (const r in cost) v -= cost[r] * R[r];
+    if (s.fac) v += infV(p, s.fac, (c.id === 'overthrow' || (c.id === 'subversive')) ? 2 : 1);
+    if (s.combat && (p.garrison > 0 || v > 0)) v += G.conflict.level * 0.8 * Math.min(1, p.garrison / 2 + 0.3);
+    if (s.ctrl && G.control[m.sid] === p.i) v += 0.6;
+    if (m.infiltrate) v -= 1;
+    v += typeof c.aiA === 'function' ? c.aiA(p, m.sid) : (c.aiA || 0);
+    v -= (c.p || 0) * 0.55 + (c.s || 0) * 0.25 + (c.rt ? 0.8 : 0) + (c.bt ? 0.5 : 0);
+    v += Math.random() * 0.6;
+    if (v > bv) { bv = v; best = m; }
+  }
+  if (best && p.agentsAvail > 0) await doAgentTurn(p, best.card, best.sid);
+  else await doReveal(p);
+}
+
+// ---------- 진행 ----------
+function newGame(cfg) {
+  UID = 0;
+  POSTS = {}; for (const k in POSTS_DEF) POSTS[k] = { ...POSTS_DEF[k], occ: null };
+  const leaders = shuffle(Object.keys(LEADERS).filter(l => l !== cfg.leader));
+  const n = cfg.opponents + 1;
+  const icons = shuffle(['ornithopter', 'crysknife', 'desertMouse', 'crysknife', 'desertMouse']);
+  G = {
+    round: 0, log: [], over: false,
+    players: [], occ: {}, maker: { imperialBasin: 0, hagga: 0, deep: 0 }, shieldWall: true,
+    alliance: { emp: null, guild: null, bg: null, fremen: null }, control: { arrakeen: null, refinery: null, imperialBasin: null },
+    reserve: { ptw: 8, tsmf: 10 }, reserveCard: { ptw: mkCard('ptw'), tsmf: mkCard('tsmf') },
+    intDeck: [], intDiscard: [], conflictDeck: [], conflict: null, row: [], impDeck: [], rctx: null,
+  };
+  for (const s in SP) G.occ[s] = [];
+  const names = ['나', '컴퓨터 1', '컴퓨터 2', '컴퓨터 3'];
+  for (let i = 0; i < n; i++) {
+    const human = i === 0 && !cfg.allAI;
+    const leader = i === 0 && cfg.leader ? cfg.leader : leaders.pop();
+    const deck = [];
+    for (const id in DEFS) if (DEFS[id].start) for (let k = 0; k < DEFS[id].start; k++) deck.push(mkCard(id));
+    G.players.push({
+      i, name: human ? '나' : names[i], ai: !human, color: COLORS[i], leader, leaderN: LEADERS[leader].n,
+      deck: shuffle(deck), hand: [], discard: [], inPlay: [], revealed: [],
+      agentsTotal: 2, agentsAvail: 2, hasSword: false, councilor: false, hooks: false,
+      solari: 0, spice: 0, water: 1, vp: n >= 4 ? 1 : 0,
+      supply: 9, garrison: 3, conflict: 0, worms: 0, swords: 0, cbonus: 0,
+      intrigue: [], spies: 3, inf: { emp: 0, guild: 0, bg: 0, fremen: 0 },
+      won: [], objective: { icon: icons[i], up: true }, revealedDone: false,
+    });
+  }
+  if (cfg.easy) for (const p of G.players) if (p.ai) p.garrison = 0, p.supply = 12;
+  if (cfg.easy && !G.players[0].ai) drawIntrigue(G.players[0], 0);
+  G.first = Math.floor(Math.random() * n);
+  // 덱 구성
+  const imp = []; for (const id in DEFS) { const d = DEFS[id]; if (!d.start && !d.reserve) for (let k = 0; k < d.count; k++) imp.push(mkCard(id)); }
+  G.impDeck = shuffle(imp); for (let k = 0; k < 5; k++) G.row.push(G.impDeck.pop());
+  const ints = []; for (const d of INTRIGUE) for (let k = 0; k < d.count; k++) ints.push({ ...d, uid: ++UID });
+  G.intDeck = shuffle(ints);
+  if (cfg.easy && !G.players[0].ai) drawIntrigue(G.players[0], 1);
+  const c1 = shuffle(CONFLICTS[1]).slice(0, 1).map(c => ({ ...c, level: 1 }));
+  const c2 = shuffle(CONFLICTS[2]).slice(0, 5).map(c => ({ ...c, level: 2 }));
+  const c3 = shuffle(CONFLICTS[3]).map(c => ({ ...c, level: 3 }));
+  G.conflictDeck = [...c3, ...c2, ...c1]; // pop()은 끝에서 꺼냄
+  log(`게임 시작! 선 플레이어: ${G.players[G.first].name}`, 'imp');
+}
+
+async function playRound() {
+  G.round++;
+  G.conflict = G.conflictDeck.pop();
+  log(`━━ ${G.round}라운드 · 분쟁 ${'I'.repeat(G.conflict.level)}: 「${G.conflict.n}」 ━━`, 'round');
+  if (G.conflict.loc && G.control[G.conflict.loc] != null) {
+    const h = G.players[G.control[G.conflict.loc]];
+    if (h.supply > 0) { h.supply--; h.conflict++; log(`${h.name} 방어 보너스: 병력 1 배치`); }
+  }
+  for (const p of G.players) { draw(p, 5); p.revealedDone = false; p.agentsAvail = p.agentsTotal; }
+  UI.render();
+  const n = G.players.length;
+  const order = []; for (let k = 0; k < n; k++) order.push(G.players[(G.first + k) % n]);
+  while (order.some(p => !p.revealedDone)) {
+    for (const p of order) {
+      if (p.revealedDone) continue;
+      G.current = p.i; UI.render();
+      if (p.ai) await aiTurn(p); else await UI.waitHuman('turn');
+      UI.render();
+    }
+  }
+  G.current = null;
+  await combatPhase(order);
+  for (const s of ['imperialBasin', 'hagga', 'deep']) if (!G.occ[s].length) G.maker[s]++;
+  UI.render();
+}
+
+async function combatPhase(order) {
+  G.phase = 'combat'; UI.render();
+  log('⚔ 전투 단계', 'round');
+  let passes = 0, idx = 0, guard = 0;
+  while (passes < order.length && guard++ < 60) {
+    const p = order[idx % order.length]; idx++;
+    const units = p.conflict + p.worms;
+    const ci = p.intrigue.filter(x => x.type === 'combat' && (!x.can || x.can(p)));
+    if (!units || !ci.length) { passes++; continue; }
+    let pick = null;
+    if (p.ai) {
+      const my = strength(p), others = G.players.filter(x => x !== p).map(strength).sort((a, b) => b - a);
+      const top = others[0] || 0;
+      if (my <= top) { const c = ci.sort((a, b) => b.str - a.str).find(x => my + x.str > top) || (my + ci.reduce((a, x) => a + x.str, 0) > top ? ci[0] : null); pick = c; }
+      else if (my - top <= 2 && G.conflict.level >= 2 && ci.length >= 2) pick = ci[0];
+    } else {
+      await sleep(100);
+      pick = await UI.ask(`전투 음모 카드를 사용할까요? (내 전투력 ${strength(p)} / 최고 상대 ${Math.max(0, ...G.players.filter(x => x !== p).map(strength))})`, [...ci.map(c => ({ label: c.n, sub: c.t, value: c })), { label: '넘기기', value: null }], {});
+    }
+    if (pick) { await playIntrigue(p, pick); passes = 0; UI.render(); await sleep(SPEED / 2); } else passes++;
+  }
+  // 보상
+  const ps = G.players.map(p => ({ p, s: strength(p) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s);
+  const groups = []; for (const x of ps) { const g = groups.find(g => g.s === x.s); if (g) g.list.push(x.p); else groups.push({ s: x.s, list: [x.p] }); }
+  const four = G.players.length >= 4, C = G.conflict;
+  log(`전투력: ${G.players.map(p => `${p.name} ${strength(p)}`).join(' / ')}`);
+  if (groups.length) {
+    const g1 = groups[0];
+    if (g1.list.length > 1) {
+      log('1위 동점! 각자 2위 보상', 'imp');
+      for (const p of g1.list) await giveReward(p, C.r[1], '2위');
+      if (four && g1.list.length === 2 && groups[1] && groups[1].list.length === 1) await giveReward(groups[1].list[0], C.r[2], '3위');
+    } else {
+      const w = g1.list[0];
+      log(`🏆 ${w.name} 분쟁 승리!`, 'imp');
+      await giveReward(w, C.r[0], '1위');
+      w.won.push({ n: C.n, icon: C.icon, up: true });
+      const match = [w.objective, ...w.won.slice(0, -1)].find(x => x.up && x.icon === C.icon);
+      if (match) { match.up = false; w.won[w.won.length - 1].up = false; addVP(w, 1, `전투 아이콘 짝(${BATTLE[C.icon]})`); }
+      const g2 = groups[1];
+      if (g2) {
+        if (g2.list.length > 1) { for (const p of g2.list) await giveReward(p, C.r[2], '3위(2위 동점)'); }
+        else { await giveReward(g2.list[0], C.r[1], '2위'); if (four && groups[2] && groups[2].list.length === 1) await giveReward(groups[2].list[0], C.r[2], '3위'); }
+      }
+    }
+  } else log('분쟁에 참가한 플레이어가 없습니다');
+  for (const p of G.players) { p.supply += p.conflict; p.conflict = 0; p.worms = 0; p.swords = 0; p.cbonus = 0; }
+  G.phase = null;
+}
+async function giveReward(p, items, label) {
+  const m = p.worms > 0 ? 2 : 1;
+  log(`${p.name} ${label} 보상${m > 1 ? ' (모래벌레로 2배!)' : ''}: ${rewardText(items)}`, 'vp');
+  for (const it of items) {
+    if (it.vp) addVP(p, it.vp * m, '분쟁');
+    if (it.spice) gain(p, 'spice', it.spice * m);
+    if (it.solari) gain(p, 'solari', it.solari * m);
+    if (it.water) gain(p, 'water', it.water * m);
+    if (it.troop) recruit(p, it.troop * m);
+    if (it.intrigue) drawIntrigue(p, it.intrigue * m);
+    if (it.inf) await chooseInf(p, it.inf * m, `${label} 보상: 영향력을 올릴 세력`);
+    if (it.control) { G.control[it.control] = p.i; log(`${p.name}이(가) ${SP[it.control].n}을(를) 장악`); }
+    if (it.spiceVP) for (let k = 0; k < m; k++) if (p.spice >= 3 && await askYN(p, '향신료 3을 내고 승점 1을 얻을까요?', true)) { p.spice -= 3; addVP(p, 1, '분쟁 보상'); }
+  }
+}
+function recallPhase() {
+  for (const s in G.occ) G.occ[s] = [];
+  G.first = (G.first + 1) % G.players.length;
+}
+async function endgame() {
+  log('━━ 게임 종료 ━━', 'round');
+  for (const p of G.players) {
+    const es = p.intrigue.filter(x => x.type === 'end' && (!x.can || x.can(p)));
+    for (const ic of es) {
+      if (p.ai || await askYN(p, `종반 음모 「${ic.n}」(${ic.t})를 사용할까요?`, true)) { if (!ic.can || ic.can(p)) await playIntrigue(p, ic); }
+    }
+  }
+  const rank = [...G.players].sort((a, b) => b.vp - a.vp || b.spice - a.spice || b.solari - a.solari || b.water - a.water || b.garrison - a.garrison);
+  G.over = true; G.rank = rank;
+  log(`승자: ${rank[0].name} (${rank[0].vp}점)`, 'imp');
+  UI.render();
+}
+async function gameLoop() {
+  while (true) {
+    await playRound();
+    if (G.players.some(p => p.vp >= 10) || !G.conflictDeck.length) { await endgame(); return; }
+    recallPhase();
+  }
+}
+if (typeof module !== 'undefined') module.exports = { newGame, gameLoop, get G() { return G; }, DEFS, SP };
+
+</script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let W = {}; // 사람 대기 상태
+let SEL = null, BUSY = false, HIDE = false;
+const CFG = { opponents: 2, leader: 'gurney', easy: false, speed: 650 };
+const ICONTAG = i => `<span class="tag t-${i}">${ICN[i]}</span>`;
+const FACCOL = { emp: 'var(--emp)', guild: 'var(--guild)', bg: 'var(--bg-f)', fremen: 'var(--fremen)' };
+
+function startScreen() {
+  $('#app').innerHTML = `<div class="start">
+  <h1>듄: 임페리움 – 업라이징</h1>
+  <p class="note">한글 웹판 · 컴퓨터와 대전 (덱빌딩 + 일꾼 놓기)</p>
+  <div class="title">상대 컴퓨터 수</div>
+  <div class="choice" id="ops">${[1,2,3].map(n=>`<button data-n="${n}" class="${CFG.opponents===n?'on':''}">${n}명 (총 ${n+1}인)</button>`).join('')}</div>
+  <div class="title">내 리더</div>
+  <div class="ld" id="lds">${Object.entries(LEADERS).map(([k,l])=>`<button data-l="${k}" class="${CFG.leader===k?'on':''}"><b>${l.n}</b><small>능력: ${l.pt}</small><small>인장 반지: ${l.st}</small></button>`).join('')}</div>
+  <div class="title">난이도</div>
+  <div class="choice" id="dif"><button data-e="0" class="${!CFG.easy?'on':''}">보통</button><button data-e="1" class="${CFG.easy?'on':''}">쉬움 (컴퓨터 병력 0으로 시작, 나는 음모 1장)</button></div>
+  <div class="title">컴퓨터 진행 속도</div>
+  <div class="choice" id="spd">${[[1100,'느리게'],[650,'보통'],[250,'빠르게']].map(([v,t])=>`<button data-s="${v}" class="${CFG.speed===v?'on':''}">${t}</button>`).join('')}</div>
+  <div class="flex"><button class="btn" id="go">게임 시작</button><button class="btn sec2" id="hlp">게임 방법</button></div>
+  <p class="note" style="margin-top:14px">업로드한 규칙서와 카드 목록(업라이징 임페리움 카드 46종)을 바탕으로 만들었습니다. 분쟁 카드·음모 카드·리더 능력은 파일에 정보가 없어 규칙 구조에 맞게 단순화했고, CHOAM 계약 모듈은 빠져 있습니다(계약 아이콘 = 솔라리 2).</p>
+  </div>`;
+  $('#ops').onclick = e => { const n = e.target.closest('button')?.dataset.n; if (n) { CFG.opponents = +n; startScreen(); } };
+  $('#lds').onclick = e => { const l = e.target.closest('button')?.dataset.l; if (l) { CFG.leader = l; startScreen(); } };
+  $('#dif').onclick = e => { const v = e.target.closest('button')?.dataset.e; if (v) { CFG.easy = v === '1'; startScreen(); } };
+  $('#spd').onclick = e => { const v = e.target.closest('button')?.dataset.s; if (v) { CFG.speed = +v; startScreen(); } };
+  $('#hlp').onclick = showHelp;
+  $('#go').onclick = () => { SPEED = CFG.speed; newGame(CFG); W = {}; SEL = null; BUSY = false; render(); gameLoop().catch(e => { console.error(e); UI.toast('오류: ' + e.message); }); };
+}
+
+function showHelp() {
+  $('#modal').innerHTML = `<div class="modal" onclick="if(event.target===this)this.parentNode.innerHTML=''"><div class="mbox help">
+  <h2>게임 방법</h2>
+  <p><b>목표:</b> 승점 10점을 먼저 내거나, 분쟁 카드 10장이 모두 끝났을 때 승점이 가장 높으면 승리.</p>
+  <p><b>라운드 진행</b></p>
+  <ol>
+  <li>분쟁 카드가 공개되고 모두 카드 5장을 뽑습니다.</li>
+  <li><b>요원 턴</b>: 손의 카드를 고른 뒤, 카드에 있는 아이콘과 같은 아이콘의 빈 공간(노란 테두리)을 누릅니다. 공간 효과 + 카드의 요원 효과를 받습니다.</li>
+  <li>⚔ 표시가 있는 공간에 가면 이번에 모집한 병력 + 수비대 병력 최대 2를 분쟁에 보낼 수 있습니다.</li>
+  <li><b>공개 턴</b>: 남은 손패를 모두 공개해 설득력으로 카드를 사고, 검으로 전투력을 올립니다. (병력 1 = 2, 모래벌레 1 = 3)</li>
+  <li><b>전투</b>: 전투력 순서대로 분쟁 보상을 받습니다. 모래벌레가 있으면 보상 2배!</li>
+  </ol>
+  <p><b>세력 영향력</b>: 2에 도달하면 승점 1, 4에 도달하면 보너스, 가장 먼저 4에 도달하면 동맹(승점 1). 더 높이 올라온 상대에게 동맹을 빼앗길 수 있습니다.</p>
+  <p><b>첩자</b>: 감시 초소에 놓아 두면, 그 초소에 연결된 공간에 상대 요원이 있어도 첩자를 회수하고 들어갈 수 있고(잠입), 요원을 보낼 때 회수해서 카드 1장을 뽑을 수도 있습니다(정보 수집). '첩자' 아이콘 카드는 내 첩자가 있는 초소의 공간으로 요원을 보낼 수 있습니다.</p>
+  <p><b>모래벌레</b>: 시에치 타브르에서 메이커 훅을 얻은 뒤 하가 분지·깊은 사막에서 소환합니다. 방어벽이 있으면 아라킨·정제소·제국 분지 분쟁에는 소환할 수 없습니다.</p>
+  <p><b>음모 카드</b>: 계략(내 턴 아무 때나) · 전투(전투 단계) · 종반(게임 끝) 세 종류입니다. 화면 아래의 보라색 버튼을 누르면 사용합니다.</p>
+  <p><b>전투 아이콘</b>: 분쟁에서 이긴 카드와 목표 카드(또는 이전에 이긴 분쟁)의 아이콘이 같으면 짝을 지어 승점 1.</p>
+  <button class="btn" onclick="$('#modal').innerHTML=''">닫기</button></div></div>`;
+}
+
+// ---------- 모달 선택 ----------
+UI.ask = (title, opts, o = {}) => new Promise(res => {
+  const done = v => { $('#modal').innerHTML = ''; res(v); setTimeout(render, 0); };
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="mbox"><h2>${esc(title)}</h2>${o.desc ? `<p class="note">${esc(o.desc)}</p>` : ''}<div class="${o.grid ? 'grid' : ''}" id="opts"></div>${o.cancel ? '<button class="opt" id="cx" style="text-align:center">취소 / 사용 안 함</button>' : ''}</div>`;
+  $('#modal').innerHTML = ''; $('#modal').appendChild(m);
+  const box = m.querySelector('#opts');
+  opts.forEach(op => { const b = document.createElement('button'); b.className = 'opt'; b.disabled = !!op.disabled; b.innerHTML = `${esc(op.label)}${op.sub ? `<small>${esc(op.sub)}</small>` : ''}`; b.onclick = () => done(op.value); box.appendChild(b); });
+  if (o.cancel) m.querySelector('#cx').onclick = () => done(null);
+  render();
+});
+UI.waitHuman = (mode, ctx) => new Promise(res => { W[mode] = { ctx, res }; if (mode === 'turn') { SEL = null; BUSY = false; } render(); });
+UI.render = () => render();
+UI.log = () => {};
+
+// ---------- 렌더 ----------
+function cardHTML(c, cls = '', extra = '') {
+  const fc = c.fac.length ? `<div class="fc" style="background:linear-gradient(90deg,${c.fac.map(f => FACCOL[f]).join(',')}${c.fac.length === 1 ? ',' + FACCOL[c.fac[0]] : ''})"></div>` : '<div class="fc" style="background:#b49b78"></div>';
+  const rev = []; if (c.p) rev.push(`설득 ${c.p}`); if (c.s) rev.push(`검 ${c.s}`); if (c.rt) rev.push(esc(c.rt));
+  return `<button class="card ${cls}" ${extra}>
+   ${c.cost ? `<span class="cost">${c.cost}</span>` : ''}<div class="cn">${esc(c.n)}</div><div class="en">${esc(c.en)}${c.fac.length ? ' · ' + c.fac.map(f => FN[f]).join('/') : ''}</div>${fc}
+   <div>${c.icons.length ? c.icons.map(ICONTAG).join('') : '<span class="tag" style="background:#999">요원 불가</span>'}</div>
+   ${c.at ? `<div class="ab"><b>요원:</b> ${esc(c.at)}</div>` : ''}
+   ${rev.length ? `<div class="ab"><b>공개:</b> ${rev.join(', ')}</div>` : ''}
+   ${c.bt ? `<div class="ab"><b>프레멘 유대:</b> ${esc(c.bt)}</div>` : ''}
+   ${c.act ? `<div class="ab"><b>획득 시:</b> ${esc(c.act)}</div>` : ''}
+   ${c.xt ? `<div class="ab">${esc(c.xt)}</div>` : ''}
+  </button>`;
+}
+
+let ZOOM = false;
+const MAP = { // x,y,w,h (가로 100, 세로 122 단위)
+  dutiful:[2,5,15,7.5], sardaukar:[18,5,15,7.5],
+  deliver:[2,20.5,15,7.5], heighliner:[18,20.5,15,7.5],
+  espionage:[2,36,15,7.5], secrets:[18,36,15,7.5],
+  fremkit:[2,51.5,15,7.5], desertTactics:[18,51.5,15,7.5],
+  highCouncil:[37,5,20,8], privilege:[58,5,20,8], swordmaster:[79,5,19.5,8],
+  assembly:[37,14,20,7.5], gatherSupport:[58,14,20,7.5],
+  acceptContract:[37,26,20,7], shipping:[58,26,20,7],
+  arrakeen:[3,71,26,10], imperialBasin:[37,71,26,10], refinery:[71,71,26,10],
+  research:[3,88,26,10], hagga:[37,92,26,10], sietch:[3,108,26,10], deep:[67,106,30,11],
+};
+const EYES = { p_emp:[17.5,2.6], p_guild:[17.5,18.1], p_bg:[17.5,33.6], p_fremen:[17.5,49.1], p_land1:[88,2.7], p_land2:[57.5,17.75], p_choam:[88,29.5], p_city1:[50,68], p_city2:[16,103.3], p_desert:[84,96] };
+const FPANEL = { emp:1, guild:16.5, bg:32, fremen:47.5 };
+function U(x, y, w, h) { return `left:${x}%;top:${y / 1.22}%;` + (w != null ? `width:${w}%;height:${h / 1.22}%;` : ''); }
+function renderMap(legal, myTurn) {
+  const ctr = sid => { const m = MAP[sid]; return [m[0] + m[2] / 2, m[1] + m[3] / 2]; };
+  let svg = `<svg viewBox="0 0 100 122" preserveAspectRatio="none">`;
+  for (const k in EYES) for (const s of POSTS[k].spaces) { const [x, y] = ctr(s); const [ex, ey] = EYES[k]; svg += `<line x1="${ex}" y1="${ey}" x2="${x}" y2="${y}" stroke="${POSTS[k].occ != null ? G.players[POSTS[k].occ].color : '#c9b38f'}" stroke-width="0.35" stroke-dasharray="1 .8" opacity=".75"/>`; }
+  svg += `</svg>`;
+  let h = `<div class="maptool"><button class="btn sec2" style="padding:4px 10px;font-size:12px" onclick="ZOOM=!ZOOM;render()">${ZOOM ? '🔍 화면에 맞춤' : '🔍 지도 확대'}</button></div><div class="mapwrap"><div class="map ${ZOOM ? 'zoom' : ''}">`;
+  // 패널
+  for (const f of FAC) {
+    const y = FPANEL[f];
+    h += `<div class="pn" style="${U(1, y, 33, 14.5)}background:${FACCOL[f]};opacity:.92"></div><div class="pt" style="${U(2.2, y + .6)}">${FN[f]}</div>`;
+    h += `<div class="chips" style="${U(2, y + 12.8 - 0.3, 31, 2.4)}">` + G.players.map(p => `<span class="chip"><i style="background:${p.color}"></i>${p.inf[f]}${G.alliance[f] === p.i ? '★' : ''}</span>`).join('') + `<span style="margin-left:auto;opacity:.85">4:${INF_BONUS[f].t}</span></div>`;
+  }
+  h += `<div class="pn" style="${U(36, 1, 63, 21.5)}background:#4c6a30;opacity:.95"></div><div class="pt" style="${U(37.2, 1.4)}">란드스라드</div>`;
+  h += `<div class="cz" style="${U(79, 14, 19.5, 7.5)}font-size:max(8.5px,1.8cqw)">대의회 의석<br>${G.players.filter(p => p.councilor).map(p => `<span class="pawn" style="display:inline-block;background:${p.color}"></span>`).join(' ') || '<span style="opacity:.7">없음</span>'}</div>`;
+  h += `<div class="pn" style="${U(36, 23.5, 63, 11)}background:#8a6a2f;opacity:.95"></div><div class="pt" style="${U(37.2, 23.4)}">CHOAM</div>`;
+  // 분쟁 구역
+  const C = G.conflict;
+  h += `<div class="pn" style="${U(36, 36, 63, 30)}background:#1a120c;border:1px solid #6b3a1c"></div>`;
+  if (C) {
+    h += `<div class="cz" style="${U(37.5, 37, 60, 28)}"><div><span class="lvl" style="font-size:max(8px,1.7cqw)">분쟁 ${'I'.repeat(C.level)}</span><span class="cname">${esc(C.n)}</span> <span style="font-size:max(8px,1.7cqw)">${BATTLE[C.icon]}${C.loc ? ' · ' + SP[C.loc].n : ''}</span></div>
+     <div class="crw">🥇 ${rewardText(C.r[0])}<br>🥈 ${rewardText(C.r[1])} · 🥉 ${rewardText(C.r[2])}</div>
+     <div class="quad">${G.players.map(p => `<div class="q" style="border-color:${p.color}"><b style="color:${p.color}">${esc(p.name)}</b> 전투력 <b>${strength(p)}</b>${p.worms ? ` 🐛×${p.worms}` : ''}
+       <div class="cubes">${('<span class="cube" style="background:' + p.color + '"></span>').repeat(p.conflict)}${p.conflict + p.worms ? '' : '<span style="opacity:.6;white-space:nowrap">병력 없음</span>'}</div>
+       <div style="opacity:.8">수비대 ${p.garrison}</div></div>`).join('')}</div></div>`;
+  }
+  // 아라키스
+  h += `<div class="pt" style="${U(2, 67)}font-size:max(10px,2.6cqw)">아라키스</div>`;
+  h += `<div class="wall ${G.shieldWall ? '' : 'broken'}" style="top:${83.6 / 1.22}%">${G.shieldWall ? '🧱 방어벽 — 위쪽 세 곳의 분쟁에는 모래벌레 소환 불가' : '💥 방어벽 파괴됨'}</div>`;
+  h += `<div class="pt" style="${U(60, 116)}font-size:max(14px,3.5cqw)">🐛</div>`;
+  h += svg;
+  // 공간 타일
+  for (const sid in MAP) {
+    const s = SP[sid], [x, y, w, hh] = MAP[sid], cost = spaceCost(sid);
+    const cs = Object.keys(cost).map(r => ({ spice: '🟠', solari: '💰', water: '💧' }[r] + cost[r])).join(' ');
+    const isL = legal.has(sid);
+    const cls = ['city'].includes(s.icon) ? 'city' : (['imperialBasin', 'hagga', 'deep'].includes(sid) ? 'desert' : '');
+    h += `<button class="tile sp ${cls} ${isL ? 'legal' : (SEL && myTurn ? 'dim' : '')}" data-sid="${sid}" style="${U(x, y, w, hh)}">
+      <div class="tn">${s.n}${s.combat ? ' ⚔' : ''}</div>
+      <div class="tc"><span class="ti t-${s.icon}">${ICN[s.icon]}</span>${cs}${s.reqT ? ` <span style="color:#d7c2ff">${s.reqT}</span>` : ''}</div>
+      ${s.ctrl && G.control[sid] != null ? `<span class="flag" style="color:${G.players[G.control[sid]].color}">🚩</span>` : ''}
+      ${s.maker ? `<span class="bonus">+🟠${G.maker[sid]}</span>` : ''}
+      <div class="pawns">${G.occ[sid].map(i => `<span class="pawn" style="background:${G.players[i].color}"></span>`).join('')}</div></button>`;
+  }
+  for (const k in EYES) { const [ex, ey] = EYES[k]; const o = POSTS[k].occ; h += `<div class="eye" title="감시초소: ${postLabel(k)}" style="left:${ex}%;top:${ey / 1.22}%;${o != null ? `background:${G.players[o].color};border-color:#fff` : ''}">👁</div>`; }
+  h += `</div></div>`;
+  return h;
+}
+function spaceInfo(sid) {
+  const s = SP[sid], cost = spaceCost(sid);
+  const cs = Object.keys(cost).map(r => `${RES_N[r]} ${cost[r]}`).join(', ');
+  const posts = Object.keys(POSTS).filter(k => POSTS[k].spaces.includes(sid));
+  $('#modal').innerHTML = `<div class="modal" onclick="if(event.target===this)this.parentNode.innerHTML=''"><div class="mbox"><h2>${s.n} ${ICONTAG(s.icon)}${s.combat ? ' <span class="cmb">⚔ 전투 공간</span>' : ''}</h2>
+   ${cs ? `<p><b style="color:#ff9d6b">비용:</b> ${cs}</p>` : ''}${s.reqT ? `<p><b style="color:#c4a7ff">조건:</b> ${s.reqT}</p>` : ''}
+   <p><b>효과:</b> ${s.fac ? FN[s.fac] + ' 영향력 +1, ' : ''}${s.t}</p>
+   ${s.ctrl ? `<p>장악한 플레이어는 누가 이곳에 오든 ${s.ctrl === 'spice' ? '향신료' : '솔라리'} +1 (현재: ${G.control[sid] != null ? esc(G.players[G.control[sid]].name) : '없음'})</p>` : ''}
+   ${s.maker ? `<p>🐛 메이커 공간: 비어 있는 라운드마다 향신료가 쌓임 (현재 ${G.maker[sid]})</p>` : ''}
+   ${s.combat ? '<p class="note">요원을 보내면 이번 턴 모집한 병력 + 수비대 병력 최대 2를 분쟁에 배치할 수 있습니다.</p>' : ''}
+   <p class="note">연결된 감시초소: ${posts.map(k => postLabel(k) + (POSTS[k].occ != null ? ` (${esc(G.players[POSTS[k].occ].name)}의 첩자)` : ' (비어 있음)')).join(' / ')}</p>
+   <p class="note">현재 요원: ${G.occ[sid].map(i => esc(G.players[i].name)).join(', ') || '없음'}</p>
+   <button class="btn" onclick="$('#modal').innerHTML=''">닫기</button></div></div>`;
+}
+
+function me() { return G.players.find(p => !p.ai); }
+function render() {
+  if (!G) return;
+  const app = $('#app');
+  const hand = document.querySelector('.handbar .row'); const hs = hand ? hand.scrollLeft : 0;
+  const mk = document.querySelector('.market'); const ms = mk ? mk.scrollLeft : 0;
+  const H = me();
+  const myTurn = W.turn && !BUSY;
+  const C = G.conflict;
+  let legal = new Set();
+  if (myTurn && SEL && H.agentsAvail > 0) for (const sid in SP) if (legalVia(H, SEL, sid)) legal.add(sid);
+  const cur = G.current != null ? G.players[G.current] : null;
+
+  let h = `<div class="wrap">`;
+  // 상단
+  h += `<div class="top"><div class="box conf"><div class="title">${G.round}라운드 · 남은 분쟁 ${G.conflictDeck.length}장 · 방어벽 ${G.shieldWall ? '🧱 있음' : '💥 파괴됨'}</div>`;
+  if (C) h += `<div><span class="lvl">분쟁 ${'I'.repeat(C.level)}</span><span class="nm">${esc(C.n)}</span> <span class="tag">${BATTLE[C.icon]}</span>${C.loc ? `<span class="tag t-city">${SP[C.loc].n}${G.shieldWall ? ' · 방어벽 보호' : ''}</span>` : ''}</div>
+    <div class="rw">🥇 <b>${rewardText(C.r[0])}</b></div><div class="rw">🥈 ${rewardText(C.r[1])}</div><div class="rw">🥉 ${rewardText(C.r[2])} <span class="note">(4인: 3위 / 2~3인: 2위 동점 시)</span></div>`;
+  h += `</div><div class="box status"><div class="title">진행</div>${G.over ? '<b>게임 종료</b>' : G.phase === 'combat' ? '⚔ 전투 단계' : cur ? `<b style="color:${cur.color}">${esc(cur.name)}</b>의 차례` : ''}
+   <div class="note" style="margin-top:4px">선 플레이어: ${esc(G.players[G.first].name)}</div>
+   <div class="flex" style="margin-top:6px"><button class="btn sec2" onclick="showHelp()">게임 방법</button><button class="btn sec2" onclick="showDeck()">내 덱 보기</button></div></div></div>`;
+  // 플레이어
+  h += `<div class="players">` + G.players.map(p => {
+    const al = FAC.filter(f => G.alliance[f] === p.i).map(f => `<span class="tag t-${f}">★${FN[f]}</span>`).join('');
+    const ct = Object.keys(G.control).filter(k => G.control[k] === p.i).map(k => `<span class="tag">🚩${SP[k].n}</span>`).join('');
+    return `<div class="pl ${G.current === p.i ? 'cur' : ''}" style="border-color:${p.color}">
+     <div class="h"><b style="color:${p.color}">${esc(p.name)}</b><span class="vp">${p.vp}<small style="font-size:11px">점</small></span></div>
+     <div class="note">${p.leaderN}${p.revealedDone ? ' · 공개 완료' : ''}</div>
+     <div class="res"><span>💰${p.solari}</span><span>🟠${p.spice}</span><span>💧${p.water}</span><span>📜${p.intrigue.length}</span></div>
+     <div>요원 ${p.agentsAvail}/${p.agentsTotal} · 첩자 ${p.spies} · 손패 ${p.hand.length}</div>
+     <div>수비대 ${p.garrison} · <b>분쟁 ${p.conflict}${p.worms ? ` +🐛${p.worms}` : ''}</b> · 전투력 <b>${strength(p)}</b></div>
+     <div>${p.councilor ? '<span class="tag">의석</span>' : ''}${p.hasSword ? '<span class="tag">소드마스터</span>' : ''}${p.hooks ? '<span class="tag t-fremen">메이커 훅</span>' : ''}<span class="tag" style="opacity:${p.objective.up ? 1 : .4}">목표:${BATTLE[p.objective.icon]}</span>${p.won.map(w => `<span class="tag" style="opacity:${w.up ? 1 : .4}">${BATTLE[w.icon]}</span>`).join('')}${al}${ct}</div>
+    </div>`;
+  }).join('') + `</div>`;
+  // 보드 지도
+  h += renderMap(legal, myTurn);
+  // 영향력
+  h += `<div class="box inf mb"><div class="title">세력 영향력 (2 = 승점 1, 4 = 보너스 / 처음 4 도달 = 동맹 ★)</div><table><tr><th>세력</th>${G.players.map(p => `<th style="color:${p.color}">${esc(p.name)}</th>`).join('')}</tr>` +
+    FAC.map(f => `<tr><td><span class="tag t-${f}">${FN[f]}</span></td>${G.players.map(p => `<td>${p.inf[f]}${G.alliance[f] === p.i ? ' ★' : ''}</td>`).join('')}</tr>`).join('') + `</table></div>`;
+  // 시장
+  const buying = W.buy && G.current === H.i;
+  const per = buying ? W.buy.ctx.persuasion : 0;
+  h += `<div class="box mb"><div class="title">임페리움 줄 · 예비 카드 (남은 덱 ${G.impDeck.length}장)${buying ? ` — <b style="color:var(--hi)">설득력 ${per}</b>: 살 카드를 누르세요` : ''}</div><div class="market">` +
+    buyable().map(c => cardHTML(c, buying ? (c.cost <= per ? 'can' : 'no') : '', `data-buy="${c.uid}"`) + (c.reserve ? `<div style="align-self:center;font-size:11px;color:var(--dim);margin-left:-4px">×${G.reserve[c.id]}</div>` : '')).join('') + `</div></div>`;
+  // 로그
+  h += `<div class="box"><details open><summary>진행 기록</summary><div class="log">${G.log.slice(0, 120).map(l => `<div class="l-${l.cls || ''}">${esc(l.msg)}</div>`).join('')}</div></details></div>`;
+  h += `</div>`;
+  // 손패 바
+  let msg = '';
+  if (G.over) msg = '게임 종료';
+  else if (W.buy && G.current === H.i) msg = `공개 턴 · 설득력 ${per} · 전투력 ${strength(H)} — 카드를 사고 [턴 종료]`;
+  else if (myTurn) msg = H.agentsAvail > 0 && legalMoves(H).length ? (SEL ? `「${SEL.n}」: 노란 테두리 공간을 고르세요` : '내 차례: 카드를 골라 요원을 보내거나 [공개 턴]') : '보낼 수 있는 요원/공간이 없습니다 → [공개 턴]';
+  else if (G.phase === 'combat') msg = '전투 진행 중…';
+  else if (cur) msg = `${cur.name} 생각 중…`;
+  const canPlot = (myTurn || (W.buy && G.current === H.i)) && !document.querySelector('#modal .modal');
+  h += `<div class="handbar"><div class="hb-top"><div class="msg">${esc(msg)}</div>
+    <button class="btn sec2" onclick="HIDE=!HIDE;render()">${HIDE ? '▲ 손패' : '▼ 접기'}</button>
+    ${myTurn ? `<button class="btn" id="rev">공개 턴</button>` : ''}
+    ${W.buy && G.current === H.i ? `<button class="btn" id="endbuy">턴 종료</button>` : ''}
+    <span class="note">💰${H.solari} 🟠${H.spice} 💧${H.water} · 요원 ${H.agentsAvail} · 리더 ${H.leaderN}: ${LEADERS[H.leader].pt} / 인장: ${LEADERS[H.leader].st}</span></div>
+    <div class="row" style="${HIDE ? 'display:none' : ''}">${H.intrigue.map(ic => `<button class="ic ${ic.type}" data-ic="${ic.uid}" ${ic.type === 'plot' && canPlot && (!ic.can || ic.can(H)) ? '' : 'disabled'}><b>📜${esc(ic.n)}</b> <span class="note">[${ITYPE[ic.type]}]</span><br>${esc(ic.t)}</button>`).join('')}
+    ${(H.revealed.length ? H.revealed : H.hand).map(c => cardHTML(c, SEL === c ? 'sel' : '', `data-hand="${c.uid}"`)).join('') || '<span class="note">손패 없음</span>'}
+    ${H.inPlay.length ? `<span class="note" style="align-self:center">사용함: ${H.inPlay.map(c => esc(c.n)).join(', ')}</span>` : ''}</div></div>`;
+  app.innerHTML = h;
+  const hr = document.querySelector('.handbar .row'); if (hr) hr.scrollLeft = hs;
+  const mr = document.querySelector('.market'); if (mr) mr.scrollLeft = ms;
+  bind();
+  if (G.over && G.rank && !document.querySelector('#modal .modal')) showEnd();
+}
+function bind() {
+  const H = me();
+  document.querySelectorAll('[data-hand]').forEach(b => b.onclick = () => {
+    if (!W.turn || BUSY) return;
+    const c = H.hand.find(x => x.uid == b.dataset.hand); if (!c) return;
+    SEL = SEL === c ? null : c; render(); if (SEL) { const l = document.querySelector('.sp.legal'); if (l) l.scrollIntoView({ behavior: 'smooth', block: 'center' }); else UI.toast('이 카드로 갈 수 있는 공간이 없습니다'); }
+  });
+  document.querySelectorAll('[data-sid]').forEach(b => b.onclick = async () => {
+    const sid = b.dataset.sid;
+    if (!W.turn || BUSY || !SEL) { spaceInfo(sid); return; }
+    if (!legalVia(H, SEL, sid)) { infoSpace(sid); return; }
+    BUSY = true; const c = SEL; SEL = null;
+    try { await doAgentTurn(H, c, sid); } catch (e) { console.error(e); }
+    const w = W.turn; W.turn = null; BUSY = false; w.res();
+  });
+  const rev = $('#rev'); if (rev) rev.onclick = async () => {
+    if (!W.turn || BUSY) return;
+    if (H.agentsAvail > 0 && legalMoves(H).length && !(await UI.ask('아직 요원이 남아 있습니다. 공개 턴을 진행할까요?', [{ label: '예, 공개 턴', value: true }, { label: '아니오', value: false }]))) return;
+    BUSY = true; SEL = null;
+    try { await doReveal(H); } catch (e) { console.error(e); }
+    const w = W.turn; W.turn = null; BUSY = false; w.res();
+  };
+  const eb = $('#endbuy'); if (eb) eb.onclick = () => { const w = W.buy; W.buy = null; w.res(); };
+  document.querySelectorAll('[data-buy]').forEach(b => b.onclick = async () => {
+    if (!W.buy || G.current !== H.i) return;
+    const c = buyable().find(x => x.uid == b.dataset.buy); if (!c || c.cost > W.buy.ctx.persuasion) return;
+    await buy(H, W.buy.ctx, c); render();
+  });
+  document.querySelectorAll('[data-ic]').forEach(b => b.onclick = async () => {
+    const ic = H.intrigue.find(x => x.uid == b.dataset.ic); if (!ic || ic.type !== 'plot') return;
+    if (!(W.turn && !BUSY) && !(W.buy && G.current === H.i)) return;
+    const wasBusy = BUSY; BUSY = true;
+    await playIntrigue(H, ic);
+    BUSY = wasBusy; render();
+  });
+}
+function infoSpace(sid) {
+  const s = SP[sid]; if (!G || !W.turn || !SEL) return;
+  const lv = legalVia(me(), SEL, sid);
+  if (!lv) UI.toast(`${s.n}: 이 카드로는 갈 수 없습니다 (아이콘/비용/조건/점유 확인)`);
+}
+UI.toast = t => { const d = document.createElement('div'); d.textContent = t; d.style.cssText = 'position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#000d;color:#fff;padding:8px 12px;border-radius:8px;z-index:30;font-size:13px'; document.body.appendChild(d); setTimeout(() => d.remove(), 1800); };
+function showDeck() {
+  const H = me();
+  const all = [...H.deck, ...H.hand, ...H.discard, ...H.inPlay, ...H.revealed];
+  const cnt = {}; all.forEach(c => cnt[c.n] = (cnt[c.n] || 0) + 1);
+  $('#modal').innerHTML = `<div class="modal" onclick="if(event.target===this)this.parentNode.innerHTML=''"><div class="mbox"><h2>내 덱 (${all.length}장)</h2>
+   <p class="note">덱 ${H.deck.length} · 손 ${H.hand.length} · 버림 ${H.discard.length}</p>
+   ${Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([n, k]) => `<div>${esc(n)} × ${k}</div>`).join('')}
+   <button class="btn" style="margin-top:10px" onclick="$('#modal').innerHTML=''">닫기</button></div></div>`;
+}
+function showEnd() {
+  $('#modal').innerHTML = `<div class="modal"><div class="mbox"><h2>${G.rank[0].ai ? '패배…' : '🎉 승리!'}</h2>
+   ${G.rank.map((p, i) => `<div style="font-size:15px;margin:4px 0">${i + 1}위 <b style="color:${p.color}">${esc(p.name)}</b> (${p.leaderN}) — <b>${p.vp}점</b> <span class="note">향신료 ${p.spice} · 솔라리 ${p.solari} · 물 ${p.water}</span></div>`).join('')}
+   <div class="flex" style="margin-top:12px"><button class="btn" onclick="$('#modal').innerHTML='';G=null;startScreen()">새 게임</button><button class="btn sec2" onclick="$('#modal').innerHTML=''">보드 보기</button></div></div></div>`;
+}
+startScreen();
+</script>
+</body>
+</html>
