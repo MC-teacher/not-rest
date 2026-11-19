@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>필그림 — 동화 나라 순례자 (컴퓨터 대전)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f3e7cf;--paper2:#ead9b8;--ink:#3a2c1e;--ink2:#6d5841;--line:#c9b08a;--red:#c4453a;--blue:#3a74b4;--green:#4d8a37;--gold:#c99a1e;--accent:#8c3b2a;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Gowun Dodum',system-ui,sans-serif;color:var(--ink);background:#d9c39b;background-image:radial-gradient(circle at 20% 10%,#e9d6b0 0,transparent 40%),radial-gradient(circle at 80% 70%,#cdb185 0,transparent 45%);min-height:100vh;font-size:14px}
+h1,h2,h3,.ttl{font-family:'Gowun Batang',serif;margin:0}
+button{font-family:inherit;font-size:14px;border:1.5px solid var(--ink);background:#fff8ea;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;box-shadow:0 2px 0 var(--ink)}
+button:active{transform:translateY(2px);box-shadow:none}
+button:disabled{opacity:.4;cursor:default;box-shadow:none}
+button.pri{background:var(--accent);color:#fff8ea;border-color:#4c1f15}
+button.sm{padding:4px 8px;font-size:12px;border-radius:8px}
+#app{max-width:760px;margin:0 auto;padding:8px 8px 170px}
+.hdr{display:flex;align-items:center;gap:8px;justify-content:space-between;background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:8px 10px;margin-bottom:8px}
+.hdr h1{font-size:18px}
+.sun{display:flex;gap:3px;align-items:center}
+.sun span{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink2);display:grid;place-items:center;font-size:12px}
+.sun span.on{background:#ffd447;border-color:#a77b00}
+.sun span.past{background:var(--paper2);opacity:.6}
+.panel{background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:8px;margin-bottom:8px}
+.panel h3{font-size:15px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.opps{display:flex;gap:6px;overflow-x:auto}
+.opp{flex:1 0 150px;background:#fffaf0;border:1.5px solid var(--line);border-radius:10px;padding:6px;font-size:12px}
+.opp.cur{border-color:var(--accent);box-shadow:0 0 0 2px #e9a28f}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1.5px solid #0006;vertical-align:-2px}
+.row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.adv{flex:0 0 132px;border-radius:10px;border:2px solid #2d4e6e;background:#dbe8f3;padding:5px;font-size:11.5px;position:relative;cursor:pointer}
+.adv.l2{border-color:#2f5d27;background:#dfeccd}
+.adv .nm{font-family:'Gowun Batang',serif;font-size:13px;line-height:1.15;margin:2px 0 3px;min-height:30px}
+.adv .vp{position:absolute;right:5px;top:4px;background:#ffd447;border:1.5px solid #8a6500;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font-weight:bold;font-size:13px}
+.adv.can{box-shadow:0 0 0 3px #f0b429}
+.imp{background:#fff8;border-radius:6px;padding:2px 4px;margin-top:3px;font-size:10.5px;line-height:1.25}
+.quest{flex:0 0 150px;border-radius:10px;border:2px dashed #7a5a2c;background:#f7ecd4;padding:5px;font-size:11.5px;cursor:pointer}
+.quill{display:inline-block;min-width:34px;text-align:center;border:1px solid var(--line);border-radius:6px;margin:2px 2px 0 0;padding:1px 2px;font-size:11px;background:#fff}
+.chip{display:inline-flex;align-items:center;gap:1px;border-radius:6px;padding:0 3px;font-size:12px;line-height:18px;border:1px solid #0003;background:#fff}
+.chip.c-r{background:#f3c8c2}.chip.c-b{background:#c5d9ef}.chip.c-g{background:#cfe5c2}.chip.c-y{background:#f6e2a6}
+.map{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:#7c6a45;padding:5px;border-radius:12px;border:2px solid var(--ink);aspect-ratio:1;max-width:520px;margin:0 auto}
+.cell{position:relative;border-radius:8px;background:#e6d3a8;overflow:hidden;cursor:pointer;display:flex;align-items:stretch;justify-content:stretch}
+.cell.camp{background:#d8b58a}
+.cell.camp:after{content:'🔥';position:absolute;right:2px;top:1px;font-size:10px;opacity:.8}
+.cell.tgt{box-shadow:inset 0 0 0 3px #ffde3b;animation:pulse 1s infinite alternate}
+@keyframes pulse{to{box-shadow:inset 0 0 0 5px #ff9d00}}
+.cell.last{outline:2px dashed #fff;outline-offset:-4px}
+.card{flex:1;margin:3px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;line-height:1.1;text-align:center;border:1.5px solid #0004}
+.card.item.c-r{background:#e48d82}.card.item.c-b{background:#88b2df}.card.item.c-g{background:#97c47f}.card.item.c-y{background:#ecc964}
+.card.item .big{font-size:22px}
+.card.comp{background:#fbf4e3}
+.card.comp .em{font-size:18px}
+.card .nm{font-size:10px;font-weight:bold}
+.figs{position:absolute;left:2px;bottom:2px;display:flex;gap:1px}
+.fig{width:18px;height:18px;border-radius:50% 50% 45% 45%;border:2px solid #fff;box-shadow:0 1px 2px #000a}
+.mine{display:flex;flex-direction:column;gap:6px}
+.party{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.pc{flex:0 0 118px;background:#fffaf0;border:1.5px solid var(--line);border-radius:10px;padding:5px;font-size:11px;cursor:pointer;position:relative}
+.pc.leader{background:#fbe9d9;border-color:#b0563e}
+.pc.sel{box-shadow:0 0 0 3px #f0b429;border-color:#b07b00}
+.pc .nm{font-family:'Gowun Batang',serif;font-size:13px}
+.pc .held{margin-top:4px;min-height:22px;border-top:1px dashed var(--line);padding-top:3px}
+.hand{display:flex;gap:5px;flex-wrap:wrap}
+.hi{width:46px;height:58px;border-radius:7px;border:1.5px solid #0005;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:12px;position:relative}
+.hi .big{font-size:20px}
+.hi.c-r{background:#e48d82}.hi.c-b{background:#88b2df}.hi.c-g{background:#97c47f}.hi.c-y{background:#ecc964}
+.hi.ok{box-shadow:0 0 0 3px #f0b429}
+.hi.no{opacity:.35}
+.hi .tag{position:absolute;bottom:-6px;font-size:9px;background:#fff;border-radius:4px;padding:0 2px;border:1px solid #0003}
+.hi.pick{outline:3px solid #222;outline-offset:1px}
+.stat{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;align-items:center}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#3a2c1e;color:#fff8ea;padding:8px 10px calc(8px + env(safe-area-inset-bottom));z-index:20;box-shadow:0 -4px 12px #0005}
+.bar .in{max-width:760px;margin:0 auto}
+.bar .msg{font-size:14px;margin-bottom:6px;line-height:1.35}
+.bar .msg b{color:#ffd447}
+.bar .btns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.bar button{background:#fff8ea}
+.bar button.pri{background:#e5a03c;color:#2a1c0c;border-color:#2a1c0c}
+.trv{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 8px;min-width:64px}
+.mini{display:grid;gap:1px}
+.mini i{width:6px;height:6px;background:#0001;border-radius:1px;display:block}
+.mini i.o{background:#c4453a}.mini i.c{background:#222;border-radius:50%}
+.ov{position:fixed;inset:0;background:#0007;z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--paper);width:100%;max-width:760px;max-height:85vh;overflow:auto;border-radius:16px 16px 0 0;padding:12px 12px calc(16px + env(safe-area-inset-bottom));border:2px solid var(--ink)}
+.sheet h2{font-size:18px;margin-bottom:8px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fffaf0;border-radius:10px;padding:8px;margin-bottom:6px;cursor:pointer}
+.opt.dis{opacity:.45;cursor:default}
+.opt .r{font-size:12px;text-align:right;white-space:nowrap}
+.log{font-size:12px;max-height:160px;overflow:auto;line-height:1.5;color:var(--ink2)}
+.log div:first-child{color:var(--ink);font-weight:bold}
+.muted{color:var(--ink2);font-size:12px}
+.start{max-width:520px;margin:30px auto;background:var(--paper);border:2px solid var(--ink);border-radius:16px;padding:18px}
+.start h1{font-size:26px;text-align:center}
+.lead{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.lead div{border:1.5px solid var(--line);border-radius:10px;padding:8px;background:#fffaf0;cursor:pointer;font-size:12px}
+.lead div.on{border-color:var(--accent);box-shadow:0 0 0 2px #e9a28f}
+.seg{display:flex;gap:6px;margin:8px 0}
+.seg button.on{background:var(--accent);color:#fff}
+table.sc{width:100%;border-collapse:collapse;font-size:13px}
+table.sc td,table.sc th{border-bottom:1px solid var(--line);padding:4px;text-align:center}
+.rules p,.rules li{line-height:1.55;font-size:13.5px}
+.pill{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 6px;font-size:12px;margin:1px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="bar" class="bar" style="display:none"><div class="in" id="barin"></div></div>
+<div id="ovl"></div>
+<script>
+'use strict';
+/* ================= 데이터 ================= */
+const COL={r:{n:'힘',ic:'✊'},b:{n:'말솜씨',ic:'💬'},g:{n:'길찾기',ic:'🍃'},y:{n:'와일드',ic:'🪙'}};
+const ACT={sw:{n:'무기',ic:'⚔️'},mu:{n:'악기',ic:'🎵'},co:{n:'여행도구',ic:'🧭'},st:{n:'마법',ic:'⭐'}};
+const TYP={W:{n:'방랑자',ic:'🎒'},N:{n:'고결한 자',ic:'🛡️'},B:{n:'짐승',ic:'🐾'},S:{n:'악당',ic:'🎭'},'?':{n:'아무 동료',ic:'❔'}};
+const OR=[[1,0],[-1,0],[0,1],[0,-1]],DG=[[1,1],[1,-1],[-1,1],[-1,-1]];
+const st8=(dirs,ds)=>{const o=[];for(const[a,b]of dirs)for(const d of ds)o.push([a*d,b*d]);return o;};
+const KN=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+const PATS={
+  walk:{n:'걷기',ic:'🥾',v:st8([...OR,...DG],[1]),d:'주변 8칸 중 1칸'},
+  cart:{n:'수레',ic:'🛞',v:st8(OR,[1,2]),d:'가로·세로 직선 1~2칸'},
+  bird:{n:'비행',ic:'🦅',v:st8(DG,[1,2]),d:'대각선 직선 1~2칸'},
+  horse:{n:'말',ic:'🐴',v:KN,d:'ㄱ자 이동(체스 나이트)'},
+  o1:{v:st8(OR,[1]),d:'가로·세로 1칸'},
+  d1:{v:st8(DG,[1]),d:'대각선 1칸'},
+  k1:{v:st8([...OR,...DG],[1]),d:'주변 8칸 중 1칸'},
+  o2:{v:st8(OR,[2]),d:'가로·세로 정확히 2칸'},
+  o12:{v:st8(OR,[1,2]),d:'가로·세로 직선 1~2칸'},
+  d12:{v:st8(DG,[1,2]),d:'대각선 직선 1~2칸'},
+  kn:{v:KN,d:'ㄱ자 이동(나이트)'},
+  o23:{v:st8(OR,[2,3]),d:'가로·세로 직선 2~3칸'},
+  a2:{v:st8([...OR,...DG],[2]),d:'8방향 직선 정확히 2칸'},
+};
+const TRAVELS=['walk','cart','bird','horse'];
+const LEADERS=[
+  {name:'나그네',em:'🧔',acts:['st','sw'],ab:['m:o1','r']},
+  {name:'마녀',em:'🧙‍♀️',acts:['st'],ab:['m:o23','r']},
+  {name:'음유시인',em:'🧑‍🎤',acts:['mu','co'],ab:['m:d1','r']},
+  {name:'사냥꾼',em:'🏹',acts:['co'],ab:['m:kn','r']},
+];
+const COMPS=[
+ ['양치기','🧑‍🌾','WB','co',['m:k1']],
+ ['대장장이','🔨','W','sw',['p:i','c:1']],
+ ['지도제작자','🗺️','W','co',['m:o12']],
+ ['행상인','🎒','W','mu co',['d:1','c:1']],
+ ['수도사','📿','WN','st',['r','c:1']],
+ ['뱃사공','🛶','W','co',['m:d12']],
+ ['약초꾼','🌿','W','st',['t:g']],
+ ['떠돌이 악사','🪕','WS','mu',['m:kn']],
+ ['공주','👸','N','st',['p:c']],
+ ['기사','🤺','N','sw',['m:o23']],
+ ['성직자','⛪','N','st mu',['r','d:1']],
+ ['왕자','🤴','N','sw',['t:r']],
+ ['시녀','💁','N','mu',['x','c:1']],
+ ['학자','📜','N','co st',['d:2']],
+ ['귀족 시인','🎩','N','mu',['t:b']],
+ ['정원사','🌻','NB','co',['ta:g','c:1']],
+ ['늑대','🐺','B','sw',['m:kn']],
+ ['하울러','🌳','B','co',['m:a2']],
+ ['부엉이','🦉','B','st',['m:d1','d:1']],
+ ['곰','🐻','B','sw',['ta:r','c:1']],
+ ['여우','🦊','BS','co',['m:k1','c:1']],
+ ['까마귀','🐦‍⬛','B','mu',['t:y']],
+ ['수사슴','🦌','B','st',['m:o23']],
+ ['거북이','🐢','B','co',['c:2']],
+ ['도적','🦹','S','sw',['ta:b','d:1']],
+ ['소매치기','🫳','S','mu',['d:1','x']],
+ ['광대','🤡','S','mu st',['m:k1','d:1']],
+ ['사기꾼','🃏','S','co',['p:i','c:1']],
+ ['해적','🏴‍☠️','SW','sw',['m:o12','c:1']],
+ ['검은 고양이','🐈‍⬛','SB','st',['x','c:1']],
+ ['밀수꾼','📦','S','co sw',['ta:y']],
+ ['점쟁이','🔮','S','st',['r','p:i']],
+];
+// [이름, 요구 동료, 은퇴 수, 비용, 승점, 클로버, 개선]
+const ADV1=[
+ ['마법의 꽃','N',0,'gg',2,0,'ac:st:d'],
+ ['마을 춤 대회','??',0,'bbb',3,0,'tv:walk:c'],
+ ['길 잃은 양','B',0,'gg',2,0,'tv:walk:cs'],
+ ['모닥불 수다','W',0,'bb',2,1,''],
+ ['힘의 물약','?',0,'rr',2,0,'ds:r'],
+ ['빵집 소동','S',1,'rr',3,1,'cl:r:d'],
+ ['다리 고치기','W',0,'rg',2,0,'tv:cart:d'],
+ ['수상한 상인','S',0,'bb',2,0,'ds:b'],
+ ['숲속 지름길','B',0,'gg',2,0,'tv:bird:s'],
+ ['노래 경연','N',0,'bb',2,1,'ac:mu:c'],
+ ['결투 신청','N',1,'rrr',4,0,''],
+ ['약초 채집','W',0,'gg',2,0,'ds:g'],
+ ['도둑 잡기','?',0,'rb',2,0,'cn:d'],
+ ['안개 낀 늪','B',1,'ggb',4,0,''],
+ ['장터 흥정','S',0,'bbr',3,1,''],
+ ['산적 소굴','S',1,'rrg',4,1,''],
+ ['왕의 초대','N',0,'bbg',3,0,'ad:c'],
+ ['늑대 울음','B',0,'rr',2,0,'tv:horse:c'],
+ ['밤하늘 별점','?',0,'bg',2,0,'cl:b:d'],
+ ['순례길 첫걸음','W',0,'gr',2,1,'cn:c'],
+];
+const ADV2=[
+ ['가장 높은 산','WB',1,'gggrr',5,1,'ac:co:d'],
+ ['심연으로의 하강','??',2,'bbgg',6,0,'tv:walk:s'],
+ ['용의 둥지','NB',1,'rrrr',6,0,'ds:r'],
+ ['잃어버린 왕관','NS',1,'bbbr',5,1,''],
+ ['거인의 다리','WW',1,'ggrr',5,0,'tv:cart:s'],
+ ['유령의 성','N?',1,'bbgg',5,0,'pt'],
+ ['해적선 습격','SW',1,'rrbb',5,0,'rs'],
+ ['요정의 숲','B?',1,'gggb',5,0,'ds:*'],
+ ['왕국 축제','NN',1,'bbbb',6,1,''],
+ ['검은 기사','NS',2,'rrrg',7,0,''],
+ ['마법사의 탑','W?',1,'bbgr',5,0,'tv:bird:cs'],
+ ['늪지 괴물','BB',1,'ggrr',6,0,'ds:g'],
+ ['황금 사과','??',1,'rgbb',5,1,'ad:d'],
+ ['도적 길드','SS',1,'rrbb',6,0,'ds:b'],
+ ['얼음 동굴','WB',2,'gggr',7,0,''],
+ ['별의 순례','WNB',2,'rgbgb',8,1,''],
+ ['신비한 축제','??',1,'bbrg',5,0,'tv:horse:cs'],
+];
+const QUESTS=[
+ {id:'1a',L:'A',t:'type',v:'W',cost:'ggb'},{id:'1b',L:'A',t:'type',v:'N',cost:'bbr'},
+ {id:'1c',L:'A',t:'type',v:'B',cost:'ggr'},{id:'1d',L:'A',t:'type',v:'S',cost:'rrb'},
+ {id:'2a',L:'B',t:'act',v:'st',cost:'bbg'},{id:'2b',L:'B',t:'act',v:'sw',cost:'rrg'},
+ {id:'2c',L:'B',t:'act',v:'mu',cost:'bbr'},{id:'2d',L:'B',t:'act',v:'co',cost:'ggb'},
+ {id:'3',L:'C',t:'clv',cost:'rbg'},{id:'4',L:'C',t:'move',cost:'rgg'},
+ {id:'5',L:'C',t:'lv2',cost:'rrb'},{id:'6',L:'C',t:'disc',cost:'bbg'},
+];
+const CAMPS=[[0,2],[1,3],[2,0],[2,4],[3,1],[4,2]];
+const CORNERS=[[0,0],[0,4],[4,0],[4,4]];
+const PCOL=['#d2402f','#2f6fd2','#2e9e5b','#8a4fc2'];
+const MTAB=[0,1,2,4,6];
+
+/* ================= 상태 ================= */
+let S=null, HIST=[], UI={}, busy=false;
+function rnd(){S.rng=(S.rng+0x6D2B79F5)|0;let t=S.rng;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function P(){return S.players[S.cur];}
+function log(t){S.log.unshift(t);if(S.log.length>120)S.log.pop();}
+function parseImp(s){if(!s)return null;const a=s.split(':');
+  if(a[0]==='tv')return{t:'tv',m:a[1],r:a[2]};
+  if(a[0]==='ad')return{t:'ad',r:a[1]};
+  if(a[0]==='cn')return{t:'cn',r:a[1]};
+  if(a[0]==='cl')return{t:'cl',c:a[1],r:a[2]};
+  if(a[0]==='ac')return{t:'ac',a:a[1],r:a[2]};
+  if(a[0]==='ds')return{t:'ds',c:a[1]};
+  return{t:a[0]};}
+
+function newGame(leaderIdx,nAI,seed){
+  S={rng:seed||((Math.random()*2**31)|0),log:[],round:1,tir:0,cur:0,phase:'corner',queue:[],after:null,pending:null,extraAct:0,actCount:0,last:null};
+  const items=[];const acts=['sw','mu','co','st'];
+  ['r','b','g'].forEach((c,ci)=>{for(let i=0;i<18;i++)items.push({id:'i'+items.length,k:'item',c,a:acts[(i+ci)%4]});});
+  for(let i=0;i<10;i++)items.push({id:'i'+items.length,k:'item',c:'y',a:acts[i%4]});
+  S.itemDeck=shuffle(items);S.discard=[];
+  S.compDeck=shuffle(COMPS.map((c,i)=>({id:'c'+i,k:'comp',name:c[0],em:c[1],types:c[2].split(''),acts:c[3].split(' '),ab:c[4]})));
+  const mk=(arr,lv)=>arr.map((a,i)=>({id:'a'+lv+'_'+i,k:'adv',lv,name:a[0],req:a[1].split(''),x:a[2],cost:a[3],vp:a[4],clv:a[5],imp:parseImp(a[6])}));
+  S.adv1=shuffle(mk(ADV1,1));S.adv2=shuffle(mk(ADV2,2));
+  S.map=[];for(let r=0;r<5;r++){S.map.push([]);for(let c=0;c<5;c++)S.map[r].push({camp:CAMPS.some(x=>x[0]===r&&x[1]===c),card:null});}
+  // 퀘스트 A,B,C 하나씩
+  const pick=L=>{const a=QUESTS.filter(q=>q.L===L);return a[Math.floor(rnd()*a.length)];};
+  S.quests=shuffle(['A','B','C'].map(L=>({...pick(L),q:[null,null,null]})));
+  // 플레이어
+  const others=shuffle([0,1,2,3].filter(i=>i!==leaderIdx));
+  const names=['나','컴퓨터 1','컴퓨터 2','컴퓨터 3'];
+  S.players=[];
+  for(let i=0;i<=nAI;i++){
+    const L=LEADERS[i===0?leaderIdx:others[i-1]];
+    S.players.push({id:i,name:names[i],ai:i>0,col:PCOL[i],party:[{card:{id:'L'+i,k:'leader',name:L.name,em:L.em,acts:L.acts,ab:L.ab,types:[]},held:null}],retired:[],hand:[],reserved:[],done:[],clovers:1,quills:2,pos:null,used:{}});
+  }
+  S.display=[];S.map.forEach(row=>row.forEach(cell=>{cell.card=cell.camp?drawComp():drawItem();}));
+  replenishDisplay();
+  S.players.forEach(p=>{const it=drawItem();if(it)p.hand.push(it);});
+  // 마지막 플레이어부터 컴퓨터가 모서리 선택
+  for(let i=S.players.length-1;i>=1;i--){const free=CORNERS.filter(([r,c])=>!figAt(r,c));const k=free[Math.floor(rnd()*free.length)];placeStart(S.players[i],k);}
+  log('게임 시작! 출발할 모서리 칸을 고르세요.');
+  HIST=[];UI={};
+}
+function placeStart(p,[r,c]){const cell=S.map[r][c];if(cell.card){p.hand.push(cell.card);cell.card=null;}p.pos=[r,c];log(`${p.name}: 모서리 (${r+1},${c+1})에서 출발`);}
+
+/* ================= 덱 ================= */
+function drawItem(){if(!S.itemDeck.length){S.itemDeck=shuffle(S.discard);S.discard=[];if(S.itemDeck.length)log('아이템 버림 더미를 섞어 새 덱을 만들었습니다');}return S.itemDeck.pop()||null;}
+function drawComp(){return S.compDeck.pop()||null;}
+function discard(it){if(it)S.discard.push(it);}
+function figAt(r,c){return S.players.some(p=>p.pos&&p.pos[0]===r&&p.pos[1]===c);}
+function replenishDisplay(){
+  const t1=S.round<=2?3:2,t2=5-t1;
+  let n1=S.display.filter(a=>a.lv===1).length,n2=S.display.length-n1;
+  while(n1<t1&&S.adv1.length&&S.display.length<5){S.display.push(S.adv1.pop());n1++;}
+  while(n2<t2&&S.adv2.length&&S.display.length<5){S.display.push(S.adv2.pop());n2++;}
+  while(S.display.length<5&&(S.adv1.length||S.adv2.length))S.display.push((S.adv1.length?S.adv1:S.adv2).pop());
+  S.display.sort((a,b)=>a.lv-b.lv);
+}
+function replenish(){
+  for(let r=0;r<5;r++)for(let c=0;c<5;c++){const cell=S.map[r][c];if(cell.card||figAt(r,c))continue;cell.card=cell.camp?drawComp():drawItem();}
+  replenishDisplay();
+}
+
+/* ================= 보조 ================= */
+const imps=p=>p.done.map(a=>a.imp).filter(Boolean);
+const partyLimit=p=>3+imps(p).filter(i=>i.t==='pt').length;
+const resLimit=p=>1+imps(p).filter(i=>i.t==='rs').length;
+const comps=p=>p.party.slice(1);
+const allComps=p=>comps(p).map(x=>x.card).concat(p.retired);
+const inB=(r,c)=>r>=0&&r<5&&c>=0&&c<5;
+function moveTargets(pos,vecs){const o=[],seen={};for(const[a,b]of vecs){const r=pos[0]+a,c=pos[1]+b;if(inB(r,c)&&!seen[r+','+c]){seen[r+','+c]=1;o.push([r,c]);}}return o;}
+const isCorner=([r,c])=>(r===0||r===4)&&(c===0||c===4);
+function rewardEff(r){const o=[];if(r.includes('c'))o.push({k:'clover',n:1});if(r.includes('d'))o.push({k:'draw',n:1});return o;}
+function abEff(code){const[a,b]=code.split(':');
+  if(a==='m')return{k:'move',pat:b};if(a==='d')return{k:'draw',n:+b};if(a==='c')return{k:'clover',n:+b};
+  if(a==='r')return{k:'reserve'};if(a==='t')return{k:'take',c:b,adj:false};if(a==='ta')return{k:'take',c:b,adj:true};
+  if(a==='x')return{k:'extra'};if(a==='p')return{k:'pick2',w:b};}
+function takeTargets(p,e){const o=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++){const cd=S.map[r][c].card;if(!cd||cd.k!=='item'||cd.c!==e.c)continue;if(e.adj&&Math.abs(r-p.pos[0])+Math.abs(c-p.pos[1])!==1)continue;o.push([r,c]);}return o;}
+
+/* ================= 효과 큐 ================= */
+function runQueue(){
+  while(S.queue.length){
+    const e=S.queue[0],p=P();
+    if(!resolve(e,p)){ if(p.ai){choose(aiChoice(S.pending));} return; }
+  }
+  const nx=S.after;S.after=null;
+  if(nx==='activate')enterActivate();
+  else if(nx==='postAct')postActivate();
+  else if(nx==='start')startTurn();
+}
+function resolve(e,p){
+  switch(e.k){
+    case 'draw':S.queue.shift();for(let i=0;i<e.n;i++){const it=drawItem();if(it)p.hand.push(it);}log(`${p.name}: 아이템 ${e.n}장 뽑음`);return true;
+    case 'clover':S.queue.shift();p.clovers+=e.n;log(`${p.name}: 🍀 +${e.n}`);return true;
+    case 'extra':S.queue.shift();S.extraAct++;log(`${p.name}: 추가 활성화 기회 +1`);return true;
+    case 'move':{const t=moveTargets(p.pos,PATS[e.pat].v);if(!t.length){S.queue.shift();return true;}S.pending={k:'move',targets:t};return false;}
+    case 'step':{S.pending={k:'step',targets:moveTargets(p.pos,PATS.k1.v)};return false;}
+    case 'gain':S.queue.shift();gainAt(p,e);return true;
+    case 'take':{const t=takeTargets(p,e);if(!t.length){S.queue.shift();log(`${p.name}: 가져올 ${COL[e.c].ic} 카드가 없음`);return true;}S.pending={k:'take',targets:t};return false;}
+    case 'reserve':{const o=[];S.display.forEach((a,i)=>o.push({d:i}));if(S.adv1.length)o.push({deck:1});if(S.adv2.length)o.push({deck:2});if(!o.length){S.queue.shift();return true;}S.pending={k:'reserve',opts:o};return false;}
+    case 'pick2':{if(!e.cards){e.cards=[];for(let i=0;i<2;i++){const c=e.w==='c'?drawComp():drawItem();if(c)e.cards.push(c);}}
+      if(!e.cards.length){S.queue.shift();return true;}S.pending={k:'pick2',cards:e.cards};return false;}
+    case 'retire':{if(comps(p).length<=partyLimit(p)){S.queue.shift();return true;}S.pending={k:'retire'};return false;}
+  }
+  S.queue.shift();return true;
+}
+function choose(ch){
+  const pd=S.pending,p=P();S.pending=null;const e=S.queue.shift();
+  switch(pd.k){
+    case 'move':{p.pos=ch;S.last=ch.slice();const steps=e.travel?imps(p).filter(i=>i.t==='tv'&&i.m===e.travel&&i.r.includes('s')).length:0;
+      S.queue.unshift(steps>0?{k:'step',n:steps,travel:e.travel}:{k:'gain',travel:e.travel});break;}
+    case 'step':{if(ch==='stop'){S.queue.unshift({k:'gain',travel:e.travel});}else{p.pos=ch;S.last=ch.slice();S.queue.unshift(e.n>1?{k:'step',n:e.n-1,travel:e.travel}:{k:'gain',travel:e.travel});}break;}
+    case 'take':{const cell=S.map[ch[0]][ch[1]];p.hand.push(cell.card);log(`${p.name}: 지도에서 ${COL[cell.card.c].ic}${ACT[cell.card.a].ic} 아이템을 가져감`);cell.card=null;break;}
+    case 'reserve':{let card;if(ch.d!==undefined)card=S.display.splice(ch.d,1)[0];else card=(ch.deck===1?S.adv1:S.adv2).pop();
+      while(p.reserved.length>=resLimit(p)){const old=p.reserved.shift();(old.lv===1?S.adv1:S.adv2).unshift(old);}
+      p.reserved.push(card);log(`${p.name}: 모험 「${card.name}」 예약`);break;}
+    case 'pick2':{const keep=e.cards[ch],other=e.cards[1-ch];
+      if(other){if(e.w==='c')S.compDeck.unshift(other);else S.itemDeck.unshift(other);}
+      if(e.w==='c'){p.party.push({card:keep,held:null});log(`${p.name}: 동료 「${keep.name}」 합류`);S.queue.unshift({k:'retire'});}
+      else{p.hand.push(keep);log(`${p.name}: 아이템 2장 중 1장 선택`);}break;}
+    case 'retire':retire(p,ch);break;
+  }
+  runQueue();
+}
+function retire(p,i){const x=p.party.splice(i,1)[0];if(x.held)discard(x.held);p.retired.push(x.card);log(`${p.name}: 「${x.card.name}」 은퇴`);}
+function gainAt(p,e){
+  const[r,c]=p.pos,cell=S.map[r][c];let card=cell.card;cell.card=null;
+  if(!card)card=cell.camp?drawComp():drawItem();
+  if(card){if(card.k==='item'){p.hand.push(card);log(`${p.name}: 아이템 ${COL[card.c].ic} 획득 (${r+1},${c+1})`);}
+    else{p.party.push({card,held:null});log(`${p.name}: 동료 「${card.name}」 합류`);S.queue.unshift({k:'retire'});}}
+  const add=[];
+  if(e.travel)imps(p).filter(i=>i.t==='tv'&&i.m===e.travel).forEach(i=>add.push(...rewardEff(i.r)));
+  if(isCorner(p.pos))imps(p).filter(i=>i.t==='cn').forEach(i=>add.push(...rewardEff(i.r)));
+  S.queue.push(...add);
+}
+
+/* ================= 턴 흐름 ================= */
+function startTurn(){S.phase='move';S.extraAct=0;S.actCount=0;S.queue=[];S.pending=null;S.after=null;
+  const p=P();log(`— ${p.name} 차례 (${S.round}라운드 ${Math.floor(S.tir/S.players.length)+1}/3턴)`);}
+function doTravel(t){const p=P();p.used[t]=true;log(`${p.name}: ${PATS[t].ic}${PATS[t].n}(으)로 이동`);S.queue=[{k:'move',pat:t,travel:t}];S.after='activate';runQueue();}
+function enterActivate(){S.phase='activate';S.actCount=0;S.extraAct=0;if(P().ai)aiActivate();}
+function canPlay(p,ci,item){const acts=p.party[ci].card.acts;return acts.includes(item.a)?0:(p.clovers>=1?1:-1);}
+function activate(ci,hi){
+  const p=P(),ch=p.party[ci],item=p.hand[hi];const cost=canPlay(p,ci,item);if(cost<0)return;
+  p.hand.splice(hi,1);p.clovers-=cost;if(ch.held)discard(ch.held);ch.held=item;
+  if(S.actCount>0)S.extraAct--;S.actCount++;
+  log(`${p.name}: ${COL[item.c].ic}${ACT[item.a].ic}로 「${ch.card.name}」 활성화${cost?' (🍀1 사용)':''}`);
+  const q=[];imps(p).forEach(i=>{if(i.t==='cl'&&i.c===item.c)q.push(...rewardEff(i.r));if(i.t==='ac'&&i.a===item.a)q.push(...rewardEff(i.r));});
+  ch.card.ab.forEach(a=>q.push(abEff(a)));
+  S.queue=q;S.after='postAct';runQueue();
+}
+function postActivate(){const p=P();if(S.extraAct>0&&p.hand.length){S.phase='activate';if(p.ai)aiActivate();}else enterAdventure();}
+function takeClover(){const p=P();p.clovers++;log(`${p.name}: 활성화 대신 🍀 1개 받음`);enterAdventure();}
+function enterAdventure(){S.phase='adventure';if(P().ai){aiAdventure();endTurn();}}
+function endTurn(){
+  replenish();S.tir++;
+  if(S.tir>=S.players.length*3){
+    S.tir=0;S.players.forEach(p=>p.used={});log(`☀️ ${S.round}라운드 종료`);S.round++;
+    if(S.round>4){endGame();return;}
+    if(S.round===3){const l1=S.display.filter(a=>a.lv===1);if(l1.length){const x=l1[l1.length-1];S.display.splice(S.display.indexOf(x),1);S.adv1.unshift(x);}replenishDisplay();}
+  }
+  S.cur=(S.cur+1)%S.players.length;startTurn();
+}
+function endGame(){S.phase='end';log('🏁 게임 종료!');}
+function cloverDraw(){const p=P();if(p.clovers<2)return;p.clovers-=2;const it=drawItem();if(it)p.hand.push(it);log(`${p.name}: 🍀2개로 아이템 1장 뽑음`);}
+
+/* ================= 모험·퀘스트 비용 ================= */
+function itemRefs(p){const o=[];p.party.forEach((x,i)=>{if(x.held)o.push({key:'p'+i,item:x.held,held:true});});p.hand.forEach((it,i)=>o.push({key:'h'+i,item:it,held:false}));return o;}
+function refItem(p,k){return k[0]==='p'?p.party[+k.slice(1)].held:p.hand[+k.slice(1)];}
+function effCost(p,costStr){
+  const cost=costStr.split('');const ds=imps(p).filter(i=>i.t==='ds');
+  ds.filter(d=>d.c!=='*').forEach(d=>{const i=cost.indexOf(d.c);if(i>=0)cost.splice(i,1);});
+  ds.filter(d=>d.c==='*').forEach(()=>{if(!cost.length)return;const have={r:0,g:0,b:0};itemRefs(p).forEach(r=>{if(have[r.item.c]!==undefined)have[r.item.c]++;});
+    const need={r:0,g:0,b:0};cost.forEach(c=>need[c]++);let best=cost[0],bv=-99;for(const c of'rgb')if(need[c]>0&&need[c]-have[c]>bv){bv=need[c]-have[c];best=c;}cost.splice(cost.indexOf(best),1);});
+  return cost;
+}
+function autoSelect(p,cost){
+  const pool=itemRefs(p).sort((a,b)=>(b.held-a.held));const used=new Set(),out=[];
+  const need={r:0,g:0,b:0};cost.forEach(c=>need[c]++);
+  for(const c of'rgb')for(let k=0;k<need[c];k++){const f=pool.find(x=>!used.has(x.key)&&x.item.c===c);if(f){used.add(f.key);out.push(f.key);}}
+  while(out.length<cost.length){const f=pool.find(x=>!used.has(x.key)&&x.item.c==='y');if(!f)break;used.add(f.key);out.push(f.key);}
+  while(out.length<cost.length){const f=pool.find(x=>!used.has(x.key));if(!f)break;used.add(f.key);out.push(f.key);}
+  return out;
+}
+function mismatch(p,keys,cost){if(keys.length!==cost.length)return Infinity;const sel={r:0,g:0,b:0,y:0},need={r:0,g:0,b:0};
+  keys.forEach(k=>sel[refItem(p,k).c]++);cost.forEach(c=>need[c]++);let m=0;for(const c of'rgb')m+=Math.min(sel[c],need[c]);return keys.length-m-sel.y;}
+function partyAssign(p,req){
+  const cs=comps(p).map((x,i)=>({idx:i+1,card:x.card}));let best=null;const used=new Set(),parts=[];
+  (function rec(i,cl){if(best&&cl>=best.cl)return;if(i===req.length){best={cl,parts:parts.slice()};return;}
+    for(const c of cs){if(used.has(c.idx))continue;const ok=req[i]==='?'||c.card.types.includes(req[i]);used.add(c.idx);parts.push(c.idx);rec(i+1,cl+(ok?0:2));parts.pop();used.delete(c.idx);}})(0,0);
+  return best;
+}
+function optCard(p,o){if(o.k==='q')return S.quests[o.i];return o.src==='d'?S.display[o.i]:p.reserved[o.i];}
+function listOptions(p){const o=[];S.display.forEach((a,i)=>o.push({k:'adv',src:'d',i}));p.reserved.forEach((a,i)=>o.push({k:'adv',src:'r',i}));
+  S.quests.forEach((Q,i)=>{if(p.quills>0&&!Q.q.includes(p.id)&&Q.q.includes(null))o.push({k:'q',i});});return o;}
+function plan(p,o,keys){
+  const card=optCard(p,o);const cost=effCost(p,card.cost);const k=keys||autoSelect(p,cost);
+  const itemCl=mismatch(p,k,cost);let pa={cl:0,parts:[]};let reason='';
+  if(o.k==='adv'){pa=partyAssign(p,card.req);if(!pa){pa={cl:Infinity,parts:[]};reason='동료 수 부족';}}
+  const total=itemCl+pa.cl;if(!reason&&itemCl===Infinity)reason='아이템 부족';else if(!reason&&total>p.clovers)reason=`🍀 ${total}개 필요`;
+  return{card,cost,keys:k,itemCl,partyCl:pa.cl,parts:pa.parts,x:o.k==='adv'?card.x:0,total,ok:total<=p.clovers,reason};
+}
+function execute(p,o,keys,retireIdx){
+  const pl=plan(p,o,keys);if(!pl.ok)return false;const card=pl.card;
+  keys.filter(k=>k[0]==='p').forEach(k=>{const i=+k.slice(1);discard(p.party[i].held);p.party[i].held=null;});
+  keys.filter(k=>k[0]==='h').map(k=>+k.slice(1)).sort((a,b)=>b-a).forEach(i=>discard(p.hand.splice(i,1)[0]));
+  p.clovers-=pl.total;
+  if(o.k==='adv'){
+    if(o.src==='d')S.display.splice(o.i,1);else p.reserved.splice(o.i,1);
+    retireIdx.slice().sort((a,b)=>b-a).forEach(i=>retire(p,i));
+    const q=[];imps(p).filter(i=>i.t==='ad').forEach(i=>q.push(...rewardEff(i.r)));
+    p.done.push(card);if(card.clv)p.clovers+=card.clv;
+    log(`${p.name}: 🏅 모험 「${card.name}」 완료! (+${card.vp}점${card.clv?`, 🍀+${card.clv}`:''})`);
+    q.forEach(e=>{if(e.k==='clover')p.clovers+=e.n;else{const it=drawItem();if(it)p.hand.push(it);}});
+  }else{
+    const Q=card;const slot=Q.q.indexOf(null);Q.q[slot]=p.id;p.quills--;if(Q.L==='C')p.clovers++;
+    log(`${p.name}: 📜 공동 퀘스트 「${questText(Q)}」 등록 (${slot+1}번째 자리)`);
+  }
+  return true;
+}
+
+/* ================= 점수 ================= */
+function missionCount(p,Q){
+  if(Q.t==='type')return allComps(p).filter(c=>c.types.includes(Q.v)).length;
+  if(Q.t==='act')return allComps(p).filter(c=>c.acts.includes(Q.v)).length;
+  const f={clv:a=>a.clv>0,move:a=>a.imp&&a.imp.t==='tv',lv2:a=>a.lv===2,disc:a=>a.imp&&a.imp.t==='ds'}[Q.t];
+  return p.done.filter(f).length;
+}
+function score(p){
+  const adv=p.done.reduce((s,a)=>s+a.vp,0),cl=Math.floor(p.clovers/3);let q=0;
+  S.quests.forEach(Q=>{const i=Q.q.indexOf(p.id);if(i<0)return;q+=[2,1,0][i]+MTAB[Math.min(missionCount(p,Q),4)];});
+  return{adv,cl,q,total:adv+cl+q};
+}
+
+/* ================= 컴퓨터 AI ================= */
+function needMap(p){
+  const need={r:0,g:0,b:0};const add=(a,w)=>{effCost(p,a.cost).forEach(c=>need[c]+=w);};
+  p.reserved.forEach(a=>add(a,1.2));S.display.forEach(a=>add(a,0.35));
+  itemRefs(p).forEach(r=>{if(need[r.item.c]!==undefined)need[r.item.c]-=0.8;});return need;
+}
+function itemValue(p,it,need){need=need||needMap(p);let v=it.c==='y'?1.7:1+Math.max(0,Math.min(1.2,need[it.c]*0.35));
+  if(p.party.some(x=>x.card.acts.includes(it.a)))v+=0.25;return v;}
+function compValue(p,c){
+  let v=1.2;const tgt=p.reserved.map(a=>[a,1.5]).concat(S.display.map(a=>[a,0.6]));
+  tgt.forEach(([a,w])=>{if(a.req.some(t=>c.types.includes(t)))v+=w*0.6;});
+  S.quests.forEach(Q=>{if(Q.q.includes(p.id)&&((Q.t==='type'&&c.types.includes(Q.v))||(Q.t==='act'&&c.acts.includes(Q.v))))v+=1.2;});
+  v+=c.ab.length*0.3;return v;
+}
+function minComp(p){let m=Infinity,mi=-1;comps(p).forEach((x,i)=>{const v=compValue(p,x.card)+(x.held?0.4:0);if(v<m){m=v;mi=i+1;}});return{v:m,i:mi};}
+function cellValue(p,[r,c],need){
+  const cell=S.map[r][c];let v;
+  if(cell.card){v=cell.card.k==='item'?itemValue(p,cell.card,need):compGainValue(p,cell.card);}
+  else v=cell.camp?1.3:1.0;
+  if(isCorner([r,c])&&imps(p).some(i=>i.t==='cn'))v+=0.9;
+  return v+rnd()*0.15;
+}
+function compGainValue(p,c){const v=compValue(p,c);if(comps(p).length>=partyLimit(p))return Math.max(0.3,v-minComp(p).v+0.5);return v+0.4;}
+function aiChoice(pd){
+  const p=P(),need=needMap(p);
+  if(pd.k==='move'||pd.k==='take'){let b=null,bv=-1;pd.targets.forEach(t=>{const v=pd.k==='take'?itemValue(p,S.map[t[0]][t[1]].card,need):cellValue(p,t,need);if(v>bv){bv=v;b=t;}});return b;}
+  if(pd.k==='step'){const here=cellValue(p,p.pos,need);let b='stop',bv=here;pd.targets.forEach(t=>{const v=cellValue(p,t,need);if(v>bv+0.2){bv=v;b=t;}});return b;}
+  if(pd.k==='reserve'){let b=pd.opts[pd.opts.length-1],bv=2.2;pd.opts.forEach(o=>{if(o.d===undefined)return;const a=S.display[o.d];const pl=plan(p,{k:'adv',src:'d',i:o.d});
+      const short=(pl.itemCl===Infinity?pl.cost.length-pl.keys.length+2:pl.itemCl)+(pl.partyCl===Infinity?3:pl.partyCl/2);const v=a.vp+(a.imp?1:0)-short*0.9;if(v>bv){bv=v;b=o;}});return b;}
+  if(pd.k==='pick2'){const e=S.queue[0];const vals=pd.cards.map(c=>c.k==='item'?itemValue(p,c,need):compGainValue(p,c));return vals.length>1&&vals[1]>vals[0]?1:0;}
+  if(pd.k==='retire'){const n=p.party.length-1;let m=Infinity,mi=1;comps(p).forEach((x,i)=>{if(i+1===n)return;const v=compValue(p,x.card)+(x.held?0.4:0);if(v<m){m=v;mi=i+1;}});return mi;}
+}
+function aiTravel(){
+  const p=P(),need=needMap(p);let best=null;
+  TRAVELS.forEach(t=>{if(p.used[t])return;moveTargets(p.pos,PATS[t].v).forEach(d=>{let v=cellValue(p,d,need);
+    if(imps(p).some(i=>i.t==='tv'&&i.m===t))v+=0.8;if(!best||v>best.v)best={t,v};});});
+  if(!best){best={t:TRAVELS.find(t=>!p.used[t])};}
+  doTravel(best.t);
+}
+function abilityValue(p,card,need){let v=0;
+  card.ab.forEach(code=>{const e=abEff(code);
+    if(e.k==='move'){let m=0;moveTargets(p.pos,PATS[e.pat].v).forEach(d=>m=Math.max(m,cellValue(p,d,need)));v+=m;}
+    else if(e.k==='draw')v+=e.n*1.1;else if(e.k==='clover')v+=e.n*0.75;
+    else if(e.k==='reserve')v+=p.reserved.length<resLimit(p)?1.3:0.3;
+    else if(e.k==='take'){let m=0;takeTargets(p,e).forEach(t=>m=Math.max(m,itemValue(p,S.map[t[0]][t[1]].card,need)));v+=m;}
+    else if(e.k==='extra')v+=p.hand.length>1?0.8:0;else if(e.k==='pick2')v+=e.w==='c'?(comps(p).length<partyLimit(p)?1.8:0.8):1.4;});
+  return v;}
+function aiActivate(){
+  const p=P(),need=needMap(p);let best={v:S.actCount>0?0.1:0.85,act:null};
+  p.party.forEach((x,ci)=>{const av=abilityValue(p,x.card,need);const loss=x.held?itemValue(p,x.held,need)*0.75:0;
+    p.hand.forEach((it,hi)=>{const c=canPlay(p,ci,it);if(c<0||(c===1&&p.clovers<2))return;
+      let tb=0;imps(p).forEach(i=>{if((i.t==='cl'&&i.c===it.c)||(i.t==='ac'&&i.a===it.a))tb+=0.9;});
+      const v=av-loss-c*0.9+tb-itemValue(p,it,need)*0.1;if(v>best.v)best={v,act:[ci,hi]};});});
+  if(best.act)activate(best.act[0],best.act[1]);
+  else if(S.actCount>0)enterAdventure();else takeClover();
+}
+function impValue(imp){if(!imp)return 0;const rl=5-S.round;return({tv:0.5,ad:0.6,cn:0.3,cl:0.5,ac:0.5,ds:0.9,pt:1,rs:0.6}[imp.t]||0)*rl;}
+function aiAdventure(){
+  const p=P();
+  while(p.clovers>=5){cloverDraw();}
+  if(S.round===4&&S.tir>=S.players.length*2&&p.clovers%3===2&&p.clovers>=2)cloverDraw();
+  let best=null;
+  listOptions(p).forEach(o=>{const pl=plan(p,o);if(!pl.ok)return;let v;
+    if(o.k==='adv'){const c=pl.card;let rl=0;if(pl.x){const ps=pl.parts.map(i=>compValue(p,p.party[i].card)).sort((a,b)=>a-b);rl=ps.slice(0,pl.x).reduce((s,x)=>s+x,0);}
+      v=c.vp+c.clv*0.4+impValue(c.imp)-pl.total*0.55-rl*0.35-pl.keys.length*0.12+(o.src==='r'?0.5:0);}
+    else{const Q=pl.card;const n=missionCount(p,Q);const pn=Math.min(4,n+Math.floor((5-S.round)/1.5));v=MTAB[pn]+[2,1,0][Q.q.indexOf(null)]+(Q.L==='C'?0.4:0)-pl.total*0.55-pl.keys.length*0.45-0.8;}
+    if(!best||v>best.v)best={o,pl,v};});
+  if(best&&best.v>0.5){const pl=best.pl;let ret=[];
+    if(pl.x){ret=pl.parts.slice().sort((a,b)=>compValue(p,p.party[a].card)-compValue(p,p.party[b].card)).slice(0,pl.x);}
+    execute(p,best.o,pl.keys,ret);}
+  else log(`${p.name}: 모험 단계 건너뜀`);
+}
+function aiTurn(){aiTravel();}
+
+/* ================= 텍스트 ================= */
+const chip=it=>it?`<span class="chip c-${it.c}">${COL[it.c].ic}${ACT[it.a].ic}</span>`:'';
+const costChips=s=>(Array.isArray(s)?s:s.split('')).map(c=>`<span class="chip c-${c}">${COL[c].ic}</span>`).join('');
+const typeIc=ts=>ts.map(t=>TYP[t].ic).join('');
+const actIc=as=>as.map(a=>ACT[a].ic).join('/');
+function abText(code){const e=abEff(code);
+  switch(e.k){case 'move':return `🚶 추가 이동: ${PATS[e.pat].d}`;case 'draw':return `아이템 ${e.n}장 뽑기`;case 'clover':return `🍀 ${e.n}개 받기`;
+    case 'reserve':return '모험 카드 1장 예약';case 'take':return `${e.adj?'가로·세로로 붙은 칸의':'지도 어디서든'} ${COL[e.c].ic}${COL[e.c].n} 아이템 1장 가져오기`;
+    case 'extra':return '이번 턴 다른 캐릭터 1명 더 활성화';case 'pick2':return e.w==='c'?'동료 2장 뽑아 1장 갖기':'아이템 2장 뽑아 1장 갖기';}}
+function rewText(r){const o=[];if(r.includes('c'))o.push('🍀1');if(r.includes('d'))o.push('아이템 1장');if(r.includes('s'))o.push('1칸 더 이동 가능');return o.join(' + ');}
+function impText(i){if(!i)return '';
+  switch(i.t){case 'tv':return `${PATS[i.m].ic}${PATS[i.m].n} 이동 시 → ${rewText(i.r)}`;case 'ad':return `다른 모험 완료 시 → ${rewText(i.r)}`;
+    case 'cn':return `모서리 칸 도착 시 → ${rewText(i.r)}`;case 'cl':return `${COL[i.c].ic} 아이템으로 활성화 시 → ${rewText(i.r)}`;
+    case 'ac':return `${ACT[i.a].ic} 아이템으로 활성화 시 → ${rewText(i.r)}`;case 'ds':return i.c==='*'?'비용 아무 기호 1개 할인':`비용 ${COL[i.c].ic} 1개 할인`;
+    case 'pt':return '동료 한도 +1';case 'rs':return '예약 한도 +1';}}
+function questText(Q){if(Q.t==='type')return `${TYP[Q.v].ic}${TYP[Q.v].n} 동료 모으기`;if(Q.t==='act')return `${ACT[Q.v].ic} 기호 동료 모으기`;
+  return{clv:'🍀 보상 모험 모으기',move:'이동 개선 모험 모으기',lv2:'II단계 모험 모으기',disc:'할인 개선 모험 모으기'}[Q.t];}
+function mini(pat){const v=PATS[pat].v;const m=Math.max(...v.map(([a,b])=>Math.max(Math.abs(a),Math.abs(b))));const n=2*m+1;let h=`<div class="mini" style="grid-template-columns:repeat(${n},6px)">`;
+  for(let r=-m;r<=m;r++)for(let c=-m;c<=m;c++){h+=`<i class="${r===0&&c===0?'c':v.some(([a,b])=>a===r&&b===c)?'o':''}"></i>`;}return h+'</div>';}
+
+/* ================= 화면 ================= */
+const $=id=>document.getElementById(id);
+function save(){try{localStorage.setItem('pilgrims_kr',JSON.stringify({S,H:HIST.slice(-25)}));}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem('pilgrims_kr'));if(d&&d.S&&d.S.phase!=='end')return d;}catch(e){}return null;}
+function human(){return S&&!P().ai&&!busy;}
+function act(fn){if(!human())return;HIST.push(JSON.stringify(S));if(HIST.length>200)HIST.shift();UI.info=null;fn();after();}
+function after(){save();render();if(S.phase!=='end'&&P().ai&&!busy)runAI();}
+function runAI(){busy=true;render();setTimeout(()=>{try{aiTurn();}catch(e){console.error(e);log('⚠️ 컴퓨터 처리 오류: '+e.message);}
+  save();if(S.phase!=='end'&&P().ai){render();runAI();}else{busy=false;render();}},750);}
+
+const H={
+  start(){const L=UI.lead??0,n=UI.nai??1;newGame(L,n);UI={};save();render();},
+  resume(d){S=d.S;HIST=d.H||[];UI={};render();if(S.phase!=='end'&&P().ai)runAI();},
+  lead(i){UI.lead=i;render();},nai(n){UI.nai=n;render();},
+  undo(){if(busy||!HIST.length)return;S=JSON.parse(HIST.pop());UI={};save();render();},
+  travel(t){act(()=>doTravel(t));},
+  cell(r,c){
+    if(human()&&S.phase==='corner'){if(CORNERS.some(k=>k[0]===r&&k[1]===c)&&!figAt(r,c))act(()=>{placeStart(P(),[r,c]);startTurn();});return;}
+    const pd=S.pending;if(human()&&pd&&pd.targets&&pd.targets.some(t=>t[0]===r&&t[1]===c)){act(()=>choose([r,c]));return;}
+    const cd=S.map[r][c].card;if(cd){UI.info={card:cd};render();}
+  },
+  stop(){act(()=>choose('stop'));},
+  selChar(i){if(!human()||S.phase!=='activate'||S.pending){UI.info={card:S.players[0].party[i].card};render();return;}UI.sel=UI.sel===i?null:i;render();},
+  hand(i){const p=S.players[0];if(human()&&S.phase==='activate'&&!S.pending&&UI.sel!=null){if(canPlay(p,UI.sel,p.hand[i])<0)return;const ci=UI.sel;UI.sel=null;act(()=>activate(ci,i));return;}UI.info={card:p.hand[i]};render();},
+  clover(){act(()=>takeClover());},
+  endAct(){act(()=>enterAdventure());},
+  cdraw(){act(()=>cloverDraw());},
+  advOpen(){UI.advList=true;render();},
+  pick(o){const p=P();const pl=plan(p,o);UI.advList=false;
+    let ret=[];if(pl.x&&pl.parts.length)ret=pl.parts.slice().sort((a,b)=>compValue(p,p.party[a].card)-compValue(p,p.party[b].card)).slice(0,pl.x);
+    UI.pay={o,keys:pl.keys.slice(),ret};render();},
+  tog(k){const u=UI.pay;const i=u.keys.indexOf(k);if(i>=0)u.keys.splice(i,1);else u.keys.push(k);render();},
+  togRet(i){const u=UI.pay;const pl=plan(P(),u.o,u.keys);const j=u.ret.indexOf(i);if(j>=0)u.ret.splice(j,1);else{u.ret.push(i);while(u.ret.length>pl.x)u.ret.shift();}render();},
+  confirm(){const u=UI.pay;UI.pay=null;act(()=>{if(execute(P(),u.o,u.keys,u.ret))endTurn();});},
+  skip(){UI.advList=false;act(()=>{log('나: 모험 단계 건너뜀');endTurn();});},
+  res(o){act(()=>choose(o));},pk(i){act(()=>choose(i));},ret(i){act(()=>choose(i));},
+  close(){UI.info=null;UI.advList=false;UI.pay=null;UI.rules=false;UI.score=false;render();},
+  rules(){UI.rules=true;render();},
+  scores(){UI.score=true;render();},
+  newg(){S=null;HIST=[];UI={};try{localStorage.removeItem('pilgrims_kr');}catch(e){}render();},
+  info(kind,i){if(kind==='d')UI.info={card:S.display[i]};else if(kind==='r')UI.info={card:S.players[0].reserved[i]};else if(kind==='q')UI.info={quest:S.quests[i]};else if(kind==='p')UI.info={card:S.players[0].party[i].card};render();},
+};
+
+function render(){
+  if(!S){renderStart();return;}
+  const me=S.players[0],cur=P();
+  let h=`<div class="hdr"><div><h1>필그림</h1><div class="muted">${S.phase==='end'?'게임 종료':`${S.round}라운드 · ${cur.name} 차례`}</div></div>
+   <div class="sun">${[1,2,3,4].map(i=>`<span class="${i===S.round?'on':i<S.round?'past':''}">${i}</span>`).join('')}</div>
+   <div style="display:flex;gap:4px"><button class="sm" onclick="H.undo()" ${busy||!HIST.length?'disabled':''}>↶ 되돌리기</button><button class="sm" onclick="H.rules()">규칙</button></div></div>`;
+  // 상대
+  h+=`<div class="panel"><div class="opps">${S.players.map(p=>{const sc=score(p);return `<div class="opp ${p===cur&&S.phase!=='end'?'cur':''}"><b><span class="dot" style="background:${p.col}"></span> ${p.name}</b> · ${p.party[0].card.em}${p.party[0].card.name}<br>
+    🍀${p.clovers} · 🃏${p.hand.length} · 🏅${p.done.length} · 예상 <b>${sc.total}</b>점<br>
+    <span class="muted">일행: ${comps(p).map(x=>x.card.em).join('')||'-'} ${p.retired.length?`(은퇴 ${p.retired.length})`:''} · 이동: ${TRAVELS.map(t=>p.used[t]?'<s>'+PATS[t].ic+'</s>':PATS[t].ic).join('')}</span></div>`;}).join('')}</div></div>`;
+  // 모험 진열
+  const canMine=human()&&S.phase==='adventure';
+  h+=`<div class="panel"><h3>모험 카드 <span class="muted">I 덱 ${S.adv1.length} · II 덱 ${S.adv2.length}</span></h3><div class="row">${S.display.map((a,i)=>advHTML(a,`H.info('d',${i})`,canMine&&plan(me,{k:'adv',src:'d',i}).ok)).join('')}</div>
+   <h3 style="margin-top:6px">공동 퀘스트</h3><div class="row">${S.quests.map((Q,i)=>questHTML(Q,i)).join('')}</div></div>`;
+  // 지도
+  const pd=S.pending,tg=human()&&pd&&pd.targets?pd.targets:(human()&&S.phase==='corner'?CORNERS.filter(([r,c])=>!figAt(r,c)):[]);
+  h+=`<div class="panel"><div class="map">`;
+  for(let r=0;r<5;r++)for(let c=0;c<5;c++){const cell=S.map[r][c];const isT=tg.some(t=>t[0]===r&&t[1]===c);const last=S.last&&S.last[0]===r&&S.last[1]===c;
+    h+=`<div class="cell ${cell.camp?'camp':''} ${isT?'tgt':''} ${last?'last':''}" onclick="H.cell(${r},${c})">${cell.card?cardCell(cell.card):''}<div class="figs">${S.players.filter(p=>p.pos&&p.pos[0]===r&&p.pos[1]===c).map(p=>`<div class="fig" style="background:${p.col}"></div>`).join('')}</div></div>`;}
+  h+=`</div><div class="muted" style="text-align:center;margin-top:4px">🔥 모닥불 칸 = 동료 카드 · 나머지 칸 = 아이템 카드 · 카드를 누르면 설명</div></div>`;
+  // 내 영역
+  const sc=score(me);
+  h+=`<div class="panel mine"><h3><span><span class="dot" style="background:${me.col}"></span> 나의 순례단</span><span class="muted">예상 ${sc.total}점 (모험 ${sc.adv} · 클로버 ${sc.cl} · 퀘스트 ${sc.q})</span></h3>
+   <div class="stat"><span>🍀 <b>${me.clovers}</b></span><span>깃펜 ${'✒️'.repeat(me.quills)||'-'}</span><span>동료 ${comps(me).length}/${partyLimit(me)}</span>
+    ${human()&&me.clovers>=2&&S.phase!=='corner'?`<button class="sm" onclick="H.cdraw()">🍀2 → 아이템 1장</button>`:''}</div>
+   <div class="party">${me.party.map((x,i)=>partyHTML(me,x,i)).join('')}</div>
+   <div><b>손 아이템</b> <span class="muted">(${me.hand.length}장)</span><div class="hand" style="margin-top:4px">${me.hand.map((it,i)=>handHTML(me,it,i)).join('')||'<span class="muted">없음</span>'}</div></div>
+   ${me.reserved.length?`<div><b>예약한 모험</b> <span class="muted">(한도 ${resLimit(me)})</span><div class="row">${me.reserved.map((a,i)=>advHTML(a,`H.info('r',${i})`,canMine&&plan(me,{k:'adv',src:'r',i}).ok)).join('')}</div></div>`:''}
+   ${me.done.length?`<div><b>완료한 모험</b><div>${me.done.map(a=>`<span class="pill">${a.lv===2?'Ⅱ':'Ⅰ'} ${a.name} ⭐${a.vp}</span>`).join('')}</div></div>`:''}
+   ${imps(me).length?`<div><b>개선 능력</b><div>${imps(me).map(i=>`<div class="imp">${impText(i)}</div>`).join('')}</div></div>`:''}
+   ${me.retired.length?`<div class="muted">은퇴: ${me.retired.map(c=>c.em+c.name).join(', ')}</div>`:''}
+  </div>`;
+  h+=`<div class="panel"><h3>기록</h3><div class="log">${S.log.slice(0,40).map(t=>`<div>${t}</div>`).join('')}</div></div>`;
+  $('app').innerHTML=h;
+  $('bar').style.display='block';$('barin').innerHTML=barHTML();
+  $('ovl').innerHTML=sheetHTML();
+  const key=tg.length?JSON.stringify(tg)+S.log.length:'';
+  if(key&&key!==UI._sk){UI._sk=key;const m=document.querySelector('.map');if(m){const rc=m.getBoundingClientRect();if(rc.top<0||rc.bottom>innerHeight-120)m.scrollIntoView({block:'center',behavior:'smooth'});}}
+}
+function cardCell(cd){
+  if(cd.k==='item')return `<div class="card item c-${cd.c}"><div class="big">${COL[cd.c].ic}</div><div>${ACT[cd.a].ic}</div></div>`;
+  return `<div class="card comp"><div class="em">${cd.em}</div><div class="nm">${cd.name}</div><div>${typeIc(cd.types)}</div><div style="font-size:9px">${actIc(cd.acts)}</div></div>`;
+}
+function advHTML(a,click,can){return `<div class="adv ${a.lv===2?'l2':''} ${can?'can':''}" onclick="${click}"><div class="vp">${a.vp}</div><div class="muted">${a.lv===2?'Ⅱ단계':'Ⅰ단계'}${a.clv?' · 🍀+'+a.clv:''}</div>
+  <div class="nm">${a.name}</div><div>동료 ${typeIc(a.req)}${a.x?' '+'✖'.repeat(a.x):''}</div><div style="margin-top:2px">${costChips(a.cost)}</div>${a.imp?`<div class="imp">${impText(a.imp)}</div>`:''}</div>`;}
+function questHTML(Q,i){return `<div class="quest" onclick="H.info('q',${i})"><b>퀘스트 ${Q.L}</b>${Q.L==='C'?' · 등록 시 🍀+1':''}<div>${questText(Q)}</div><div style="margin:2px 0">비용 ${costChips(Q.cost)}</div>
+  <div>${Q.q.map((pid,k)=>`<span class="quill">${['+2','+1','+0'][k]} ${pid===null?'':`<span class="dot" style="background:${S.players[pid].col}"></span>`}</span>`).join('')}</div></div>`;}
+function partyHTML(me,x,i){const c=x.card;return `<div class="pc ${i===0?'leader':''} ${UI.sel===i?'sel':''}" onclick="H.selChar(${i})">
+  <div class="nm">${c.em} ${c.name}</div><div class="muted">${i===0?'🎩 리더':typeIc(c.types)+' '+c.types.map(t=>TYP[t].n).join('·')} · ${actIc(c.acts)}</div>
+  <div style="margin-top:3px">${c.ab.map(abText).join('<br>+ ')}</div><div class="held">${x.held?chip(x.held):'<span class="muted">비어 있음</span>'}</div></div>`;}
+function handHTML(me,it,i){let cls='',tag='';const actMode=human()&&S.phase==='activate'&&!S.pending&&UI.sel!=null;
+  if(actMode){const c=canPlay(me,UI.sel,it);cls=c===0?'ok':c===1?'':'no';tag=c===0?'일치':c===1?'🍀1':'';}
+  return `<div class="hi c-${it.c} ${cls}" onclick="H.hand(${i})"><div class="big">${COL[it.c].ic}</div><div>${ACT[it.a].ic}</div>${tag?`<span class="tag">${tag}</span>`:''}</div>`;}
+
+function barHTML(){
+  const p=P();
+  if(S.phase==='end')return `<div class="msg">🏁 게임이 끝났습니다.</div><div class="btns"><button class="pri" onclick="H.scores()">결과 보기</button><button onclick="H.newg()">새 게임</button></div>`;
+  if(busy||p.ai)return `<div class="msg">🤖 <b>${p.name}</b> 차례 진행 중…</div>`;
+  const pd=S.pending;
+  if(S.phase==='corner')return `<div class="msg">출발할 <b>모서리 칸</b>(빛나는 칸)을 누르세요. 그 칸의 아이템을 가져갑니다.</div>`;
+  if(pd){
+    if(pd.k==='move')return `<div class="msg"><b>이동</b>: 빛나는 칸 중 하나를 누르세요. 그 칸의 카드를 얻습니다.</div>`;
+    if(pd.k==='step')return `<div class="msg"><b>1칸 더 이동</b>할 수 있습니다(개선 능력). 주변 칸을 누르거나 여기서 멈추세요. 카드는 마지막 칸에서만 얻습니다.</div><div class="btns"><button class="pri" onclick="H.stop()">여기서 멈추기</button></div>`;
+    if(pd.k==='take')return `<div class="msg"><b>아이템 가져오기</b>: 빛나는 칸의 카드를 누르세요.</div>`;
+    return `<div class="msg">선택이 필요합니다 ↑</div>`;
+  }
+  if(S.phase==='move')return `<div class="msg"><b>① 이동</b> — 이동 방법을 고르세요 (라운드마다 4가지 중 3번 사용)</div><div class="btns">${TRAVELS.map(t=>`<button class="trv" ${p.used[t]?'disabled':''} onclick="H.travel('${t}')"><span>${PATS[t].ic} ${PATS[t].n}</span>${mini(t)}</button>`).join('')}</div>`;
+  if(S.phase==='activate'){const first=S.actCount===0;
+    return `<div class="msg"><b>② 활성화</b> — ${UI.sel!=null?`「${p.party[UI.sel].card.name}」 아래에 놓을 <b>손 아이템</b>을 누르세요.`:'일행 캐릭터를 누른 뒤 손 아이템을 고르세요. 기호가 다르면 🍀1개.'}${first?'':' (추가 활성화)'}</div>
+     <div class="btns">${first?`<button onclick="H.clover()">대신 🍀 1개 받기</button>`:`<button onclick="H.endAct()">활성화 끝내기</button>`}</div>`;}
+  if(S.phase==='adventure'){const n=listOptions(p).filter(o=>plan(p,o).ok).length;
+    return `<div class="msg"><b>③ 모험</b> — 모험 1장 완료 또는 퀘스트 1개 등록 (선택). 가능한 것 <b>${n}</b>개</div><div class="btns"><button class="pri" onclick="H.advOpen()">모험/퀘스트 고르기</button><button onclick="H.skip()">건너뛰고 턴 끝내기</button></div>`;}
+  return '';
+}
+function sheet(inner,closable=true){return `<div class="ov" ${closable?'onclick="if(event.target===this)H.close()"':''}><div class="sheet">${inner}${closable?`<div style="text-align:right;margin-top:8px"><button onclick="H.close()">닫기</button></div>`:''}</div></div>`;}
+function sheetHTML(){
+  if(!S)return '';const p=P(),me=S.players[0];
+  if(UI.rules)return sheet(rulesHTML());
+  if(S.phase==='end'||UI.score){if(S.phase==='end'&&UI.score===false)return '';return sheet(resultHTML());}
+  const pd=S.pending;
+  if(human()&&pd&&pd.k==='reserve')return sheet(`<h2>모험 카드 예약</h2><p class="muted">예약 한도 ${resLimit(p)}장. 가득 차 있으면 가장 오래된 예약 카드가 덱 맨 아래로 돌아갑니다.</p>`+
+    pd.opts.map(o=>o.d!==undefined?`<div class="opt" onclick='H.res(${JSON.stringify(o)})'>${advLine(S.display[o.d])}</div>`:`<div class="opt" onclick='H.res(${JSON.stringify(o)})'><b>${o.deck===1?'Ⅰ단계':'Ⅱ단계'} 덱 맨 위 카드 (비공개)</b></div>`).join(''),false);
+  if(human()&&pd&&pd.k==='pick2')return sheet(`<h2>2장 중 1장 고르기</h2>`+pd.cards.map((c,i)=>`<div class="opt" onclick="H.pk(${i})">${cardLine(c)}</div>`).join(''),false);
+  if(human()&&pd&&pd.k==='retire'){const n=p.party.length-1;return sheet(`<h2>동료가 가득 찼어요</h2><p class="muted">기존 동료 1명을 은퇴시키세요 (아래 놓인 아이템은 버려집니다). 은퇴한 동료도 퀘스트 점수에는 포함됩니다.</p>`+
+    comps(p).map((x,i)=>i+1===n?'':`<div class="opt" onclick="H.ret(${i+1})">${cardLine(x.card)} ${x.held?chip(x.held):''}</div>`).join(''),false);}
+  if(UI.pay)return sheet(payHTML());
+  if(UI.advList){const os=listOptions(p);return sheet(`<h2>모험 완료 / 퀘스트 등록</h2>`+os.map(o=>{const pl=plan(p,o);const c=pl.card;
+    const name=o.k==='q'?`📜 퀘스트 ${c.L}: ${questText(c)}`:`${o.src==='r'?'📌예약 · ':''}${c.lv===2?'Ⅱ':'Ⅰ'} ${c.name} ⭐${c.vp}`;
+    return `<div class="opt ${pl.ok?'':'dis'}" ${pl.ok?`onclick='H.pick(${JSON.stringify(o)})'`:''}><div><b>${name}</b><div>${o.k==='adv'?'동료 '+typeIc(c.req)+(c.x?' ✖'+c.x:'')+' · ':''}비용 ${costChips(pl.cost)}</div></div><div class="r">${pl.ok?(pl.total?`가능 (🍀${pl.total})`:'가능'):pl.reason}</div></div>`;}).join('')||'<p>할 수 있는 것이 없습니다.</p>');}
+  if(UI.info){const i=UI.info;if(i.quest)return sheet(`<h2>공동 퀘스트 ${i.quest.L}</h2><p><b>${questText(i.quest)}</b></p><p>비용: ${costChips(i.quest.cost)} ${i.quest.L==='C'?'· 등록 즉시 🍀1':''}</p><p class="muted">등록한 사람만 게임 끝에 점수를 얻습니다. 맞는 카드 1/2/3/4장 이상 → 1/2/4/6점. 등록 자리 첫째 +2점, 둘째 +1점. ${i.quest.L==='C'?'(완료한 모험 카드 기준)':'(일행+은퇴한 동료 기준, 리더 제외)'}</p>`);
+    if(i.card)return sheet(cardDetail(i.card));}
+  return '';
+}
+function cardLine(c){if(c.k==='item')return `${chip(c)} 아이템 · ${COL[c.c].n} / ${ACT[c.a].n}`;return `<div><b>${c.em} ${c.name}</b> ${typeIc(c.types)} · 활성화 ${actIc(c.acts)}<div class="muted">${c.ab.map(abText).join(' + ')}</div></div>`;}
+function advLine(a){return `<div><b>${a.lv===2?'Ⅱ':'Ⅰ'} ${a.name}</b> ⭐${a.vp}${a.clv?' 🍀+'+a.clv:''}<div>동료 ${typeIc(a.req)}${a.x?' ✖'+a.x:''} · ${costChips(a.cost)}</div>${a.imp?`<div class="imp">${impText(a.imp)}</div>`:''}</div>`;}
+function cardDetail(c){
+  if(c.k==='item')return `<h2>아이템 카드</h2><p style="font-size:28px">${chip(c)}</p><p>모험 기호: <b>${COL[c.c].ic} ${COL[c.c].n}</b>${c.c==='y'?' (어떤 기호로도 사용 가능)':''}<br>활성화 기호: <b>${ACT[c.a].ic} ${ACT[c.a].n}</b></p><p class="muted">같은 활성화 기호를 가진 캐릭터 아래에 놓아 능력을 쓰거나, 모험·퀘스트 비용으로 냅니다.</p>`;
+  if(c.k==='adv')return `<h2>${c.name}</h2>${advLine(c)}<p class="muted">동료 조건: ${c.req.map(t=>TYP[t].ic+TYP[t].n).join(', ')}${c.x?` · 완료 시 참여한 동료 ${c.x}명 은퇴`:''}</p>`;
+  return `<h2>${c.em} ${c.name}</h2><p>${c.k==='leader'?'🎩 리더 (은퇴하지 않음)':'종류: '+c.types.map(t=>TYP[t].ic+TYP[t].n).join(', ')}<br>활성화 기호: ${c.acts.map(a=>ACT[a].ic+ACT[a].n).join(' 또는 ')}</p><p><b>능력</b><br>${c.ab.map(abText).join('<br>+ ')}</p>`;
+}
+function payHTML(){
+  const p=P(),u=UI.pay,pl=plan(p,u.o,u.keys);const c=pl.card;
+  const refs=itemRefs(p);
+  let h=`<h2>${u.o.k==='q'?'퀘스트 등록':'모험 완료'}: ${u.o.k==='q'?questText(c):c.name}</h2>
+   <p>필요한 아이템 (할인 반영): ${costChips(pl.cost)||'없음'}</p>
+   <p class="muted">낼 아이템을 눌러 고르세요 (${u.keys.length}/${pl.cost.length}). 🪙는 아무 기호, 기호가 다른 카드는 🍀1개씩.</p>
+   <div class="hand">${refs.map(r=>`<div class="hi c-${r.item.c} ${u.keys.includes(r.key)?'pick':''}" onclick="H.tog('${r.key}')"><div class="big">${COL[r.item.c].ic}</div><div>${ACT[r.item.a].ic}</div><span class="tag">${r.held?'일행':'손'}</span></div>`).join('')}</div>`;
+  if(u.o.k==='adv'){
+    h+=`<p style="margin-top:12px">동료 조건 ${typeIc(c.req)} → 참여: ${pl.parts.map(i=>p.party[i].card.em+p.party[i].card.name).join(', ')||'-'} ${pl.partyCl&&pl.partyCl!==Infinity?`(종류 바꾸기 🍀${pl.partyCl})`:''}</p>`;
+    if(pl.x)h+=`<p><b>참여한 동료 중 ${pl.x}명 은퇴</b> — 누르세요:</p>`+pl.parts.map(i=>`<span class="opt" style="display:inline-flex;margin-right:6px;${u.ret.includes(i)?'border-color:#8c3b2a;background:#f4d3c8':''}" onclick="H.togRet(${i})">${p.party[i].card.em} ${p.party[i].card.name}</span>`).join('');
+  }
+  const okRet=u.o.k!=='adv'||!pl.x||u.ret.length===pl.x;const ok=pl.ok&&okRet;
+  h+=`<p style="margin-top:10px">🍀 사용: <b>${pl.total===Infinity?'-':pl.total}</b> / 보유 ${p.clovers} ${pl.ok?'':`<span style="color:#b00">(${pl.reason})</span>`}</p>
+   <div class="btns" style="display:flex;gap:6px"><button class="pri" ${ok?'':'disabled'} onclick="H.confirm()">확정하고 턴 끝내기</button><button onclick="H.close()">취소</button></div>`;
+  return h;
+}
+function resultHTML(){
+  const rs=S.players.map(p=>({p,s:score(p)})).sort((a,b)=>b.s.total-a.s.total||b.p.hand.length-a.p.hand.length);
+  return `<h2>${S.phase==='end'?(rs[0].p.id===0?'🎉 승리했습니다!':`🏆 ${rs[0].p.name} 승리`):'현재 예상 점수'}</h2><table class="sc"><tr><th>순례자</th><th>모험</th><th>클로버</th><th>퀘스트</th><th>합계</th></tr>
+   ${rs.map(({p,s})=>`<tr><td><span class="dot" style="background:${p.col}"></span> ${p.name}</td><td>${s.adv}</td><td>${s.cl}</td><td>${s.q}</td><td><b>${s.total}</b></td></tr>`).join('')}</table>
+   <p class="muted">동점이면 손에 아이템이 더 많은 사람이 이깁니다.</p>${S.phase==='end'?'<button class="pri" onclick="H.newg()">새 게임</button>':''}`;
+}
+function rulesHTML(){return `<div class="rules"><h2>규칙 요약</h2>
+ <p>4라운드 동안 각자 <b>3턴</b>씩 진행합니다. 가장 많은 승점을 모은 순례자가 이깁니다.</p>
+ <p><b>① 이동</b> — 걷기🥾·수레🛞·비행🦅·말🐴 중 이번 라운드에 아직 쓰지 않은 방법 하나로 이동하고, 도착한 칸의 카드를 가져갑니다. 모닥불🔥 칸은 동료, 나머지는 아이템. 다른 사람이 있는 칸이나 빈 칸이면 덱에서 뽑습니다.</p>
+ <p><b>② 활성화</b> — 손의 아이템 1장을 같은 활성화 기호(⚔️🎵🧭⭐)를 가진 일행 캐릭터 아래에 놓고 능력을 씁니다. 이미 아이템이 있으면 그것은 버립니다. 하기 싫으면 대신 🍀1개를 받습니다.<br>리더는 이동 + 모험 카드 예약 능력을 가집니다(예약은 1장까지).</p>
+ <p><b>③ 모험</b>(선택) — 진열된/예약한 모험 1장 완료 또는 공동 퀘스트 1개 등록.<br>· 일행에 요구된 종류의 동료가 있어야 하고 ✖ 수만큼 참여 동료가 은퇴합니다.<br>· 손이나 캐릭터 아래 아이템으로 비용(✊💬🍃)을 냅니다. 🪙는 와일드.<br>· 완료하면 승점·클로버·개선 능력을 얻습니다.</p>
+ <p><b>④ 보충</b> — 빈 칸과 진열을 자동으로 채웁니다. 1~2라운드는 Ⅰ3·Ⅱ2장, 3~4라운드는 Ⅰ2·Ⅱ3장.</p>
+ <p><b>클로버🍀</b> — 1개: 활성화 기호 바꾸기 / 모험 기호 1개 바꾸기. 2개: 동료 종류 바꾸기 / 언제든 아이템 1장 뽑기. 끝에 3개당 1점.</p>
+ <p><b>동료</b> — 리더 외 최대 3명. 넘치면 기존 동료를 은퇴시킵니다.</p>
+ <p><b>공동 퀘스트</b> — 깃펜 2개로 최대 2곳 등록. 게임 끝에 맞는 카드 1/2/3/4장↑ → 1/2/4/6점, 첫째 자리 +2, 둘째 +1.</p>
+ <p><b>되돌리기</b> — 상단 ↶ 버튼으로 내 행동을 하나씩 취소할 수 있습니다(컴퓨터 차례까지 함께 되감김).</p>
+ <p class="muted">※ 이 웹판의 카드 내용(동료·모험·퀘스트 비용 등)은 규칙서에 목록이 없어 규칙에 맞춰 새로 구성한 것입니다. 기본 게임 규칙(여정 카드·솔로 매 사냥꾼 제외)을 따릅니다.</p></div>`;}
+function renderStart(){
+  $('bar').style.display='none';$('ovl').innerHTML=UI.rules?sheet(rulesHTML()):'';
+  const d=load();const L=UI.lead??0,n=UI.nai??1;
+  $('app').innerHTML=`<div class="start"><h1>필그림</h1><p style="text-align:center" class="muted">동화 나라를 떠도는 순례자 — 컴퓨터와 한 판</p>
+   ${d?`<button class="pri" style="width:100%;margin:6px 0" onclick='H.resume(load())'>▶ 이어하기 (${d.S.round}라운드)</button>`:''}
+   <h3 style="margin-top:12px">나의 리더</h3><div class="lead">${LEADERS.map((l,i)=>`<div class="${i===L?'on':''}" onclick="H.lead(${i})"><b>${l.em} ${l.name}</b><br>활성화 ${actIc(l.acts)}<br>${l.ab.map(abText).join(' + ')}</div>`).join('')}</div>
+   <h3>컴퓨터 상대 수</h3><div class="seg">${[1,2,3].map(k=>`<button class="${k===n?'on':''}" onclick="H.nai(${k})">${k}명</button>`).join('')}</div>
+   <button class="pri" style="width:100%;margin-top:10px;font-size:16px" onclick="H.start()">새 게임 시작</button>
+   <button style="width:100%;margin-top:8px" onclick="H.rules()">규칙 보기</button></div>`;
+}
+if(typeof document!=='undefined'&&document.getElementById('app')){render();}
+</script>
+</body>
+</html>
