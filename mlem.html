@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLEM 우주 고양이 탐사대</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 장난스러운 고양이 우주 기관 보드게임, 밤하늘 테이블 위
+   IDEA: 실제 보드게임 우주 매트 — 세로 트랙 위로 로켓이 올라감
+   PICTURE: 0~26칸 우주 매트(달·행성·심우주)가 화면의 주인공
+   COLOUR/TYPE: 깊은 우주 청록 바탕, 크림 글자, 고양이 코 분홍 강조 / Jua + Gowun Dodum
+   LAYOUT: 넓으면 매트 왼쪽·조작판 오른쪽, 좁으면 조작판 → 매트 → 점수 순 */
+:root{color-scheme:dark;--bg:#0b1a24;--bg2:#10263a;--card:#132d44;--line:#24445f;--ink:#f6f1e7;--mute:#9fb3c4;--pink:#ff7a8a;--gold:#f5c542;--silver:#c9d3dc;--bronze:#c98a5a;--ok:#5fd3a5}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#173a55 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#2a1a3d 0,transparent 60%),var(--bg);color:var(--ink);font:16px/1.5 "Gowun Dodum",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+h1,h2,h3,.jua{font-family:Jua,"Gowun Dodum",sans-serif;font-weight:400;margin:0}
+button{font:inherit;color:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line);background:var(--bg2);min-height:44px;padding:8px 14px}
+button:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.primary{background:var(--pink);border-color:var(--pink);color:#2a0d14;font-family:Jua,sans-serif;font-size:18px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px max(3vw,12px);border-bottom:1px solid var(--line);background:rgba(11,26,36,.85);position:sticky;top:0;z-index:5;backdrop-filter:blur(6px)}
+header h1{font-size:clamp(20px,4vw,28px);line-height:1.05}
+header h1 small{display:block;font-family:"Gowun Dodum";font-size:12px;color:var(--mute)}
+.hbtn{display:flex;gap:8px;flex-wrap:wrap}
+.fail{display:flex;gap:3px;align-items:center;font-size:13px;color:var(--mute)}
+.fail i{width:14px;height:14px;border-radius:50%;border:1px solid #6b3340;display:inline-block}
+.fail i.on{background:var(--pink);border-color:var(--pink)}
+main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;padding:16px max(3vw,12px);max-width:1240px;margin:0 auto}
+.col{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.card h2{font-size:20px;margin-bottom:8px}
+/* 매트 */
+.mat{background:linear-gradient(180deg,#20123a 0,#152a4a 30%,#173b5c 75%,#2a6a8f 100%);border-radius:22px;padding:10px;border:1px solid var(--line);box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.row{display:grid;grid-template-columns:34px 104px 30px minmax(0,1fr);align-items:center;gap:6px;min-height:34px;padding:2px 6px;border-radius:10px;position:relative}
+.row.here{background:rgba(255,122,138,.2);box-shadow:inset 0 0 0 2px var(--pink)}
+.row.trail{background:rgba(255,255,255,.06)}
+.num{font-family:Jua;font-size:17px;color:var(--mute);text-align:right}
+.sat .num{color:var(--gold)}
+.sym{display:flex;gap:3px;align-items:center}
+.rk{font-size:22px;text-align:center}
+.att{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.moon{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f1f4f7,#9aa9b8 70%);color:#14212c;font:15px Jua;display:grid;place-items:center;position:relative;box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.moon.occ{box-shadow:0 0 0 3px var(--c)}
+.moon .who{position:absolute;right:-6px;bottom:-6px;font-size:12px;width:18px;height:18px;border-radius:50%;background:var(--c);display:grid;place-items:center}
+.pl{display:flex;align-items:center;gap:6px;padding:3px 10px 3px 4px;border-radius:999px;font-size:14px;color:#fff;background:linear-gradient(90deg,var(--pc),transparent)}
+.pl b{font-size:20px}
+.deeprow{grid-template-columns:34px minmax(0,1fr);min-height:56px;background:linear-gradient(90deg,rgba(168,85,247,.25),transparent)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-inline-end:2px;border:1px solid rgba(255,255,255,.6)}
+/* 주사위 */
+.die{display:inline-block;vertical-align:middle}
+.dice{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.grp{display:flex;gap:4px;padding:6px;border-radius:12px;border:2px solid transparent;background:rgba(255,255,255,.05);align-items:center;min-height:52px}
+button.grp{border:2px solid var(--line)}
+button.grp.sel{border-color:var(--pink);background:rgba(255,122,138,.18)}
+.grp.no{opacity:.35}
+.grp small{font-size:13px;color:var(--mute);margin-inline-start:4px}
+.preview{font-family:Jua;font-size:22px;margin:6px 0}
+.act h2{font-size:22px}
+.who-tag{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.opts button{text-align:start;display:flex;flex-direction:column;gap:2px;align-items:flex-start}
+.opts button .t{font-family:Jua;font-size:17px}
+.opts button .d{font-size:13px;color:var(--mute);line-height:1.35}
+.rocket{display:flex;flex-direction:column;gap:6px}
+.seat{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:12px;background:rgba(255,255,255,.05);border-left:5px solid var(--c);font-size:15px}
+.seat.cmd{background:rgba(245,197,66,.15)}
+.seat .ic{font-size:20px}
+.seat.used{opacity:.6}
+.empty{color:var(--mute);font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mute);font-weight:400}
+.tot{font-family:Jua;font-size:18px}
+.goals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px;font-size:13px}
+.goal{padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.05)}
+.goal.got{box-shadow:inset 0 0 0 2px var(--c)}
+.plist{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.plist .p{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.star{font:13px Jua;padding:1px 6px;border-radius:8px;color:#1a1206}
+.log{max-height:260px;overflow:auto;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+.log div:first-child{color:var(--ink);font-weight:700}
+.log div{color:var(--mute)}
+.note{font-size:13px;color:var(--mute)}
+.thinking{display:flex;align-items:center;gap:10px;color:var(--mute)}
+.thinking span{animation:bob 1s infinite alternate}
+@keyframes bob{to{transform:translateY(-6px)}}
+@media(prefers-reduced-motion:reduce){.thinking span{animation:none}}
+/* 모달 */
+.modal{position:fixed;inset:0;background:rgba(3,8,12,.75);display:none;place-items:center;z-index:20;padding:14px}
+.modal.on{display:grid}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:20px;max-width:640px;width:100%;max-height:88vh;overflow:auto;padding:20px}
+.sheet h2{font-size:26px;margin-bottom:10px}
+.sheet h3{font-size:19px;margin:16px 0 6px;color:var(--pink)}
+.sheet ul{padding-inline-start:20px;margin:4px 0}
+.sheet li{margin:3px 0}
+.field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.field input{font:16px "Gowun Dodum";padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);min-height:44px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button.on{background:var(--pink);color:#2a0d14;border-color:var(--pink)}
+@media(max-width:860px){main{grid-template-columns:minmax(0,1fr)}.col.side{order:-1}}
+@media(max-width:420px){.row{grid-template-columns:28px 92px 26px minmax(0,1fr);gap:4px;padding:2px 3px}.opts{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🐱 MLEM 우주 고양이 탐사대<small>라이너 크니지아 · 한글판 웹 버전</small></h1>
+  <div class="fail" id="fail"></div>
+  <div class="hbtn">
+    <button id="undoBtn" title="직전 내 선택으로 되돌리기">↩️ 무르기</button>
+    <button id="speedBtn">🐢 보통</button>
+    <button id="rulesBtn">📖 규칙</button>
+    <button id="newBtn">🆕 새 게임</button>
+  </div>
+</header>
+<main>
+  <div class="col">
+    <div class="mat" id="mat"></div>
+  </div>
+  <div class="col side">
+    <div class="card act" id="act"></div>
+    <div class="card"><h2>🚀 로켓 탑승자</h2><div class="rocket" id="rocket"></div></div>
+    <div class="card"><h2>📊 점수 (현재 예상)</h2><div id="score"></div></div>
+    <div class="card"><h2>🪐 행성 현황</h2><div class="plist" id="planets"></div></div>
+    <div class="card"><h2>📜 기록</h2><div class="log" id="log"></div></div>
+  </div>
+</main>
+
+<div class="modal" id="setup"><div class="sheet">
+  <h2>🐾 새 게임</h2>
+  <div class="field"><label for="myName">내 이름</label><input id="myName" value="나" maxlength="8"></div>
+  <div class="field"><span>컴퓨터 상대 수</span><div class="seg" id="aiSeg"></div></div>
+  <div class="field"><span>첫 탐사 시작</span><div class="seg" id="startSeg"></div></div>
+  <p class="note">무르기는 내가 한 선택(우주비행사 고르기, 주사위 고르기, 착륙)을 되돌립니다. 이미 나온 주사위 값은 무르기를 해도 바뀌지 않아요.</p>
+  <button class="primary" id="goBtn" style="width:100%">게임 시작 🚀</button>
+</div></div>
+
+<div class="modal" id="rules"><div class="sheet">
+  <h2>📖 게임 규칙</h2>
+  <p>여러분은 고양이 우주 기관의 책임자입니다. 우주비행사를 로켓에 태워 달·행성·심우주로 보내 점수를 모으세요. 단, 로켓이 추락하면 계획은 실패!</p>
+  <h3>1. 이륙</h3>
+  <ul><li>탐사를 시작한 사람부터 차례로 우주비행사 1명씩 로켓에 태웁니다.</li><li>처음 탄 사람이 <b>사령관</b>👑이 됩니다. 로켓은 0번 칸에서 출발 (🛰️ 위성 냥이 타면 3번 칸).</li></ul>
+  <h3>2. 비행</h3>
+  <ul><li>사령관이 남은 주사위를 모두 굴리고 같은 눈끼리 묶습니다.</li><li>로켓이 있는 칸 옆에 그려진 기호와 같은 주사위만 쓸 수 있어요. 한 묶음을 고르면 그 묶음은 <b>전부</b> 써야 합니다. 여러 묶음을 함께 써도 됩니다.</li><li>🔥 추진 주사위의 값은 지금 칸에 표시된 숫자(🔥1, 🔥2…)입니다.</li><li>쓴 숫자 주사위는 이번 탐사 동안 버려집니다. 🔥 주사위는 버리지 않아요. 주사위는 최소 1개는 남습니다.</li><li>쓸 수 있는 주사위가 하나도 없으면 <b>추락</b>💥! 실패 칸이 하나 올라가고, 로켓에 남은 우주비행사는 손으로 돌아옵니다.</li></ul>
+  <h3>3. 착륙 (6번 칸부터)</h3>
+  <ul><li>사령관부터 로켓 순서대로 내릴지 정합니다.</li><li><b>달</b>: 칸마다 정해진 달 중 비어 있는 가장 높은 점수 달에 내려 즉시 점수를 받습니다. 달 하나엔 1명만.</li><li><b>행성</b>: 인원 제한 없음. 점수는 게임이 끝날 때 계산합니다(가장 많이 보낸 사람 금, 2등 은, 나머지 동. 동점이면 먼저 내린 사람이 우선).</li><li>사령관이 내리면 다음 탑승자가 사령관이 됩니다.</li><li><b>심우주</b>(26)에 도착하면 모두 내립니다: 사령관은 혜성 7점, 나머지는 은하 5점.</li></ul>
+  <h3>4. 우주비행사 능력</h3>
+  <ul id="astroRules"></ul>
+  <h3>5. 목표 (각 5점, 먼저 달성한 1명만)</h3>
+  <ul id="goalRules"></ul>
+  <h3>6. 게임 끝</h3>
+  <ul><li>로켓이 11번 추락하면 즉시 끝, 또는 누군가 8명을 모두 우주에 내려놓으면 그 탐사가 끝날 때 게임 종료.</li><li>달·심우주 점수 + 행성 점수 + 목표 점수가 가장 높은 사람이 우승!</li></ul>
+  <p class="note">보드의 칸별 주사위 기호와 달·행성 점수는 규칙서 사진을 보고 옮긴 값이라 실제 보드와 일부 다를 수 있습니다.</p>
+  <button class="primary" id="closeRules" style="width:100%;margin-top:12px">닫기</button>
+</div></div>
+
+<script>
+// ===== MLEM 우주 고양이 탐사대 – 게임 엔진 =====
+// 주사위 면: 0 = 추진(불꽃), 1~4 = 눈
+const DIE_FACES = [0, 0, 1, 2, 3, 4];
+
+// 칸 정보 (규칙서 사진에서 읽은 값)
+// f: 추진 주사위 허용 시 1개당 이동값(0이면 추진 불가), n: 허용되는 눈
+const SPACES = [
+  { f: 1, n: [1, 2] },                       // 0
+  { f: 1, n: [1, 3] },                       // 1
+  { f: 2, n: [1, 3] },                       // 2
+  { f: 1, n: [2, 3], sat: true },            // 3 (위성)
+  { f: 0, n: [1, 4] },                       // 4
+  { f: 2, n: [1, 2] },                       // 5
+  { f: 0, n: [1, 2, 4], moons: [1, 2] },     // 6
+  { f: 0, n: [1, 2], planet: 'fish' },       // 7
+  { f: 0, n: [1, 3], planet: 'fish' },       // 8
+  { f: 0, n: [2, 4], moons: [1, 2] },        // 9
+  { f: 0, n: [1, 3, 4], moons: [1, 2, 2] },  // 10
+  { f: 1, n: [1], planet: 'yarn' },          // 11
+  { f: 2, n: [3], planet: 'yarn' },          // 12
+  { f: 0, n: [2, 4], moons: [1, 2, 2] },     // 13
+  { f: 0, n: [3, 4], moons: [2, 2, 3] },     // 14
+  { f: 1, n: [1], planet: 'green' },         // 15
+  { f: 0, n: [1, 2, 3], planet: 'green' },   // 16
+  { f: 0, n: [2, 3, 4], moons: [2, 2, 3] },  // 17
+  { f: 1, n: [1, 4], moons: [3, 3] },        // 18
+  { f: 2, n: [1], planet: 'paw' },           // 19
+  { f: 0, n: [2, 3], planet: 'paw' },        // 20
+  { f: 2, n: [1], moons: [3, 3] },           // 21
+  { f: 2, n: [4], moons: [3, 4] },           // 22
+  { f: 2, n: [2], planet: 'wool' },          // 23
+  { f: 1, n: [2], planet: 'wool' },          // 24
+  { f: 1, n: [1], moons: [3, 4] },           // 25
+  { deep: true },                            // 26 심우주
+];
+const DEEP = 26;
+
+const PLANETS = {
+  fish:  { name: '금붕어 어항 행성', pts: [3, 2, 1], emoji: '🐟' },
+  yarn:  { name: '털실 행성',       pts: [4, 2, 1], emoji: '🧶' },
+  green: { name: '초록 캣닢 행성',   pts: [5, 3, 2], emoji: '🌿' },
+  paw:   { name: '젤리 발바닥 행성', pts: [6, 4, 2], emoji: '🐾' },
+  wool:  { name: '니트 행성',       pts: [7, 4, 2], emoji: '🧣' },
+};
+const PLANET_KEYS = ['fish', 'yarn', 'green', 'paw', 'wool'];
+
+const ASTROS = {
+  sat:   { name: '위성 냥',     icon: '🛰️', desc: '이 우주비행사가 로켓에 타면 로켓이 3번 칸(위성 칸)에서 출발합니다.' },
+  pilot: { name: '조종사 냥',   icon: '↕️', desc: '착륙할 때 로켓이 한 칸 위(+1) 또는 아래(-1)에 있는 것처럼 내릴 수 있습니다. (25→심우주는 5점만)' },
+  para:  { name: '낙하산 냥',   icon: '🪂', desc: '로켓이 추락해도 그 칸의 행성이나 빈 달에 내릴 수 있습니다.' },
+  moon:  { name: '달 탐사 냥',  icon: '🌙', desc: '달에 내리면 그 달 점수를 2배로 받습니다.' },
+  planet:{ name: '행성 탐사 냥', icon: '🪐', desc: '이 우주비행사가 있는 행성에서 받는 점수가 2배가 됩니다.' },
+  deep:  { name: '심우주 냥',   icon: '🌌', desc: '심우주에 내리면 점수 2배 (혜성 14점 / 은하 10점).' },
+  bomb:  { name: '말썽꾸러기 냥', icon: '💥', desc: '이 우주비행사가 로켓에서 내리면 현재 사령관은 주사위 1개를 버려야 합니다(최소 1개는 남음).' },
+  boost: { name: '부스터 냥',   icon: '🔋', desc: '로켓에 타고 있는 동안 사령관이 한 번, 눈 1 주사위처럼 사용 가능(칸에 눈 1 기호가 있어야 함). 추락을 막을 수도 있습니다.' },
+};
+const ASTRO_KEYS = ['sat', 'pilot', 'para', 'moon', 'planet', 'deep', 'bomb', 'boost'];
+
+const GOALS = [
+  { name: '행성 4곳 탐사', desc: '서로 다른 행성 4곳에 우주비행사 배치' },
+  { name: '한 행성 3명',   desc: '한 행성에 우주비행사 3명 배치' },
+  { name: '달 4개',       desc: '달 4개에 우주비행사 배치' },
+  { name: '심우주 2명',   desc: '심우주(혜성/은하)에 우주비행사 2명 배치' },
+];
+const MAX_FAIL = 11;
+
+const COLORS = [
+  { name: '파랑', hex: '#3b82f6' },
+  { name: '빨강', hex: '#ef4444' },
+  { name: '초록', hex: '#22c55e' },
+  { name: '노랑', hex: '#eab308' },
+  { name: '보라', hex: '#a855f7' },
+];
+
+// ---------- 주사위 기록 (무르기와 무관하게 고정) ----------
+let DICE_LOG = [];
+function getRoll(idx, n) {
+  while (DICE_LOG.length <= idx) {
+    const r = [];
+    for (let i = 0; i < 6; i++) r.push(DIE_FACES[Math.floor(Math.random() * 6)]);
+    DICE_LOG.push(r);
+  }
+  return DICE_LOG[idx].slice(0, n);
+}
+
+// ---------- 상태 ----------
+function newGame(cfg) {
+  // cfg: {players:[{name, isAI}], starter}
+  const S = {
+    players: cfg.players.map((p, i) => ({
+      name: p.name, isAI: p.isAI, color: COLORS[i].hex, colorName: COLORS[i].name,
+      avail: ASTRO_KEYS.slice(), placed: 0, pts: 0, goals: [],
+    })),
+    failures: 0,
+    starter: cfg.starter || 0,
+    moonOcc: {},       // space -> [null | {p,t}]
+    planetList: {},    // key -> [{p,t,order}]
+    deepList: [],      // {p,t,where}
+    goalOwner: [null, null, null, null],
+    order: 0,
+    rollIndex: 0,
+    nextId: 1,
+    exp: null,
+    expNo: 0,
+    log: [],
+    over: false,
+    final: null,
+  };
+  SPACES.forEach((s, i) => { if (s.moons) S.moonOcc[i] = s.moons.map(() => null); });
+  PLANET_KEYS.forEach(k => (S.planetList[k] = []));
+  startExpedition(S);
+  return S;
+}
+
+function log(S, msg) { S.log.push(msg); if (S.log.length > 300) S.log.shift(); }
+function pname(S, p) { return S.players[p].name; }
+function N(S) { return S.players.length; }
+
+function startExpedition(S) {
+  S.expNo++;
+  const order = [];
+  for (let k = 0; k < N(S); k++) {
+    const p = (S.starter + k) % N(S);
+    if (S.players[p].avail.length) order.push(p);
+  }
+  S.exp = { rocket: [], marker: 0, dice: 6, phase: 'board', boardOrder: order, boardPos: 0, roll: null, landQueue: [], landPos: 0, paraQueue: [], paraPos: 0, lastMove: null };
+  log(S, `━━ ${S.expNo}번째 탐사 시작 (출발: ${pname(S, S.starter)}) ━━`);
+  if (!order.length) endGame(S);
+}
+
+function commander(S) { return S.exp.rocket[0]; }
+
+function allowed(space, face) {
+  const s = SPACES[space];
+  if (s.deep) return false;
+  if (face === 0) return s.f > 0;
+  return s.n.includes(face);
+}
+function boostersAvail(S) { return S.exp.rocket.filter(e => e.t === 'boost' && !e.used).length; }
+function canBoost(S) { return boostersAvail(S) > 0 && !SPACES[S.exp.marker].deep && SPACES[S.exp.marker].n.includes(1); }
+
+// ---------- 현재 결정 ----------
+function getPending(S) {
+  if (S.over) return null;
+  const E = S.exp;
+  switch (E.phase) {
+    case 'board': {
+      const p = E.boardOrder[E.boardPos];
+      return { type: 'pick', p, options: S.players[p].avail.slice() };
+    }
+    case 'roll':
+      return { type: 'roll', p: commander(S).p };
+    case 'choose':
+      return { type: 'choose', p: commander(S).p, groups: usableGroups(S), boosters: canBoost(S) ? boostersAvail(S) : 0 };
+    case 'land': {
+      const e = E.rocket.find(x => x.id === E.landQueue[E.landPos]);
+      return { type: 'land', p: e.p, entry: e, options: landOptions(S, e, false) };
+    }
+    case 'para': {
+      const e = E.rocket.find(x => x.id === E.paraQueue[E.paraPos]);
+      return { type: 'para', p: e.p, entry: e, options: landOptions(S, e, true) };
+    }
+  }
+  return null;
+}
+
+function groupsOf(roll) {
+  const g = {};
+  roll.forEach(f => (g[f] = (g[f] || 0) + 1));
+  return Object.keys(g).map(Number).sort((a, b) => a - b).map(f => ({ face: f, count: g[f] }));
+}
+function usableGroups(S) {
+  const m = S.exp.marker;
+  return groupsOf(S.exp.roll).filter(g => allowed(m, g.face)).map(g => ({ ...g, value: (g.face === 0 ? SPACES[m].f : g.face) * g.count }));
+}
+
+// 해당 칸에 내릴 수 있는 위치 옵션
+function spotOption(S, sp) {
+  if (sp >= DEEP) return { kind: 'deep', space: DEEP };
+  if (sp < 6) return null;
+  const s = SPACES[sp];
+  if (s.moons) {
+    const occ = S.moonOcc[sp];
+    let best = -1;
+    s.moons.forEach((v, i) => { if (!occ[i] && (best < 0 || v >= s.moons[best])) best = i; });
+    if (best < 0) return null;
+    return { kind: 'moon', space: sp, idx: best, pts: s.moons[best] };
+  }
+  if (s.planet) return { kind: 'planet', space: sp, planet: s.planet };
+  return null;
+}
+function landOptions(S, e, crash) {
+  const m = S.exp.marker;
+  if (m <= 5 && !(crash)) {
+    // 0~5칸은 착륙 단계 생략 (호출되지 않음)
+  }
+  const opts = [];
+  if (crash) {
+    const o = spotOption(S, m);
+    if (o && o.kind !== 'deep') opts.push(o);
+    return opts;
+  }
+  const spots = [m];
+  if (e.t === 'pilot') spots.push(m - 1, m + 1);
+  spots.forEach(sp => {
+    const o = spotOption(S, sp);
+    if (!o) return;
+    if (o.kind === 'deep') o.pilotDeep = true;
+    if (!opts.some(x => x.kind === o.kind && x.space === o.space)) opts.push(o);
+  });
+  return opts;
+}
+
+// ---------- 행동 적용 ----------
+function act(S, action) {
+  const E = S.exp;
+  const pend = getPending(S);
+  if (!pend) return;
+  switch (pend.type) {
+    case 'pick': {
+      const t = action.t;
+      const pl = S.players[pend.p];
+      const i = pl.avail.indexOf(t);
+      if (i < 0) throw new Error('bad pick');
+      pl.avail.splice(i, 1);
+      E.rocket.push({ id: S.nextId++, p: pend.p, t, used: false });
+      log(S, `${pl.name}: ${ASTROS[t].icon} ${ASTROS[t].name} 탑승`);
+      E.boardPos++;
+      if (E.boardPos >= E.boardOrder.length) {
+        E.marker = E.rocket.some(e => e.t === 'sat') ? 3 : 0;
+        if (E.marker === 3) log(S, '🛰️ 위성 냥 덕분에 3번 칸에서 출발!');
+        log(S, `👑 사령관: ${pname(S, commander(S).p)}`);
+        E.phase = 'roll';
+      }
+      break;
+    }
+    case 'roll': {
+      E.roll = getRoll(S.rollIndex++, E.dice);
+      log(S, `${pname(S, pend.p)}: 주사위 ${E.dice}개 굴림 → ${E.roll.map(faceText).join(' ')}`);
+      const ok = E.roll.some(f => allowed(E.marker, f)) || canBoost(S);
+      if (!ok) crash(S);
+      else E.phase = 'choose';
+      break;
+    }
+    case 'choose': {
+      const faces = action.faces || [];
+      const nb = action.boosters || 0;
+      const groups = usableGroups(S);
+      let move = 0, usedNum = 0;
+      faces.forEach(f => {
+        const g = groups.find(x => x.face === f);
+        if (!g) throw new Error('bad face');
+        move += g.value;
+        if (f !== 0) usedNum += g.count;
+      });
+      if (nb > (canBoost(S) ? boostersAvail(S) : 0)) throw new Error('bad boost');
+      move += nb;
+      if (move <= 0) throw new Error('must move');
+      let k = nb;
+      // 부스터: 사령관 본인 것 먼저 사용하지 않고 로켓 순서대로
+      E.rocket.forEach(e => { if (k > 0 && e.t === 'boost' && !e.used) { e.used = true; k--; } });
+      const from = E.marker;
+      E.marker = Math.min(DEEP, E.marker + move);
+      E.dice -= usedNum;
+      if (E.dice <= 0) E.dice = 1;
+      E.lastMove = { from, to: E.marker };
+      const parts = faces.map(f => { const g = groups.find(x => x.face === f); return `${faceText(f)}×${g.count}`; });
+      if (nb) parts.push(`🔋×${nb}`);
+      log(S, `${pname(S, pend.p)}: ${parts.join(' + ')} 사용 → ${from}→${E.marker === DEEP ? '심우주' : E.marker}칸 (남은 주사위 ${E.dice}개)`);
+      E.roll = null;
+      if (E.marker >= DEEP) deepSpace(S);
+      else if (E.marker <= 5) E.phase = 'roll';
+      else { E.phase = 'land'; E.landQueue = E.rocket.map(x => x.id); E.landPos = 0; skipEmptyLand(S); }
+      break;
+    }
+    case 'land': {
+      const e = pend.entry;
+      if (action.opt) disembark(S, e, action.opt);
+      else log(S, `${pname(S, e.p)}: ${ASTROS[e.t].icon} 계속 탑승`);
+      E.landPos++;
+      skipEmptyLand(S);
+      break;
+    }
+    case 'para': {
+      const e = pend.entry;
+      if (action.opt) placeAt(S, e, action.opt, true);
+      E.paraPos++;
+      skipEmptyPara(S);
+      break;
+    }
+  }
+}
+
+function faceText(f) { return f === 0 ? '🔥' : ['', '⚀', '⚁', '⚂', '⚃'][f]; }
+
+function skipEmptyLand(S) {
+  const E = S.exp;
+  while (E.phase === 'land') {
+    if (E.landPos >= E.landQueue.length) {
+      if (!E.rocket.length) endExpedition(S);
+      else E.phase = 'roll';
+      return;
+    }
+    const e = E.rocket.find(x => x.id === E.landQueue[E.landPos]);
+    if (!e || !landOptions(S, e, false).length) { E.landPos++; continue; }
+    return;
+  }
+}
+function skipEmptyPara(S) {
+  const E = S.exp;
+  while (E.phase === 'para') {
+    if (E.paraPos >= E.paraQueue.length) { finishCrash(S); return; }
+    const e = E.rocket.find(x => x.id === E.paraQueue[E.paraPos]);
+    if (!e || !landOptions(S, e, true).length) { E.paraPos++; continue; }
+    return;
+  }
+}
+
+function placeAt(S, e, opt, viaPara) {
+  const pl = S.players[e.p];
+  const E = S.exp;
+  let gained = 0, where = '';
+  if (opt.kind === 'moon') {
+    S.moonOcc[opt.space][opt.idx] = { p: e.p, t: e.t };
+    gained = opt.pts * (e.t === 'moon' ? 2 : 1);
+    where = `${opt.space}번 칸 달(${opt.pts}점)`;
+  } else if (opt.kind === 'planet') {
+    S.planetList[opt.planet].push({ p: e.p, t: e.t, order: S.order++ });
+    where = PLANETS[opt.planet].name;
+  } else if (opt.kind === 'deep') {
+    const isCmd = opt.comet;
+    const base = opt.pilotDeep ? 5 : (isCmd ? 7 : 5);
+    gained = base * (e.t === 'deep' ? 2 : 1);
+    S.deepList.push({ p: e.p, t: e.t, where: isCmd ? 'comet' : 'galaxy' });
+    where = isCmd ? '혜성' : '은하';
+  }
+  pl.pts += gained;
+  pl.placed++;
+  E.rocket = E.rocket.filter(x => x.id !== e.id);
+  log(S, `${viaPara ? '🪂 ' : ''}${pl.name}: ${ASTROS[e.t].icon} ${where}에 착륙${gained ? ` (+${gained}점)` : ''}`);
+  checkGoals(S, e.p);
+}
+
+function disembark(S, e, opt) {
+  const E = S.exp;
+  const wasCmd = E.rocket[0].id === e.id;
+  placeAt(S, e, opt, false);
+  if (e.t === 'bomb' && E.rocket.length) {
+    if (E.dice > 1) { E.dice--; log(S, `💥 말썽꾸러기! 사령관 주사위 1개 버림 (남은 ${E.dice}개)`); }
+    else log(S, '💥 말썽꾸러기! 하지만 주사위가 1개뿐이라 그대로 유지');
+  }
+  if (wasCmd && E.rocket.length) log(S, `👑 새 사령관: ${pname(S, E.rocket[0].p)}`);
+}
+
+function checkGoals(S, p) {
+  const c = goalCounts(S, p);
+  const cond = [c.distinctPlanets >= 4, c.maxOnPlanet >= 3, c.moons >= 4, c.deep >= 2];
+  cond.forEach((ok, g) => {
+    if (ok && S.goalOwner[g] === null) {
+      S.goalOwner[g] = p;
+      log(S, `🏅 ${pname(S, p)}: 목표 "${GOALS[g].name}" 달성! (+5점)`);
+    }
+  });
+}
+function goalCounts(S, p) {
+  let distinctPlanets = 0, maxOnPlanet = 0, moons = 0;
+  PLANET_KEYS.forEach(k => {
+    const c = S.planetList[k].filter(x => x.p === p).length;
+    if (c) distinctPlanets++;
+    maxOnPlanet = Math.max(maxOnPlanet, c);
+  });
+  Object.values(S.moonOcc).forEach(a => a.forEach(o => { if (o && o.p === p) moons++; }));
+  const deep = S.deepList.filter(x => x.p === p).length;
+  return { distinctPlanets, maxOnPlanet, moons, deep };
+}
+
+function deepSpace(S) {
+  const E = S.exp;
+  log(S, '🌠 심우주 도달! 모두 내립니다.');
+  const list = E.rocket.slice();
+  list.forEach((e, i) => placeAt(S, e, { kind: 'deep', space: DEEP, comet: i === 0 }, false));
+  endExpedition(S);
+}
+
+function crash(S) {
+  const E = S.exp;
+  S.failures++;
+  log(S, `💥 로켓 추락! (실패 ${S.failures}/${MAX_FAIL})`);
+  E.roll = E.roll; // 보여주기 위해 유지
+  E.phase = 'para';
+  E.paraQueue = E.rocket.filter(e => e.t === 'para').map(x => x.id);
+  E.paraPos = 0;
+  skipEmptyPara(S);
+}
+function finishCrash(S) {
+  const E = S.exp;
+  E.rocket.forEach(e => S.players[e.p].avail.push(e.t));
+  if (E.rocket.length) log(S, '남은 우주비행사들은 기지로 귀환합니다.');
+  E.rocket = [];
+  endExpedition(S);
+}
+
+function endExpedition(S) {
+  const E = S.exp;
+  E.rocket.forEach(e => S.players[e.p].avail.push(e.t));
+  E.rocket = [];
+  E.roll = null;
+  const allPlaced = S.players.some(p => p.placed >= 8);
+  if (S.failures >= MAX_FAIL || allPlaced) { endGame(S); return; }
+  S.starter = (S.starter + 1) % N(S);
+  startExpedition(S);
+}
+
+function planetScores(S) {
+  // 반환: {key: [{p, count, pts, doubled}]}
+  const res = {};
+  PLANET_KEYS.forEach(k => {
+    const list = S.planetList[k];
+    const by = {};
+    list.forEach(x => {
+      if (!by[x.p]) by[x.p] = { p: x.p, count: 0, first: x.order, doubled: false };
+      by[x.p].count++;
+      if (x.t === 'planet') by[x.p].doubled = true;
+    });
+    const arr = Object.values(by).sort((a, b) => b.count - a.count || a.first - b.first);
+    arr.forEach((r, i) => {
+      const base = PLANETS[k].pts[Math.min(i, 2)];
+      r.rank = Math.min(i, 2);
+      r.pts = base * (r.doubled ? 2 : 1);
+    });
+    res[k] = arr;
+  });
+  return res;
+}
+
+function scoreBreakdown(S) {
+  const ps = planetScores(S);
+  return S.players.map((pl, p) => {
+    let planet = 0;
+    PLANET_KEYS.forEach(k => ps[k].forEach(r => { if (r.p === p) planet += r.pts; }));
+    const goals = S.goalOwner.filter(o => o === p).length * 5;
+    return { p, instant: pl.pts, planet, goals, total: pl.pts + planet + goals };
+  });
+}
+
+function endGame(S) {
+  S.over = true;
+  S.final = scoreBreakdown(S);
+  const best = Math.max(...S.final.map(r => r.total));
+  const winners = S.final.filter(r => r.total === best).map(r => pname(S, r.p));
+  log(S, `🏁 게임 종료! 우승: ${winners.join(', ')} (${best}점)`);
+}
+
+// ============ AI ============
+function crashProb(space, n, boostOK) {
+  if (space >= DEEP) return 0;
+  const s = SPACES[space];
+  if (boostOK && s.n.includes(1)) return 0;
+  let good = 0;
+  DIE_FACES.forEach(f => { if (allowed(space, f)) good++; });
+  return Math.pow(1 - good / 6, n);
+}
+
+// 선수 p가 e(유형 t)로 옵션 o에 내릴 때 가치
+function optValue(S, p, t, o, isCmd) {
+  if (!o) return 0;
+  let v = 0;
+  const c = goalCounts(S, p);
+  if (o.kind === 'moon') {
+    v = o.pts * (t === 'moon' ? 2 : 1);
+    if (S.goalOwner[2] === null && c.moons === 3) v += 5; else if (S.goalOwner[2] === null) v += 0.6 * c.moons;
+  } else if (o.kind === 'deep') {
+    const base = o.pilotDeep ? 5 : (isCmd ? 7 : 5);
+    v = base * (t === 'deep' ? 2 : 1);
+    if (S.goalOwner[3] === null) v += c.deep === 1 ? 5 : 1.5;
+  } else if (o.kind === 'planet') {
+    const before = planetPtsFor(S, p, o.planet, null);
+    const after = planetPtsFor(S, p, o.planet, t);
+    v = after - before;
+    // 다른 사람 점수를 깎는 효과 약간 반영
+    v += 0.3;
+    const mine = S.planetList[o.planet].filter(x => x.p === p).length;
+    if (S.goalOwner[0] === null && mine === 0) v += c.distinctPlanets === 3 ? 5 : 0.8;
+    if (S.goalOwner[1] === null && mine === 2) v += 5; else if (S.goalOwner[1] === null && mine === 1) v += 0.8;
+  }
+  return v;
+}
+function planetPtsFor(S, p, k, addT) {
+  const list = S.planetList[k].slice();
+  if (addT) list.push({ p, t: addT, order: 1e9 });
+  const by = {};
+  list.forEach(x => {
+    if (!by[x.p]) by[x.p] = { p: x.p, count: 0, first: x.order, d: false };
+    by[x.p].count++;
+    if (x.t === 'planet') by[x.p].d = true;
+  });
+  const arr = Object.values(by).sort((a, b) => b.count - a.count || a.first - b.first);
+  const i = arr.findIndex(r => r.p === p);
+  if (i < 0) return 0;
+  return PLANETS[k].pts[Math.min(i, 2)] * (arr[i].d ? 2 : 1);
+}
+
+function bestNowValue(S, p, t, space, isCmd) {
+  const opts = [];
+  const spots = [space];
+  if (t === 'pilot') spots.push(space - 1, space + 1);
+  spots.forEach(sp => {
+    const o = spotOption(S, sp);
+    if (o) { if (o.kind === 'deep' && sp !== space) o.pilotDeep = true; opts.push(o); }
+  });
+  let best = 0;
+  opts.forEach(o => (best = Math.max(best, optValue(S, p, t, o, isCmd))));
+  return best;
+}
+
+function futureValue(S, p, t, space, isCmd) {
+  // 앞으로 1~6칸 내 가장 좋은 착륙지 가치(평균적)
+  let vals = [];
+  for (let d = 1; d <= 6; d++) {
+    const sp = Math.min(DEEP, space + d);
+    vals.push(bestNowValue(S, p, t, sp, isCmd));
+  }
+  vals.sort((a, b) => b - a);
+  return (vals[0] * 0.5 + vals[1] * 0.3 + vals[2] * 0.2);
+}
+
+function stayEV(S, p, t, space, nDice, isCmd, boostLeft) {
+  const pc = crashProb(space, nDice, boostLeft);
+  const control = isCmd ? 0.85 : 0.7;
+  return (1 - pc) * futureValue(S, p, t, space, isCmd) * control;
+}
+
+function aiDecide(S) {
+  const pend = getPending(S);
+  const E = S.exp;
+  if (!pend) return null;
+  const p = pend.p;
+  const pl = S.players[p];
+  switch (pend.type) {
+    case 'roll': return {};
+    case 'pick': {
+      const isFirst = E.rocket.length === 0;
+      const hasSat = E.rocket.some(e => e.t === 'sat');
+      const moonsLeft = Object.values(S.moonOcc).reduce((a, arr) => a + arr.filter(x => !x).length, 0);
+      const sc = {
+        sat: hasSat ? 0.6 : (isFirst ? 3.2 : 2.6),
+        pilot: 2.6,
+        para: 2.1,
+        moon: 1.5 + moonsLeft / 12,
+        planet: 2.2,
+        deep: isFirst ? 2.8 : 1.4,
+        bomb: 1.3,
+        boost: isFirst ? 3 : 2.3,
+      };
+      // 남은 개수가 적으면 아무거나 – 동점 처리 결정적으로
+      let best = null, bv = -1;
+      pl.avail.forEach((t, i) => {
+        const v = sc[t] + ((S.rollIndex * 7 + p * 3 + i * 5) % 10) / 25;
+        if (v > bv) { bv = v; best = t; }
+      });
+      return { t: best };
+    }
+    case 'choose': {
+      const groups = pend.groups;
+      const cmd = commander(S);
+      let best = null, bv = -Infinity;
+      const nG = groups.length;
+      for (let mask = 0; mask < (1 << nG); mask++) {
+        for (let b = 0; b <= pend.boosters; b++) {
+          let move = b, usedNum = 0;
+          const faces = [];
+          groups.forEach((g, i) => { if (mask & (1 << i)) { move += g.value; faces.push(g.face); if (g.face) usedNum += g.count; } });
+          if (move <= 0) continue;
+          const to = Math.min(DEEP, E.marker + move);
+          let nd = E.dice - usedNum; if (nd <= 0) nd = 1;
+          const boostLeft = boostersAvail(S) - b > 0;
+          let v;
+          if (to >= DEEP) {
+            v = 0;
+            E.rocket.forEach((e, i) => { const val = (i === 0 ? 7 : 5) * (e.t === 'deep' ? 2 : 1); v += e.p === cmd.p ? val : -val * 0.25; });
+          } else {
+            const now = bestNowValue(S, cmd.p, cmd.t, to, true);
+            const st = stayEV(S, cmd.p, cmd.t, to, nd, true, boostLeft);
+            v = Math.max(now, st) + nd * 0.15 + to * 0.05;
+          }
+          v -= b * 0.6;
+          if (v > bv) { bv = v; best = { faces, boosters: b }; }
+        }
+      }
+      return best;
+    }
+    case 'land': {
+      const e = pend.entry;
+      const isCmd = E.rocket[0].id === e.id;
+      let bo = null, bv = 0;
+      pend.options.forEach(o => { const v = optValue(S, p, e.t, o, isCmd); if (v > bv) { bv = v; bo = o; } });
+      if (!bo) return { opt: null };
+      const stay = stayEV(S, p, e.t, E.marker, E.dice, isCmd, canBoostAt(S, E.marker));
+      // 게임 막바지: 남은 우주비행사가 적으면 안전하게
+      const urgency = S.failures >= 9 ? 1.2 : 1;
+      return bv * urgency >= stay ? { opt: bo } : { opt: null };
+    }
+    case 'para': {
+      let bo = null, bv = 0;
+      pend.options.forEach(o => { const v = optValue(S, p, pend.entry.t, o, false); if (v > bv) { bv = v; bo = o; } });
+      return { opt: bo };
+    }
+  }
+}
+function canBoostAt(S, sp) { return boostersAvail(S) > 0; }
+
+if (typeof module !== 'undefined' && typeof window === 'undefined') module.exports = { newGame, act, getPending, aiDecide, scoreBreakdown, SPACES, DICE_LOG_RESET: () => (DICE_LOG = []), getLog: () => DICE_LOG };
+
+</script>
+<script>
+{
+const $ = id => document.getElementById(id);
+let S = null, undoStack = [], runId = 0, fast = false, human = 0;
+let sel = { faces: [], boosters: 0 };
+let setupAI = 2, setupStart = 'me';
+
+function pipSVG(face, size, f) {
+  const s = size;
+  if (face === 0) {
+    return `<svg class="die" width="${s}" height="${s}" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff8ee" stroke="#d9cbb5"/><path d="M20 7c4 7 11 11 9 19a9 9 0 0 1-18 0c-1-5 3-8 4-12 2 3 3 5 5 5-2-4-2-8 0-12z" fill="#ff6b3d"/>${f ? `<text x="20" y="31" text-anchor="middle" font-size="13" font-family="Jua" fill="#fff">${f}</text>` : ''}</svg>`;
+  }
+  const P = { 1: [[20, 20]], 2: [[12, 12], [28, 28]], 3: [[11, 11], [20, 20], [29, 29]], 4: [[12, 12], [28, 12], [12, 28], [28, 28]] }[face];
+  return `<svg class="die" width="${s}" height="${s}" viewBox="0 0 40 40"><rect x="1" y="1" width="38" height="38" rx="8" fill="#fff8ee" stroke="#d9cbb5"/>${P.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.3" fill="#1b1b1b"/>`).join('')}</svg>`;
+}
+function flameBadge(v) {
+  return `<span title="추진 주사위 1개당 ${v}칸" style="display:inline-flex;align-items:center;font:13px Jua;color:#ffb38f">${pipSVG(0, 22, v)}</span>`;
+}
+function col(p) { return S.players[p].color; }
+function dot(p) { return `<span class="dot" style="--c:${col(p)}"></span>`; }
+
+// ---------- 그리기 ----------
+function renderMat() {
+  const E = S.exp, m = E.marker;
+  const lm = E.lastMove;
+  let h = '';
+  for (let i = DEEP; i >= 0; i--) {
+    const s = SPACES[i];
+    const here = !S.over && E.phase !== 'board' && m === i;
+    const trail = lm && i > lm.from && i < lm.to;
+    if (s.deep) {
+      const comet = S.deepList.filter(d => d.where === 'comet'), gal = S.deepList.filter(d => d.where === 'galaxy');
+      h += `<div class="row deeprow ${here ? 'here' : ''}"><div class="num">26</div><div class="att"><span class="pl" style="--pc:#7c3aed"><b>☄️</b>혜성 7 ${comet.map(d => dot(d.p)).join('')}</span><span class="pl" style="--pc:#6d28d9"><b>🌌</b>은하 5 ${gal.map(d => dot(d.p)).join('')}</span>${here ? '🚀' : ''}</div></div>`;
+      continue;
+    }
+    let sym = (s.f ? flameBadge(s.f) : '') + s.n.map(n => pipSVG(n, 22)).join('');
+    let att = '';
+    if (s.moons) att = s.moons.map((v, k) => { const o = S.moonOcc[i][k]; return `<span class="moon ${o ? 'occ' : ''}" style="${o ? `--c:${col(o.p)}` : ''}" title="달 ${v}점">${v}${o ? `<span class="who">${ASTROS[o.t].icon}</span>` : ''}</span>`; }).join('');
+    if (s.planet) { const P = PLANETS[s.planet]; att = `<span class="pl" style="--pc:${planetColor(s.planet)}"><b>${P.emoji}</b>${P.name} ${P.pts.join('/')}</span>`; }
+    h += `<div class="row ${s.sat ? 'sat' : ''} ${here ? 'here' : ''} ${trail ? 'trail' : ''}"><div class="num">${s.sat ? '🛰️' : ''}${i}</div><div class="sym">${sym}</div><div class="rk">${here ? '🚀' : ''}</div><div class="att">${att}</div></div>`;
+  }
+  $('mat').innerHTML = h;
+}
+function planetColor(k) { return { fish: '#2b8fbf', yarn: '#c05fb0', green: '#5c9a3c', paw: '#c2589c', wool: '#b06a35' }[k]; }
+
+function renderRocket() {
+  const E = S.exp;
+  if (!E.rocket.length) { $('rocket').innerHTML = `<div class="empty">${E.phase === 'board' ? '탑승 준비 중…' : '비어 있음'}</div>`; return; }
+  $('rocket').innerHTML = E.rocket.map((e, i) => `<div class="seat ${i === 0 && E.phase !== 'board' ? 'cmd' : ''} ${e.used ? 'used' : ''}" style="--c:${col(e.p)}"><span class="ic">${ASTROS[e.t].icon}</span><span><b>${S.players[e.p].name}</b> · ${ASTROS[e.t].name}${e.used ? ' (사용함)' : ''}</span>${i === 0 && E.phase !== 'board' ? '<span style="margin-left:auto">👑 사령관</span>' : ''}</div>`).join('') +
+    (E.phase !== 'board' ? `<div class="note">남은 주사위: <b>${E.dice}개</b></div>` : '');
+}
+
+function renderScore() {
+  const sb = scoreBreakdown(S);
+  $('score').innerHTML = `<table><thead><tr><th>선수</th><th>달·심우주</th><th>행성</th><th>목표</th><th>합계</th><th>남은</th></tr></thead><tbody>${sb.map(r => {
+    const pl = S.players[r.p];
+    return `<tr><td>${dot(r.p)}${pl.name}${pl.isAI ? ' 🤖' : ''}</td><td>${r.instant}</td><td>${r.planet}</td><td>${r.goals}</td><td class="tot">${r.total}</td><td>${8 - pl.placed}명</td></tr>`;
+  }).join('')}</tbody></table>
+  <div class="goals">${GOALS.map((g, i) => { const o = S.goalOwner[i]; return `<div class="goal ${o !== null ? 'got' : ''}" style="${o !== null ? `--c:${col(o)}` : ''}">🏅 <b>${g.name}</b><br>${o !== null ? `${dot(o)}${S.players[o].name} 달성` : '<span class="note">' + g.desc + '</span>'}</div>`; }).join('')}</div>
+  <div class="note" style="margin-top:6px">손에 있는 우주비행사: ${S.players.map((pl, p) => `${dot(p)}${pl.avail.map(t => ASTROS[t].icon).join('') || '없음'}`).join(' · ')}</div>`;
+  const ps = planetScores(S);
+  $('planets').innerHTML = PLANET_KEYS.map(k => {
+    const P = PLANETS[k];
+    const rows = ps[k];
+    return `<div class="p"><b>${P.emoji} ${P.name}</b> <span class="star" style="background:var(--gold)">${P.pts[0]}</span><span class="star" style="background:var(--silver)">${P.pts[1]}</span><span class="star" style="background:var(--bronze)">${P.pts[2]}</span> → ${rows.length ? rows.map(r => `${dot(r.p)}${r.count}명=${r.pts}점${r.doubled ? '(×2)' : ''}`).join(' ') : '<span class="note">아직 없음</span>'}</div>`;
+  }).join('');
+}
+
+function renderLog() { $('log').innerHTML = S.log.slice(-60).reverse().map(l => `<div>${l}</div>`).join(''); }
+
+function renderFail() {
+  let h = '실패 ';
+  for (let i = 1; i <= MAX_FAIL; i++) h += `<i class="${i <= S.failures ? 'on' : ''}"></i>`;
+  $('fail').innerHTML = h + ` ${S.failures}/${MAX_FAIL}`;
+}
+
+function rollView(roll, marker) {
+  return `<div class="dice">${groupsOf(roll).map(g => `<div class="grp ${allowed(marker, g.face) ? '' : 'no'}">${Array.from({ length: g.count }, () => pipSVG(g.face, 34, g.face === 0 ? SPACES[marker].f || '' : '')).join('')}</div>`).join('')}</div>`;
+}
+
+function renderAct() {
+  const el = $('act');
+  if (S.over) {
+    const sb = S.final.slice().sort((a, b) => b.total - a.total);
+    const best = sb[0].total;
+    el.innerHTML = `<h2>🏁 게임 종료</h2><p class="jua" style="font-size:24px;margin:6px 0">${sb.filter(r => r.total === best).map(r => S.players[r.p].name).join(', ')} 우승! 🎉</p>
+    <table><thead><tr><th>순위</th><th>선수</th><th>합계</th></tr></thead><tbody>${sb.map((r, i) => `<tr><td>${i + 1}</td><td style="text-align:left">${dot(r.p)}${S.players[r.p].name}</td><td class="tot">${r.total}</td></tr>`).join('')}</tbody></table>
+    <button class="primary" style="width:100%;margin-top:12px" id="againBtn">다시 하기</button>`;
+    $('againBtn').onclick = openSetup;
+    return;
+  }
+  const pend = getPending(S);
+  const E = S.exp;
+  const pl = S.players[pend.p];
+  const mine = pend.p === human;
+  const tag = `<div class="who-tag">${dot(pend.p)}${pl.name} 차례 · ${S.expNo}번째 탐사 · 로켓 ${E.phase === 'board' ? '준비 중' : (E.marker + '번 칸')}</div>`;
+  const lastRoll = S.lastRoll && S.lastRoll.exp === S.expNo - (S.lastRoll.crashed ? 1 : 0) ? S.lastRoll : null;
+  if (!mine) {
+    let extra = '';
+    if (E.roll) extra = rollView(E.roll, E.marker);
+    else if (S.lastRoll && S.lastRoll.crashed && E.phase === 'board' && S.lastRoll.exp === S.expNo - 1) extra = `<p class="note">직전 추락 주사위:</p>` + rollView(S.lastRoll.roll, S.lastRoll.marker);
+    el.innerHTML = `${tag}<h2>🤖 ${pl.name} 생각 중…</h2><div class="thinking"><span>🐱</span>잠시만 기다려 주세요</div>${extra}`;
+    return;
+  }
+  let crashNote = '';
+  if (S.lastRoll && S.lastRoll.crashed && S.lastRoll.exp === S.expNo - 1 && E.phase === 'board' && E.rocket.length < 2) crashNote = `<p class="note">💥 직전 탐사는 추락했어요:</p>` + rollView(S.lastRoll.roll, S.lastRoll.marker);
+  if (pend.type === 'pick') {
+    el.innerHTML = `${tag}<h2>어떤 우주비행사를 태울까요?</h2>${E.rocket.length === 0 ? '<p class="note">내가 먼저 타므로 👑 사령관이 됩니다.</p>' : ''}${crashNote}<div class="opts">${pend.options.map(t => `<button data-t="${t}"><span class="t">${ASTROS[t].icon} ${ASTROS[t].name}</span><span class="d">${ASTROS[t].desc}</span></button>`).join('')}</div>`;
+    el.querySelectorAll('[data-t]').forEach(b => (b.onclick = () => humanAct({ t: b.dataset.t })));
+  } else if (pend.type === 'roll') {
+    const pc = crashProb(E.marker, E.dice, canBoost(S));
+    el.innerHTML = `${tag}<h2>🎲 주사위를 굴리세요</h2><p>주사위 <b>${E.dice}개</b>를 굴립니다. 지금 칸에서 쓸 수 있는 기호: ${(SPACES[E.marker].f ? flameBadge(SPACES[E.marker].f) : '') + SPACES[E.marker].n.map(n => pipSVG(n, 22)).join('')}</p><p class="note">추락 확률 약 ${Math.round(pc * 100)}%</p><button class="primary" id="rollBtn" style="width:100%">주사위 굴리기</button>`;
+    $('rollBtn').onclick = () => humanAct({}, true);
+  } else if (pend.type === 'choose') {
+    const all = groupsOf(E.roll);
+    const used = pend.groups;
+    let move = sel.boosters;
+    sel.faces.forEach(f => { const g = used.find(x => x.face === f); if (g) move += g.value; });
+    let usedNum = 0; sel.faces.forEach(f => { if (f) usedNum += used.find(x => x.face === f).count; });
+    let nd = E.dice - usedNum; if (nd <= 0) nd = 1;
+    const to = Math.min(DEEP, E.marker + move);
+    el.innerHTML = `${tag}<h2>어떤 주사위 묶음을 쓸까요?</h2><p class="note">밝은 묶음만 쓸 수 있어요. 눌러서 고르세요 (여러 개 가능).</p>
+    <div class="dice">${all.map(g => {
+      const u = used.find(x => x.face === g.face);
+      const dice = Array.from({ length: g.count }, () => pipSVG(g.face, 34, g.face === 0 ? SPACES[E.marker].f || '' : '')).join('');
+      return u ? `<button class="grp ${sel.faces.includes(g.face) ? 'sel' : ''}" data-f="${g.face}">${dice}<small>+${u.value}칸</small></button>` : `<div class="grp no">${dice}</div>`;
+    }).join('')}</div>
+    ${pend.boosters ? `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">🔋 부스터 사용 (각 +1칸): <button id="bMinus">−</button><b>${sel.boosters}</b><button id="bPlus">+</button><span class="note">사용 가능 ${pend.boosters}개</span></div>` : ''}
+    <div class="preview">${move ? `🚀 ${E.marker} → ${to === DEEP ? '심우주!' : to + '번 칸'} (+${move})` : '묶음을 골라 주세요'}</div>
+    ${move ? `<p class="note">이동 후 남는 주사위: ${nd}개${to < DEEP ? ` · 다음 추락 확률 약 ${Math.round(crashProb(to, nd, boostersAvail(S) - sel.boosters > 0) * 100)}%` : ''}</p>` : ''}
+    <button class="primary" id="goMove" style="width:100%" ${move ? '' : 'disabled'}>이동하기</button>`;
+    el.querySelectorAll('[data-f]').forEach(b => (b.onclick = () => { const f = +b.dataset.f; sel.faces = sel.faces.includes(f) ? sel.faces.filter(x => x !== f) : [...sel.faces, f]; renderAct(); }));
+    if (pend.boosters) {
+      $('bMinus').onclick = () => { sel.boosters = Math.max(0, sel.boosters - 1); renderAct(); };
+      $('bPlus').onclick = () => { sel.boosters = Math.min(pend.boosters, sel.boosters + 1); renderAct(); };
+    }
+    $('goMove').onclick = () => { const a = { faces: sel.faces.slice(), boosters: sel.boosters }; humanAct(a); };
+  } else if (pend.type === 'land' || pend.type === 'para') {
+    const e = pend.entry;
+    const isCmd = E.rocket[0].id === e.id;
+    const optText = o => {
+      if (o.kind === 'moon') return `🌙 ${o.space}번 칸 달 (${o.pts}점${e.t === 'moon' ? ' ×2 = ' + o.pts * 2 + '점' : ''})`;
+      if (o.kind === 'planet') return `${PLANETS[o.planet].emoji} ${PLANETS[o.planet].name}${o.space !== E.marker ? ` (${o.space}번 칸)` : ''}`;
+      return `🌌 심우주 은하 (${5 * (e.t === 'deep' ? 2 : 1)}점)`;
+    };
+    const pc = crashProb(E.marker, E.dice, canBoost(S));
+    el.innerHTML = `${tag}<h2>${pend.type === 'para' ? '🪂 추락! 낙하산으로 내릴까요?' : `${ASTROS[e.t].icon} ${ASTROS[e.t].name}, 내릴까요?`}</h2>${pend.type === 'para' ? rollView(E.roll || [], E.marker) : ''}
+    ${pend.type === 'land' ? `<p class="note">${isCmd ? '👑 내가 사령관입니다. 내리면 다음 탑승자가 사령관이 돼요.' : ''} 계속 타면 다음 굴림 추락 확률 약 ${Math.round(pc * 100)}% (주사위 ${E.dice}개)</p>` : ''}
+    <div class="opts">${pend.options.map((o, i) => `<button data-o="${i}"><span class="t">${optText(o)}</span><span class="d">여기에 내리기</span></button>`).join('')}
+    <button data-o="-1"><span class="t">${pend.type === 'para' ? '내리지 않음' : '🚀 계속 탑승'}</span><span class="d">${pend.type === 'para' ? '기지로 귀환' : '더 멀리 가 보기'}</span></button></div>`;
+    el.querySelectorAll('[data-o]').forEach(b => (b.onclick = () => { const i = +b.dataset.o; humanAct({ opt: i < 0 ? null : pend.options[i] }); }));
+  }
+}
+
+function renderAll() {
+  renderMat(); renderRocket(); renderScore(); renderLog(); renderFail(); renderAct();
+  $('undoBtn').disabled = !undoStack.length;
+}
+
+// ---------- 진행 ----------
+function wrapAct(a) {
+  const E = S.exp;
+  const pend = getPending(S);
+  const before = S.failures;
+  act(S, a);
+  if (pend.type === 'roll') {
+    const r = S.exp.roll || (S.exp.phase === 'para' ? S.exp.roll : null);
+    S.lastRoll = { roll: DICE_LOG[S.rollIndex - 1].slice(0, E.dice), marker: E.marker, crashed: S.failures > before, exp: S.expNo };
+    if (S.failures > before) S.lastRoll.exp = S.expNo - (S.exp.phase === 'board' ? 1 : 0);
+  }
+}
+function humanAct(a, noSnap) {
+  if (!noSnap) undoStack.push(JSON.stringify(S));
+  if (undoStack.length > 200) undoStack.shift();
+  sel = { faces: [], boosters: 0 };
+  try { wrapAct(a); } catch (err) { console.error(err); if (!noSnap) undoStack.pop(); return; }
+  step();
+}
+function step() {
+  renderAll();
+  if (S.over) return;
+  const pend = getPending(S);
+  if (pend.p !== human) {
+    const my = ++runId;
+    const delay = fast ? 250 : (pend.type === 'roll' ? 700 : 950);
+    setTimeout(() => {
+      if (my !== runId) return;
+      wrapAct(aiDecide(S));
+      step();
+    }, delay);
+  }
+}
+function undo() {
+  if (!undoStack.length) return;
+  runId++;
+  S = JSON.parse(undoStack.pop());
+  sel = { faces: [], boosters: 0 };
+  step();
+}
+
+// ---------- 설정 ----------
+function openSetup() {
+  $('aiSeg').innerHTML = [1, 2, 3, 4].map(n => `<button data-n="${n}" class="${n === setupAI ? 'on' : ''}">${n}명</button>`).join('');
+  $('aiSeg').querySelectorAll('button').forEach(b => (b.onclick = () => { setupAI = +b.dataset.n; openSetup(); }));
+  $('startSeg').innerHTML = [['me', '내가 먼저'], ['rand', '무작위']].map(([k, t]) => `<button data-k="${k}" class="${k === setupStart ? 'on' : ''}">${t}</button>`).join('');
+  $('startSeg').querySelectorAll('button').forEach(b => (b.onclick = () => { setupStart = b.dataset.k; openSetup(); }));
+  $('setup').classList.add('on');
+}
+const AI_NAMES = ['치즈냥', '고등어냥', '삼색냥', '턱시도냥'];
+$('goBtn').onclick = () => {
+  const players = [{ name: ($('myName').value || '나').trim(), isAI: false }];
+  for (let i = 0; i < setupAI; i++) players.push({ name: AI_NAMES[i], isAI: true });
+  const starter = setupStart === 'me' ? 0 : Math.floor(Math.random() * players.length);
+  runId++;
+  DICE_LOG = [];
+  S = newGame({ players, starter });
+  S.lastRoll = null;
+  undoStack = [];
+  $('setup').classList.remove('on');
+  step();
+};
+$('undoBtn').onclick = undo;
+$('newBtn').onclick = openSetup;
+$('rulesBtn').onclick = () => $('rules').classList.add('on');
+$('closeRules').onclick = () => $('rules').classList.remove('on');
+$('speedBtn').onclick = () => { fast = !fast; $('speedBtn').textContent = fast ? '🐇 빠르게' : '🐢 보통'; };
+$('astroRules').innerHTML = ASTRO_KEYS.map(t => `<li>${ASTROS[t].icon} <b>${ASTROS[t].name}</b>: ${ASTROS[t].desc}</li>`).join('');
+$('goalRules').innerHTML = GOALS.map(g => `<li>🏅 <b>${g.name}</b>: ${g.desc}</li>`).join('');
+
+window.__S = () => S;
+// 첫 화면: 미리보기용 게임을 만들고 설정 창 띄우기
+S = newGame({ players: [{ name: '나', isAI: false }, { name: AI_NAMES[0], isAI: true }, { name: AI_NAMES[1], isAI: true }], starter: 0 });
+S.lastRoll = null;
+renderAll();
+openSetup();
+}
+</script>
+</body>
+</html>

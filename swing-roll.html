@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>스윙 앤 롤 — 컴퓨터 대전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 야구장 전광판 옆 테이블 — 경쾌하지만 판정은 또렷하게
+   IDEA: 잔디 위 대결판, 카드마다 9칸 투구 추적판
+   PICTURE: 다이아몬드 + 공(투수)과 배트(타자)가 겹쳐 보이는 큰 9칸 판
+   COLOUR and TYPE: 잔디 초록 · 상 빨강 · 중 노랑 · 하 파랑 / Black Han Sans + Noto Sans KR
+   LAYOUT: 전광판 → 그라운드 → 버튼 → 내 손패 → 주사위·판정표 */
+:root{color-scheme:light dark;
+--bg:light-dark(#eef3ea,#0f1a13);--ink:light-dark(#13261a,#e9f1ea);
+--grass:light-dark(#2f7a46,#1f5132);--grass2:light-dark(#3a8c53,#265e3b);
+--chalk:#fbfaf4;--board:light-dark(#13261a,#0a120d);
+--card:light-dark(#fffdf6,#1b2a20);--line:light-dark(#cfd9cc,#2e4235);--mute:light-dark(#5b6d60,#9fb3a5);
+--T:#d8283f;--M:#e9b824;--B:#2f6fc0;--red:#d8283f;--blue:#1d3f9a;--green:#2e9a4a;--hit:#e9b824}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip}
+h1{font:400 clamp(26px,5vw,40px)/1.05 "Black Han Sans",sans-serif;margin:0}
+h2{font:400 19px "Black Han Sans";margin:0 0 6px}
+.wrap{max-width:1100px;margin:0 auto;padding:16px max(4vw,12px) 40px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:end;justify-content:space-between;margin-bottom:12px}
+header p{margin:0;color:var(--mute);font-size:14px}
+.ng{display:flex;gap:6px;flex-wrap:wrap}
+.sb{background:var(--board);color:#f3f6ee;border-radius:14px;padding:10px 12px;overflow-x:auto}
+.sb table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.sb th,.sb td{padding:4px 6px;text-align:center;font-size:15px;white-space:nowrap}
+.sb th{color:#9fb3a5;font-weight:400;font-size:13px}
+.sb td:first-child,.sb th:first-child{text-align:left}
+.sb .r{color:var(--hit);font-weight:900;font-size:18px}
+.sb .now{outline:2px solid var(--hit);outline-offset:-2px;border-radius:4px}
+.status{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin-top:8px;font-size:15px}
+.outs i{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--red);margin-left:4px;vertical-align:-1px}
+.outs i.on{background:var(--red)}
+.ground{margin-top:12px;background:linear-gradient(var(--grass),var(--grass2));border-radius:18px;padding:14px;display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:14px;color:var(--chalk)}
+.dia svg{width:100%;height:auto;display:block}
+.duel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,150px) minmax(0,1fr);gap:10px;align-items:start}
+.side h3{margin:0 0 4px;font-size:14px;font-weight:700}
+.zcol{text-align:center}
+.verdict{font:400 20px "Black Han Sans";margin-top:6px}
+.mini{font-size:13px;opacity:.92;margin-top:6px;line-height:1.4}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border-radius:7px;background:#d9ddd6;width:84px}
+.grid span{aspect-ratio:1;border-radius:3px;background:#fff;display:grid;place-items:center;font-size:13px;line-height:1}
+.grid.big{width:132px;margin:0 auto;background:rgba(255,255,255,.35);border:2px solid var(--chalk)}
+.grid.big span{font-size:22px}
+.grid .bt{background:#f3c4a0}.grid .bl{background:#cfe0ff}.grid .both{background:var(--hit)}
+.card{background:var(--card);color:var(--ink);border-radius:12px;padding:8px 9px;border:2px solid var(--line);border-top-width:8px;text-align:left;font:inherit;width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 8px;align-items:start}
+.card.zT{border-top-color:var(--T)}.card.zM{border-top-color:var(--M)}.card.zB{border-top-color:var(--B)}
+button.card{cursor:pointer;min-height:44px}
+button.card:focus-visible,.btn:focus-visible{outline:3px solid var(--hit);outline-offset:2px}
+.card.sel{border-color:var(--hit);box-shadow:0 0 0 3px var(--hit)}
+.card .top{grid-column:1/-1;display:flex;justify-content:space-between;gap:4px;align-items:baseline}
+.card b{font-size:15px;line-height:1.2}
+.tag{font-size:12px;padding:1px 7px;border-radius:99px;color:#fff;white-space:nowrap}
+.tag.bat{background:var(--blue)}.tag.pit{background:var(--red)}
+.ab{font-size:13px;line-height:1.35}.ab strong{display:block;color:var(--red)}
+.card.bat .ab strong{color:var(--blue)}
+.off{text-decoration:line-through;opacity:.55}
+.backs{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.backs span{width:24px;height:34px;border-radius:5px;border:2px solid #fff;display:grid;place-items:center;font:700 12px "Noto Sans KR";color:#fff}
+.backs .T{background:var(--T)}.backs .M{background:var(--M);color:#1a1a1a}.backs .B{background:var(--B)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+.btn{min-height:44px;padding:0 16px;border-radius:12px;border:2px solid var(--ink);background:transparent;color:var(--ink);font:700 15px "Noto Sans KR";cursor:pointer}
+.btn.main{background:var(--green);border-color:var(--green);color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.msg{font-size:17px;font-weight:700;margin:6px 0 0;min-height:1.6em}
+.msg.good{color:var(--green)}.msg.bad{color:var(--red)}
+.mine{margin-top:12px;display:grid;gap:12px}
+.hand{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.hint{font-size:13px;color:var(--mute);margin:2px 0 8px}
+.panel{margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.dice{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.die{width:50px;height:50px;border-radius:11px;background:#fff;border:2px solid #333;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:7px}
+.die i{width:9px;height:9px;border-radius:50%;background:#1a1a1a;place-self:center}
+.die.q{place-items:center;font:400 24px "Black Han Sans";color:#999;grid-template:1fr/1fr}
+.die.p{border-color:var(--red)}.die.b{border-color:var(--blue)}.die.x{border-style:dashed}
+.dlab{font-size:12px;color:var(--mute);text-align:center}
+.die.roll{animation:sh .45s ease}
+@keyframes sh{0%{transform:rotate(0)}30%{transform:rotate(-25deg) scale(1.1)}60%{transform:rotate(20deg)}100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.die.roll{animation:none}}
+.sum{font:400 32px "Black Han Sans"}
+.tbls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tbls>div{border-radius:10px;padding:6px;color:#fff}
+.tbls .pt{background:var(--red)}.tbls .bt2{background:var(--blue)}
+.tbls h3{font:400 15px "Black Han Sans";margin:2px 4px 4px}
+.tbls .dim{opacity:.45}
+table.tbl{border-collapse:collapse;width:100%;font-size:13px;background:#fff;color:#1a1a1a;border-radius:6px;overflow:hidden}
+.tbl td{padding:3px 6px;border-bottom:1px solid #e3e3e3}
+.tbl td:first-child{width:2.2em;text-align:right;font-variant-numeric:tabular-nums;font-weight:900}
+.tbl tr.hl td{background:var(--hit);font-weight:700}
+details{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+summary{cursor:pointer;font-weight:700;min-height:32px}
+.log{max-height:260px;overflow:auto;font-size:14px;margin:6px 0 0;padding-left:18px}
+.rules{font-size:14px}.rules li{margin-bottom:4px}
+.over{background:var(--board);color:#fff;border-radius:14px;padding:16px;margin-top:12px;text-align:center}
+.over h2{font-size:32px;margin:0}
+@media(max-width:760px){.ground{grid-template-columns:1fr}.dia{max-width:200px;margin:0 auto;width:100%}.panel{grid-template-columns:1fr}}
+@media(max-width:520px){.duel{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.duel .zcol{grid-column:1/-1;order:-1}.tbls{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>스윙 앤 롤</h1><p>1대1 야구 심리전 · 나 vs 컴퓨터 · 3라운드, 7점이면 즉시 승리, 동점이면 홈 팀 승리</p></div>
+  <div class="ng"><button class="btn" id="ngAway">새 게임 (나 원정·선공)</button><button class="btn" id="ngHome">새 게임 (나 홈·후공)</button></div>
+</header>
+
+<div class="sb" id="sb"></div>
+<div class="status" id="status"></div>
+
+<section class="ground">
+  <div class="dia" id="dia"></div>
+  <div class="duel">
+    <div class="side" id="leftSide"></div>
+    <div class="zcol"><div class="grid big" id="zone"></div><div class="verdict" id="verdict"></div></div>
+    <div class="side" id="rightSide"></div>
+  </div>
+</section>
+
+<div class="bar">
+  <button class="btn main" id="subBtn">카드 제출</button>
+  <button class="btn" id="undoBtn">↶ 무르기</button>
+  <button class="btn main" id="rollBtn">주사위 굴리기</button>
+  <button class="btn main" id="nextBtn">다음 타석 ▶</button>
+</div>
+<p class="msg" id="msg"></p>
+<div id="overBox"></div>
+
+<section class="mine" id="mine"></section>
+
+<section class="panel">
+  <div class="box">
+    <h2>주사위</h2>
+    <div class="dice" id="dice"></div>
+    <p class="hint" id="modTxt"></p>
+  </div>
+  <div class="box">
+    <h2>판정 타일</h2>
+    <div class="tbls" id="tbls"></div>
+  </div>
+</section>
+
+<details>
+  <summary>규칙 보기</summary>
+  <ol class="rules">
+    <li>3라운드. 홈 팀이 먼저 투수(초: 원정 공격, 말: 홈 공격). 3아웃이면 역할 교대, 주자는 치웁니다. 반 이닝은 라운드 번호의 루(1라운드 1루, 2라운드 2루, 3라운드 3루)에 주자 1명을 두고 시작합니다. 각자 타자 3번, 투수 3번.</li>
+    <li>반 이닝마다 투수는 투수 카드, 타자는 타자 카드를 <b>6장(빨강·노랑·파랑 2장씩, 선수와 능력은 무작위로 섞임)</b> 받습니다. 그 라운드에 받은 카드는 끝나면 박스로 돌아갑니다.</li>
+    <li>카드 색(뒷면) = 빨강 상 · 노랑 중 · 파랑 하. 손패 뒷면은 상대에게 보입니다.</li>
+    <li>타석마다 1장씩 비공개로 내고 동시에 공개. 공(⚾) 칸이 배트(🏏) 칸과 겹치면 <b>타격 성공 → 타자 판정 타일 + 타자 능력</b>, 안 겹치면 <b>헛스윙 → 투수 판정 타일 + 투수 능력</b>.</li>
+    <li>투수와 타자가 주사위를 1개씩 굴려 합으로 판정. 합이 1이면 2, 13 이상이면 12로 봅니다.</li>
+    <li>⚡ 즉시 발동 효과는 공개하자마자 발동합니다(투수의 취소 능력으로 막을 수 있음).</li>
+    <li>게임 종료: 3라운드 종료, 또는 한 팀이 7점 이상이면 즉시. 점수가 같으면 홈 팀 승리.</li>
+    <li><b>무르기:</b> 카드 제출은 주사위를 굴리기 전까지 되돌릴 수 있습니다(컴퓨터도 다시 고릅니다). 주사위를 굴린 뒤에는 무를 수 없습니다.</li>
+  </ol>
+  <p class="hint">카드 24종의 칸 배치·능력과 판정 타일은 실물 사진을 옮겼고(사진이 작아 일부 칸은 추정), 선수 이름은 가상입니다. 손패를 다 쓰면 그 반 이닝이 끝나는 것으로 처리했습니다.</p>
+</details>
+<details>
+  <summary>경기 기록</summary>
+  <ol class="log" id="log"></ol>
+</details>
+</div>
+
+<script>
+{
+const Z={T:"상",M:"중",B:"하"},ZK=["T","M","B"];
+/* 판정 타일 */
+const PIT={2:"dp",3:"k",4:"k",5:"k",6:"fly",7:"fly",8:"ground",9:"ground",10:"bb",11:"hit",12:"hr"};
+const BAT={2:"dp",3:"fly",4:"ground",5:"ground",6:"bb",7:"hit",8:"hit",9:"double",10:"triple",11:"hr",12:"hr"};
+const RN={dp:"병살타",k:"삼진",fly:"뜬공 아웃",ground:"땅볼 아웃",bb:"볼넷",hit:"안타",double:"2루타",triple:"3루타",hr:"홈런",out:"타자 아웃",dp2:"타자·선두 주자 아웃",adv2:"타자·주자 2칸",walk1:"타자 1칸 이동"};
+const RD={dp:"타자 아웃 + 선두 주자 아웃",k:"타자 아웃",fly:"타자 아웃, 3루 주자 1칸",ground:"타자 아웃, 1·2루 주자 1칸",bb:"타자 1칸",hit:"타자와 모든 주자 1칸",double:"타자와 모든 주자 2칸",triple:"타자와 모든 주자 3칸",hr:"타자와 모든 주자 4칸"};
+/* 능력 */
+const AB={
+ bolt:["⚡ 즉시 발동","주사위 1개를 굴려 3~6이면 선두 주자 1칸 이동"],
+ cancel:["즉시 효과 취소","상대의 ⚡ 즉시 발동 효과를 취소"],
+ fix3:["주사위 고정(3)","자신의 주사위를 굴리지 않고 3으로 고정"],
+ fix4:["주사위 고정(4)","자신의 주사위를 굴리지 않고 4로 고정"],
+ walk1:["즉시 출루","주사위를 굴리지 않고 즉시 타자 1칸 이동"],
+ reroll:["재굴림","원하면 자신의 주사위를 한 번 다시 굴림"],
+ minus1:["-1","주사위 결과값에서 1을 뺌"],
+ plus2:["+2","주사위 결과값에 2를 더함"],
+ one:["주사위 1개","주사위를 1개만 굴림"],
+ three:["주사위 3개","주사위를 3개 굴림"],
+ twoOut:["2아웃 압박","2아웃이면 주사위 없이 즉시 타자 아웃"],
+ out59:["판정 변경","5~9가 나오면 타자 아웃"],
+ dp68:["판정 변경","6~8이 나오면 타자와 선두 주자 아웃"],
+ adv58:["판정 변경","5~8이 나오면 타자와 모든 주자 2칸 이동"],
+ hr68:["판정 변경","6~8이 나오면 홈런!"],
+ steal:["카드 버리기","상대 손패에서 무작위 1장을 버림칸으로"],
+ back:["카드 회수","자신의 버림칸에서 1장을 손패로 가져옴"]};
+/* 카드 24종: [능력, 파랑(하) 칸, 노랑(중) 칸, 빨강(상) 칸] — 칸 0~8은 왼쪽 위부터 */
+const PDEF=[["fix3",[6],[5],[0]],["cancel",[7],[5],[2]],["cancel",[7],[3],[1]],["cancel",[6],[3],[0]],["steal",[8],[3],[2]],["back",[6],[5],[0]],
+ ["dp68",[8],[3],[2]],["reroll",[7],[3],[2]],["twoOut",[7],[4],[1]],["minus1",[7],[4],[1]],["one",[7,8],[3,4],[0,1]],["out59",[6],[5],[0]]];
+const BDEF=[["bolt",[3,4,6,7],[2,3,4,5],[1,2,4,5]],["bolt",[4,5,7,8],[3,4,5,6],[0,1,3,4]],["bolt",[4,6,7,8],[3,4,5,7],[0,1,2,4]],["walk1",[4,5,6,7,8],[1,3,4,5,7],[0,1,2,3,4]],
+ ["steal",[5,6,7,8],[1,3,4,5],[0,1,2,5]],["back",[3,6,7,8],[3,4,5,7],[0,1,2,3]],["hr68",[7,8],[4,5],[0,1]],["adv58",[6,7,8],[3,4,5],[0,1,2]],
+ ["three",[6,7],[3,4],[1,2]],["plus2",[6,7,8],[3,4,5],[0,1,2]],["fix4",[3,4,6,7],[0,3,4,5],[1,2,4,5]],["reroll",[4,5,7,8],[3,4,5,8],[0,1,3,4]]];
+const SUR="김이박최정강조윤장임한오서신권황안송류홍".split("");
+const GIV=["도윤","서준","하준","민재","지호","건우","우진","현우","선우","태윤","시후","은찬","예준","준혁","도현","주원","승민","재윤","유찬","한결","이안","지훈","로운","다온"];
+const $=id=>document.getElementById(id);
+const rnd=n=>Math.floor(Math.random()*n);
+const d6=()=>1+rnd(6);
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const pickW=w=>{let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){r-=w[i];if(r<=0)return i}return w.length-1};
+const clamp=v=>Math.max(2,Math.min(12,v));
+let S,undo=[],anim=false;
+
+/* 색별 평균 커버리지(컴퓨터가 뒷면 색만 보고 추정할 때 사용) */
+const COV={bat:{},pit:{}};
+for(const [kind,defs] of [["bat",BDEF],["pit",PDEF]])ZK.forEach((z,zi)=>{const c=Array(9).fill(0);defs.forEach(d=>d[[3,2,1][zi]].forEach(i=>c[i]+=1/defs.length));COV[kind][z]=c});
+
+function makeSets(kind){const defs=kind==="bat"?BDEF:PDEF,g=shuffle(GIV.slice());
+  return shuffle(defs.map((d,k)=>{const name=SUR[rnd(SUR.length)]+g[k];return ZK.map((z,zi)=>({id:`${kind}${k}${z}`,kind,name,z,ab:d[0],cells:d[[3,2,1][zi]]}))}))}
+function makePools(kind){const p={T:[],M:[],B:[]};makeSets(kind).flat().forEach(c=>p[c.z].push(c));ZK.forEach(z=>shuffle(p[z]));return p}
+const other=w=>w==="p"?"c":"p";
+const away=()=>other(S.home);
+const batSide=()=>S.half===0?away():S.home;
+const defSide=()=>other(batSide());
+const roleOf=w=>w===batSide()?"bat":"pit";
+const tot=w=>S.line[w].reduce((a,b)=>a+(b||0),0);
+const nm=w=>w==="p"?"나":"컴퓨터";
+
+function newGame(home){
+  S={home,inning:1,half:0,outs:0,bases:[0,0,0],line:{p:[],c:[]},phase:"",
+     sets:{bat:makePools("bat"),pit:makePools("pit")},hand:{p:[],c:[]},disc:{p:[],c:[]},
+     sel:-1,played:null,dice:null,mods:[],res:null,log:[],over:null,msg:"",tone:"",pending:null};
+  undo=[];startHalf();render();
+}
+function startHalf(){
+  S.outs=0;S.bases=[0,0,0];if(S.inning<=3)S.bases[S.inning-1]=1;S.disc={p:[],c:[]};
+  for(const w of["p","c"]){const k=roleOf(w);S.hand[w]=ZK.flatMap(z=>S.sets[k][z].splice(0,2))}
+  S.line[batSide()][S.inning-1]=S.line[batSide()][S.inning-1]||0;
+  S.sel=-1;S.phase="select";S.tone="";
+  S.msg=`${S.inning}라운드 ${S.half?"말":"초"} · ${S.inning}루에 주자를 두고 시작 — ${batSide()==="p"?"내가 공격! 타자 카드를":"내가 수비! 투수 카드를"} 1장 고르세요.`;
+}
+/* 컴퓨터 선택 */
+function contactP(card,oppHand){const ok=roleOf("c")==="pit"?"bat":"pit";let s=0;
+  for(const o of oppHand){const cov=COV[ok][o.z];
+    if(card.kind==="pit")s+=1-card.cells.reduce((p,i)=>p*(1-cov[i]),1);
+    else s+=cov.reduce((a,v,i)=>a+(card.cells.includes(i)?v:0),0)}
+  return s/(oppHand.length||1)}
+function aiPick(){
+  const me=S.hand.c,opp=S.hand.p,b=S.bases,runners=b.some(x=>x);
+  return pickW(me.map(c=>{const p=Math.min(.98,contactP(c,opp));let v;
+    if(c.kind==="pit"){v=Math.max(.03,(1-p))**3;
+      if(c.ab==="twoOut"&&S.outs===2)v*=1.8;if(c.ab==="dp68"&&runners)v*=1.4;if(c.ab==="cancel"&&opp.some(x=>x.ab==="bolt"))v*=1.3;if(c.ab==="one")v*=1.3}
+    else{v=(p+.05)**2;if(c.ab==="bolt"&&runners)v*=1.4;if(c.ab==="hr68"||c.ab==="three"||c.ab==="plus2")v*=1.2;if(c.ab==="adv58"&&runners)v*=1.3}
+    return v}));
+}
+function submit(){
+  if(S.phase!=="select"||S.sel<0)return;
+  undo.push(JSON.stringify(S));
+  const ci=aiPick(),mine=S.hand.p.splice(S.sel,1)[0],theirs=S.hand.c.splice(ci,1)[0];
+  const bat=roleOf("p")==="bat",batter=bat?mine:theirs,pitcher=bat?theirs:mine;
+  const contact=pitcher.cells.some(i=>batter.cells.includes(i));
+  S.played={mine,theirs,batter,pitcher,contact,boltOff:batter.ab==="bolt"&&pitcher.ab==="cancel"};
+  S.phase="reveal";S.sel=-1;S.dice=null;S.mods=[];
+  S.msg=(contact?"공이 배트에 걸렸다 — 타격 성공! 타자 판정 타일.":"헛스윙! 투수 판정 타일.")+(batter.ab==="bolt"?(S.played.boltOff?" ⚡ 즉시 효과는 투수가 취소!":" ⚡ 즉시 발동 효과 대기 중."):"");
+  S.tone=contact===bat?"good":"bad";render();
+}
+function doUndo(){if(!undo.length||S.phase!=="reveal")return;S=JSON.parse(undo.pop());S.msg="무르기 완료. 카드를 다시 고르세요.";S.tone="";render()}
+
+/* 주자 이동 */
+function adv(n,bb){let runs=0;const nb=[0,0,0];
+  for(let i=2;i>=0;i--)if(S.bases[i]){const t=i+n;if(t>=3)runs++;else nb[t]=1}
+  if(bb){if(bb>=4)runs++;else nb[bb-1]=1}S.bases=nb;return runs}
+function force(){let r=0;const b=S.bases;if(b[0]){if(b[1]){if(b[2])r++;b[2]=1}b[1]=1}b[0]=1;return r}
+function leadIdx(){for(let i=2;i>=0;i--)if(S.bases[i])return i;return -1}
+function leadAdv(){const i=leadIdx();if(i<0)return 0;S.bases[i]=0;if(i===2)return 1;if(S.bases[i+1]){/* 앞 칸이 막히면 밀어냄 */}S.bases[i+1]=1;return 0}
+
+function roll(){
+  if(S.phase!=="reveal")return;undo=[];anim=true;
+  const P=S.played,{batter,pitcher,contact}=P,side=batSide();
+  S.mods=[];let runs=0;const D={pd:null,bd:null,extra:[],note:[]};
+  // 1) ⚡ 즉시 발동
+  if(batter.ab==="bolt"){
+    if(P.boltOff)S.mods.push("⚡ 취소됨");
+    else{const v=d6();D.bolt=v;if(v>=3&&leadIdx()>=0){runs+=leadAdv();S.mods.push(`⚡ ${v}: 선두 주자 1칸`)}else S.mods.push(`⚡ ${v}: 효과 없음`)}
+  }
+  const ab=contact?batter.ab:pitcher.ab;
+  let res=null,sum=null;
+  // 2) 주사위 없는 능력
+  if(contact&&ab==="walk1"){res="walk1";S.mods.push("즉시 출루")}
+  else if(!contact&&ab==="twoOut"&&S.outs===2){res="out";S.mods.push("2아웃 압박: 즉시 아웃")}
+  else{
+    // 3) 주사위: 투수 1개 + 타자 1개
+    let pd=d6(),bd=d6();
+    if(!contact&&ab==="fix3"){pd=3;D.pFix=1;S.mods.push("투수 주사위 3 고정")}
+    if(contact&&ab==="fix4"){bd=4;D.bFix=1;S.mods.push("타자 주사위 4 고정")}
+    if(!contact&&ab==="reroll"){const keep=S.hand&&defSide()==="c"?pd<=3:null;if(defSide()==="c"){if(pd>=4){D.pOld=pd;pd=d6();S.mods.push("투수 재굴림")}}else{S.pending={who:"pit",pd,bd,runs};}}
+    if(contact&&ab==="reroll"){if(side==="c"){if(bd<=3){D.bOld=bd;bd=d6();S.mods.push("타자 재굴림")}}else{S.pending={who:"bat",pd,bd,runs}}}
+    if(S.pending){S.dice={pd,bd,extra:[],bolt:D.bolt};S.phase="reroll";S.msg=`주사위 ${pd}+${bd}. 내 주사위(${S.pending.who==="pit"?pd:bd})를 다시 굴릴까요?`;S.tone="";render();return}
+    finishDice(pd,bd,D,runs);return;
+  }
+  applyRes(res,null,D,runs);
+}
+function finishDice(pd,bd,D,runs){
+  const P=S.played,contact=P.contact,ab=contact?P.batter.ab:P.pitcher.ab;
+  let sum,dice=[pd,bd],shown={pd,bd,extra:[],bolt:D.bolt,pOld:D.pOld,bOld:D.bOld,pFix:D.pFix,bFix:D.bFix};
+  if(!contact&&ab==="one"){sum=pd;shown.bd=null;S.mods.push("주사위 1개만")}
+  else if(contact&&ab==="three"){const e=d6();shown.extra=[e];sum=pd+bd+e;S.mods.push("주사위 3개")}
+  else sum=pd+bd;
+  if(!contact&&ab==="minus1"){sum-=1;S.mods.push("-1")}
+  if(contact&&ab==="plus2"){sum+=2;S.mods.push("+2")}
+  const raw=sum;sum=clamp(sum);if(raw!==sum)S.mods.push(`${raw} → ${sum}`);
+  let res=(contact?BAT:PIT)[sum];
+  if(!contact&&ab==="out59"&&sum>=5&&sum<=9){res="out";S.mods.push("5~9 → 타자 아웃")}
+  if(!contact&&ab==="dp68"&&sum>=6&&sum<=8){res="dp2";S.mods.push("6~8 → 타자·선두 주자 아웃")}
+  if(contact&&ab==="adv58"&&sum>=5&&sum<=8){res="adv2";S.mods.push("5~8 → 모두 2칸")}
+  if(contact&&ab==="hr68"&&sum>=6&&sum<=8){res="hr";S.mods.push("6~8 → 홈런!")}
+  shown.sum=sum;shown.table=contact?"bat":"pit";S.dice=shown;
+  applyRes(res,sum,D,runs);
+}
+function rerollChoice(yes){
+  if(S.phase!=="reroll")return;const p=S.pending;S.pending=null;anim=true;
+  const D={bolt:S.dice.bolt};let {pd,bd}=p;
+  if(yes){if(p.who==="pit"){D.pOld=pd;pd=d6()}else{D.bOld=bd;bd=d6()}S.mods.push("내 주사위 재굴림")}else S.mods.push("재굴림 안 함");
+  finishDice(pd,bd,D,p.runs);
+}
+function applyRes(res,sum,D,runs){
+  const P=S.played,{batter,pitcher,contact}=P,side=batSide();
+  if(!S.dice)S.dice={pd:null,bd:null,extra:[],bolt:D.bolt,sum:null,table:null};
+  let isOut=false;
+  const outLead=()=>{const i=leadIdx();if(i>=0&&S.outs<3){S.bases[i]=0;S.outs++}};
+  switch(res){
+    case"k":case"out":S.outs++;isOut=true;break;
+    case"fly":S.outs++;isOut=true;if(S.outs<3&&S.bases[2]){S.bases[2]=0;runs++}break;
+    case"ground":{S.outs++;isOut=true;if(S.outs<3){const[r1,r2,r3]=S.bases;if(r2&&r3)runs++;S.bases=[0,r1,(r2||r3)?1:0]}break}
+    case"dp":case"dp2":S.outs++;isOut=true;outLead();break;
+    case"bb":case"walk1":runs+=force();break;
+    case"hit":runs+=adv(1,1);break;case"double":case"adv2":runs+=adv(2,2);break;case"triple":runs+=adv(3,3);break;case"hr":runs+=adv(4,4);break;
+  }
+  S.line[side][S.inning-1]+=runs;
+  S.disc[side].push(batter);S.disc[defSide()].push(pitcher);
+  // 카드 능력(버리기/회수)
+  const actor=contact?side:defSide(),ab=contact?batter.ab:pitcher.ab;
+  if(ab==="steal"){const t=other(actor);if(S.hand[t].length){const c=S.hand[t].splice(rnd(S.hand[t].length),1)[0];S.disc[t].push(c);S.mods.push(`${nm(t)} 손패 1장(${Z[c.z]}) 버림`)}}
+  let wantBack=false;
+  if(ab==="back"){const pool=S.disc[actor].filter(c=>c!==batter&&c!==pitcher);
+    if(pool.length){if(actor==="c"){const c=pool[rnd(pool.length)];S.disc.c.splice(S.disc.c.indexOf(c),1);S.hand.c.push(c);S.mods.push(`컴퓨터가 버림칸에서 ${Z[c.z]} 카드 회수`)}else wantBack=true}}
+  S.res=res;
+  const ds=S.dice&&S.dice.sum!=null?`${S.dice.sum} → `:"";
+  S.msg=`${ds}${RN[res]}${runs?` · ${runs}점!`:""}${S.outs>=3?" · 3아웃":""}`;
+  S.tone=(side==="p")===(!isOut||runs>0)?"good":"bad";
+  const dd=S.dice;const dtxt=dd&&dd.pd!=null?` · 🎲투${dd.pd}${dd.bd!=null?"+타"+dd.bd:""}${dd.extra.length?"+"+dd.extra.join("+"):""}`:"";
+  S.log.unshift(`${S.inning}R ${S.half?"말":"초"} ${nm(side)} 공격 · ${batter.name}(${Z[batter.z]}) vs ${pitcher.name}(${Z[pitcher.z]}) · ${contact?"타격":"헛스윙"}${dtxt}${S.mods.length?" ["+S.mods.join(", ")+"]":""} → ${RN[res]}${runs?` +${runs}점`:""} · ${S.outs}아웃`);
+  if(tot(side)>=7)return end(`${nm(side)} 7점 돌파!`);
+  if(side===S.home&&S.half===1&&S.inning>=3&&tot(S.home)>tot(away()))return end("끝내기!");
+  if(wantBack){S.phase="back";S.msg+=" — 카드 회수: 버림칸에서 1장을 고르세요.";render();return}
+  S.phase="result";afterPA();render();
+}
+function pickBack(i){if(S.phase!=="back")return;const pool=S.disc.p.filter(c=>c!==S.played.batter&&c!==S.played.pitcher);const c=pool[i];S.disc.p.splice(S.disc.p.indexOf(c),1);S.hand.p.push(c);S.mods.push(`버림칸에서 ${c.name}(${Z[c.z]}) 회수`);S.msg=`${c.name}(${Z[c.z]}) 카드를 손패로 가져왔습니다.`;S.phase="result";afterPA();render()}
+function afterPA(){if(S.outs<3&&(!S.hand.p.length||!S.hand.c.length)){S.cardsOut=true;S.msg+=" · 손패 소진으로 반 이닝 종료"}}
+function next(){
+  if(S.phase!=="result")return;
+  S.played=null;S.dice=null;S.res=null;S.mods=[];
+  if(S.outs>=3||S.cardsOut){S.cardsOut=false;
+    if(S.half===0){if(S.inning>=3&&tot(S.home)>=tot(away()))return end(tot(S.home)===tot(away())?"동점 — 홈 팀 승리":"");S.half=1}
+    else{if(S.inning>=3)return end(tot("p")===tot("c")?"동점 — 홈 팀 승리":"");S.inning++;S.half=0}
+    startHalf();
+  }else{S.phase="select";S.msg="다음 타석. 카드를 고르세요.";S.tone=""}
+  render();
+}
+function end(why){
+  const p=tot("p"),c=tot("c");S.phase="over";const win=p>c||(p===c&&S.home==="p");
+  S.over=[win?"승리!":"패배",`${why?why+" · ":""}나 ${p} : ${c} 컴퓨터`];render();
+}
+
+/* ---------- 화면 ---------- */
+function gridHTML(card,big){let h="";for(let i=0;i<9;i++){const isB=card.kind==="pit"&&card.cells.includes(i),isT=card.kind==="bat"&&card.cells.includes(i);h+=`<span class="${isB?"bl":isT?"bt":""}">${isB?"⚾":isT?"🏏":""}</span>`}return `<div class="grid">${h}</div>`}
+function cardHTML(c,btn,i,sel,off){
+  const ab=AB[c.ab];
+  const inner=`<div class="top"><b>${c.name}</b><span class="tag ${c.kind}">${c.kind==="bat"?"타자":"투수"} · ${Z[c.z]}</span></div>${gridHTML(c)}<div class="ab${off?" off":""}"><strong>${ab[0]}</strong>${ab[1]}<br><small>${c.ab==="bolt"?"공개 즉시":c.ab==="cancel"?"공개 즉시":c.kind==="bat"?"타격 성공 시":"헛스윙 시"}</small></div>`;
+  return btn?`<button class="card ${c.kind} z${c.z}${sel?" sel":""}" data-${btn}="${i}" aria-pressed="${!!sel}">${inner}</button>`:`<div class="card ${c.kind} z${c.z}">${inner}</div>`;
+}
+const backs=h=>`<div class="backs">${h.slice().sort((a,b)=>ZK.indexOf(a.z)-ZK.indexOf(b.z)).map(c=>`<span class="${c.z}">${Z[c.z]}</span>`).join("")||"<small>없음</small>"}</div>`;
+function dieHTML(v,cls,lab){const P={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+  return `<div><div class="die${cls}">${[...Array(9)].map((_,i)=>P[v].includes(i)?"<i></i>":"<span></span>").join("")}</div><div class="dlab">${lab}</div></div>`}
+function render(){
+  const inn=Math.max(3,S.inning),A=away(),H=S.home;
+  const row=w=>`<tr><td>${nm(w)} <small>${w===H?"홈":"원정"}</small></td>${[...Array(inn)].map((_,i)=>{const v=S.line[w][i];const now=S.phase!=="over"&&S.inning-1===i&&batSide()===w;return `<td class="${now?"now":""}">${v===undefined?"":v}</td>`}).join("")}<td class="r">${tot(w)}</td></tr>`;
+  $("sb").innerHTML=`<table><tr><th>팀</th>${[...Array(inn)].map((_,i)=>`<th>${i+1}</th>`).join("")}<th>R</th></tr>${row(A)}${row(H)}</table>`;
+  $("status").innerHTML=`<b>${S.inning}라운드 ${S.half?"말":"초"}</b><span>공격: ${nm(batSide())}</span><span class="outs">아웃${[0,1,2].map(i=>`<i class="${i<S.outs?"on":""}"></i>`).join("")}</span>`;
+  const bp=[[150,100],[100,50],[50,100]],B=S.bases;
+  $("dia").innerHTML=`<svg viewBox="0 0 200 190" role="img" aria-label="주자: ${["1루","2루","3루"].filter((_,i)=>B[i]).join(", ")||"없음"}">
+   <path d="M100 175 L170 100 L100 25 L30 100 Z" fill="#c9773f" opacity=".9"/><path d="M100 160 L150 105 L100 50 L50 105 Z" fill="#3a8c53"/>
+   <circle cx="100" cy="105" r="11" fill="#c9773f"/><path d="M92 158 h16 v6 l-8 7 l-8 -7z" fill="#fbfaf4"/>
+   ${bp.map(([x,y],i)=>`<rect x="${x-9}" y="${y-9}" width="18" height="18" transform="rotate(45 ${x} ${y})" fill="${B[i]?"#e9b824":"#fbfaf4"}"/>${B[i]?`<circle cx="${x}" cy="${y-18}" r="7" fill="#fff" stroke="#13261a" stroke-width="2"/>`:""}`).join("")}
+   <text x="170" y="92" font-size="11" fill="#fbfaf4">1루</text><text x="90" y="14" font-size="11" fill="#fbfaf4">2루</text><text x="8" y="92" font-size="11" fill="#fbfaf4">3루</text></svg>`;
+  const P=S.played,side=w=>{
+    const role=roleOf(w),pc=P?(w==="p"?P.mine:P.theirs):null;
+    let h=`<h3>${nm(w)} · ${role==="bat"?"타자":"투수"}</h3>`;
+    h+=pc?cardHTML(pc,null,0,0,P&&((pc.kind==="bat")!==P.contact&&!["bolt","cancel"].includes(pc.ab)||(pc.ab==="bolt"&&P.boltOff))):`<div class="mini">${S.phase==="select"?"카드 고르는 중…":""}</div>`;
+    h+=`<div class="mini">손패 뒷면 ${S.hand[w].length}장</div>${backs(S.hand[w])}<div class="mini">버림칸: ${S.disc[w].map(c=>Z[c.z]).join(" ")||"없음"}</div>`;return h};
+  $("leftSide").innerHTML=side("p");$("rightSide").innerHTML=side("c");
+  let z="";for(let i=0;i<9;i++){const b=P&&P.pitcher.cells.includes(i),t=P&&P.batter.cells.includes(i);z+=`<span class="${b&&t?"both":b?"bl":t?"bt":""}">${b?"⚾":t?"🏏":""}</span>`}
+  $("zone").innerHTML=z;
+  $("verdict").textContent=P?(P.contact?"타격 성공!":"헛스윙!"):"VS";
+  const bat=roleOf("p")==="bat";
+  $("subBtn").disabled=!(S.phase==="select"&&S.sel>=0);
+  $("undoBtn").disabled=!(undo.length&&S.phase==="reveal");
+  $("rollBtn").disabled=S.phase!=="reveal";
+  $("nextBtn").disabled=S.phase!=="result";
+  $("nextBtn").textContent=(S.outs>=3||S.cardsOut)?"역할 교대 ▶":"다음 타석 ▶";
+  $("msg").textContent=S.msg;$("msg").className="msg "+(S.tone||"");
+  let m="";
+  if(S.phase==="reroll")m=`<div><h2>재굴림</h2><div class="bar" style="margin:0"><button class="btn main" data-rr="1">다시 굴리기</button><button class="btn" data-rr="0">그대로 두기</button></div></div>`;
+  if(S.phase==="back"){const pool=S.disc.p.filter(c=>c!==P.batter&&c!==P.pitcher);m=`<div><h2>버림칸에서 1장 회수</h2><div class="hand">${pool.map((c,i)=>cardHTML(c,"bk",i,false)).join("")}</div></div>`}
+  if(S.phase!=="over")m+=`<div><h2>내 손패 — ${bat?"타자":"투수"} 카드</h2>
+   <p class="hint">컴퓨터 손패 뒷면: ${backs(S.hand.c).replace(/<\/?div[^>]*>/g,"")} — ${bat?"투수 공(⚾)이 들어올 칸을 배트로 덮으면 타격 성공":"타자 배트(🏏)를 피해 던지면 헛스윙"}. 내 손패 뒷면도 컴퓨터에게 보입니다.</p>
+   <div class="hand">${S.hand.p.map((c,i)=>S.phase==="select"?cardHTML(c,"b",i,i===S.sel):cardHTML(c)).join("")}</div></div>`;
+  $("mine").innerHTML=m;
+  const D=S.dice;let dh="";
+  if(D&&(D.pd!=null||D.bolt)){const a=anim?" roll":"";
+    if(D.bolt)dh+=dieHTML(D.bolt," b x"+a,"⚡");
+    if(D.pd!=null)dh+=dieHTML(D.pd," p"+a,D.pFix?"투수(고정)":D.pOld?`투수(재 ${D.pOld}→)`:"투수");
+    if(D.bd!=null)dh+=dieHTML(D.bd," b"+a,D.bFix?"타자(고정)":D.bOld?`타자(재 ${D.bOld}→)`:"타자");
+    (D.extra||[]).forEach(v=>dh+=dieHTML(v," b"+a,"추가"));
+    if(D.sum!=null)dh+=`<div class="sum">= ${D.sum}</div>`;
+  }else dh=`<div><div class="die q">?</div><div class="dlab">투수</div></div><div><div class="die q">?</div><div class="dlab">타자</div></div>`;
+  $("dice").innerHTML=dh;
+  $("modTxt").textContent=S.mods.length?"발동: "+S.mods.join(", "):S.phase==="reveal"?"주사위를 굴리면 무르기를 할 수 없습니다.":"";
+  anim=false;
+  const tb=(T,cls,title,key)=>`<div class="${cls}${P&&P.contact!==(key==="bat")?" dim":""}"><h3>${title}</h3><table class="tbl">${Object.keys(T).map(k=>`<tr class="${D&&D.table===key&&+k===D.sum?"hl":""}"><td>${k}</td><td><b>${RN[T[k]]}</b> <small>${RD[T[k]]}</small></td></tr>`).join("")}</table></div>`;
+  $("tbls").innerHTML=tb(PIT,"pt","PITCHER 투수 (헛스윙)","pit")+tb(BAT,"bt2","BATTER 타자 (타격 성공)","bat");
+  $("log").innerHTML=S.log.map(l=>`<li>${l}</li>`).join("")||"<li>아직 기록이 없습니다.</li>";
+  $("overBox").innerHTML=S.over?`<div class="over"><h2>${S.over[0]}</h2><p>${S.over[1]}</p><button class="btn main" id="again">다시 하기</button></div>`:"";
+  if(S.over)$("again").onclick=()=>newGame(S.home);
+}
+$("mine").addEventListener("click",e=>{
+  const rr=e.target.closest("[data-rr]");if(rr)return rerollChoice(rr.dataset.rr==="1");
+  const bk=e.target.closest("[data-bk]");if(bk)return pickBack(+bk.dataset.bk);
+  const b=e.target.closest("[data-b]");if(!b||S.phase!=="select")return;const i=+b.dataset.b;S.sel=S.sel===i?-1:i;render()});
+$("subBtn").onclick=submit;$("undoBtn").onclick=doUndo;$("rollBtn").onclick=roll;$("nextBtn").onclick=next;
+$("ngAway").onclick=()=>newGame("c");$("ngHome").onclick=()=>newGame("p");
+newGame("c");
+}
+</script>
+</body>
+</html>

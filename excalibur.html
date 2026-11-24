@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>엑스칼리버 컴퓨터 대전</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Myeongjo:wght@800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 장난스러운 속임수 게임, 호숫가 안개 속 왕좌 다툼
+   IDEA: 아발론 호수 위에 흩어진 칩 더미, 테이블 위 손패
+   PICTURE: 3개 구역으로 나뉜 아발론 칩 밭이 화면의 중심
+   COLOUR/TYPE: 이끼빛 호수 + 깊은 숲 잉크 + 왕관 금색, 명조 제목 + 고운돋움 본문
+   LAYOUT: 상단 상대 → 아발론 → 하단 고정 손패·질문 패널 */
+:root{color-scheme:light dark;
+ --bg:light-dark(#e4ece2,#0f1b17);--panel:light-dark(#f4f8f1,#16261f);--ink:light-dark(#13261f,#e3ece4);
+ --mute:light-dark(#53685e,#93a99d);--line:light-dark(#c3d2c3,#2a3f35);--lake:light-dark(#bcd6cf,#173430);
+ --gold:light-dark(#a8790d,#e2b648);--red:light-dark(#b3203a,#ff6b82);--m:#2f7fd0;--f:#d6488f;--sw:#7c8790;--back:light-dark(#2f5a4c,#3d7563)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Gowun Dodum",system-ui,sans-serif;overflow-x:clip;padding-bottom:var(--dock,260px)}
+button{font:inherit;color:inherit;cursor:pointer}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px max(3vw,12px) 6px}
+h1{font:800 clamp(22px,5vw,32px)/1.05 "Nanum Myeongjo",serif;margin:0;flex:1 1 200px;letter-spacing:-.5px}
+h1 small{display:block;font:13px "Gowun Dodum";color:var(--mute);margin-top:4px;letter-spacing:0}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;min-height:40px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.pri{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.undo{border-color:var(--gold);color:var(--gold);font-weight:700}
+#status{padding:0 max(3vw,12px);color:var(--mute);font-size:14px}
+#status b{color:var(--ink)}#status .warn{color:var(--red);font-weight:700}
+main{padding:8px max(3vw,12px);max-width:1100px;margin:0 auto;display:grid;gap:12px}
+#opps{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.opp{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
+.opp.sel{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 30%,transparent);cursor:pointer}
+.opp .on{font-weight:700;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.tag{font-size:12px;color:var(--mute);font-weight:400}
+.dots{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 4px;align-items:center}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--back);border:1px solid color-mix(in srgb,var(--ink) 25%,transparent)}
+.prot{outline:2px solid var(--gold);outline-offset:1px}
+.oplay{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mute);min-height:20px}
+#avalon{background:var(--lake);border-radius:18px;padding:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;position:relative}
+#avalon h2{grid-column:1/-1;margin:0;font:800 18px "Nanum Myeongjo",serif;display:flex;justify-content:space-between;align-items:baseline}
+.reg{background:color-mix(in srgb,var(--panel) 55%,transparent);border-radius:12px;padding:6px;border:2px solid transparent}
+.reg.sel{border-color:var(--gold)}
+.reg .rh{font-size:13px;display:flex;justify-content:space-between;gap:4px;margin-bottom:4px}
+.reg .rh b.low{color:var(--red)}
+.slots{display:flex;flex-wrap:wrap;gap:4px}
+.slot{width:24px;height:24px;border-radius:50%;background:var(--back);border:2px solid color-mix(in srgb,#fff 30%,transparent);padding:0;font-size:8px;line-height:1;color:#fff;overflow:hidden}
+.slot.kn{background:var(--panel);color:var(--ink);font-size:7.5px;border-color:var(--gold)}
+.slot.pick{cursor:pointer;box-shadow:0 0 0 2px var(--gold)}
+.slot.pick:hover{transform:scale(1.15)}
+.slot.flip{background:var(--gold);color:#000}
+.rbtn{margin-top:6px;width:100%;font-size:12px;padding:6px 4px;min-height:34px}
+.blade{grid-column:1/-1;font-size:12px;color:var(--mute);text-align:center}
+.chip{width:58px;height:58px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:11.5px;line-height:1.1;padding:4px;background:var(--panel);border:4px solid var(--sw);word-break:keep-all;flex:none;position:relative;font-weight:700}
+.chip.m{border-color:var(--m)}.chip.f{border-color:var(--f)}
+.chip.E{background:linear-gradient(135deg,#ffd76a,#e08b2c);color:#3a2200;border-color:#8a6a2a}
+.chip.C{background:linear-gradient(135deg,#2e5b48,#0b1f18);color:#d6f5e0;border-color:#5a6a66}
+.chip.S{background:linear-gradient(135deg,#d9eef0,#8fb7bd);color:#13261f}
+.chip.sm{width:40px;height:40px;font-size:9px;border-width:3px;padding:2px}
+.chip.pick{cursor:pointer;box-shadow:0 0 0 3px var(--gold)}
+.chip.dim{opacity:.35}
+.chip.chosen{transform:translateY(-8px);box-shadow:0 6px 0 -2px var(--gold)}
+.chip .lk{position:absolute;top:-6px;right:-6px;font-size:14px}
+#dock{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:2px solid var(--line);box-shadow:0 -8px 24px rgba(0,0,0,.12);padding:8px max(3vw,12px) calc(8px + env(safe-area-inset-bottom));z-index:5;max-height:62vh;overflow:auto}
+#dock .in{max-width:1100px;margin:0 auto;display:grid;gap:6px}
+#q{font-weight:700;font-size:15.5px}
+#q .sub{display:block;font-weight:400;font-size:13px;color:var(--mute)}
+#qshow{display:flex;gap:6px;flex-wrap:wrap}
+#opts{display:flex;gap:6px;flex-wrap:wrap}
+#opts .btn{min-height:44px}
+#mine{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:4px}
+#mine .lab{font-size:12px;color:var(--mute);width:100%;display:flex;justify-content:space-between;gap:6px}
+#info{font-size:13px;color:var(--mute);min-height:18px}
+#logw{background:var(--panel);border-radius:14px;padding:8px 12px;border:1px solid var(--line)}
+#logw summary{font-weight:700;cursor:pointer}
+#log{max-height:260px;overflow:auto;font-size:13.5px;margin-top:6px}
+#log p{margin:2px 0;border-bottom:1px dashed var(--line);padding-bottom:2px}
+#log p.round{font-weight:800;color:var(--gold);border:0;margin-top:8px}
+#log p.me{color:var(--ink);font-weight:700}#log p.warn{color:var(--red);font-weight:700}#log p.ai{color:var(--mute)}
+#trash{font-size:13px;color:var(--mute)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;z-index:9;overflow:auto;padding:20px 10px}
+.modal.on{display:flex}
+.card{background:var(--panel);border-radius:16px;max-width:640px;width:100%;padding:18px;position:relative}
+.card h3{font:800 22px "Nanum Myeongjo",serif;margin:0 0 8px}
+.card h4{margin:14px 0 4px}
+.card .x{position:absolute;top:10px;right:10px}
+.gl{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;font-size:14px}
+.gl .cnt{color:var(--mute);font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+select{font:inherit;padding:8px;border-radius:8px;min-height:40px;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.res p{margin:6px 0;font-size:16px}
+.win{color:var(--gold);font-weight:800}.lose{color:var(--red);font-weight:800}
+@media(max-width:600px){header .btn{padding:6px 10px;min-height:36px;font-size:14px}h1 small{font-size:12px}.slot{width:20px;height:20px;font-size:7px}.chip{width:52px;height:52px;font-size:10.5px}#avalon{gap:5px;padding:8px}.reg{padding:4px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.chip,.slot{transition:transform .15s}
+</style>
+</head>
+<body>
+<header>
+ <h1>엑스칼리버<small>컴퓨터와 하는 한글판 · 개인 플레이용 비공식 구현</small></h1>
+ <button class="btn undo" id="undoBtn" title="무르기">↩ 무르기</button>
+ <button class="btn" id="rulesBtn">규칙</button>
+ <button class="btn" id="chipsBtn">칩 목록</button>
+ <button class="btn" id="newBtn">새 게임</button>
+</header>
+<div id="status"></div>
+<main>
+ <section id="opps"></section>
+ <section id="avalon"></section>
+ <div id="trash"></div>
+ <details id="logw" open><summary>진행 기록</summary><div id="log"></div></details>
+</main>
+<div id="dock"><div class="in">
+ <div id="q"></div>
+ <div id="qshow"></div>
+ <div id="opts"></div>
+ <div id="info"></div>
+ <div id="mine"></div>
+</div></div>
+
+<div class="modal" id="mNew"><div class="card">
+ <h3>새 게임</h3>
+ <div class="row"><label for="selN">컴퓨터 수</label>
+  <select id="selN"><option value="1">1명 (2인 게임)</option><option value="2">2명 (3인)</option><option value="3" selected>3명 (4인)</option><option value="4">4명 (5인)</option><option value="5">5명 (6인)</option></select></div>
+ <div class="row"><label for="selS">컴퓨터 속도</label>
+  <select id="selS"><option value="1.6">느리게</option><option value="1" selected>보통</option><option value="0.4">빠르게</option></select></div>
+ <p class="tag">무르기는 내 선택만 되돌립니다. 새 칩을 보거나(뽑기·훔치기·엿보기·동전 던지기 등) 다른 플레이어 차례로 넘어가면 그 전으로는 무를 수 없어요.</p>
+ <div class="row"><button class="btn pri" id="startBtn">시작하기</button><button class="btn" id="cancelNew">취소</button></div>
+</div></div>
+<div class="modal" id="mRules"><div class="card"><button class="btn x" data-close>닫기</button>
+ <h3>규칙 요약</h3>
+ <p><b>목표</b> — 게임이 끝났을 때 <b>엑스칼리버</b> 칩을 가진 사람이 승리합니다.</p>
+ <ul>
+  <li>아무도 엑스칼리버를 갖고 있지 않으면(아발론에 있으면) 모두 패배.</li>
+  <li><b>저주받은 검</b>을 가진 사람은 승리할 수 없고 최종 패배자가 됩니다.</li>
+  <li>엑스칼리버와 저주받은 검을 한 사람이 모두 가지면, 나머지 모두가 '오염된 승리'를 나눠 갖습니다.</li>
+  <li><b>종자의 검</b>: 가진 채로 내 왼쪽 사람이 이기면 나도 승리(4인 이상).</li>
+ </ul>
+ <h4>준비</h4>
+ <p>왕관을 가진 사람이 엑스칼리버·저주받은 검과 아발론 칩 몇 개를 섞어 모두에게 1개씩 나눠 줍니다(2인이면 두 검만). 나머지 칩은 뒷면으로 3개 구역에 나뉘어 '아발론'이 됩니다.</p>
+ <h4>라운드 진행</h4>
+ <ol>
+  <li><b>뽑기</b>: 손이 4개 미만이면 4개가 될 때까지 아발론에서 뽑습니다(왕관부터 시계 방향).</li>
+  <li><b>내기</b>: 모두 손에서 칩 1개를 몰래 고릅니다. 검 3종은 낼 수 없습니다.</li>
+  <li><b>공개</b>: 동시에 공개합니다.</li>
+  <li><b>해결</b>: '공개 즉시' 칩(흑기사·갤러해드·랜슬롯·어부왕)을 먼저, 그다음 나머지를 왕관부터 시계 방향으로 해결하고 버립니다.</li>
+  <li><b>왕관 넘기기</b>: 왕관이 왼쪽 사람에게 갑니다.</li>
+ </ol>
+ <p><b>게임 종료</b> — 아발론의 구역 하나가(6인 이상은 두 개가) 비는 순간, 그 라운드가 마지막 라운드가 됩니다. 라운드가 끝나면 승자를 가립니다.</p>
+ <h4>용어</h4>
+ <ul>
+  <li><b>훔치기</b>: 한 플레이어의 손에서 무작위로 가져옵니다.</li>
+  <li><b>돌려주기</b>: 뽑았으면 아발론의 아무 구역에, 훔쳤으면 그 사람에게 손의 칩(아무거나)을 돌려줍니다. 저주받은 검을 넘길 기회!</li>
+  <li><b>왼쪽</b> = 시계 방향 = 이 화면에서 나 다음 순서의 컴퓨터.</li>
+  <li><b>어부왕</b>: 누가 나에게서 훔치려 할 때 던질지 물어봅니다.</li>
+  <li>파란 테두리 = 남성 그림, 분홍 테두리 = 여성 그림(카일리아 효과에 쓰임).</li>
+ </ul>
+ <h4>무르기</h4>
+ <p>내 선택을 한 단계씩 되돌립니다. 새로운 비공개 정보를 얻었거나(칩 뽑기, 훔치기, 엿보기, 공개, 동전 던지기) 다른 플레이어 차례로 넘어간 뒤에는 무를 수 없습니다. 칩을 고른 뒤 '공개!' / '턴 마치기' 전까지는 자유롭게 무를 수 있어요.</p>
+</div></div>
+<div class="modal" id="mChips"><div class="card"><button class="btn x" data-close>닫기</button>
+ <h3>칩 목록</h3><p class="tag">괄호 안은 (전체 수 / 버려진 수)</p><div class="gl" id="glossary"></div>
+</div></div>
+<div class="modal" id="mEnd"><div class="card res" id="endCard"></div></div>
+
+<script>
+{
+'use strict';
+// ================= 칩 데이터 =================
+const T={
+ ARTHUR:{ko:'아서 왕',s:'아서 왕',n:1,g:'m',d:'검을 가진 사람(나 제외) 모두가 검을 뒷면으로 내밉니다. 보지 않고 1개를 훔치고 나머지는 돌려줍니다.'},
+ ARTISAN:{ko:'장인',s:'장인',n:5,g:'m',d:'아발론에서 2개를 뽑거나 한 사람에게서 2개를 훔친 뒤, 손의 칩 2개를 아발론의 원하는 구역에 뒷면으로 놓습니다.'},
+ BARONESS:{ko:'남작부인',s:'남작 부인',n:4,g:'f',d:'2개를 뽑은 뒤, 손의 칩 1개를 버립니다(공개). 검은 버릴 수 없습니다.'},
+ BLACKKNIGHT:{ko:'흑기사',s:'흑기사',n:1,g:'m',rev:1,d:'[공개 즉시] 동전 던지기 2번. 한 번이라도 성공하면 다른 사람이 낸 칩(영구 칩 포함) 1개를 내 손으로 가져오고, 그 사람은 능력을 잃습니다.'},
+ CAELIA:{ko:'카일리아',s:'카일리아',n:1,g:'f',d:'최대 2명을 지목합니다. 그들은 손에 있는 남성 그림(파란 테두리) 칩을 모두 버립니다.'},
+ CURSED:{ko:'저주받은 검',s:'저주받은 검',n:1,sw:'C',d:'검. 내거나 버릴 수 없지만 주고받을 수는 있습니다. 게임 끝에 가지고 있으면 이길 수 없고 최종 패배자가 됩니다.'},
+ EXCALIBUR:{ko:'엑스칼리버',s:'엑스 칼리버',n:1,sw:'E',d:'검. 내거나 버릴 수 없지만 주고받을 수는 있습니다. 게임 끝에 가지고 있으면 승리!'},
+ FISHER:{ko:'어부왕',s:'어부왕',n:1,g:'m',rev:1,perm:1,d:'[영구] 공개되면 내 앞에 남습니다. 누가 나에게서 훔치려 할 때 던질 수 있습니다: 성공하면 이번 라운드 동안 훔치기가 나에게서 0개를 가져가고, 실패하면 어부왕은 버려집니다.'},
+ GALAHAD:{ko:'갤러해드',s:'갤러 해드',n:1,g:'m',rev:1,d:'[공개 즉시] 손의 칩 1개를 골라 쥡니다. 그 칩은 이번 라운드 동안 모든 효과로부터 보호됩니다.'},
+ GAWAIN:{ko:'가웨인',s:'가웨인',n:1,g:'m',d:'한 사람을 지목합니다. 그가 검을 가지고 있으면 검 1개(그가 고름)를 나에게 줍니다.'},
+ GREENKNIGHT:{ko:'녹색 기사',s:'녹색 기사',n:1,g:'m',d:'검을 가진 모두가 검을 전부 나에게 줍니다.'},
+ GUINEVERE:{ko:'귀네비어',s:'귀네 비어',n:1,g:'f',d:'검을 가진 모두가 검을 뒷면으로 내밉니다. 보지 않고 최대 2개를 골라 한 구역에 넣고 그 구역을 섞습니다.'},
+ LADY:{ko:'호수의 여인',s:'호수의 여인',n:1,g:'f',d:'왼쪽 또는 오른쪽을 가리킵니다. 모두가 동시에 손 전체를 그 방향으로 넘깁니다.'},
+ LANCELOT:{ko:'랜슬롯',s:'랜슬롯',n:1,g:'m',rev:1,d:'[공개 즉시] 다른 사람들이 낸 칩과 모든 영구 칩을 동전처럼 던집니다. 실패한 칩은 버려지고 능력을 잃습니다.'},
+ MERCHANT:{ko:'상인',s:'상인',n:7,g:'m',d:'2개를 뽑거나 한 사람에게서 2개를 훔친 뒤, 1개를 가져온 곳에 돌려줍니다.'},
+ MERLIN:{ko:'멀린',s:'멀린',n:1,g:'m',d:'검을 가진 모두가 검을 전부 나에게 줍니다. 그 뒤 검을 준 사람들은 차례대로 내 손에서 1개씩 훔칩니다.'},
+ MORDRED:{ko:'모드레드',s:'모드 레드',n:1,g:'m',d:'한 사람의 손을 몰래 봅니다. 원하면 그 사람과 손 전체를 바꿉니다.'},
+ MORGANA:{ko:'모르가나',s:'모르 가나',n:1,g:'f',d:'2개를 뽑은 뒤, 그중 1개를 즉시 공개해 효과를 해결할 수 있습니다(해결 뒤 버림).'},
+ PEASANT:{ko:'농부',s:'농부',n:8,g:'f',d:'1개를 뽑거나 한 사람에게서 1개를 훔친 뒤, 1개를 가져온 곳에 돌려줍니다.'},
+ PERCIVAL:{ko:'퍼시벌',s:'퍼시벌',n:1,g:'m',d:'아발론의 칩 4개를 모두가 보도록 뒤집습니다. 그중 1개를 가져가고 나머지 3개는 다시 뒷면으로 둡니다.'},
+ PRIEST:{ko:'사제',s:'사제',n:5,g:'m',d:'2개를 뽑습니다. 검을 뽑았다면 "후자!"라고 외쳐야 합니다(아니면 외치지 않습니다).'},
+ ROBYN:{ko:'록슬리의 로빈',s:'로빈',n:1,g:'f',d:'1개를 훔칩니다. 손이 7개가 될 때까지 (가능하면) 반복해야 합니다. 매번 대상을 바꿀 수 있습니다.'},
+ SPIRIT:{ko:'정령',s:'정령',n:5,g:'f',d:'왼쪽 또는 오른쪽을 가리킵니다. 모두가 동시에 그 방향 옆사람의 손에서 1개씩 훔칩니다.'},
+ SPY:{ko:'첩자',s:'첩자',n:3,g:'f',d:'한 사람의 손을 봅니다. 그중 1개를 모두에게 보여 준 뒤 돌려줍니다.'},
+ SQUIRE:{ko:'종자의 검',s:'종자의 검',n:1,sw:'S',d:'검. 내거나 버릴 수 없지만 주고받을 수는 있습니다. 이 검을 가진 채 내 왼쪽 사람이 이기면 나도 승리합니다(2~3인 제외).'},
+ THIEF:{ko:'도둑',s:'도둑',n:6,g:'m',d:'한 사람에게서 1개를 훔칩니다. 그다음 다른 사람에게서 1개를 더 훔칩니다(가능하면).'},
+ UTHER:{ko:'우서 왕',s:'우서 왕',n:1,g:'m',d:'왼쪽 또는 오른쪽을 가리킵니다. 검을 가진 모두가 검을 그 방향으로 넘깁니다.'},
+};
+const VAL={EXCALIBUR:10,SQUIRE:1.5,CURSED:-6,GREENKNIGHT:1.2,MERLIN:1,ROBYN:1.1,MORDRED:1,LADY:.9,MERCHANT:.85,THIEF:.8,ARTISAN:.8,PERCIVAL:.9,GAWAIN:.8,GUINEVERE:.6,UTHER:.7,GALAHAD:.7,FISHER:.7,SPY:.5,SPIRIT:.5,PRIEST:.5,BARONESS:.5,MORGANA:.6,BLACKKNIGHT:.6,LANCELOT:.4,CAELIA:.4,ARTHUR:.7,PEASANT:.3};
+const SW=['E','C','S'];
+const AINAMES=['하늘봇','바다봇','숲봇','별봇','달봇'];
+
+// ================= 엔진 상태 / 되감기 =================
+let G=null,CFG=null,ANS=[],AIDX=0,GEN=0,PEND=null,BAR=0,REPLAY=false,SPEED=1,INFO='';
+const ABORT={abort:1};
+let HEADLESS=false; // 테스트용
+
+function rng(){let t=(G.seed=(G.seed+0x6D2B79F5)|0);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}
+const ri=n=>Math.floor(rng()*n);
+const pick=a=>a[ri(a.length)];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=ri(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function ask(q){
+ if(AIDX<ANS.length) return Promise.resolve(ANS[AIDX++]);
+ REPLAY=false;
+ const gen=GEN;
+ return new Promise(res=>{PEND={q,res:v=>{if(gen!==GEN||!PEND)return;PEND=null;ANS.push(v);AIDX++;INFO='';save();res(v);}};render();if(HEADLESS)HEADLESS(PEND);});
+}
+function barrier(){BAR=AIDX;}
+function sleep(ms){if(REPLAY||HEADLESS)return Promise.resolve();const gen=GEN;render();return new Promise((res,rej)=>setTimeout(()=>gen===GEN?res():rej(ABORT),ms*SPEED));}
+const canUndo=()=>!!PEND&&ANS.length>BAR;
+function undo(){if(!canUndo())return;ANS.pop();startEngine(true);}
+function startEngine(replay){
+ GEN++;PEND=null;AIDX=0;BAR=0;REPLAY=!!replay&&ANS.length>0;
+ G=newGame(CFG);
+ runGame().catch(e=>{if(e!==ABORT){console.error(e);log('오류: '+e.message,'warn');render();}});
+ if(!REPLAY)render();
+}
+function save(){if(HEADLESS)return;try{localStorage.setItem('excal_ko_v1',JSON.stringify({cfg:CFG,ans:ANS}));}catch(e){}}
+
+// ================= 도우미 =================
+const tp=id=>G.chips[id].t;
+const ko=id=>T[tp(id)].ko;
+const isSw=id=>!!T[tp(id)].sw;
+const nm=p=>G.players[p].name;
+const hand=p=>G.players[p].hand;
+const free=p=>hand(p).filter(id=>!G.prot.has(id));
+const others=p=>{const r=[];for(let i=1;i<G.n;i++)r.push((p+i)%G.n);return r;};
+const order=()=>{const r=[];for(let i=0;i<G.n;i++)r.push((G.crown+i)%G.n);return r;};
+const avTotal=()=>G.avalon.reduce((x,r)=>x+r.length,0);
+const regionOf=id=>G.avalon.findIndex(r=>r.includes(id));
+const inAv=id=>regionOf(id)>=0;
+const has=(p,t)=>hand(p).some(id=>tp(id)===t);
+function jo(w,pair){const[a,b]=pair.split('/');const s=w.replace(/[\]\)\s」』]+$/,'');const c=s.charCodeAt(s.length-1);if(c<0xAC00||c>0xD7A3)return w+b;const f=(c-0xAC00)%28;if(pair==='으로/로')return w+((f===0||f===8)?b:a);return w+(f?a:b);}
+const tag=id=>`[${ko(id)}]`;
+const tagT=t=>`[${T[t].ko}]`;
+function log(t,c=''){G.log.push({t,c});}
+const dirName=(p,d)=>d===1?`왼쪽(${nm((p+1)%G.n)} 쪽)`:`오른쪽(${nm((p-1+G.n)%G.n)} 쪽)`;
+function locOf(id){if(inAv(id))return G.n;for(let p=0;p<G.n;p++)if(hand(p).includes(id))return p;return -1;}
+function minRegionSize(){const need=G.n>=6?2:1;const empt=G.avalon.filter(r=>!r.length).length;if(empt>=need)return 0;if(need-empt>1)return 99;return Math.min(...G.avalon.filter(r=>r.length).map(r=>r.length));}
+const late=()=>G.final||minRegionSize()<=4;
+
+// ================= 새 게임 =================
+function newGame(cfg){
+ const n=cfg.nAI+1;
+ const g={n,seed:cfg.seed,round:0,final:false,over:false,crown:0,chips:[],players:[],avalon:[[],[],[]],trash:[],prot:new Set(),fkUp:new Set(),fkNo:new Set(),resolving:new Set(),log:[],known:[],B:[],flipped:new Set(),phase:'',resCount:0,result:null};
+ G=g;
+ const types=[];for(const k in T)for(let i=0;i<T[k].n;i++)types.push(k);
+ shuffle(types);
+ g.chips=types.map((t,id)=>({id,t}));
+ g.sid={};for(const c of g.chips)if(T[c.t].sw)g.sid[T[c.t].sw]=c.id;
+ for(let i=0;i<n;i++){g.players.push({name:i===0?'당신':AINAMES[i-1],hand:[],played:null,secret:null,perm:[]});g.known.push(new Set());}
+ g.crown=ri(n);
+ const pool=shuffle(g.chips.map(c=>c.id).filter(id=>id!==g.sid.E&&id!==g.sid.C));
+ const start=shuffle([g.sid.E,g.sid.C,...pool.splice(0,n-2)]);
+ for(let i=0;i<n;i++)g.players[(g.crown+i)%n].hand.push(start[i]);
+ const a=Math.round(pool.length/3),b=Math.round(pool.length*2/3);
+ g.avalon=[pool.slice(0,a),pool.slice(a,b),pool.slice(b)];
+ // AI 믿음 초기화 (index n = 아발론)
+ for(let p=0;p<n;p++){
+  if(p===0){g.B.push(null);continue;}
+  const B={};const mine=g.players[p].hand[0];
+  for(const s of SW){
+   const arr=new Array(n+1).fill(0);
+   if(mine===g.sid[s])arr[p]=1;
+   else if(s!=='S'){for(let q=0;q<n;q++)if(q!==p)arr[q]=1/(n-1);}
+   else{const inStart=(n-2)/60;arr[n]=1-inStart;for(let q=0;q<n;q++)if(q!==p)arr[q]=inStart/(n-1);}
+   B[s]=arr;
+  }
+  g.B.push(B);
+ }
+ return g;
+}
+
+// ================= AI 믿음 추적 =================
+function bNorm(b,a){
+ let t=b.reduce((x,y)=>x+y,0);
+ if(t<=1e-9){for(let i=0;i<=G.n;i++)b[i]=(i!==a&&(i===G.n?avTotal()>0:hand(i).length>0))?1:0;t=b.reduce((x,y)=>x+y,0)||1;}
+ for(let i=0;i<=G.n;i++)b[i]/=t;
+}
+function knownInAv(a){let c=0;for(const id of G.known[a])if(inAv(id))c++;return c;}
+function syncBeliefs(){
+ for(let a=1;a<G.n;a++)for(const s of SW){
+  const b=G.B[a][s],sid=G.sid[s],L=locOf(sid);
+  if(L===a||(L===G.n&&G.known[a].has(sid))){b.fill(0);b[L]=1;continue;}
+  b[a]=0;
+  for(let q=0;q<G.n;q++)if(q!==a&&!hand(q).length)b[q]=0;
+  if(!avTotal())b[G.n]=0;
+  bNorm(b,a);
+ }
+}
+// ev:{ids,from,to,mode,seen:[],fromSize,avBefore}
+function observe(ev){
+ const A=G.n;
+ for(let a=1;a<G.n;a++){
+  const knowsAll=ev.seen.includes(a)||(ev.from===A&&ev.ids.every(id=>G.known[a].has(id)));
+  for(const s of SW){
+   const b=G.B[a][s],sid=G.sid[s];
+   if(knowsAll){if(ev.ids.includes(sid)){b.fill(0);b[ev.to]=1;}continue;}
+   let fr;
+   if(ev.from===A){
+    if(G.known[a].has(sid))fr=ev.ids.includes(sid)?1:0;
+    else{const unk=Math.max(1,ev.avBefore-knownInAv(a));fr=ev.ids.filter(id=>!G.known[a].has(id)).length/unk;}
+   }else{
+    fr=ev.ids.length/Math.max(1,ev.fromSize);
+    if(ev.mode==='chosen')fr*=(s==='C'?2.5:s==='E'?0.3:1);
+   }
+   fr=Math.min(1,fr);
+   const m=b[ev.from]*fr;b[ev.from]-=m;b[ev.to]+=m;
+  }
+ }
+}
+function forget(id){for(const k of G.known)k.delete(id);}
+function revealCounts(counts,all){
+ for(let a=1;a<G.n;a++)for(const s of SW){
+  const b=G.B[a][s];
+  counts.forEach((c,q)=>{if(c===0&&q!==a)b[q]=0;});
+  if(all&&counts.reduce((x,c)=>x+(c>0?c:0),0)>=3)b[G.n]=0;
+  bNorm(b,a);
+ }
+}
+function peekInfo(a,v){if(a===0)return;for(const s of SW){const b=G.B[a][s];if(hand(v).includes(G.sid[s])){b.fill(0);b[v]=1;}else{b[v]=0;bNorm(b,a);}}}
+function publicReveal(id,v){for(let a=1;a<G.n;a++)for(const s of SW)if(G.sid[s]===id){const b=G.B[a][s];b.fill(0);b[v]=1;}}
+function exactFor(players,id,to){for(const a of players){if(a<1)continue;for(const s of SW)if(G.sid[s]===id){const b=G.B[a][s];b.fill(0);b[to]=1;}}}
+function permuteCols(f){ // f(q) = 새 위치
+ for(let a=1;a<G.n;a++)for(const s of SW){const b=G.B[a][s],nb=new Array(G.n+1).fill(0);nb[G.n]=b[G.n];for(let q=0;q<G.n;q++)nb[f(q)]+=b[q];G.B[a][s]=nb;}
+}
+
+// ================= 칩 이동 원시 동작 =================
+function checkEnd(){
+ const empt=G.avalon.filter(r=>!r.length).length;
+ if(!G.final&&empt>=(G.n>=6?2:1)){G.final=true;log('⚠️ 아발론 구역이 비었습니다! 이번 라운드가 마지막 라운드입니다.','warn');}
+}
+function drawChip(p,id){
+ const before=avTotal();
+ observe({ids:[id],from:G.n,to:p,mode:'slot',seen:[p],avBefore:before});
+ const r=regionOf(id);G.avalon[r].splice(G.avalon[r].indexOf(id),1);forget(id);
+ hand(p).push(id);syncBeliefs();checkEnd();
+}
+function rmHand(p,id){const h=hand(p);h.splice(h.indexOf(id),1);}
+function toAvalon(p,id,r){
+ observe({ids:[id],from:p,to:G.n,mode:'chosen',seen:[p],fromSize:hand(p).length});
+ rmHand(p,id);G.avalon[r].push(id);G.known[p].add(id);syncBeliefs();
+}
+function giveTo(from,to,id,mode='chosen'){
+ observe({ids:[id],from,to,mode,seen:[from,to],fromSize:hand(from).length});
+ rmHand(from,id);hand(to).push(id);syncBeliefs();
+ if(to===0||from===0)barrier();
+}
+function trashHand(p,id){rmHand(p,id);G.trash.push(id);}
+async function fisherOK(victim,thief){
+ if(G.fkUp.has(victim))return false;
+ const P=G.players[victim];const fk=P.perm.find(id=>tp(id)==='FISHER');
+ if(fk===undefined)return true;
+ const key=G.resCount+':'+victim;
+ if(G.fkNo.has(key))return true;
+ let flip;
+ if(victim===0)flip=(await ask({kind:'opts',text:`${jo(nm(thief),'이/가')} 당신에게서 훔치려 합니다. 어부왕을 던질까요?`,sub:'성공(50%)하면 이번 라운드 동안 훔치기를 막고, 실패하면 어부왕을 잃습니다.',opts:[['던진다',1],['그냥 둔다',0]]}))===1;
+ else flip=has(victim,'EXCALIBUR')?true:(has(victim,'CURSED')?false:rng()<0.3);
+ if(!flip){G.fkNo.add(key);return true;}
+ barrier();
+ if(rng()<0.5){G.fkUp.add(victim);log(`🎣 ${jo(nm(victim),'이/가')} 어부왕을 던져 성공! 이번 라운드 동안 훔치기를 막습니다.`);await sleep(500);return false;}
+ P.perm.splice(P.perm.indexOf(fk),1);G.trash.push(fk);log(`🎣 ${nm(victim)}의 어부왕 던지기 실패 — 어부왕이 버려졌습니다.`);await sleep(500);return true;
+}
+async function steal(thief,victim,k){
+ if(k<=0)return[];
+ if(!(await fisherOK(victim,thief))){log(`${nm(victim)}에게서는 아무것도 훔칠 수 없습니다(어부왕).`);return[];}
+ const av=shuffle(free(victim).slice());const ids=av.slice(0,k);
+ if(!ids.length)return[];
+ observe({ids,from:victim,to:thief,mode:'random',seen:[thief,victim],fromSize:hand(victim).length});
+ for(const id of ids){rmHand(victim,id);hand(thief).push(id);}
+ syncBeliefs();
+ if(thief===0)log(`당신은 ${nm(victim)}에게서 ${jo(ids.map(tag).join(', '),'을/를')} 훔쳤습니다.`,'me');
+ else if(victim===0)log(`${jo(nm(thief),'이/가')} 당신에게서 ${jo(ids.map(tag).join(', '),'을/를')} 훔쳐 갔습니다.`,'me');
+ else log(`${jo(nm(thief),'이/가')} ${nm(victim)}에게서 ${ids.length}개를 훔쳤습니다.`,'ai');
+ if(thief===0||victim===0)barrier();
+ return ids;
+}
+
+// ================= 선택 (사람/AI 공통) =================
+function avAns(a,excl=[]){if(typeof a==='number')return a;const r=+a.slice(1);const c=G.avalon[r].filter(id=>!excl.includes(id));return pick(c.length?c:G.avalon[r]);}
+async function drawN(p,k,label){
+ const got=[];
+ for(let i=0;i<k&&avTotal()>0;i++){
+  let id;
+  if(p===0){const a=await ask({kind:'avalon',text:`${label||''} 아발론에서 칩을 고르세요 (${i+1}/${k})`});id=avAns(a);}
+  else id=aiPickDraw(p);
+  drawChip(p,id);got.push(id);
+  if(p===0){barrier();log(`당신은 ${jo(tag(id),'을/를')} 뽑았습니다.`,'me');}
+ }
+ if(p!==0)log(`${jo(nm(p),'이/가')} 아발론에서 ${got.length}개를 뽑았습니다.`,'ai');
+ return got;
+}
+async function choosePlayer(p,text,cands,purpose,extra){
+ if(p===0)return ask({kind:'player',text,players:cands,opts:extra||[]});
+ return aiPlayer(p,cands,purpose);
+}
+async function chooseHand(p,text,ids,purpose,sub){
+ if(!ids.length)return null;
+ if(p===0)return ask({kind:'hand',text,ids,sub});
+ return aiHand(p,ids,purpose);
+}
+async function chooseRegion(p,purpose,id){
+ if(p===0)return ask({kind:'opts',text:`${jo(tag(id),'을/를')} 어느 구역에 놓을까요?`,opts:[0,1,2].map(r=>[`구역 ${r+1} (${G.avalon[r].length}개)`,r])});
+ return aiRegion(p,id);
+}
+async function chooseDir(p,t){
+ if(p===0)return ask({kind:'opts',text:`${T[t].ko}: 방향을 고르세요`,sub:T[t].d,opts:[[`⬅ 왼쪽 · ${nm(1)} 쪽`,1],[`오른쪽 ➡ · ${nm(G.n-1)} 쪽`,-1]]});
+ return aiDir(p,t);
+}
+
+// ================= 게임 흐름 =================
+async function runGame(){
+ log(`게임 시작! ${G.n}인 게임, 왕관은 ${nm(G.crown)}에게.`,'round');
+ log(`당신의 시작 칩: ${tag(hand(0)[0])}`,'me');
+ while(true){
+  await playRound();
+  if(G.final)break;
+  G.crown=(G.crown+1)%G.n;
+  log(`👑 왕관이 ${nm(G.crown)}에게 넘어갑니다.`);
+ }
+ endGame();
+}
+async function playRound(){
+ G.round++;G.prot=new Set();G.fkUp=new Set();barrier();
+ for(const P of G.players){P.played=null;P.secret=null;}
+ log(`── 라운드 ${G.round} ──`,'round');
+ // 1. 뽑기
+ G.phase='draw';
+ for(const p of order()){
+  let auto=false,cnt=0;
+  while(hand(p).length<4&&avTotal()>0){
+   let id;
+   if(p===0&&!auto){
+    const a=await ask({kind:'avalon',text:`뽑기: 칩을 고르세요 (${hand(0).length}/4)`,sub:'칩을 누르거나 구역 버튼으로 무작위로 뽑습니다.',opts:[['남은 칩 전부 무작위로','auto']]});
+    if(a==='auto'){auto=true;id=pick(G.avalon.filter(r=>r.length).flat());}else id=avAns(a);
+   }else if(p===0)id=pick(G.avalon.flat());
+   else id=aiPickDraw(p);
+   drawChip(p,id);cnt++;
+   if(p===0){barrier();log(`당신은 ${jo(tag(id),'을/를')} 뽑았습니다.`,'me');}
+  }
+  if(p!==0&&cnt){log(`${jo(nm(p),'이/가')} ${cnt}개를 뽑았습니다.`,'ai');await sleep(350);}
+ }
+ // 2. 내기
+ G.phase='play';
+ for(let p=1;p<G.n;p++){const id=aiChoosePlay(p);G.players[p].secret=id;}
+ const playable=hand(0).filter(id=>!isSw(id));
+ if(playable.length){
+  const id=await ask({kind:'hand',text:'낼 칩을 고르세요',ids:playable,sub:'모두 동시에 1개를 몰래 냅니다. (검은 낼 수 없음)'});
+  G.players[0].secret=id;
+  await ask({kind:'opts',text:`${jo(tag(id),'을/를')} 냅니다.`,sub:'공개하면 되돌릴 수 없어요. 바꾸려면 ↩ 무르기.',opts:[['공개!','go']]});
+ }
+ // 3. 공개
+ G.phase='resolve';barrier();
+ const shown=[];
+ for(const p of order()){const P=G.players[p];if(P.secret!=null){rmHand(p,P.secret);P.played=P.secret;P.secret=null;shown.push(`${nm(p)} ${tag(P.played)}`);}else shown.push(`${nm(p)} (낼 칩 없음)`);}
+ log('공개! '+shown.join(' · '));
+ await sleep(900);
+ // 4. 해결
+ const ord=order();
+ for(const p of ord){const id=G.players[p].played;if(id!=null&&T[tp(id)].rev)await resolvePlayed(p);}
+ for(const p of ord){if(G.players[p].played!=null)await resolvePlayed(p);}
+}
+async function resolvePlayed(p){
+ const P=G.players[p],id=P.played;if(id==null)return;
+ if(p!==0)barrier();
+ G.resCount++;G.resolving=new Set([id]);G.cur=p;
+ log(`▶ ${nm(p)}: ${tag(id)}`,p===0?'me':'');
+ await sleep(600);
+ await effect(p,tp(id));
+ if(P.played===id){P.played=null;if(tp(id)==='FISHER'){P.perm.push(id);log(`${nm(p)} 앞에 어부왕이 영구 칩으로 놓였습니다.`);}else G.trash.push(id);}
+ G.resolving=new Set();
+ if(p===0&&AIDX>BAR)await ask({kind:'opts',text:'행동을 마칠까요?',sub:'턴을 마치면 무를 수 없어요.',opts:[['턴 마치기','end']]});
+ G.cur=null;
+ await sleep(300);
+}
+
+async function effect(p,t){
+ const n=G.n;
+ const targets=()=>others(p).filter(q=>free(q).length>0);
+ switch(t){
+ case 'PEASANT':case 'MERCHANT':case 'ARTISAN':{
+  const k=t==='PEASANT'?1:2;let mode='none';
+  const tg=targets();
+  if(tg.length&&avTotal()>0)mode=p===0?await ask({kind:'opts',text:`${T[t].ko}: 어떻게 할까요?`,sub:T[t].d,opts:[[`아발론에서 ${k}개 뽑기`,'draw'],[`한 사람에게서 ${k}개 훔치기`,'steal']]}):aiDrawOrSteal(p,t,k);
+  else if(tg.length)mode='steal';else if(avTotal()>0)mode='draw';
+  let from=null;
+  if(mode==='draw')await drawN(p,k);
+  else if(mode==='steal'){from=await choosePlayer(p,`누구에게서 ${k}개를 훔칠까요?`,tg,'steal');await steal(p,from,k);}
+  if(t==='ARTISAN'){
+   for(let i=0;i<2;i++){
+    const id=await chooseHand(p,`아발론에 놓을 칩을 고르세요 (${i+1}/2)`,free(p),'place');if(id==null)break;
+    const r=await chooseRegion(p,'place',id);toAvalon(p,id,r);
+    log(p===0?`당신은 ${jo(tag(id),'을/를')} 구역 ${r+1}에 놓았습니다.`:`${jo(nm(p),'이/가')} 구역 ${r+1}에 칩 1개를 놓았습니다.`,p===0?'me':'ai');
+   }
+  }else if(mode!=='none'){
+   const id=await chooseHand(p,mode==='steal'?`${nm(from)}에게 돌려줄 칩을 고르세요`:'아발론에 돌려줄 칩을 고르세요',free(p),'return');
+   if(id!=null){
+    if(mode==='steal'){giveTo(p,from,id);log(p===0?`당신은 ${nm(from)}에게 ${jo(tag(id),'을/를')} 돌려주었습니다.`:(from===0?`${jo(nm(p),'이/가')} 당신에게 ${jo(tag(id),'을/를')} 돌려주었습니다.`:`${jo(nm(p),'이/가')} ${nm(from)}에게 1개를 돌려주었습니다.`),p===0||from===0?'me':'ai');}
+    else{const r=await chooseRegion(p,'return',id);toAvalon(p,id,r);log(p===0?`당신은 ${jo(tag(id),'을/를')} 구역 ${r+1}에 돌려놓았습니다.`:`${jo(nm(p),'이/가')} 구역 ${r+1}에 1개를 돌려놓았습니다.`,p===0?'me':'ai');}
+   }
+  }
+  break;}
+ case 'THIEF':{
+  let tg=targets();if(!tg.length){log('훔칠 대상이 없습니다.');break;}
+  const a=await choosePlayer(p,'첫 번째로 훔칠 사람을 고르세요',tg,'steal');await steal(p,a,1);
+  tg=targets().filter(q=>q!==a);
+  if(tg.length){const b=await choosePlayer(p,'두 번째로 훔칠 다른 사람을 고르세요',tg,'steal');await steal(p,b,1);}
+  break;}
+ case 'ROBYN':{
+  const blocked=new Set();let guard=0;
+  while(hand(p).length<7&&guard++<20){
+   const tg=targets().filter(q=>!blocked.has(q)&&!G.fkUp.has(q));if(!tg.length)break;
+   const v=await choosePlayer(p,`누구에게서 훔칠까요? (손 ${hand(p).length}/7)`,tg,'steal');
+   const got=await steal(p,v,1);if(!got.length)blocked.add(v);
+   await sleep(250);
+  }
+  break;}
+ case 'PRIEST':{
+  const snap=[];for(let a=1;a<n;a++)snap[a]=SW.map(s=>G.B[a][s][p]);
+  const got=await drawN(p,2);
+  const huz=got.some(isSw);
+  if(huz){log(`📣 ${nm(p)}: "후자!"`,'warn');await sleep(700);}
+  for(let a=1;a<n;a++){if(a===p)continue;const d=SW.map((s,i)=>Math.max(0,G.B[a][s][p]-snap[a][i]));const sd=d.reduce((x,y)=>x+y,0);
+   SW.forEach((s,i)=>{const b=G.B[a][s];if(huz){if(sd>0){const add=Math.min(b[n],d[i]*(1/sd-1));b[n]-=add;b[p]+=add;}}else{b[p]-=d[i];b[n]+=d[i];}bNorm(b,a);});}
+  syncBeliefs();
+  break;}
+ case 'BARONESS':{
+  await drawN(p,2);
+  const c=free(p).filter(id=>!isSw(id));
+  const id=await chooseHand(p,'버릴 칩을 고르세요 (검 제외)',c,'trash');
+  if(id!=null){trashHand(p,id);log(`${jo(nm(p),'이/가')} ${jo(tag(id),'을/를')} 버렸습니다.`);}
+  break;}
+ case 'MORGANA':{
+  const got=await drawN(p,2);
+  const c=got.filter(id=>hand(p).includes(id)&&!isSw(id)&&!G.prot.has(id));
+  let id=null;
+  if(c.length){
+   if(p===0){const a=await ask({kind:'opts',text:'뽑은 칩 중 하나를 바로 해결할까요?',opts:[...c.map(x=>[`${tag(x)} 해결`,x]),['해결하지 않기',-1]]});id=a<0?null:a;}
+   else{let best=null,bv=0.25;for(const x of c){const v=scoreChip(p,tp(x));if(v>bv){bv=v;best=x;}}id=best;}
+  }
+  if(id!=null){
+   rmHand(p,id);barrier();G.resolving.add(id);
+   log(`✨ ${jo(nm(p),'이/가')} 모르가나로 ${jo(tag(id),'을/를')} 공개해 해결합니다.`);
+   await sleep(600);
+   await effect(p,tp(id));
+   if(tp(id)==='FISHER'){G.players[p].perm.push(id);log(`${nm(p)} 앞에 어부왕이 영구 칩으로 놓였습니다.`);}else G.trash.push(id);
+  }
+  break;}
+ case 'PERCIVAL':{
+  const k=Math.min(4,avTotal());const fl=[];
+  if(!k){log('아발론에 칩이 없습니다.');break;}
+  for(let i=0;i<k;i++){
+   let id;
+   if(p===0){const a=await ask({kind:'avalon',text:`퍼시벌: 뒤집을 칩을 고르세요 (${i+1}/${k})`,excl:fl});id=avAns(a,fl);}
+   else id=aiPercivalFlip(p,fl);
+   fl.push(id);for(const kk of G.known)kk.add(id);
+   barrier();
+  }
+  G.flipped=new Set(fl);
+  log(`🔍 ${jo(nm(p),'이/가')} 칩을 뒤집었습니다: ${fl.map(id=>`구역${regionOf(id)+1} ${tag(id)}`).join(', ')}`);
+  await sleep(1000);
+  let take;
+  if(p===0)take=await ask({kind:'opts',text:'가져갈 칩을 고르세요',opts:fl.map(x=>[tag(x),x])});
+  else take=aiPercivalTake(p,fl);
+  G.flipped=new Set();
+  drawChip(p,take);barrier();
+  log(`${jo(nm(p),'이/가')} ${jo(tag(take),'을/를')} 가져갔습니다. 나머지는 다시 뒷면으로.`);
+  break;}
+ case 'GREENKNIGHT':case 'MERLIN':{
+  const counts=new Array(n).fill(0),moves=[];
+  for(const q of others(p)){const sw=free(q).filter(isSw);counts[q]=sw.length;for(const id of sw)moves.push([q,id]);}
+  counts[p]=-1;
+  revealCounts(counts,false);
+  permuteCols(q=>(counts[q]>0?p:q));
+  for(const[q,id]of moves){rmHand(q,id);hand(p).push(id);exactFor([q,p],id,p);}
+  syncBeliefs();barrier();
+  const givers=others(p).filter(q=>counts[q]>0);
+  log(givers.length?`⚔️ ${givers.map(q=>`${nm(q)} ${counts[q]}개`).join(', ')}의 검이 ${nm(p)}에게 갔습니다.`:'아무도 검을 내놓지 않았습니다.');
+  if(p===0&&moves.length)log(`받은 검: ${moves.map(m=>tag(m[1])).join(', ')}`,'me');
+  await sleep(700);
+  if(t==='MERLIN')for(const q of order())if(givers.includes(q)){await steal(q,p,1);await sleep(300);}
+  break;}
+ case 'GAWAIN':{
+  const v=await choosePlayer(p,'검을 요구할 사람을 고르세요',others(p),'gawain');
+  const sw=free(v).filter(isSw);
+  if(!sw.length){log(`${nm(v)}에게는 줄 검이 없습니다.`);for(let a=1;a<n;a++)if(a!==v)for(const s of SW){G.B[a][s][v]=0;bNorm(G.B[a][s],a);}syncBeliefs();barrier();break;}
+  let id;
+  if(v===0)id=await ask({kind:'hand',text:`가웨인: ${nm(p)}에게 줄 검을 고르세요`,ids:sw});
+  else id=sw.find(x=>tp(x)==='CURSED')??sw.find(x=>tp(x)==='SQUIRE')??sw[0];
+  for(let a=1;a<n;a++){if(a===p||a===v)continue;const w={E:1,C:3,S:2};const tot=SW.reduce((x,s)=>x+G.B[a][s][v]*w[s],0)||1;for(const s of SW){const b=G.B[a][s];const m=Math.min(b[v],b[v]*w[s]/tot);b[v]-=m;b[p]+=m;}}
+  rmHand(v,id);hand(p).push(id);exactFor([p,v],id,p);syncBeliefs();barrier();
+  log(p===0?`${jo(nm(v),'이/가')} 당신에게 ${jo(tag(id),'을/를')} 주었습니다.`:v===0?`당신은 ${nm(p)}에게 ${jo(tag(id),'을/를')} 주었습니다.`:`${jo(nm(v),'이/가')} ${nm(p)}에게 검 1개를 주었습니다.`,p===0||v===0?'me':'');
+  break;}
+ case 'ARTHUR':{
+  const counts=new Array(n).fill(-1);
+  for(const q of others(p))counts[q]=free(q).filter(isSw).length;
+  revealCounts(counts,false);syncBeliefs();
+  const hold=others(p).filter(q=>counts[q]>0);
+  log(hold.length?`검을 내민 사람: ${hold.map(q=>`${nm(q)} ${counts[q]}개`).join(', ')}`:'아무도 검을 내밀지 않았습니다.');
+  if(!hold.length)break;
+  await sleep(500);
+  const v=p===0?await ask({kind:'player',text:'아서 왕: 누구의 검을 훔칠까요? (어떤 검인지는 모름)',players:hold,labels:Object.fromEntries(hold.map(q=>[q,`검 ${counts[q]}개`]))}):aiArthur(p,hold,counts);
+  if(!(await fisherOK(v,p))){log(`${nm(v)}에게서는 훔칠 수 없습니다(어부왕).`);break;}
+  const id=pick(free(v).filter(isSw));
+  for(let a=1;a<n;a++){if(a===p||a===v)continue;for(const s of SW){const b=G.B[a][s];const m=b[v]/counts[v];b[v]-=m;b[p]+=m;}}
+  rmHand(v,id);hand(p).push(id);exactFor([p,v],id,p);syncBeliefs();barrier();
+  log(p===0?`당신은 ${nm(v)}에게서 ${jo(tag(id),'을/를')} 훔쳤습니다.`:v===0?`${jo(nm(p),'이/가')} 당신의 ${jo(tag(id),'을/를')} 훔쳤습니다.`:`${jo(nm(p),'이/가')} ${nm(v)}의 검 1개를 훔쳤습니다.`,p===0||v===0?'me':'');
+  break;}
+ case 'GUINEVERE':{
+  const counts=new Array(n).fill(0);
+  for(let q=0;q<n;q++)counts[q]=free(q).filter(isSw).length;
+  revealCounts(counts,true);syncBeliefs();
+  log(counts.some(c=>c)?`검을 내민 사람: ${counts.map((c,q)=>c?`${nm(q)} ${c}개`:'').filter(Boolean).join(', ')}`:'아무도 검을 내밀지 않았습니다.');
+  if(!counts.some(c=>c))break;
+  await sleep(500);
+  const taken=[];const rem=counts.slice();
+  for(let i=0;i<2;i++){
+   const hold=[];for(let q=0;q<n;q++)if(rem[q]>0)hold.push(q);if(!hold.length)break;
+   let v;
+   if(p===0){const a=await ask({kind:'player',text:`귀네비어: 누구의 검을 고를까요? (${i+1}/2)`,players:hold,labels:Object.fromEntries(hold.map(q=>[q,`남은 검 ${rem[q]}개`])),opts:[['그만 고르기',-1]]});v=a;}
+   else v=aiGuinevere(p,hold,i);
+   if(v<0||v==null)break;
+   const c=free(v).filter(x=>isSw(x)&&!taken.includes(x));const id=pick(c);
+   taken.push(id);rem[v]--;
+   for(let a=1;a<n;a++){if(a===v)continue;for(const s of SW){const b=G.B[a][s];const m=b[v]/(rem[v]+1);b[v]-=m;b[n]+=m;}}
+   rmHand(v,id);exactFor([v],id,n);
+  }
+  if(!taken.length){log(`${jo(nm(p),'이/가')} 아무 검도 고르지 않았습니다.`);syncBeliefs();break;}
+  const r=p===0?await ask({kind:'opts',text:'검을 넣을 구역을 고르세요',opts:[0,1,2].map(r=>[`구역 ${r+1} (${G.avalon[r].length}개)`,r])}):aiRegion(p,null);
+  G.avalon[r].push(...taken);shuffle(G.avalon[r]);
+  for(const id of G.avalon[r])forget(id);
+  syncBeliefs();barrier();
+  log(`🌀 ${jo(nm(p),'이/가')} 검 ${taken.length}개를 구역 ${r+1}에 넣고 섞었습니다.`);
+  break;}
+ case 'LADY':{
+  const d=await chooseDir(p,t);
+  log(`🌊 ${jo(nm(p),'이/가')} ${dirName(p,d)}을 가리킵니다. 모두 손을 넘깁니다!`);
+  const moving=G.players.map((P,q)=>free(q));
+  for(let q=0;q<n;q++)G.players[q].hand=hand(q).filter(id=>G.prot.has(id));
+  for(let q=0;q<n;q++)hand((q+d+n)%n).push(...moving[q]);
+  permuteCols(q=>(q+d+n)%n);syncBeliefs();barrier();
+  await sleep(600);
+  break;}
+ case 'UTHER':{
+  const d=await chooseDir(p,t);
+  log(`👑 ${jo(nm(p),'이/가')} ${dirName(p,d)}을 가리킵니다. 검을 가진 사람은 검을 넘깁니다.`);
+  const counts=[],moves=[];
+  for(let q=0;q<n;q++){const sw=free(q).filter(isSw);counts[q]=sw.length;for(const id of sw)moves.push([q,id]);}
+  revealCounts(counts,true);
+  permuteCols(q=>(q+d+n)%n);
+  for(const[q,id]of moves){const to=(q+d+n)%n;rmHand(q,id);hand(to).push(id);exactFor([q,to],id,to);}
+  syncBeliefs();barrier();
+  log(moves.length?`검을 넘긴 사람: ${counts.map((c,q)=>c?`${nm(q)} ${c}개`:'').filter(Boolean).join(', ')}`:'아무도 검이 없었습니다.');
+  await sleep(600);
+  break;}
+ case 'SPIRIT':{
+  const d=await chooseDir(p,t);
+  log(`👻 ${jo(nm(p),'이/가')} ${dirName(p,d)}을 가리킵니다. 모두 그쪽 사람에게서 1개씩 훔칩니다.`);
+  const allow=[];for(const q of order()){const v=(q+d+n)%n;allow[q]=free(v).length>0?await fisherOK(v,q):false;}
+  const tr=[];const sizes=G.players.map(P=>P.hand.length);
+  for(let q=0;q<n;q++){const v=(q+d+n)%n;if(allow[q]){const id=pick(free(v));tr.push([v,q,id]);}}
+  for(let a=1;a<n;a++)for(const s of SW){const b=G.B[a][s],nb=b.slice();for(const[v,q]of tr){const m=b[v]/Math.max(1,sizes[v]);nb[v]-=m;nb[q]+=m;}G.B[a][s]=nb;}
+  for(const[v,q,id]of tr){rmHand(v,id);hand(q).push(id);exactFor([v,q],id,q);}
+  syncBeliefs();barrier();
+  const mine=tr.filter(x=>x[1]===0),lost=tr.filter(x=>x[0]===0);
+  if(mine.length)log(`당신은 ${jo(tag(mine[0][2]),'을/를')} 받았습니다.`,'me');
+  if(lost.length)log(`당신은 ${jo(tag(lost[0][2]),'을/를')} 빼앗겼습니다.`,'me');
+  await sleep(600);
+  break;}
+ case 'MORDRED':{
+  const v=await choosePlayer(p,'손을 엿볼 사람을 고르세요',others(p),'peek');
+  barrier();peekInfo(p,v);
+  log(`👁 ${jo(nm(p),'이/가')} ${nm(v)}의 손을 엿봅니다.`);
+  let sw;
+  if(p===0)sw=(await ask({kind:'opts',text:`${nm(v)}의 손입니다. 손을 바꿀까요?`,show:hand(v).slice(),sub:'🔒 표시는 갤러해드로 보호된 칩(교환되지 않음)',opts:[['바꾼다',1],['바꾸지 않는다',0]]}))===1;
+  else sw=aiMordredSwap(p,v);
+  if(sw){
+   const a=free(p),b=free(v);
+   G.players[p].hand=hand(p).filter(id=>G.prot.has(id)).concat(b);
+   G.players[v].hand=hand(v).filter(id=>G.prot.has(id)).concat(a);
+   permuteCols(q=>q===p?v:q===v?p:q);syncBeliefs();barrier();
+   log(`🔄 ${jo(nm(p),'이/가')} ${jo(nm(v),'과/와')} 손을 바꿨습니다!`,'warn');
+  }else log(`${jo(nm(p),'은/는')} 손을 바꾸지 않았습니다.`);
+  break;}
+ case 'SPY':{
+  const tg=others(p).filter(q=>hand(q).length);if(!tg.length)break;
+  const v=await choosePlayer(p,'손을 엿볼 사람을 고르세요',tg,'peek');
+  barrier();peekInfo(p,v);
+  let id;
+  if(p===0)id=await ask({kind:'opts',text:`${nm(v)}의 손입니다. 모두에게 보여 줄 칩을 고르세요`,show:hand(v).slice(),opts:hand(v).map(x=>[tag(x),x])});
+  else{const h=hand(v);id=h.find(x=>tp(x)==='EXCALIBUR')??h.find(x=>tp(x)==='CURSED')??h.find(x=>tp(x)==='SQUIRE')??pick(h);}
+  publicReveal(id,v);syncBeliefs();
+  log(`🕵 ${jo(nm(p),'이/가')} ${nm(v)}의 손에서 ${jo(tag(id),'을/를')} 공개했습니다!`,isSw(id)?'warn':'');
+  await sleep(700);
+  break;}
+ case 'CAELIA':{
+  const picks=[];
+  for(let i=0;i<2;i++){
+   const c=others(p).filter(q=>!picks.includes(q));if(!c.length)break;
+   const v=p===0?await ask({kind:'player',text:`카일리아: 지목할 사람 (${i+1}/2)`,players:c,opts:i?[['한 명만 지목',-1]]:[]}):aiCaelia(p,c,i);
+   if(v==null||v<0)break;picks.push(v);
+  }
+  for(const v of picks){const tr=free(v).filter(id=>T[tp(id)].g==='m');for(const id of tr)trashHand(v,id);log(`💔 ${nm(v)}: ${tr.length?tr.map(tag).join(', ')+' 버림':'버릴 칩 없음'}`);}
+  syncBeliefs();barrier();
+  break;}
+ case 'GALAHAD':{
+  const id=await chooseHand(p,'갤러해드: 보호할 칩을 고르세요',hand(p).slice(),'protect','이번 라운드 동안 어떤 효과도 이 칩을 건드릴 수 없습니다.');
+  if(id!=null){G.prot.add(id);log(`🛡 ${jo(nm(p),'이/가')} 칩 1개를 보호합니다.`);}
+  break;}
+ case 'FISHER':break;
+ case 'LANCELOT':{
+  const res=[];
+  for(const q of order()){
+   const P=G.players[q];
+   if(q!==p&&P.played!=null&&!G.resolving.has(P.played)){const ok=rng()<0.5;res.push(`${nm(q)} ${tag(P.played)} ${ok?'✅':'❌'}`);if(!ok){G.trash.push(P.played);P.played=null;}}
+   for(const id of P.perm.slice()){const ok=rng()<0.5;res.push(`${nm(q)} ${tag(id)}(영구) ${ok?'✅':'❌'}`);if(ok)G.fkUp.add(q);else{P.perm.splice(P.perm.indexOf(id),1);G.trash.push(id);}}
+  }
+  barrier();
+  log(res.length?`🎲 랜슬롯의 동전 던지기: ${res.join(' · ')}`:'던질 칩이 없습니다.');
+  await sleep(800);
+  break;}
+ case 'BLACKKNIGHT':{
+  const f1=rng()<0.5,f2=rng()<0.5;barrier();
+  log(`🎲 흑기사 동전 던지기: ${f1?'✅':'❌'} ${f2?'✅':'❌'}`);
+  await sleep(500);
+  if(!(f1||f2))break;
+  const c=[];
+  for(const q of others(p)){const P=G.players[q];if(P.played!=null&&!G.resolving.has(P.played))c.push([q,P.played,0]);for(const id of P.perm)c.push([q,id,1]);}
+  if(!c.length){log('가져올 칩이 없습니다.');break;}
+  let k;
+  if(p===0)k=await ask({kind:'opts',text:'흑기사: 가져올 칩을 고르세요',opts:c.map((x,i)=>[`${nm(x[0])}의 ${tag(x[1])}${x[2]?'(영구)':''}`,i])});
+  else{let bv=-9;k=0;c.forEach((x,i)=>{const v=(VAL[tp(x[1])]||0)+(tp(x[1])==='FISHER'?G.B[p].E[x[0]]*2:0)+rng()*0.1;if(v>bv){bv=v;k=i;}});}
+  const[q,id,perm]=c[k];const P=G.players[q];
+  if(perm)P.perm.splice(P.perm.indexOf(id),1);else P.played=null;
+  hand(p).push(id);syncBeliefs();barrier();
+  log(`🗡 ${jo(nm(p),'이/가')} ${nm(q)}의 ${jo(tag(id),'을/를')} 빼앗았습니다!`);
+  break;}
+ }
+}
+
+function endGame(){
+ G.over=true;barrier();
+ const n=G.n,lE=locOf(G.sid.E),lC=locOf(G.sid.C),lS=locOf(G.sid.S);
+ const res=new Array(n).fill('패배');let head;
+ if(lE===n||lE<0){head='엑스칼리버가 아발론에 남았습니다. 왕국은 혼돈에 빠지고 모두 패배!';}
+ else if(lE===lC){head=`${jo(nm(lE),'이/가')} 엑스칼리버와 저주받은 검을 함께 가졌습니다. 나머지 모두 오염된 승리!`;for(let q=0;q<n;q++)res[q]=q===lE?'최종 패배자':'오염된 승리';}
+ else{head=`👑 ${jo(nm(lE),'이/가')} 엑스칼리버로 왕이 되었습니다!`;res[lE]='승리';
+  if(n>=4&&lS>=0&&lS<n&&lS!==lC&&(lS+1)%n===lE&&lS!==lE)res[lS]='승리(종자의 검)';}
+ if(lC>=0&&lC<n&&lE!==lC)res[lC]='최종 패배자';
+ G.result={head,res,lE,lC,lS};
+ log(head,'round');
+ REPLAY=false;save();render();
+}
+
+// ================= AI =================
+function canEnd(a,k){return has(a,'EXCALIBUR')&&!has(a,'CURSED')&&!G.final&&minRegionSize()>0&&minRegionSize()<=k;}
+function dirVal(a,t,d){
+ const n=G.n,b=G.B[a];
+ const src=t==='SPIRIT'?(a+d+n)%n:(a-d+n)%n;
+ const h=Math.max(1,hand(src).length);
+ if(t==='SPIRIT')return(b.E[src]-b.C[src])/h;
+ if(t==='UTHER')return b.E[src]-b.C[src]+b.S[src]*0.2;
+ return b.E[src]-b.C[src];
+}
+function scoreChip(a,t){
+ const b=G.B[a],A=G.n,oth=others(a),hasE=has(a,'EXCALIBUR'),hasC=has(a,'CURSED');
+ const hs=q=>Math.max(1,hand(q).length),avN=avTotal();
+ const knowE=G.known[a].has(G.sid.E)&&inAv(G.sid.E);
+ const dG=k=>avN?(knowE?1:Math.min(1,b.E[A]*k/avN)):0;
+ const sG=k=>{let m=0;for(const q of oth){if(G.fkUp.has(q))continue;const f=Math.min(1,k/hs(q));m=Math.max(m,b.E[q]*f-(hasC?0:0.6*b.C[q]*f));}return m;};
+ const sumE=oth.reduce((x,q)=>x+b.E[q],0),sumC=oth.reduce((x,q)=>x+b.C[q],0),maxE=Math.max(...oth.map(q=>b.E[q]));
+ const dir=tt=>Math.max(dirVal(a,tt,1),dirVal(a,tt,-1));
+ let v=0;
+ switch(t){
+  case 'PEASANT':v=hasE?0.05:Math.max(dG(1),sG(1));if(hasC)v+=0.8;if(canEnd(a,1))v+=1;break;
+  case 'MERCHANT':v=hasE?0.1:Math.max(dG(2),sG(2));if(hasC)v+=0.85;if(canEnd(a,2))v+=1;break;
+  case 'ARTISAN':v=hasE?0.1:Math.max(dG(2),sG(2));if(hasC)v+=0.75;if(canEnd(a,2))v+=1;break;
+  case 'THIEF':v=hasE?0.05:Math.min(1,sG(1)*1.6);break;
+  case 'ROBYN':v=hasE?0.1:Math.min(1,sumE*0.6)-(hasC?0:0.4*sumC);break;
+  case 'PRIEST':case 'BARONESS':v=hasE?0.05:dG(2);if(canEnd(a,2))v+=1;break;
+  case 'MORGANA':v=(hasE?0.05:dG(2))+0.1;if(canEnd(a,2))v+=1;break;
+  case 'PERCIVAL':v=hasE?0.05:Math.min(1,dG(4)*1.2);if(canEnd(a,1))v+=1;break;
+  case 'GREENKNIGHT':v=hasE?-0.3-sumC:(hasC?0.05:sumE-0.9*sumC);break;
+  case 'MERLIN':v=hasE?-0.3:(hasC?0.05:0.6*(sumE-0.9*sumC));break;
+  case 'GAWAIN':{let m=0;for(const q of oth)m=Math.max(m,b.E[q]*(1-b.C[q])-(hasC?0:0.7*b.C[q]));v=hasE?0:m;break;}
+  case 'ARTHUR':v=hasE?0:(sumE-(hasC?0:0.8*sumC))/2;break;
+  case 'GUINEVERE':v=hasE?0.02:0.35*maxE;break;
+  case 'UTHER':v=hasE&&!hasC?-0.6:(hasC&&!hasE?0.6:dir('UTHER')*0.6);break;
+  case 'LADY':v=hasE&&!hasC?-0.7:(hasC&&!hasE?0.55:dir('LADY')*0.7);break;
+  case 'SPIRIT':v=hasE?-0.15:dir('SPIRIT');break;
+  case 'MORDRED':v=hasE?0.02:0.8*maxE+(hasC?0.3:0);break;
+  case 'SPY':v=0.15;break;case 'CAELIA':v=0.1;break;
+  case 'GALAHAD':v=hasE?0.4:0.08;break;case 'FISHER':v=hasE?0.45:0.15;break;
+  case 'BLACKKNIGHT':v=0.2;break;case 'LANCELOT':v=0.1;break;
+ }
+ if(late())v*=1.6;
+ return v+rng()*0.12;
+}
+function aiChoosePlay(a){
+ const c=hand(a).filter(id=>!isSw(id));if(!c.length)return null;
+ let best=c[0],bv=-99;for(const id of c){const v=scoreChip(a,tp(id));if(v>bv){bv=v;best=id;}}
+ return best;
+}
+function aiDrawOrSteal(a,t,k){
+ if(canEnd(a,k))return'draw';
+ if(has(a,'CURSED')&&t!=='ARTISAN')return'steal';
+ const b=G.B[a],avN=avTotal();
+ const knowE=G.known[a].has(G.sid.E)&&inAv(G.sid.E);
+ const dg=knowE?1:(avN?b.E[G.n]*k/avN:0);
+ let sg=0;for(const q of others(a))if(free(q).length&&!G.fkUp.has(q))sg=Math.max(sg,b.E[q]*Math.min(1,k/hand(q).length));
+ return sg>dg?'steal':'draw';
+}
+function aiPlayer(a,c,purpose){
+ const b=G.B[a];let best=c[0],bv=-99;
+ for(const q of c){
+  let v;const h=Math.max(1,hand(q).length);
+  if(purpose==='steal')v=G.fkUp.has(q)?-5:(b.E[q]-(has(a,'CURSED')?0:0.5*b.C[q]))/h*2+b.S[q]*0.1;
+  else if(purpose==='peek')v=b.E[q]+0.2*b.C[q];
+  else if(purpose==='gawain')v=b.E[q]*(1-b.C[q])-0.6*b.C[q];
+  else v=h;
+  v+=rng()*0.05;
+  if(v>bv){bv=v;best=q;}
+ }
+ return best;
+}
+function aiHand(a,ids,purpose){
+ const v=id=>VAL[tp(id)]??0.5;
+ if(purpose==='protect'){let b=null,bv=-99;for(const id of ids){if(tp(id)==='CURSED')continue;if(v(id)>bv){bv=v(id);b=id;}}return b??ids[0];}
+ let b=ids[0],bv=99;for(const id of ids){const x=v(id)+rng()*0.05;if(x<bv){bv=x;b=id;}}return b;
+}
+function aiRegion(a,id){
+ const sz=G.avalon.map(r=>r.length);
+ if(id!=null&&tp(id)==='CURSED')return sz.indexOf(Math.max(...sz));
+ if(has(a,'EXCALIBUR'))return sz.indexOf(Math.max(...sz));
+ const ne=sz.map((s,i)=>[s,i]).filter(x=>x[0]>0).sort((x,y)=>x[0]-y[0]);
+ return ne.length?ne[0][1]:ri(3);
+}
+function aiPickDraw(a){
+ const E=G.sid.E;
+ if(G.known[a].has(E)&&inAv(E))return E;
+ const bad=id=>G.known[a].has(id)&&(tp(id)==='CURSED');
+ const regs=G.avalon.map((r,i)=>[r.length,i]).filter(x=>x[0]>0);
+ let r;
+ if(has(a,'EXCALIBUR')&&!has(a,'CURSED'))r=regs.sort((x,y)=>x[0]-y[0])[0][1];
+ else r=regs.sort((x,y)=>y[0]-x[0])[0][1];
+ const known=G.avalon[r].filter(id=>G.known[a].has(id)&&tp(id)==='SQUIRE');
+ if(known.length)return known[0];
+ const c=G.avalon[r].filter(id=>!bad(id)&&!G.known[a].has(id));
+ if(c.length)return pick(c);
+ const c2=G.avalon[r].filter(id=>!bad(id));
+ return pick(c2.length?c2:G.avalon[r]);
+}
+function aiPercivalFlip(a,fl){
+ const all=G.avalon.flat().filter(id=>!fl.includes(id));
+ const E=G.sid.E;if(all.includes(E)&&G.known[a].has(E))return E;
+ const unk=all.filter(id=>!G.known[a].has(id));return pick(unk.length?unk:all);
+}
+function aiPercivalTake(a,fl){
+ const f=t=>fl.find(id=>tp(id)===t);
+ if(f('EXCALIBUR')!=null)return f('EXCALIBUR');
+ if(f('SQUIRE')!=null)return f('SQUIRE');
+ let b=fl[0],bv=-99;for(const id of fl){const v=VAL[tp(id)]??0.5;if(v>bv){bv=v;b=id;}}return b;
+}
+function aiArthur(a,hold,counts){const b=G.B[a];let best=hold[0],bv=-99;for(const q of hold){const v=(b.E[q]-0.8*b.C[q])/counts[q]-(G.fkUp.has(q)?5:0)+rng()*0.05;if(v>bv){bv=v;best=q;}}return best;}
+function aiGuinevere(a,hold,i){
+ if(has(a,'EXCALIBUR'))return -1;
+ const b=G.B[a];const c=hold.filter(q=>q!==a);if(!c.length)return -1;
+ let best=c[0],bv=-99;for(const q of c){const v=b.E[q]+rng()*0.05;if(v>bv){bv=v;best=q;}}
+ return bv<0.15&&i>0?-1:best;
+}
+function aiCaelia(a,c,i){let best=c[0],bv=-1;for(const q of c){const v=free(q).filter(id=>T[tp(id)].g==='m').length+rng()*0.3;if(v>bv){bv=v;best=q;}}return best;}
+function aiDir(a,t){
+ const hasE=has(a,'EXCALIBUR'),hasC=has(a,'CURSED');
+ if((t==='LADY'||t==='UTHER')&&hasC&&!hasE){ // 저주 검을 E 보유 가능성 낮은 쪽으로
+  const n=G.n,b=G.B[a];return b.E[(a+1)%n]>b.E[(a-1+n)%n]?-1:1;}
+ return dirVal(a,t,1)>=dirVal(a,t,-1)?1:-1;
+}
+function aiMordredSwap(a,v){
+ const hv=ids=>ids.reduce((x,id)=>x+(tp(id)==='EXCALIBUR'?10:tp(id)==='CURSED'?-8:tp(id)==='SQUIRE'?1:0.1),0);
+ return hv(free(v))>hv(free(a))+0.5;
+}
+
+// ================= 화면 =================
+const $=id=>document.getElementById(id);
+function chipHTML(id,cls='',attrs=''){
+ const t=tp(id),d=T[t];
+ const c=d.sw?d.sw:d.g;
+ return `<span class="chip ${c} ${cls}" ${attrs} data-info="${t}">${d.s}${G.prot.has(id)?'<span class="lk">🔒</span>':''}</span>`;
+}
+function render(){
+ if(REPLAY||HEADLESS||!G)return;
+ const q=PEND?PEND.q:null,n=G.n;
+ $('undoBtn').disabled=!canUndo();
+ $('undoBtn').title=canUndo()?'마지막 선택을 되돌립니다':'새 정보를 봤거나 턴이 넘어가 무를 수 없어요';
+ const ms=minRegionSize();
+ $('status').innerHTML=`라운드 <b>${G.round}</b> · 왕관 👑 <b>${nm(G.crown)}</b> · 아발론 <b>${avTotal()}</b>개`+(G.final?` · <span class="warn">마지막 라운드!</span>`:(ms<=4?` · <span class="warn">한 구역에 ${ms}개만 남음</span>`:''));
+ // 상대
+ const selP=q&&q.kind==='player'?q.players:[];
+ $('opps').innerHTML=others(0).map(p=>{
+  const P=G.players[p];
+  const tagx=p===1&&p===n-1?'내 양옆':p===1?'내 왼쪽':p===n-1?'내 오른쪽':'';
+  const fist=G.phase==='play'&&P.secret!=null&&!G.over;
+  return `<div class="opp ${selP.includes(p)?'sel':''}" ${selP.includes(p)?`data-ans='${p}'`:''}>
+   <div class="on">${G.crown===p?'👑':''}${P.name}${G.cur===p?' ▶':''} <span class="tag">${tagx}</span>${G.fkUp.has(p)?' <span class="tag">🎣방어</span>':''}</div>
+   <div class="dots">${G.over?P.hand.map(id=>chipHTML(id,'sm')).join(''):P.hand.map(id=>`<span class="dot ${G.prot.has(id)?'prot':''}"></span>`).join('')} <span class="tag">${P.hand.length}개</span></div>
+   <div class="oplay">${fist?'✊ 칩을 쥐고 있음':''}${P.played!=null?'낸 칩 '+chipHTML(P.played,'sm'):''}${P.perm.length?' 영구 '+P.perm.map(id=>chipHTML(id,'sm')).join(''):''}${selP.includes(p)&&q.labels?` <b>${q.labels[p]}</b>`:''}</div>
+  </div>`;}).join('');
+ // 아발론
+ const avQ=q&&q.kind==='avalon';const ex=q&&q.excl?q.excl:[];
+ const blades=['아론다이트','갈라틴','엑스칼리버 모형'];
+ $('avalon').innerHTML=`<h2>아발론 <span class="tag">${G.n>=6?'두 구역':'한 구역'}이 비면 마지막 라운드</span></h2>`+
+  G.avalon.map((r,i)=>{
+   const can=avQ&&r.filter(id=>!ex.includes(id)).length>0;
+   return `<div class="reg ${can?'sel':''}"><div class="rh"><span>구역 ${i+1}</span><b class="${r.length<=3?'low':''}">${r.length}개</b></div>
+   <div class="slots">${r.map(id=>{
+    const fl=G.flipped.has(id),kn=G.known[0].has(id)||G.over;
+    const pk=can&&!ex.includes(id);
+    return `<button class="slot ${fl?'flip':kn?'kn':''} ${pk?'pick':''}" ${pk?`data-ans='${id}'`:'disabled'} aria-label="${kn||fl?ko(id):'뒷면 칩'}">${kn||fl?T[tp(id)].s.slice(0,3):''}</button>`;}).join('')}</div>
+   ${can?`<button class="btn rbtn" data-ans='"r${i}"'>여기서 무작위</button>`:''}
+   <div class="tag" style="text-align:center;margin-top:4px">⚔ ${blades[i]}</div></div>`;}).join('');
+ // 버린 칩
+ const tc={};for(const id of G.trash)tc[tp(id)]=(tc[tp(id)]||0)+1;
+ $('trash').innerHTML=G.trash.length?`<b>상자(버린 칩 ${G.trash.length}개):</b> `+Object.entries(tc).map(([t,c])=>`${T[t].ko}${c>1?'×'+c:''}`).join(', '):'';
+ // 질문
+ if(G.over){$('q').innerHTML=`게임 종료 — ${G.result.head}`;$('opts').innerHTML=`<button class="btn pri" id="againBtn">새 게임</button><button class="btn" id="resBtn">결과 보기</button>`;$('qshow').innerHTML='';}
+ else if(q){
+  $('q').innerHTML=q.text+(q.sub?`<span class="sub">${q.sub}</span>`:'');
+  $('qshow').innerHTML=(q.show||[]).map(id=>chipHTML(id)).join('');
+  let o='';
+  if(q.kind==='player')o+=q.players.map(p=>`<button class="btn" data-ans='${p}'>${nm(p)}${q.labels?` · ${q.labels[p]}`:''}</button>`).join('');
+  o+=(q.opts||[]).map(([l,v])=>`<button class="btn ${v==='go'||v==='end'?'pri':''}" data-ans='${JSON.stringify(v)}'>${l}</button>`).join('');
+  if(canUndo())o+=`<button class="btn undo" data-undo>↩ 무르기</button>`;
+  $('opts').innerHTML=o;
+ }else{$('q').innerHTML='<span class="sub">컴퓨터가 생각 중…</span>';$('opts').innerHTML='';$('qshow').innerHTML='';}
+ // 내 영역
+ const me=G.players[0];const hq=q&&q.kind==='hand'?q.ids:null;
+ let h=`<div class="lab"><span>${G.crown===0?'👑 ':''}내 손 (${me.hand.length}개)${G.fkUp.has(0)?' · 🎣방어 중':''}</span><span>칩을 누르면 설명</span></div>`;
+ if(me.played!=null)h+=`<span class="tag">낸 칩</span>${chipHTML(me.played,'sm')}`;
+ if(me.perm.length)h+=`<span class="tag">영구</span>${me.perm.map(id=>chipHTML(id,'sm')).join('')}`;
+ h+=me.hand.map(id=>{const pk=hq&&hq.includes(id);const dim=hq&&!pk;const ch=me.secret===id;return chipHTML(id,`${pk?'pick':''} ${dim?'dim':''} ${ch?'chosen':''}`,pk?`data-ans='${id}' role="button" tabindex="0"`:'');}).join('');
+ $('mine').innerHTML=h;
+ $('info').textContent=INFO;
+ // 로그
+ $('log').innerHTML=G.log.slice(-120).reverse().map(l=>`<p class="${l.c}">${l.t}</p>`).join('');
+ document.body.style.setProperty('--dock',($('dock').offsetHeight+16)+'px');
+ if(G.over&&!G.shownEnd){G.shownEnd=true;showEnd();}
+}
+function showEnd(){
+ const r=G.result;
+ $('endCard').innerHTML=`<h3>게임 종료</h3><p><b>${r.head}</b></p>`+G.players.map((P,p)=>`<p class="${/승리/.test(r.res[p])?'win':/최종/.test(r.res[p])?'lose':''}">${P.name}: ${r.res[p]}</p>`).join('')+
+ `<p class="tag">엑스칼리버: ${r.lE===G.n?'아발론':nm(r.lE)} · 저주받은 검: ${r.lC===G.n?'아발론':nm(r.lC)} · 종자의 검: ${r.lS===G.n?'아발론':r.lS<0?'-':nm(r.lS)}</p>
+ <div class="row"><button class="btn pri" id="again2">새 게임</button><button class="btn" data-close>판 보기</button></div>`;
+ $('mEnd').classList.add('on');
+}
+function glossary(){
+ const tc={};if(G)for(const id of G.trash)tc[tp(id)]=(tc[tp(id)]||0)+1;
+ $('glossary').innerHTML=Object.keys(T).sort((a,b)=>T[a].ko.localeCompare(T[b].ko,'ko')).map(t=>{
+  const d=T[t];return `<span class="chip ${d.sw||d.g}">${d.s}</span><div><b>${d.ko}</b> <span class="cnt">(${d.n} / ${tc[t]||0})</span><br>${d.d}</div>`;}).join('');
+}
+
+// ================= 이벤트 =================
+document.addEventListener('click',e=>{
+ const u=e.target.closest('[data-undo]');if(u){undo();return;}
+ const c=e.target.closest('[data-close]');if(c){c.closest('.modal').classList.remove('on');return;}
+ const a=e.target.closest('[data-ans]');
+ if(a&&PEND){PEND.res(JSON.parse(a.getAttribute('data-ans')));return;}
+ const inf=e.target.closest('[data-info]');
+ if(inf){const d=T[inf.dataset.info];INFO=`${d.ko}: ${d.d}`;$('info').textContent=INFO;document.body.style.setProperty('--dock',($('dock').offsetHeight+16)+'px');}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-ans]')){e.preventDefault();e.target.click();}});
+$('undoBtn').onclick=undo;
+$('rulesBtn').onclick=()=>$('mRules').classList.add('on');
+$('chipsBtn').onclick=()=>{glossary();$('mChips').classList.add('on');};
+$('newBtn').onclick=()=>$('mNew').classList.add('on');
+$('cancelNew').onclick=()=>$('mNew').classList.remove('on');
+document.addEventListener('click',e=>{if(e.target.id==='againBtn'||e.target.id==='again2'){$('mEnd').classList.remove('on');$('mNew').classList.add('on');}if(e.target.id==='resBtn')showEnd();});
+$('startBtn').onclick=()=>{
+ CFG={nAI:+$('selN').value,seed:(Math.random()*2**31)|0,speed:+$('selS').value};SPEED=CFG.speed;
+ try{localStorage.setItem('excal_ko_pref',JSON.stringify({n:CFG.nAI,s:CFG.speed}));}catch(e){}
+ ANS=[];$('mNew').classList.remove('on');startEngine(false);save();
+};
+window.addEventListener('resize',()=>document.body.style.setProperty('--dock',($('dock').offsetHeight+16)+'px'));
+
+// 테스트 훅
+window.__EXCAL={newGameHeadless(cfg,answer){HEADLESS=answer;CFG=cfg;ANS=[];SPEED=0;GEN++;PEND=null;AIDX=0;BAR=0;G=newGame(CFG);return runGame().then(()=>G);},get G(){return G;},get PEND(){return PEND;},undoHeadless(){ANS.pop();GEN++;PEND=null;AIDX=0;BAR=0;REPLAY=true;G=newGame(CFG);runGame().catch(()=>{});},canUndo,get ANS(){return ANS;}};
+
+// 시작
+(function boot(){
+ if(window.__NOBOOT)return;
+ try{const p=JSON.parse(localStorage.getItem('excal_ko_pref')||'null');if(p){$('selN').value=p.n;$('selS').value=p.s;}}catch(e){}
+ let sv=null;try{sv=JSON.parse(localStorage.getItem('excal_ko_v1')||'null');}catch(e){}
+ if(sv&&sv.cfg){CFG=sv.cfg;SPEED=CFG.speed||1;ANS=sv.ans||[];startEngine(true);}
+ else{CFG={nAI:3,seed:(Math.random()*2**31)|0,speed:1};SPEED=1;ANS=[];startEngine(false);save();}
+})();
+}
+</script>
+</body>
+</html>

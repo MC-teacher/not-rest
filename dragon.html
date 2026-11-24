@@ -61,6 +61,9 @@ header .sub{font-size:11px;color:var(--muted)}
 .card.click:active{transform:scale(.96)}
 .card.pick{border-color:var(--accent);background:#ffe3d6}
 .card.mini{width:118px}
+#aiHand{margin:-2px 0 8px}
+#aiHand:empty{display:none}
+#aiHand .card.can::after{content:'완성됨!'}
 .card.mini svg{height:58px}
 .card .tag{font-size:11px;color:var(--muted);text-align:center;margin-top:1px}
 .card.mini .tag{font-size:10px}
@@ -114,6 +117,7 @@ table.res td,table.res th{border-bottom:1px solid var(--line);padding:6px;text-a
   </header>
 
   <div class="pbar" id="aiBar"></div>
+  <div class="hand" id="aiHand"></div>
   <div id="fancyBar"></div>
   <div id="boardWrap"><svg id="board"></svg></div>
   <div class="counters" id="counters"></div>
@@ -153,18 +157,21 @@ const RING1 = DIRS.map(([q,r])=>q+','+r);
 const SHOP_NAMES = ['따끈 빵집','반짝 보석 공방','숯불 정육점','망치 대장간','보라 물약 상점','이슬 꽃집','구름 찻집','두루마리 서점','뾰족 모자 가게','촛농 양초 공방','물레 도자기 공방','톱니 시계방','현악기 공방','향긋 향수 가게','달콤 과자점','치즈 동굴','보물 지도 상점','유리 공방','비단 상점','만물 잡화점','약초 상점','태엽 장난감 가게','무지개 우산 가게','쪽빛 염색 공방','나무 목공소','가죽 구두 가게','황금 꿀 가게','보글 수프 가게','달빛 차 상점','활자 인쇄소','등불 가게','바구니 공방','새콤 잼 가게','깃털 펜 가게','거품 비누 공방','망원경 상점','피클 항아리','리본 가게','바람 연 가게','별빛 천문대','버섯 시장','드래곤 카페'];
 const SH={line:[[0,0],[1,0],[2,0]], tri:[[0,0],[1,0],[0,1]]};
 const ADJ=KEYS.map(k=>new Set(NEI[k].map(x=>IDX[x])));
-const CONN3=[],TRI3=[];
+const LINE3=[],TRI3=[];
+for(const [q,r] of COORDS) for(const [dq,dr] of DIRS.slice(0,3)){
+  const ks=[0,1,2].map(i=>(q+dq*i)+','+(r+dr*i)); if(ks.every(k=>k in IDX)) LINE3.push(ks.map(k=>IDX[k])); }
 for(let a=0;a<KEYS.length;a++)for(let b=a+1;b<KEYS.length;b++)for(let c=b+1;c<KEYS.length;c++){
-  const e=ADJ[a].has(b)+ADJ[a].has(c)+ADJ[b].has(c); if(e>=2)CONN3.push([a,b,c]); if(e===3)TRI3.push([a,b,c]); }
+  if(ADJ[a].has(b)&&ADJ[a].has(c)&&ADJ[b].has(c)) TRI3.push([a,b,c]); }
 const PERMS=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
 function placementsOf(shape,ts){
   const out=[],seen=new Set();
-  for(const set of (shape==='tri'?TRI3:CONN3)) for(const pm of PERMS){ const t=pm.map(i=>ts[i]); const sig=set.join()+'|'+t.join(); if(seen.has(sig))continue; seen.add(sig); out.push({idx:set,t}); }
+  const perms=shape==='tri'?PERMS:[[0,1,2],[2,1,0]];
+  for(const set of (shape==='tri'?TRI3:LINE3)) for(const pm of perms){ const t=pm.map(i=>ts[i]); const sig=set.join()+'|'+t.join(); if(seen.has(sig))continue; seen.add(sig); out.push({idx:set,t}); }
   return out;
 }
 function buildDeck(){
   const T=TK, defs=[];
-  // 연결형 24장 (어떻게든 이어지면 OK) — 2점
+  // 일직선 24장 — 2점
   T.forEach(t=>defs.push(['line',[t,t,t]]));
   for(let i=0;i<6;i++){ defs.push(['line',[T[i],T[i],T[(i+1)%6]]]); defs.push(['line',[T[i],T[i],T[(i+3)%6]]]); }
   for(let i=0;i<6;i++) defs.push(['line',[T[i],T[(i+1)%6],T[(i+3)%6]]]);
@@ -200,9 +207,11 @@ const FANCIES={
 const FK=Object.keys(FANCIES);
 const has=f=>!!(G&&G.fancies&&G.fancies.includes(f));
 const HS=()=>has('trinity')?3:2;
+const mkt=()=>has('oracle')||!!(G&&G.open);
+let OPEN_RULE=true;
 const MODAL_KINDS=new Set(['coinDiscard','oracle']);
 
-function newGame(fancies=[]){
+function newGame(fancies=[],open=false){
   tokenSeq=0;
   const board={}; KEYS.forEach(k=>board[k]=[]);
   const ring=shuffle(TK.map(t=>mkTok([t])));
@@ -214,10 +223,10 @@ function newGame(fancies=[]){
   if(fancies.includes('buddy')) bag.push(mkTok(['buddy']));
   const deck=shuffle(buildDeck());
   G={board,bag,extras,deck,faceUp:[],fancies,cur:0,first:0,endTriggered:false,coinUsed:false,phase:'setup',
-     players:[{hand:[],scored:[],coins:3,ai:false},{hand:[],scored:[],coins:3,ai:true}],
+     open,players:[0,1].map(i=>({hand:[],scored:[],coins:open?4:3,ai:i===1})),
      recent:new Set(),sel:new Set(),match:new Set(),pending:null,waiting:null,waitKind:null,decisions:[],replay:[],rngState:(Math.random()*4294967296)|0,held:null,over:false,log:[]};
-  G.players.forEach(p=>{for(let i=0;i<HS();i++)p.hand.push(G.deck.shift());});
-  if(has('oracle')) G.faceUp=G.deck.splice(0,2);
+  G.open=open; G.players.forEach(p=>{for(let i=0;i<HS();i++)p.hand.push(G.deck.shift());});
+  if(mkt()) G.faceUp=G.deck.splice(0,2);
   document.getElementById('logList').innerHTML='';
   AI.plan=[];
 }
@@ -266,8 +275,15 @@ function renderBoard(){
     s+=`<g class="hexg ${pend&&pend.valid.has(k)?'clickable':''}" data-k="${k}"><path class="${cls.join(' ')}" d="${hexPath(x,y,S-2)}"/>`;
     if(G){
       const st=G.board[k]; const n=st.length;
-      st.forEach((t,j)=>{ const off=(n-1-j)*4; const tr=S*0.6; s+=tokenSVG(t,x,y-(n-1)*2+off,tr); });
-      if(n>1){ s+=`<circle cx="${x+S*0.52}" cy="${y-S*0.5}" r="9" fill="#3b2e22"/><text x="${x+S*0.52}" y="${y-S*0.5+4}" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">${n}</text>`; }
+      if(n===1) s+=tokenSVG(st[0],x,y,S*0.6);
+      else if(n>1){
+        // 맨 위 토큰은 크게, 아래 깔린 토큰은 아래쪽에 작은 칩으로
+        s+=tokenSVG(st[n-1],x,y-S*0.12,S*0.5);
+        const below=st.slice(0,n-1).reverse(); const cr=S*0.24, gap=cr*2.1, y2=y+S*0.6;
+        s+=`<rect x="${x-(below.length*gap)/2-3}" y="${y2-cr-3}" width="${below.length*gap+6}" height="${cr*2+6}" rx="${cr+3}" fill="rgba(59,46,34,.78)"/>`;
+        below.forEach((t,j)=>{ s+=tokenSVG(t,x-(below.length-1)*gap/2+j*gap,y2,cr); });
+        s+=`<circle cx="${x+S*0.56}" cy="${y-S*0.52}" r="9" fill="#3b2e22"/><text x="${x+S*0.56}" y="${y-S*0.52+4}" font-size="11" fill="#fff" text-anchor="middle" font-weight="bold">${n}</text>`;
+      }
     }
     s+='</g>';
   });
@@ -281,7 +297,7 @@ function cardSVG(card,small){
   card.pat.forEach((p,i)=>{const [x,y]=pts[i];o+=`<path d="${hexPath(x,y,s-0.5)}" fill="#e8d6b5" stroke="#b39468" stroke-width="1"/>`+tokenSVG({types:[p.t]},x,y,s*0.66);});
   return o+'</svg>';
 }
-function cardHTML(card,cls='',attr=''){return `<div class="card ${cls}" ${attr}><div class="nm">${card.name}</div><div class="val">${card.v}</div>${cardSVG(card)}<div class="tag">${card.shape==='tri'?'🔺 삼각형으로 모이기':'🔗 어떻게든 이어지면 OK'}</div></div>`;}
+function cardHTML(card,cls='',attr=''){return `<div class="card ${cls}" ${attr}><div class="nm">${card.name}</div><div class="val">${card.v}</div>${cardSVG(card)}<div class="tag">${card.shape==='tri'?'🔺 삼각형으로 모이기':'➖ 일직선으로 놓기'}</div></div>`;}
 
 function topsOf(b){return KEYS.map(k=>{const t=topOf(b,k);return t?t.types:null;});}
 function findMatch(b,card){const tops=topsOf(b);for(const pl of card.pls){let ok=true;for(let i=0;i<pl.idx.length;i++){const tt=tops[pl.idx[i]];if(!fits(tt,pl.t[i])){ok=false;break;}}if(ok)return pl.idx.map(i=>KEYS[i]);}return null;}
@@ -292,19 +308,20 @@ function renderPanels(){
   const [me,ai]=G.players;
   const aiS=ai.scored.reduce((a,c)=>a+c.v,0), meS=me.scored.reduce((a,c)=>a+c.v,0);
   document.getElementById('aiBar').className='pbar'+(G.cur===1&&!G.over&&G.phase!=='setup'?' active':'');
-  document.getElementById('aiBar').innerHTML=`<div class="who">🤖 컴퓨터</div><div class="stats"><span class="stat">평판 <b>${aiS}</b></span><span class="stat">🪙 <b>${ai.coins}</b></span><span class="stat">득점 카드 <b>${ai.scored.length}</b></span></div><div class="back">${ai.hand.map(()=>'<span></span>').join('')}</div>`;
+  document.getElementById('aiBar').innerHTML=`<div class="who">🤖 컴퓨터</div><div class="stats"><span class="stat">평판 <b>${aiS}</b></span><span class="stat">🪙 <b>${ai.coins}</b></span><span class="stat">득점 카드 <b>${ai.scored.length}</b></span></div>${G.open?'<span class="small">👁 손패 공개</span>':`<div class="back">${ai.hand.map(()=>'<span></span>').join('')}</div>`}`;
   document.getElementById('meBar').className='pbar'+(G.cur===0&&!G.over&&G.phase!=='setup'?' active':'');
   document.getElementById('meBar').innerHTML=`<div class="who">🧑 나</div><div class="stats"><span class="stat">평판 <b>${meS}</b></span><span class="stat">🪙 <b>${me.coins}</b></span><span class="stat">득점 카드 <b>${me.scored.length}</b></span><span class="stat">합계 <b>${points(me)}</b></span></div>`;
   document.getElementById('counters').innerHTML=`<span>👜 주머니 ${G.bag.length}</span><span>🃏 상점 덱 ${G.deck.length}</span><span>🧺 예비 토큰 ${G.extras.length}</span>${G.endTriggered?'<span style="color:#c8552d;font-weight:bold">⏳ 마지막 턴</span>':''}`;
+  document.getElementById('aiHand').innerHTML=G.open&&G.phase!=='setup'?ai.hand.map(c=>cardHTML(c,'mini'+(findMatch(G.board,c)?' can':''))).join(''):'';
   document.getElementById('fancyBar').innerHTML=(G.fancies||[]).map((f,i)=>`<button class="fchip" data-f="${f}">${FANCIES[f].em} ${FANCIES[f].ko}<i>${FANCIES[f].kind==='active'?'액티브':'패시브'} · ${i===0?'내 선택':'컴퓨터 선택'}</i></button>`).join('');
-  document.getElementById('faceUp').innerHTML=has('oracle')?`<div class="small">🔮 오라클 — 펼친 카드</div><div class="hand">${G.faceUp.map(c=>cardHTML(c,'mini')).join('')||'<span class="small">비어 있어요 (턴 끝에 채워요)</span>'}</div>`:'';
+  document.getElementById('faceUp').innerHTML=mkt()?`<div class="small">${has('oracle')?'🔮 오라클 — 펼친 카드':'🃏 공용 시장 — 카드를 뽑을 때 여기서 골라도 돼요'}</div><div class="hand">${G.faceUp.map(c=>cardHTML(c,'mini')).join('')||'<span class="small">비어 있어요 (턴 끝에 채워요)</span>'}</div>`:'';
   const scoring=G.waitKind==='score'&&G.cur===0;
   document.getElementById('myHand').innerHTML=me.hand.map((c,i)=>{const can=!!findMatch(G.board,c);return cardHTML(c,(can?'can ':'')+(scoring&&can?'click':''),`data-i="${i}"`);}).join('')||'<div class="small">손에 카드가 없어요</div>';
   const ub=document.getElementById('btnUndo'); ub.disabled=!canUndo(); ub.style.opacity=ub.disabled?.4:1;
   const cb=document.getElementById('btnCoin'); cb.disabled=!canCoin(); cb.textContent=`🪙 코인 사용 (${me.coins})`;
 }
 function render(){renderBoard();if(G)renderPanels();}
-function drawAvail(){return G.deck.length>0||(has('oracle')&&G.faceUp.length>0);}
+function drawAvail(){return G.deck.length>0||(mkt()&&G.faceUp.length>0);}
 function coinOptions(pi){
   const p=G.players[pi]; if(G.coinUsed||p.coins<=0) return [];
   const o=[]; const tokAvail=G.bag.length+G.extras.length>0;
@@ -374,8 +391,8 @@ function promptAsk(kind,o){
       draw();
     }else if(kind==='oracle'){
       const root=document.getElementById('modalRoot');
-      setPrompt('🔮 가져올 카드를 고르세요');
-      root.innerHTML=`<div class="overlay"><div class="modal"><h2>🔮 카드 뽑기</h2><p class="small">펼친 카드 중 1장을 가져오거나, 덱에서 1장 뽑으세요.</p><div class="hand">${o.cards.map((c,i)=>cardHTML(c,'mini click'+(findMatch(G.board,c)?' can':''),`data-oi="${i}"`)).join('')}</div><div class="row">${o.deckOk?'<button class="big" id="oDeck">🃏 덱에서 뽑기</button>':''}${G.decisions.length?'<button class="big alt" id="mUndo">↩️ 무르기</button>':''}</div></div></div>`;
+      setPrompt(has('oracle')?'🔮 가져올 카드를 고르세요':'🃏 시장에서 고르거나 덱에서 뽑으세요');
+      root.innerHTML=`<div class="overlay"><div class="modal"><h2>${has('oracle')?'🔮':'🃏'} 카드 뽑기</h2><p class="small">펼친 카드 중 1장을 가져오거나, 덱에서 1장 뽑으세요.</p><div class="hand">${o.cards.map((c,i)=>cardHTML(c,'mini click'+(findMatch(G.board,c)?' can':''),`data-oi="${i}"`)).join('')}</div><div class="row">${o.deckOk?'<button class="big" id="oDeck">🃏 덱에서 뽑기</button>':''}${G.decisions.length?'<button class="big alt" id="mUndo">↩️ 무르기</button>':''}</div></div></div>`;
       root.querySelectorAll('[data-oi]').forEach(e=>e.onclick=()=>done(+e.dataset.oi));
       const dk=document.getElementById('oDeck'); if(dk) dk.onclick=()=>done('deck');
       const mu=document.getElementById('mUndo'); if(mu) mu.onclick=undo;
@@ -407,12 +424,16 @@ async function humanPhase(body){
   }
 }
 document.getElementById('board').addEventListener('click',e=>{
-  const g=e.target.closest('.hexg'); if(!g||!G||!G.pending)return;
-  const k=g.dataset.k; if(G.pending.valid.has(k)) G.pending.resolve(k);
+  const g=e.target.closest('.hexg'); if(!g||!G)return;
+  const k=g.dataset.k;
+  if(G.pending&&G.pending.valid.has(k)){ G.pending.resolve(k); return; }
+  const st=G.board[k]; if(!st.length)return;
+  toast(st.length===1?`${tName(st[0])} (1개)`:`쌓인 토큰 ${st.length}개 — 맨 위: ${tName(st[st.length-1])} / 아래: ${st.slice(0,-1).reverse().map(tName).join(', ')}`,3000,true);
 });
 
 // ===================== 컴퓨터 AI =====================
 function cloneB(b){const c={};for(const k of KEYS)c[k]=b[k].slice();return c;}
+function evalAI(b,hand){ const w=G.open?(DIFF==='hard'?0.6:DIFF==='normal'?0.3:0):0; return w?evalB(b,hand)-w*evalB(b,G.players[1-G.cur].hand):evalB(b,hand); }
 function evalB(b,hand){
   const tops=topsOf(b); let s=0;
   for(const card of hand){
@@ -456,8 +477,8 @@ const AI={plan:[],
     const hand=G.players[G.cur].hand; const cands=[];
     for(const h of KEYS){ if(G.board[h].length>=3)continue;
       const b1=cloneB(G.board); b1[h].push(token);
-      cands.push({s:evalB(b1,hand),steps:[{k:'place',v:h},{k:'fire',v:null}]});
-      if(allowFire) for(const t of token.types) for(const r of simAbility(b1,t,h,0)) cands.push({s:evalB(r.b,hand)+(r.bonus||0)+0.01,steps:[{k:'place',v:h},{k:'fire',v:t},...r.steps]});
+      cands.push({s:evalAI(b1,hand),steps:[{k:'place',v:h},{k:'fire',v:null}]});
+      if(allowFire) for(const t of token.types) for(const r of simAbility(b1,t,h,0)) cands.push({s:evalAI(r.b,hand)+(r.bonus||0)+0.01,steps:[{k:'place',v:h},{k:'fire',v:t},...r.steps]});
     }
     let pick;
     if(DIFF==='easy'&&Math.random()<0.4) pick=cands[Math.floor(Math.random()*cands.length)];
@@ -473,7 +494,7 @@ const AI={plan:[],
     if(kind==='pickTok') kind='crystal';
     if(kind==='place'){ this.plan=this.makePlan(o.token,o.allowFire); }
     if(kind==='crystal'){
-      let bi=0,bv=-1e9; o.tokens.forEach((t,i)=>{ for(const h of KEYS){ if(G.board[h].length>=3)continue; const b1=cloneB(G.board); b1[h].push(t); const v=evalB(b1,G.players[G.cur].hand)+(DIFF==='easy'?Math.random()*6:0); if(v>bv){bv=v;bi=i;} } });
+      let bi=0,bv=-1e9; o.tokens.forEach((t,i)=>{ for(const h of KEYS){ if(G.board[h].length>=3)continue; const b1=cloneB(G.board); b1[h].push(t); const v=evalAI(b1,G.players[G.cur].hand)+(DIFF==='easy'?Math.random()*6:0); if(v>bv){bv=v;bi=i;} } });
       return bi;
     }
     const nx=this.plan[0];
@@ -509,7 +530,7 @@ function pullOne(){
 }
 async function drawCard(pi){
   const p=G.players[pi];
-  if(has('oracle')&&G.faceUp.length){
+  if(mkt()&&G.faceUp.length){
     const v=await ask(pi,'oracle',{cards:G.faceUp.slice(),deckOk:G.deck.length>0,prompt:'오라클: 카드 고르기'});
     if(v!=='deck'&&v!=null){ const c=G.faceUp.splice(v,1)[0]; p.hand.push(c); log(`[${PN(pi)}] 🔮 펼친 카드 '${c.name}'를 가져옴`); render(); return c; }
   }
@@ -517,7 +538,7 @@ async function drawCard(pi){
   const c=G.deck.shift(); p.hand.push(c); if(!G.deck.length) triggerEnd('상점 덱의 마지막 카드를 뽑음'); render(); return c;
 }
 function refillFaceUp(){
-  if(!has('oracle')) return;
+  if(!mkt()) return;
   while(G.faceUp.length<2&&G.deck.length){ G.faceUp.push(G.deck.shift()); if(!G.deck.length) triggerEnd('상점 덱의 마지막 카드를 뽑음'); }
 }
 function mark(...ks){G.recent=new Set(ks.filter(Boolean));G.sel=new Set();}
@@ -703,6 +724,8 @@ function startScreen(){
   <p>주머니에서 드래곤 토큰을 뽑아 보드에 놓고, 드래곤의 <b>특수 능력</b>으로 배치를 바꿔 손에 든 <b>상점 카드의 패턴</b>을 완성하세요. 게임이 끝났을 때 평판(♥)이 높은 쪽이 승리!</p>
   <div class="diff" id="diffSel"><button data-d="easy">쉬움</button><button data-d="normal">보통</button><button data-d="hard">어려움</button></div>
   <div class="diff" id="spdSel"><button data-s="1000">천천히</button><button data-s="650">보통 속도</button><button data-s="300">빠르게</button></div>
+  <div class="diff" id="openSel"><button data-o="1">👁 카드 공개 하우스 룰</button><button data-o="0">원작대로 (비공개)</button></div>
+  <p class="small" id="openDesc" style="text-align:center;margin:-4px 0 8px"></p>
   <div class="diff" id="modeSel"><button data-m="0">기본 게임</button><button data-m="1">✨ 팬시 모드 (확장)</button></div>
   <div id="fancyPick"></div>
   <div class="row"><button class="big" id="goBtn">게임 시작</button><button class="big alt" onclick="showRules()">규칙 보기</button></div>`);
@@ -710,13 +733,17 @@ function startScreen(){
     document.querySelectorAll('#diffSel button').forEach(b=>b.classList.toggle('on',b.dataset.d===DIFF));
     document.querySelectorAll('#spdSel button').forEach(b=>b.classList.toggle('on',+b.dataset.s===SPEED));
     document.querySelectorAll('#modeSel button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='1')===FANCY_ON));
+    document.querySelectorAll('#openSel button').forEach(b=>b.classList.toggle('on',(b.dataset.o==='1')===OPEN_RULE));
+    document.getElementById('openDesc').textContent=OPEN_RULE?'서로의 손패가 보이고, 코인 4개로 시작하며, 공용 시장 2장에서 카드를 골라 뽑을 수 있어요.':'손패는 서로 비공개, 코인 3개로 시작해요.';
+    if(OPEN_RULE&&MY_FANCY==='oracle') MY_FANCY='random';
     const fp=document.getElementById('fancyPick');
-    fp.innerHTML=FANCY_ON?`<p class="small">내가 쓸 <b>팬시 드래곤 카드</b> 1장을 고르세요. 컴퓨터도 남은 카드 중 1장을 골라요. 고른 2장은 <b>두 사람 모두</b> 써요.</p><div class="fgrid"><button class="fcard ${MY_FANCY==='random'?'on':''}" data-f="random"><b>🎲 무작위</b>아무거나 골라 주세요</button>${FK.map(f=>fancyCardHTML(f,MY_FANCY===f)).join('')}</div>`:'';
+    fp.innerHTML=FANCY_ON?`<p class="small">내가 쓸 <b>팬시 드래곤 카드</b> 1장을 고르세요. 컴퓨터도 남은 카드 중 1장을 골라요. 고른 2장은 <b>두 사람 모두</b> 써요.</p><div class="fgrid"><button class="fcard ${MY_FANCY==='random'?'on':''}" data-f="random"><b>🎲 무작위</b>아무거나 골라 주세요</button>${FK.filter(f=>!(OPEN_RULE&&f==='oracle')).map(f=>fancyCardHTML(f,MY_FANCY===f)).join('')}</div>`:'';
     fp.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{MY_FANCY=b.dataset.f;upd();});
   };
   document.querySelectorAll('#diffSel button').forEach(b=>b.onclick=()=>{DIFF=b.dataset.d;upd();});
   document.querySelectorAll('#spdSel button').forEach(b=>b.onclick=()=>{SPEED=+b.dataset.s;upd();});
   document.querySelectorAll('#modeSel button').forEach(b=>b.onclick=()=>{FANCY_ON=b.dataset.m==='1';upd();});
+  document.querySelectorAll('#openSel button').forEach(b=>b.onclick=()=>{OPEN_RULE=b.dataset.o==='1';upd();});
   upd();
   document.getElementById('goBtn').onclick=()=>{closeModal();begin();};
 }
@@ -724,9 +751,10 @@ let gameToken=0;
 async function begin(){
   gameToken++;
   let fancies=[];
-  if(FANCY_ON){ const mine=MY_FANCY==='random'?FK[Math.floor(Math.random()*FK.length)]:MY_FANCY; const rest=FK.filter(f=>f!==mine); fancies=[mine,rest[Math.floor(Math.random()*rest.length)]]; }
-  newGame(fancies); render();
+  if(FANCY_ON){ const pool=FK.filter(f=>!(OPEN_RULE&&f==='oracle')); const mine=MY_FANCY==='random'?pool[Math.floor(Math.random()*pool.length)]:MY_FANCY; const rest=pool.filter(f=>f!==mine); fancies=[mine,rest[Math.floor(Math.random()*rest.length)]]; }
+  newGame(fancies,OPEN_RULE); render();
   log(`새 게임 시작 (난이도: ${{easy:'쉬움',normal:'보통',hard:'어려움'}[DIFF]})`);
+  if(OPEN_RULE) log('👁 카드 공개 하우스 룰 (코인 4개, 공용 시장 2장)');
   if(fancies.length) log(`✨ 팬시 모드: 나 ${FANCIES[fancies[0]].ko}, 컴퓨터 ${FANCIES[fancies[1]].ko}`);
   // 선 플레이어 정하기
   let first=null, html='';
@@ -748,19 +776,23 @@ function showRules(){
   <p><b>준비</b> · 보드 가운데를 둘러싼 6칸에 색깔별 드래곤 1개씩, 각자 코인 3개와 상점 카드 2장(비공개). 예비 토큰 6개는 옆에 둬요.</p>
   <p><b>내 차례 = 3단계</b></p>
   <ol><li><b>놓기</b> · 주머니에서 토큰을 뽑아 빈 칸이나 더미 위에 놓아요 (한 칸에 최대 3개). 그 토큰의 능력을 쓸지 고를 수 있어요.</li>
-  <li><b>득점</b> · 카드에 그려진 드래곤 3마리가 보드 위(각 더미의 <b>맨 위</b> 토큰)에 모여 있으면 득점! 여러 장을 한 번에 득점해도 돼요. 듀얼 토큰은 둘 중 원하는 종류로 쳐요.<br>🔗 <b>연결 카드 (2점)</b>: 세 마리가 일자든 꺾였든 <b>어떻게든 이어져 있기만 하면</b> OK. 순서도 상관없어요.<br>🔺 <b>삼각형 카드 (3점)</b>: 세 마리가 서로 모두 맞닿은 <b>삼각형</b>으로 모여야 해요.</li>
+  <li><b>득점</b> · 카드에 그려진 드래곤 3마리가 보드 위(각 더미의 <b>맨 위</b> 토큰)에 모여 있으면 득점! 여러 장을 한 번에 득점해도 돼요. 듀얼 토큰은 둘 중 원하는 종류로 쳐요.<br>➖ <b>일직선 카드 (2점)</b>: 세 마리가 카드 그림 순서대로 <b>한 줄로 쭉</b> 놓여야 해요. 줄의 방향은 상관없어요(돌리거나 뒤집어 읽어도 OK). 꺾인 모양은 안 돼요.<br>🔺 <b>삼각형 카드 (3점)</b>: 세 마리가 서로 모두 맞닿은 <b>삼각형</b>으로 모여야 해요.</li>
   <li><b>보충</b> · 손패가 2장이 되도록 덱에서 뽑아요.</li></ol>
   <h3>✨ 팬시 모드 (확장)</h3>
   <p>시작할 때 나와 컴퓨터가 팬시 드래곤 카드를 1장씩 골라, 그 2장을 <b>둘 다 함께</b> 써요. <b>액티브</b> 카드는 코인을 쓰는 새 방법을 줘요 (코인 버튼을 누르면 고를 수 있어요. 여전히 한 턴에 코인 1개만). <b>패시브</b> 카드는 규칙 자체를 바꿔요.</p>
   ${FK.map(f=>`<div class="ab"><div class="ic" style="background:${FANCIES[f].kind==='active'?'#ffe3ef':'#e3f0ff'}">${FANCIES[f].em}</div><div><b>${FANCIES[f].ko}</b> (${FANCIES[f].kind==='active'?'액티브':'패시브'}) — ${FANCIES[f].txt}</div></div>`).join('')}
   <p><b>↩️ 무르기</b> · 내 차례 안에서는 놓기·능력·득점·코인 사용을 한 단계씩 되돌릴 수 있어요. 새로 뽑히는 토큰은 무르기 전과 똑같이 나와요. 턴을 마치면 무를 수 없어요.</p>
   <p><b>🪙 코인</b> · 보충 전에 한 턴에 한 번, 코인 1개를 내고 카드 2장을 뽑은 뒤 손에서 2장을 덱 맨 아래로 보내요. 남은 코인은 끝날 때 1점씩!</p>
+  <h3>👁 카드 공개 하우스 룰 (시작 화면에서 켜고 끌 수 있어요)</h3>
+  <ul><li><b>손패 공개</b> · 서로의 상점 카드가 보여요. 상대가 노리는 배치를 먼저 채가거나, 토큰을 덮어 모양을 비틀어 막을 수 있어요. 컴퓨터도 내 카드를 보고 견제해요(보통·어려움).</li>
+  <li><b>코인 4개로 시작</b> · 견제만 하다 막히지 않도록 손패를 갈아치울 여유를 1개 더 줘요.</li>
+  <li><b>공용 시장 2장</b> · 카드 2장을 앞면으로 깔아 둬요. 카드를 뽑을 때마다 시장에서 1장 고르거나 덱에서 뽑을 수 있고, 시장은 턴이 끝난 뒤 채워요. (이 룰에선 같은 효과인 오라클 팬시 카드는 빠져요)</li></ul>
   <h3>드래곤 능력 (위쪽일수록 순서표에서 높음)</h3>
   ${TK.map(t=>`<div class="ab"><div class="ic" style="background:${TYPES[t].c}">${TYPES[t].em}</div><div><b>${TYPES[t].ko}</b> — ${TYPES[t].ab}</div></div>`).join('')}
-  <p class="small">능력은 각 더미의 맨 위 토큰에만 적용돼요. 인접 = 변을 맞댄 칸. 듀얼 토큰은 두 능력 중 하나만 써요. 식물은 다른 식물을 발동시켜 연쇄할 수도 있어요.</p>
+  <p class="small">한 칸에 토큰이 쌓이면 맨 위 토큰은 크게, 그 아래 깔린 토큰은 칸 아래쪽 작은 띠에 보여요(왼쪽이 바로 아래). 칸을 누르면 쌓인 순서를 알려 줘요. 득점과 능력은 각 더미의 맨 위 토큰에만 적용돼요. 인접 = 변을 맞댄 칸. 듀얼 토큰은 두 능력 중 하나만 써요. 식물은 다른 식물을 발동시켜 연쇄할 수도 있어요.</p>
   <p><b>게임 끝</b> · 주머니의 마지막 토큰을 뽑거나 덱의 마지막 카드를 뽑으면 종료 조건 발동. 그 턴을 끝까지 하고, 상대는 마지막으로 득점·코인 사용 기회를 가져요. 진행 중 주머니가 비면 예비 토큰 6개를 넣어요.</p>
   <p><b>승리</b> · 카드 평판 + 남은 코인이 높은 쪽. 동점이면 득점 카드가 많은 쪽, 그래도 같으면 함께 승리!</p>
-  <p class="small">※ 보드게임 Flamecraft Duals의 기본 규칙을 바탕으로 만든 비공식 연습판이에요. 상점 카드 42장(연결 24장·삼각형 18장)은 이 사이트용으로 새로 구성했어요. 팬시 카드 중 프레셔스·플레어·테일러·스털링은 설명서에 카드 문구가 없어 보충 설명을 바탕으로 효과를 정했어요. 분수 모드·솔로 모드는 포함하지 않았어요.</p>
+  <p class="small">※ 보드게임 Flamecraft Duals의 기본 규칙을 바탕으로 만든 비공식 연습판이에요. 상점 카드 42장(일직선 24장·삼각형 18장)은 이 사이트용으로 새로 구성했어요. 팬시 카드 중 프레셔스·플레어·테일러·스털링은 설명서에 카드 문구가 없어 보충 설명을 바탕으로 효과를 정했어요. 분수 모드·솔로 모드는 포함하지 않았어요.</p>
   <div class="row"><button class="big" onclick="closeModal()">닫기</button></div>`);
 }
 document.getElementById('btnRules').onclick=showRules;

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>라크리모사 – 모차르트의 후원자들</title>
+<style>
+:root{--paper:#f4ead6;--paper2:#ebdcbf;--ink:#3a2a1c;--wine:#7b1e2b;--gold:#b88a2e;--line:#c9b48d;--T:#222;--J:#b3261e;--C:#8a7a56;--ok:#2e7d4f}
+*{box-sizing:border-box}
+body{margin:0;background:#2b1d16;color:var(--ink);font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;font-size:14px}
+#app{max-width:820px;margin:0 auto;background:var(--paper);min-height:100vh;padding-bottom:150px}
+header{position:sticky;top:0;z-index:20;background:var(--wine);color:#fff;padding:8px 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+header h1{font-size:16px;margin:0;font-family:Georgia,serif;font-style:italic;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+header{flex-wrap:nowrap}
+header .score{font-size:13px;background:rgba(255,255,255,.15);padding:3px 8px;border-radius:12px}
+button{font:inherit;border:1px solid var(--line);background:#fff8ea;color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.pri{background:var(--wine);color:#fff;border-color:var(--wine)}
+button.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+header button{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.35);padding:4px 9px}
+section{padding:8px 10px;border-bottom:1px solid var(--line)}
+h2{font-size:14px;margin:2px 0 6px;color:var(--wine);display:flex;align-items:center;gap:6px}
+h2 small{color:#7a6a55;font-weight:normal;font-size:12px}
+.hs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.card{flex:0 0 auto;width:104px;min-height:128px;border:1.5px solid var(--line);border-radius:8px;background:#fffdf6;padding:5px;font-size:11.5px;position:relative;display:flex;flex-direction:column;gap:3px}
+.card.opus{background:#fbf3e3;border-color:#d4b57a}
+.card .per{position:absolute;right:4px;top:3px;font-size:10px;color:#9a8566;font-family:Georgia,serif}
+.card .ttl{font-weight:bold;font-size:11.5px;line-height:1.2;padding-right:14px}
+.card .sub{font-size:10px;color:#7a6a55}
+.card .zone{border-top:1px dashed #dccaa5;padding-top:2px}
+.card .lbl{font-size:9.5px;color:#9a8566}
+.card>.lbl:first-of-type{padding-right:18px}
+.card.sel{outline:3px solid var(--gold);outline-offset:1px}
+.card.can{box-shadow:0 0 0 3px #4caf7a;cursor:pointer}
+.card.rot{opacity:.55}
+.card.empty{background:transparent;border-style:dashed;color:#a8957a;align-items:center;justify-content:center}
+.slotcost{font-size:10.5px;text-align:center;margin-top:2px;min-height:15px}
+.chip{display:inline-flex;align-items:center;gap:1px;border-radius:9px;padding:0 5px;margin:1px;font-size:11px;line-height:17px;background:#efe3c8;white-space:nowrap}
+.chip.T{background:var(--T);color:#fff}.chip.J{background:var(--J);color:#fff}.chip.C{background:#fff;border:1px solid var(--C);color:#5a4c30}.chip.W{background:linear-gradient(90deg,#222 0 33%,#b3261e 33% 66%,#d8cfb8 66%);color:#fff;text-shadow:0 0 2px #000}
+.chip.tok{border-radius:3px;outline:1px solid #0003}
+.chip.d{background:#f3d77a}.chip.vp{background:var(--wine);color:#fff}.chip.fin{background:#c99a6b;color:#fff}
+.chip.cost{opacity:.95}.chip.cost::before{content:"−";font-weight:bold}
+.act{display:inline-block;background:#fff;border:1px solid #cdb68a;border-radius:6px;padding:0 4px;margin:1px;font-size:11px}
+.row7 .card{width:96px}
+#map svg{width:100%;height:auto;background:#e8dcbd;border-radius:8px;display:block}
+.loc{cursor:default}.loc.can{cursor:pointer}
+.req{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.mv{border:1px solid var(--line);border-radius:6px;padding:3px;background:#fffaf0;font-size:11px}
+.mv h4{margin:0 0 3px;font-size:11.5px;text-align:center;color:var(--wine)}
+.mv .vpv{text-align:center;font-size:10.5px;color:#7a6a55}
+.slot{display:flex;align-items:center;justify-content:space-between;border:1px solid #e2d3b3;border-radius:5px;padding:1px 3px;margin:2px 0;min-height:22px;background:#fff}
+.slot.X{background:#ddd;color:#999}.slot.P{background:#e9d1d5}.slot.S{background:#d6e3ef}.slot.N{background:#ece6d6}
+.slot.can{box-shadow:0 0 0 2px #4caf7a;cursor:pointer}
+.ctile{font-size:10px;border-top:1px dashed #d8c7a3;margin-top:3px;padding-top:2px}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.box{border:1px solid var(--line);border-radius:8px;padding:6px;background:#fffaf0}
+.trk{display:flex;align-items:center;gap:4px;margin:3px 0}
+.trk .nm{width:34px;font-size:12px}
+.trk .cells{display:flex;gap:2px}
+.trk .cell{width:14px;height:14px;border-radius:3px;background:#eadfc6;font-size:9px;text-align:center;line-height:14px;color:#998}
+.trk .cell.on{background:var(--wine);color:#fff}
+.fin{display:flex;flex-direction:column-reverse;gap:2px}
+.fin div{font-size:11px;padding:1px 4px;border-radius:4px;background:#f1e6cf}
+.fin div.on{background:var(--wine);color:#fff}
+.mk{display:inline-block;margin:2px;padding:1px 5px;border-radius:6px;font-size:11px;border:1px solid #d3bf95;background:#fff}
+.mk.used{opacity:.35;text-decoration:line-through}
+.pb{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.pb .card{width:auto;min-height:96px}
+#prompt{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;justify-content:center;pointer-events:none}
+#prompt .in{pointer-events:auto;max-width:820px;width:100%;background:#3a2a1c;color:#fff;padding:9px 10px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -4px 14px #0006}
+#prompt .msg{font-size:13.5px;margin-bottom:6px;line-height:1.4}
+#prompt .btns{display:flex;flex-wrap:wrap;gap:6px}
+#prompt button{background:#fff8ea}
+#prompt button.pri{background:var(--gold);border-color:var(--gold);color:#fff}
+#log{font-size:12px;max-height:200px;overflow:auto;background:#fffaf0;border:1px solid var(--line);border-radius:6px;padding:6px}
+#log div{padding:1px 0;border-bottom:1px dotted #e6d8bb}
+#log .s{color:#1f4f7a}#log .m{color:var(--wine);font-weight:bold}
+.solo{background:#eef3f8}
+.overlay{position:fixed;inset:0;background:#000a;z-index:50;display:flex;align-items:center;justify-content:center;padding:14px}
+.overlay .pan{background:var(--paper);border-radius:12px;max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:16px}
+.overlay h3{margin:0 0 8px;color:var(--wine)}
+table.sc{width:100%;border-collapse:collapse;font-size:13px}table.sc td,table.sc th{border-bottom:1px solid var(--line);padding:4px;text-align:center}
+.opt{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.opt button.on{background:var(--wine);color:#fff}
+.note{font-size:12px;color:#6d5b45;line-height:1.5}
+.toast{position:fixed;top:56px;left:50%;transform:translateX(-50%);background:#1f4f7a;color:#fff;padding:8px 12px;border-radius:10px;z-index:40;font-size:13px;max-width:92%;box-shadow:0 4px 12px #0005}
+.exch{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.exch button{padding:2px 6px;font-size:11px}
+@media(max-width:560px){.req{grid-template-columns:repeat(3,1fr)}.board{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="prompt"></div>
+<div id="ov"></div>
+<script>
+/* ================= 데이터 ================= */
+const SP={T:'재능',J:'여행',C:'작곡',W:'자유'};
+const ACT={D:{i:'📖',k:'회고록 기록'},O:{i:'✒️',k:'작품 위촉'},P:{i:'🎭',k:'공연·판매'},V:{i:'🐎',k:'여행'},R:{i:'✝️',k:'레퀴엠'},PR:{i:'🎭',k:'종교음악 공연(+7두캇)'},SR:{i:'📜',k:'종교음악 판매(+재정2)'},N:{i:'♪',k:'중립 마커 놓기'}};
+const TYPE={opera:'오페라',religious:'종교음악',symphony:'교향곡',chamber:'실내악',nannerl:'난네를'};
+const TYPEI={opera:'🎭',religious:'⛪',symphony:'🎻',chamber:'🎹',nannerl:'👧'};
+const INST={H:{k:'호른',i:'📯'},P:{k:'타악기',i:'🥁'},S:{k:'현악기',i:'🎻'},V:{k:'성악',i:'🎤'},O:{k:'오르간',i:'🪈'}};
+const ROMAN=['★','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ'];
+const TRK_MAX=8, FIN_MAX=6;
+const FIN_INCOME=[{},{d:1},{d:2},{d:3,W:1},{d:4,vp:1,W:1},{d:5,vp:2,W:1},{d:6,vp:3,W:1}];
+const MEM_SPACE=[{d:3,T:1},{d:3},{d:2,T:1},{d:2},{d:1,T:1},{d:1},{T:1}];
+const OPUS_SPACE=[{d:2},{d:2},{d:1},{d:1},{d:1},{},{gain:1}];
+const MYMK={H1:{inst:'H',rw:{neutral:1},k:'호른①'},H2:{inst:'H',rw:{d:2},k:'호른②'},P:{inst:'P',rw:{cC:1},k:'타악기'},S1:{inst:'S',rw:{cT:1},k:'현악기①'},S2:{inst:'S',rw:{cJ:1},k:'현악기②'},V:{inst:'V',rw:{fin:1},k:'성악'},O:{inst:'O',rw:{vp:1},k:'오르간'}};
+const REQ=[null,
+ {k:'키리에',hi:5,lo:1,inst:['H','H','P']},
+ {k:'세쿠엔치아',hi:4,lo:2,inst:['H','H','P','P','S','S','S','O']},
+ {k:'오페르토리움',hi:5,lo:1,inst:['H','H','S','S']},
+ {k:'상투스',hi:6,lo:3,inst:['H','H','P','S','S','V','V','O','O']},
+ {k:'아뉴스 데이',hi:5,lo:1,inst:['H','P','S','V','O']}];
+const CONSTANZE=[[[2,2],[4,5],[4,7],[5,4]],[[1,2],[2,6],[4,3],[3,3]],[[2,4],[4,8],[5,2],[3,1]],[[1,1],[2,7],[4,6],[5,3]],[[2,0],[3,2],[4,1],[5,1]]];
+
+/* 기억 카드: acts 행동, rw 경험칸 보상, st 이야기칸 점수 */
+const CARDS={};
+function M(id,p,acts,rw,st){CARDS[id]={id,kind:'mem',p,acts,rw,st};}
+M('s1',0,'O',{},{T:2});M('s2',0,'D',{},{J:2});M('s3',0,'P',{},{C:2});
+M('s4',0,'V',{},{T:1,C:1});M('s5',0,'R',{},{J:1,C:1});M('s6',0,'O',{},{T:1,J:1});
+M('s7',0,'D',{},{T:1,C:1});M('s8',0,'P',{d:1},{J:1});M('s9',0,'R',{},{W:1});
+const MD=[
+ [1,'O',{d:1},{T:2}],[1,'D',{T:1},{J:2}],[1,'V',{J:1},{C:2}],[1,'R',{C:1},{T:1,J:1}],[1,'OP',{},{J:1,C:1}],[1,'P',{d:2},{T:1,C:1}],[1,'V',{},{W:1,vp:1}],
+ [2,'OV',{T:1},{T:2,J:1}],[2,'DR',{d:1},{C:2,vp:1}],[2,'P',{T:1,J:1},{J:2,C:1}],[2,'R',{C:2},{T:2,C:1}],[2,'O',{d:2},{T:1,J:1,C:1}],[2,'V',{J:2},{J:2,vp:1}],[2,'PD',{},{T:2,vp:1}],
+ [3,'OP',{T:1,d:1},{T:2,J:1,vp:1}],[3,'RV',{C:1,J:1},{C:2,J:1}],[3,'D',{d:3},{T:2,C:2}],[3,'O',{T:2},{J:2,C:1,vp:1}],[3,'R',{C:2,d:1},{T:1,J:1,C:1,vp:1}],[3,'VP',{J:2},{T:3}],[3,'DO',{W:1},{J:1,C:2,vp:1}],
+ [4,'OR',{T:1,C:1},{T:3,J:1,vp:1}],[4,'PV',{d:2,J:1},{J:2,C:2}],[4,'DR',{C:1},{T:2,C:2,vp:1}],[4,'O',{T:2,d:2},{J:2,vp:2}],[4,'R',{C:2,J:1},{T:2,J:1,C:1}],[4,'VO',{J:2},{C:3,vp:1}],[4,'P',{T:2},{W:2,vp:1}],
+ [5,'OP',{T:2},{T:3,J:1,vp:2}],[5,'RV',{C:2,J:1},{C:3,vp:2}],[5,'DR',{d:3},{T:2,C:2,vp:1}],[5,'OV',{T:1,J:1},{J:3,vp:2}],[5,'PR',{C:1,T:1},{W:2,vp:2}],[5,'RO',{C:2},{T:2,C:2,vp:2}]];
+MD.forEach((m,i)=>M('m'+i,...m));
+/* 작품 카드 */
+const OD=[
+ [1,'바스티앙과 바스티엔',1768,'opera'],[1,'미트리다테',1770,'opera'],[1,'루치오 실라',1772,'opera'],[1,'교향곡 1번 K.16',1764,'symphony'],[1,'교향곡 25번 K.183',1773,'symphony'],[1,'기뻐하라, 환호하라',1773,'religious'],[1,'미사 브레비스 K.49',1768,'religious'],[1,'디베르티멘토 K.136',1772,'chamber'],[1,'현악 사중주 K.155',1772,'chamber'],
+ [2,'가짜 여정원사',1775,'opera'],[2,'양치기 왕',1775,'opera'],[2,'차이데',1780,'opera'],[2,'대관식 미사',1779,'religious'],[2,'증거자의 저녁기도',1780,'religious'],[2,'파리 교향곡',1778,'symphony'],[2,'신포니아 콘체르탄테',1779,'symphony'],[2,'하프너 세레나데',1776,'chamber'],[2,'플루트와 하프 협주곡',1778,'chamber'],
+ [3,'이도메네오',1781,'opera'],[3,'후궁으로부터의 도주',1782,'opera'],[3,'카이로의 거위',1783,'opera'],[3,'대미사 C단조',1782,'religious'],[3,'참회하는 다윗',1785,'religious'],[3,'하프너 교향곡',1782,'symphony'],[3,'린츠 교향곡',1783,'symphony'],[3,'불협화음 사중주',1785,'chamber'],[3,'피아노 사중주 K.478',1785,'chamber'],
+ [4,'피가로의 결혼',1786,'opera'],[4,'돈 조반니',1787,'opera'],[4,'극장 지배인',1786,'opera'],[4,'프리메이슨 장송음악',1785,'religious'],[4,'프라하 교향곡',1786,'symphony'],[4,'교향곡 40번',1788,'symphony'],[4,'주피터 교향곡',1788,'symphony'],[4,'아이네 클라이네 나흐트무지크',1787,'chamber'],[4,'케겔슈타트 트리오',1786,'chamber'],
+ [5,'코지 판 투테',1790,'opera'],[5,'마술피리',1791,'opera'],[5,'티토 황제의 자비',1791,'opera'],[5,'아베 베룸 코르푸스',1791,'religious'],[5,'작은 프리메이슨 칸타타',1791,'religious'],[5,'클라리넷 협주곡',1791,'symphony'],[5,'피아노 협주곡 27번',1791,'symphony'],[5,'클라리넷 오중주',1789,'chamber'],[5,'현악 오중주 K.593',1790,'chamber'],[5,'프로이센 사중주',1789,'chamber']];
+OD.forEach(([p,name,yr,type],i)=>{
+ const tb={opera:1,religious:0,symphony:0,chamber:-1}[type], v=(i%3)-1;
+ CARDS['o'+i]={id:'o'+i,kind:'opus',p,name,yr,type,
+  cost:{d:Math.max(1,2+p+tb+(v>0?1:0)),T:Math.ceil(p/2)+(type==='opera'&&p>2?1:0)},
+  vp:p+1+tb+(v>0?1:0),
+  perf:{T:1+(p>=3?1:0),d:2+p+(type==='opera'?1:0)+(v<0?1:0)},
+  sell:{T:1+(p>=4?1:0),fin:1+(p>=3?1:0),vp:p+1+(type==='religious'?1:0)}};
+});
+CARDS.nan={id:'nan',kind:'opus',p:0,name:'난네를의 소나타',yr:1763,type:'nannerl',cost:{},vp:0,perf:{T:1,d:3},sell:{T:1,fin:1,vp:1}};
+/* 시대 보너스 */
+const BONUS={1:[['O',{d:2}],['V',{cJ:1}],['R',{cC:1}]],2:[['D',{vp:1}],['P',{d:3}],['V',{vp:2}]],3:[['O',{vp:2}],['R',{vp:2}],['P',{cT:1}]],4:[['V',{vp:3}],['D',{d:3}],['O',{vp:3}]],5:[['R',{vp:3}],['P',{vp:3}],['O',{vp:4}]]};
+/* 작곡가 */
+const COMP={Eybler:{k:'아이블러',off:['religious','opera','symphony'],ag:['O','P','R'],seq:['J','T','C','J']},
+ Stadler:{k:'슈타틀러',off:['chamber','religious','opera'],ag:['V','O','P'],seq:['T','C','T','J']},
+ Sussmayr:{k:'쥐스마이어',off:['symphony','chamber','religious'],ag:['R','V','O'],seq:['C','J','C','T']},
+ Freystadtler:{k:'프라이슈테틀러',off:['opera','symphony','chamber'],ag:['P','R','V'],seq:['T','J','J','C']}};
+const CT={1:[[{d:2,C:1},{vp:2}],[{d:3,C:2},{vp:3,cJ:1}]],
+ 2:[[{d:2,C:1},{d:1}],[{d:3,C:1},{cT:1}],[{d:3,C:2,fin:1},{vp:2}],[{d:4,C:2,fin:1},{vp:3}]],
+ 3:[[{d:3,C:2},{}],[{d:4,C:2},{vp:1}],[{d:5,C:3,fin:1},{vp:2}]],
+ 4:[[{d:3,C:2},{act:'O'}],[{d:4,C:2},{act:'V',vp:1}],[{d:4,C:3,fin:1},{act:'P',vp:2}],[{d:5,C:3,fin:1},{act:'R',vp:2}]],
+ 5:[[{d:4,C:3},{vp:1}],[{d:5,C:3,fin:1},{vp:2}],[{d:6,C:4,fin:1},{vp:3}]]};
+function ctile(comp,mv,i){const [cost,rw]=CT[mv][i];const c=COMP[comp];const t={id:`c${mv}-${i}`,comp,mv,i,cost,rw};
+ if(mv===2)t.seq=c.seq[i]; if(mv===3){t.off=c.off[i];t.offvp=i===2?2:1;} if(mv===5)t.ag=c.ag[i]; return t;}
+/* 지도 */
+const LOCS={1:{k:'잘츠부르크',x:262,y:198,court:0},2:{k:'빈',x:340,y:168,court:1},3:{k:'프라하',x:292,y:108,court:0},4:{k:'베를린',x:268,y:38,court:0},5:{k:'프랑크푸르트',x:168,y:102,court:0},6:{k:'런던',x:52,y:52,court:1},7:{k:'파리',x:62,y:168,court:1},8:{k:'만하임',x:140,y:160,court:0},9:{k:'밀라노',x:150,y:262,court:0},10:{k:'베네치아',x:262,y:266,court:0},11:{k:'뮌헨',x:205,y:192,court:0}};
+const ROADS=[[1,2,2],[1,11,1],[1,10,2],[2,3,2],[2,10,3],[3,4,2],[3,11,2],[4,5,3],[5,8,1],[5,11,2],[5,6,3],[6,7,2],[7,8,2],[8,11,1],[9,11,2],[9,10,1],[7,9,3]];
+const COURTS=[
+ {g:{k:'types',l:['opera','religious']},vp:6},{g:{k:'types',l:['symphony','chamber']},vp:6},{g:{k:'types',l:['opera','symphony']},vp:6},{g:{k:'types',l:['religious','chamber']},vp:6},
+ {g:{k:'types',l:['opera','chamber','symphony']},vp:9},{g:{k:'periods',l:[1,2]},vp:5},{g:{k:'periods',l:[3,4]},vp:6},{g:{k:'periods',l:[4,5]},vp:7},{g:{k:'periods',l:[2,3]},vp:5},
+ {g:{k:'instr',l:['S','V']},vp:5},{g:{k:'instr',l:['H','O']},vp:5},{g:{k:'instr',l:['P','S']},vp:4},{g:{k:'mvts',l:[2,4]},vp:6},{g:{k:'mvts',l:[1,5]},vp:5},{g:{k:'mvts',l:[3,4]},vp:5},{g:{k:'mvts',l:[2,3]},vp:5}];
+COURTS.forEach((c,i)=>{c.id='k'+i;c.kind='court';c.cost={J:c.vp>=7?5:c.vp>=6?4:3};c.r=i%2?{cT:1}:{d:2};c.gr={d:3,vp:2};});
+const CITIES=[
+ [{J:2},{cT:1},{cT:2}],[{J:2},{d:4},{d:6}],[{J:1,T:1},{vp:2},{vp:3}],[{J:2},{act:'D'},{act:'D',d:2}],[{J:2,T:1},{act:'SR'},{act:'SR',vp:1}],
+ [{J:2,T:1},{act:'PR'},{act:'PR',vp:1}],[{J:2},{per:['chamber',2]},{per:['chamber',2],d:2}],[{J:3},{per:['religious',3]},{per:['religious',3],d:2}],[{J:1},{cC:1},{cC:2}],[{J:2},{cW:2},{cW:3}],
+ [{J:1,T:1},{act:'P'},{act:'P',d:2}],[{J:2},{act:'O'},{act:'O',cT:1}],[{J:1},{d:3},{d:5}],[{J:3},{vp:4},{vp:5}],[{J:2,T:1},{act:'R'},{act:'R',cC:1}]]
+ .map(([cost,r,gr],i)=>({id:'y'+i,kind:'city',cost,r,gr}));
+const TILE={};COURTS.forEach(t=>TILE[t.id]=t);CITIES.forEach(t=>TILE[t.id]=t);
+/* 솔로이스트(쉬카네더) 카드: a 행동, L 카드줄 왼/오, dir/n 여행, mv/pos 레퀴엠 */
+const SOLO={1:{a:'O',L:'R',dir:1,n:1,mv:2,pos:'top'},2:{a:'D',L:'L',dir:-1,n:0,mv:4,pos:'bottom'},3:{a:'P',L:'L',dir:1,n:1,mv:1,pos:'top'},
+ 4:{a:'V',L:'R',dir:-1,n:1,mv:3,pos:'bottom'},5:{a:'R',L:'L',dir:1,n:0,mv:5,pos:'top'},6:{a:'O',L:'R',dir:1,n:0,mv:2,pos:'bottom'},
+ 7:{a:'V',L:'L',dir:-1,n:1,mv:4,pos:'top'},8:{a:'P',L:'R',dir:1,n:0,mv:3,pos:'top'},9:{a:'D',L:'R',dir:-1,n:1,mv:1,pos:'bottom'},
+ 10:{a:'OR',L:'L',dir:1,n:1,mv:4,pos:'top'},11:{a:'VR',L:'R',dir:-1,n:2,mv:2,pos:'top'}};
+const DIFF={easy:{k:'쉬움',cards:[1,2,3,4,5,6,7,8,9],fin:0,pen:2},mid:{k:'보통',cards:[1,2,3,4,5,6,7,9,10],fin:2,pen:1},hard:{k:'어려움',cards:[1,2,3,4,5,6,7,10,11],fin:4,pen:0}};
+
+/* ================= 상태 / 난수 / 무르기 ================= */
+let G=null, HIST=[], ui={pick:null,sel:null};
+const SAVE='lacrimosa-ko-v1';
+function rnd(){G.rng=(G.rng+0x6D2B79F5)|0;let t=G.rng;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function act(fn){HIST.push(JSON.stringify(G));try{fn();}catch(e){console.error(e);G=JSON.parse(HIST.pop());}ui.pick=null;ui.sel=null;save();render();}
+function lock(){HIST=[];}
+function undo(){if(!HIST.length)return;G=JSON.parse(HIST.pop());ui.pick=null;ui.sel=null;save();render();}
+function save(){try{localStorage.setItem(SAVE,JSON.stringify(G));}catch(e){}}
+function log(t,c){G.log.unshift({t,c:c||''});if(G.log.length>200)G.log.pop();}
+
+/* ================= 준비 ================= */
+function newGame(diff,comp){
+ G={rng:(Date.now()^Math.floor(Math.random()*1e9))|0,diff,comp,round:1,turnNo:0,phase:'place',deck:[],row:Array(7).fill(null),bonus:null,bpick:{},
+  map:{moz:1,loc:{},courtStack:[],cityStack:[],cityDisc:[]},req:[],stacks:{},wild:{t:0,c:0},log:[],over:false,lastSolo:null,
+  P:{d:10,vp:0,tr:{T:2,J:2,C:2},cnt:{T:0,J:0,C:0},fin:2,deck:[],hand:[],exp:[],story:[],opus:[{id:'nan',rot:false}],mk:{H1:1,H2:1,P:1,S1:1,S2:1,V:1,O:1},tiles:[],courts:[]},
+  S:{vp:0,fin:DIFF[diff].fin,deck:[],exp:[],story:[],mk:7,courts:[]},turn:null};
+ for(let p=1;p<=5;p++){
+  const mem=shuffle(Object.values(CARDS).filter(c=>c.kind==='mem'&&c.p===p).map(c=>c.id)).slice(2);
+  const op=shuffle(Object.values(CARDS).filter(c=>c.kind==='opus'&&c.p===p).map(c=>c.id)).slice(2);
+  G.bpick[p]=Math.floor(rnd()*3);
+  G.deck.push('B'+p,...shuffle(mem.concat(op)));
+ }
+ G.bonus=G.deck.shift(); fillRow();
+ for(let m=1;m<=5;m++){REQ[m].inst.forEach((ins,i)=>G.req.push({mv:m,i,inst:ins,own:null}));G.stacks[m]=CT[m].map((_,i)=>i);}
+ CONSTANZE[Math.floor(rnd()*5)].forEach(([m,i])=>{const s=G.req.find(s=>s.mv===m&&s.i===i);if(s)s.own='X';});
+ G.map.courtStack=shuffle(COURTS.map(c=>c.id));G.map.cityStack=shuffle(CITIES.map(c=>c.id));
+ for(let l=1;l<=11;l++)G.map.loc[l]={tile:null,gild:false};
+ refillMap();
+ G.P.deck=shuffle(['s1','s2','s3','s4','s5','s6','s7','s8','s9']);
+ G.P.hand=G.P.deck.splice(0,4);
+ G.S.deck=shuffle(DIFF[diff].cards.slice());
+ G.turn=newTurn();
+ log(`게임 시작 — 난이도 ${DIFF[diff].k}, 작곡가 ${COMP[comp].k}`,'m');
+ log(`제1시대 시작. 시대 보너스: ${bonusText()}`,'m');
+ HIST=[];ui={pick:null,sel:null};save();render();
+}
+function newTurn(){return{exp:null,story:null,pending:[],used:false};}
+function fillRow(){slideRow();for(let i=6;i>=0;i--){if(G.row[i])continue;if(!G.deck.length||G.deck[0][0]==='B')break;G.row[i]=G.deck.shift();}}
+function slideRow(){const c=G.row.filter(x=>x);G.row=Array(7-c.length).fill(null).concat(c);}
+function refillMap(){for(let l=1;l<=11;l++){const L=G.map.loc[l];if(L.tile)continue;
+ if(LOCS[l].court){if(G.map.courtStack.length){L.tile=G.map.courtStack.shift();L.gild=false;}}
+ else{if(!G.map.cityStack.length&&G.map.cityDisc.length){G.map.cityStack=shuffle(G.map.cityDisc);G.map.cityDisc=[];}
+  if(G.map.cityStack.length){L.tile=G.map.cityStack.shift();L.gild=false;}}}}
+function curBonus(){const p=+G.bonus.slice(1);return BONUS[p][G.bpick[p]];}
+function bonusText(){const [a,r]=curBonus();return `${ACT[a].i}${ACT[a].k} 1개당 ${plain(r)}`;}
+
+/* ================= 자원 처리 ================= */
+const P=()=>G.P;
+function spHave(k){return P().tr[k]+P().cnt[k];}
+function canPay(c,pl){pl=pl||P();if(!c)return true;
+ if((c.d||0)>pl.d)return false;
+ for(const k of ['T','J','C'])if((c[k]||0)>pl.tr[k]+pl.cnt[k])return false;
+ if((c.fin||0)>pl.fin)return false;return true;}
+function pay(c){const p=P();p.d-=c.d||0;p.fin-=c.fin||0;
+ for(const k of ['T','J','C']){let n=c[k]||0;const a=Math.min(n,p.tr[k]);p.tr[k]-=a;n-=a;p.cnt[k]-=n;}}
+function addTrack(k,n,pl){pl=pl||P();pl.tr[k]+=n;if(pl.tr[k]>TRK_MAX){pl.d+=pl.tr[k]-TRK_MAX;pl.tr[k]=TRK_MAX;}}
+function addFin(n,pl){pl.fin+=n;if(pl.fin>FIN_MAX){pl.vp+=2*(pl.fin-FIN_MAX);pl.fin=FIN_MAX;}}
+function gain(r,pl,ctx){pl=pl||P();if(!r)return;const real=pl===G.P;
+ if(r.d)pl.d+=r.d; if(r.vp)pl.vp+=r.vp; if(r.fin)addFin(r.fin,pl);
+ for(const k of ['T','J','C'])if(r[k])addTrack(k,r[k],pl);
+ for(const k of ['T','J','C'])if(r['c'+k])pl.cnt[k]+=r['c'+k];
+ if(real){if(r.W)G.wild.t+=r.W;if(r.cW)G.wild.c+=r.cW;
+  if(r.act)G.turn.pending.push({type:r.act});
+  if(r.per){const n=pl.opus.filter(o=>CARDS[o.id].type===r.per[0]).length;pl.vp+=n*r.per[1];}
+  if(r.neutral&&ctx)G.turn.pending.unshift({type:'N',mv:ctx.mv,forced:true});}}
+function offBonus(type){let v=0;P().tiles.forEach(t=>{const T=ctileOf(t);if(T.off===type)v+=T.offvp;});if(v){P().vp+=v;log(`  오페르토리움 작곡가 보너스 ★${v}`);}}
+function ctileOf(id){const [mv,i]=id.slice(1).split('-').map(Number);return ctile(G.comp,mv,i);}
+function roadCost(to){const from=G.map.moz;const dist={};for(let l=1;l<=11;l++)dist[l]=1e9;dist[from]=0;const q=new Set(Object.keys(dist).map(Number));
+ while(q.size){let u=null;q.forEach(x=>{if(u===null||dist[x]<dist[u])u=x;});q.delete(u);
+  ROADS.forEach(([a,b,c])=>{const v=a===u?b:b===u?a:null;if(v&&dist[u]+c<dist[v])dist[v]=dist[u]+c;});}
+ return dist[to];}
+function tileRw(l){const L=G.map.loc[l];const t=TILE[L.tile];return L.gild?t.gr:t.r;}
+
+/* ================= 플레이어 행동 ================= */
+function placeCard(id,where){act(()=>{const p=P();p.hand.splice(p.hand.indexOf(id),1);G.turn[where]=id;
+ if(G.turn.exp&&G.turn.story){p.exp[G.turnNo]=G.turn.exp;p.story[G.turnNo]=G.turn.story;G.phase='choose';}});}
+function unplace(where){act(()=>{P().hand.push(G.turn[where]);G.turn[where]=null;});}
+function chooseUse(useCard){act(()=>{const c=CARDS[G.turn.exp];
+ if(useCard){gain(c.rw);for(const a of c.acts)G.turn.pending.push({type:a});log(`${ACT[c.acts[0]].i} 카드 사용: ${c.acts.split('').map(a=>ACT[a].k).join(', ')}${plain(c.rw)?' / 보상 '+plain(c.rw):''}`);}
+ else{P().d+=G.round;log(`행동 대신 🪙${G.round} 받음`);}
+ G.phase='act';});}
+function finishPending(pi,base,extra){const it=G.turn.pending.splice(pi,1)[0];
+ const b=base||it.type; if(!it.extra&&!extra){P().tiles.forEach(t=>{const T=ctileOf(t);if(T.ag===b){G.turn.pending.push({type:b,extra:true});log(`  아뉴스 데이 작곡가: ${ACT[b].k} 1회 추가`);}});}}
+function doDocument(pi,ri){act(()=>{const id=G.row[ri];pay(MEM_SPACE[ri]);const old=P().story[G.turnNo];P().story[G.turnNo]=id;G.turn.story=id;G.row[ri]=null;slideRow();
+ log(`📖 기억 카드 획득 (제${ROMAN[CARDS[id].p]}시대), 이야기 칸의 카드 1장 제거`);finishPending(pi,'D');});}
+function opusCost(ri){const c=CARDS[G.row[ri]],s=OPUS_SPACE[ri];return{d:Math.max(0,(c.cost.d||0)+(s.d||0)-(s.gain||0)),T:c.cost.T||0};}
+function doCommission(pi,ri){act(()=>{const id=G.row[ri],c=CARDS[id];pay(opusCost(ri));P().opus.push({id,rot:false});P().vp+=c.vp;G.row[ri]=null;slideRow();
+ log(`✒️ 『${c.name}』 위촉 ★${c.vp}`);offBonus(c.type);finishPending(pi,'O');});}
+function doPerform(pi,oi,mode){act(()=>{const it=G.turn.pending[pi];const o=P().opus[oi],c=CARDS[o.id];
+ if(mode==='perf'){pay({T:c.perf.T});P().d+=c.perf.d;o.rot=true;let extra='';if(it.type==='PR'){P().d+=7;extra=' +🪙7';}log(`🎭 『${c.name}』 공연 🪙${c.perf.d}${extra}`);}
+ else{pay({T:c.sell.T});addFin(c.sell.fin+(it.type==='SR'?2:0),P());P().vp+=c.sell.vp;P().opus.splice(oi,1);log(`📜 『${c.name}』 판매 ★${c.sell.vp}, 재정+${c.sell.fin+(it.type==='SR'?2:0)}`);}
+ offBonus(c.type);finishPending(pi,'P');});}
+function doTravel(pi,l){act(()=>{const rc=roadCost(l);const t=TILE[G.map.loc[l].tile];const rw=tileRw(l);pay({d:rc});pay(t.cost);G.map.moz=l;
+ G.map.loc[l].tile=null;
+ if(t.kind==='court'){P().courts.push(t.id);log(`🐎 ${LOCS[l].k} 궁정 방문 (길 🪙${rc}) — 궁정 타일 획득`);}
+ else{G.map.cityDisc.push(t.id);log(`🐎 ${LOCS[l].k} 방문 (길 🪙${rc}): ${plain(rw)}`);}
+ finishPending(pi,'V');gain(rw);});}
+function reqCheck(si,key){const s=G.req[si];const tile=ctile(G.comp,s.mv,G.stacks[s.mv][0]);const tmp=JSON.parse(JSON.stringify(P()));gain(MYMK[key].rw,tmp);return canPay(tile.cost,tmp);}
+function doRequiem(pi,si,key){act(()=>{const s=G.req[si];const ti=G.stacks[s.mv].shift();const tile=ctile(G.comp,s.mv,ti);
+ P().mk[key]=0;s.own='P';finishPending(pi,'R');gain(MYMK[key].rw,null,{mv:s.mv});pay(tile.cost);gain(tile.rw);P().tiles.push(tile.id);
+ log(`✝️ ${REQ[s.mv].k} ${INST[s.inst].k} 파트를 ${COMP[G.comp].k}에게 위촉`);});}
+function doNeutral(pi,si){act(()=>{G.req[si].own='N';G.turn.pending.splice(pi,1);log(`♪ 중립 마커를 ${REQ[G.req[si].mv].k}에 배치`);});}
+function skipNeutral(pi){act(()=>{G.turn.pending.splice(pi,1);});}
+function exchange(kind,k){act(()=>{if(kind==='buy'){P().d-=3;P().cnt[k]++;log(`🪙3 → ${SP[k]} 토큰`);}else{P().cnt[k]--;P().d+=1;log(`${SP[k]} 토큰 → 🪙1`);}});}
+function resolveWild(kind,k){act(()=>{if(kind==='t'){G.wild.t--;addTrack(k,1);}else{G.wild.c--;P().cnt[k]++;}});}
+
+/* ================= 턴 종료 · 솔로이스트 · 정리 ================= */
+function endTurn(){if(G.turn.pending.some(x=>x.forced))return;
+ act(()=>{fillRow();const draw=G.turnNo<3?Math.min(4-P().hand.length,P().deck.length):0;for(let i=0;i<draw;i++)P().hand.push(P().deck.shift());
+  soloTurn();G.turnNo++;
+  if(G.turnNo>=4)maintenance();else{G.turn=newTurn();G.phase='place';}});
+ lock();save();render();showSoloToast();}
+function soloTurn(){const S=G.S;const e=S.deck.shift(),s=S.deck.shift();S.exp.push(e);S.story.push(s);const ec=SOLO[e],sc=SOLO[s];
+ const before=G.log.length;const vp0=S.vp;
+ log(`— 쉬카네더: 경험 카드 #${e}(${ec.a.split('').map(a=>ACT[a].k).join('+')}), 이야기 카드 #${s}`,'s');
+ for(const a of ec.a)soloAct(a,sc,0);
+ fillRow();
+ G.lastSolo={e,s,lines:G.log.slice(0,G.log.length-before).reverse().map(x=>x.t),gain:S.vp-vp0};}
+function rowPick(kind,side){const idx=G.row.map((id,i)=>id&&CARDS[id].kind===kind?i:-1).filter(i=>i>=0);if(!idx.length)return -1;return side==='L'?idx[0]:idx[idx.length-1];}
+function soloAct(a,sc,depth){const S=G.S;
+ if(a==='D'){if(depth)return;const i=rowPick('mem',sc.L);if(i<0){log('  기억 카드가 없어 아무것도 하지 않음','s');return;}const c=CARDS[G.row[i]];G.row[i]=null;slideRow();
+  if(c.st.vp)S.vp+=c.st.vp;log(`  📖 기억 카드 획득(★${c.st.vp||0}) → 그 카드의 행동 실행`,'s');for(const x of c.acts)soloAct(x,sc,1);}
+ else if(a==='O'){const i=rowPick('opus',sc.L);if(i<0){log('  작품 카드가 없어 아무것도 하지 않음','s');return;}const c=CARDS[G.row[i]];G.row[i]=null;slideRow();const v=Math.max(0,c.vp-DIFF[G.diff].pen);S.vp+=v;log(`  ✒️ 『${c.name}』 위촉 ★${v}`,'s');}
+ else if(a==='P'){const i=rowPick('opus',sc.L);if(i<0){log('  작품 카드가 없어 아무것도 하지 않음','s');return;}const c=CARDS[G.row[i]];G.row[i]=null;slideRow();const v0=S.vp;S.vp+=Math.max(0,c.sell.vp-DIFF[G.diff].pen);addFin(c.sell.fin,S);log(`  📜 『${c.name}』 판매 ★${S.vp-v0}`,'s');}
+ else if(a==='V'){soloTravel(sc.dir,sc.n);}
+ else if(a==='R'){soloRequiem(sc.mv,sc.pos);}}
+function courtsLeft(){return Object.values(G.map.loc).some(L=>L.tile&&TILE[L.tile].kind==='court');}
+function soloTravel(dir,n){if(n===0){log('  🐎 궁정 0곳 — 이동 없음','s');return;}if(!courtsLeft()){log('  🐎 남은 궁정이 없음','s');return;}
+ let cnt=0,loc=G.map.moz;const S=G.S;
+ const at=(l,start)=>{const L=G.map.loc[l];if(!L.tile)return;const t=TILE[L.tile];
+  if(t.kind==='court'){S.courts.push(L.tile);L.tile=null;cnt++;log(`  🐎 ${LOCS[l].k} 궁정 타일 획득(★${t.vp})`,'s');}
+  else if(!start){G.map.cityDisc.push(L.tile);L.tile=null;log(`  🐎 ${LOCS[l].k} 도시 타일 버림`,'s');}};
+ at(loc,true);let g=0;while(cnt<n&&courtsLeft()&&g++<40){loc=((loc-1+dir+11)%11)+1;at(loc,false);}G.map.moz=loc;}
+function soloRequiem(mv,pos){const S=G.S;if(S.mk<=0){log('  ✝️ 남은 레퀴엠 마커 없음','s');return;}
+ const order=[];for(let m=mv;m<=5;m++)order.push(m);for(let m=mv-1;m>=1;m--)order.push(m);
+ for(const m of order){const e=G.req.filter(s=>s.mv===m&&!s.own);if(!e.length)continue;const s=pos==='top'?e[0]:e[e.length-1];s.own='S';S.mk--;S.vp+=REQ[m].lo;log(`  ✝️ ${REQ[m].k} ${INST[s.inst].k} 파트 차지 ★${REQ[m].lo}`,'s');return;}
+ log('  ✝️ 빈 파트가 없음','s');}
+function maintenance(){const p=P();
+ log(`제${ROMAN[G.round]}시대 정리`,'m');
+ p.tr={T:0,J:0,C:0};
+ p.story.forEach(id=>{const c=CARDS[id];gain(c.st);});
+ p.tiles.forEach(t=>{const T=ctileOf(t);if(T.seq)addTrack(T.seq,1);});
+ const fi=FIN_INCOME[p.fin];gain(fi);
+ const [ba,br]=curBonus();let cnt=0;p.exp.forEach(id=>{cnt+=CARDS[id].acts.split('').filter(a=>a===ba).length;});
+ for(let i=0;i<cnt;i++)gain(br);
+ log(`  이야기 점수 → 재능 ${p.tr.T}, 여행 ${p.tr.J}, 작곡 ${p.tr.C} / 재정 수입 ${plain(fi)||'없음'} / 시대 보너스 ${cnt}회`);
+ p.opus.forEach(o=>o.rot=false);
+ p.deck=shuffle(p.exp.concat(p.story));p.exp=[];p.story=[];
+ G.S.deck=shuffle(DIFF[G.diff].cards.slice());G.S.exp=[];G.S.story=[];
+ if(G.round>=5){p.cnt.T+=G.wild.t+G.wild.c;G.wild={t:0,c:0};finalScore();return;}
+ for(let l=1;l<=11;l++){const L=G.map.loc[l];if(L.tile)L.gild=true;}refillMap();
+ for(let i=3;i<7;i++)G.row[i]=null;while(G.deck.length&&G.deck[0][0]!=='B')G.deck.shift();
+ G.bonus=G.deck.shift();fillRow();
+ G.round++;G.turnNo=0;const draw=4-p.hand.length;for(let i=0;i<draw;i++)p.hand.push(p.deck.shift());
+ G.turn=newTurn();G.phase='place';
+ log(`제${ROMAN[G.round]}시대 시작. 시대 보너스: ${bonusText()}`,'m');}
+
+/* ================= 최종 점수 ================= */
+function courtBest(courts,opus,marks){
+ const used={o:new Set(),m:new Set()};let best=0,bestSel=[];
+ function need(g){if(g.k==='types')return g.l.map(t=>({src:'o',f:o=>CARDS[o.id].type===t}));if(g.k==='periods')return g.l.map(p=>({src:'o',f:o=>CARDS[o.id].p===p}));
+  if(g.k==='instr')return g.l.map(x=>({src:'m',f:m=>m.inst===x}));return g.l.map(x=>({src:'m',f:m=>m.mv===x}));}
+ function sat(reqs,k,cb){if(k===reqs.length)return cb();const r=reqs[k];const list=r.src==='o'?opus:marks;
+  for(let i=0;i<list.length;i++){if(used[r.src].has(i)||!r.f(list[i]))continue;used[r.src].add(i);const ok=sat(reqs,k+1,cb);used[r.src].delete(i);if(ok==='stop')return 'stop';}}
+ function go(ci,tot,sel){if(tot>best){best=tot;bestSel=sel.slice();}if(ci===courts.length)return;const c=TILE[courts[ci]];
+  sat(need(c.g),0,()=>{go(ci+1,tot+c.vp,sel.concat(c.id));});go(ci+1,tot,sel);}
+ go(0,0,[]);return{vp:best,sel:bestSel};}
+function requiemScore(){let p=0,s=0;for(let m=1;m<=5;m++){const sl=G.req.filter(x=>x.mv===m);const a=sl.filter(x=>x.own==='P'||x.own==='N').length,b=sl.filter(x=>x.own==='S').length;
+ const pv=a>b?REQ[m].hi:REQ[m].lo,sv=b>a?REQ[m].hi:REQ[m].lo;p+=sl.filter(x=>x.own==='P').length*pv;s+=sl.filter(x=>x.own==='S').length*sv;}return{p,s};}
+function finalScore(){const p=P(),S=G.S;
+ const marks=G.req.filter(x=>x.own==='P');const cb=courtBest(p.courts,p.opus,marks);const rq=requiemScore();
+ const sp=p.tr.T+p.tr.J+p.tr.C+p.cnt.T+p.cnt.J+p.cnt.C;
+ const pr={game:p.vp,court:cb.vp,req:rq.p,story:Math.floor(sp/2),money:Math.floor(p.d/3)};pr.total=Object.values(pr).reduce((a,b)=>a+b,0);
+ const sc=S.courts.reduce((a,id)=>a+TILE[id].vp,0);const sr={game:S.vp,court:sc,req:rq.s,story:0,money:0};sr.total=Object.values(sr).reduce((a,b)=>a+b,0);
+ let win=pr.total>sr.total?'P':pr.total<sr.total?'S':null;
+ if(!win){const a=marks.length,b=G.req.filter(x=>x.own==='S').length;win=a>b?'P':a<b?'S':'T';}
+ G.final={pr,sr,win,courtSel:cb.sel};G.over=true;G.phase='over';
+ log(`게임 종료! 나 ${pr.total}점 : 쉬카네더 ${sr.total}점`,'m');}
+
+/* ================= 표시 도우미 ================= */
+function chips(r,cost){if(!r)return'';let h='';const cl=cost?' cost':'';
+ if(r.d)h+=`<span class="chip d${cl}">🪙${r.d}</span>`;if(r.gain)h+=`<span class="chip d">🪙+${r.gain}</span>`;
+ if(r.vp)h+=`<span class="chip vp${cl}">★${r.vp}</span>`;if(r.fin)h+=`<span class="chip fin${cl}">재정${cost?'':'+'}${r.fin}</span>`;
+ for(const k of ['T','J','C','W'])if(r[k])h+=`<span class="chip ${k}${cl}">${SP[k]}${cost?'':'▲'}${r[k]}</span>`;
+ for(const k of ['T','J','C','W'])if(r['c'+k])h+=`<span class="chip ${k} tok">${SP[k]}●${r['c'+k]}</span>`;
+ if(r.act)h+=`<span class="act">${ACT[r.act].i}${ACT[r.act].k}</span>`;
+ if(r.per)h+=`<span class="chip">${TYPEI[r.per[0]]}${TYPE[r.per[0]]}당 ★${r.per[1]}</span>`;
+ if(r.neutral)h+=`<span class="chip">중립 마커</span>`;return h;}
+function plain(r){if(!r)return'';const a=[];if(r.d)a.push('🪙'+r.d);if(r.vp)a.push('★'+r.vp);if(r.fin)a.push('재정+'+r.fin);
+ for(const k of ['T','J','C','W'])if(r[k])a.push(SP[k]+'▲'+r[k]);for(const k of ['T','J','C','W'])if(r['c'+k])a.push(SP[k]+'토큰'+r['c'+k]);
+ if(r.act)a.push(ACT[r.act].k);if(r.per)a.push(`${TYPE[r.per[0]]}당★${r.per[1]}`);return a.join(' ');}
+function memHTML(id,cls,attr){const c=CARDS[id];return `<div class="card ${cls||''}" ${attr||''}><span class="per">${c.p?ROMAN[c.p]:'시작'}</span>
+ <div class="lbl">경험 칸 보상·행동</div><div>${chips(c.rw)||'<span class="lbl">보상 없음</span>'}</div>
+ <div>${c.acts.split('').map(a=>`<span class="act">${ACT[a].i}${ACT[a].k}</span>`).join('')}</div>
+ <div class="zone"><div class="lbl">이야기 칸 점수</div>${chips(c.st)}</div></div>`;}
+function opusHTML(id,cls,attr,o){const c=CARDS[id];return `<div class="card opus ${cls||''}" ${attr||''}><span class="per">${c.p?ROMAN[c.p]:'시작'}</span>
+ <div class="ttl">${c.name}</div><div class="sub">${TYPEI[c.type]} ${TYPE[c.type]} · ${c.yr}</div>
+ <div>${chips(c.cost,true)} ${c.vp?`<span class="chip vp">★${c.vp}</span>`:''}</div>
+ <div class="zone"><span class="lbl">공연</span> ${chips({T:c.perf.T},true)}→${chips({d:c.perf.d})}</div>
+ <div class="zone"><span class="lbl">판매</span> ${chips({T:c.sell.T},true)}→${chips({fin:c.sell.fin,vp:c.sell.vp})}</div>${o&&o.rot?'<div class="lbl">이번 시대 공연함</div>':''}</div>`;}
+function cardHTML(id,cls,attr,o){return CARDS[id].kind==='mem'?memHTML(id,cls,attr):opusHTML(id,cls,attr,o);}
+function goalText(g){if(g.k==='types')return g.l.map(t=>TYPEI[t]+TYPE[t]).join('+')+' 작품';if(g.k==='periods')return g.l.map(p=>'제'+ROMAN[p]+'시대').join('+')+' 작품';
+ if(g.k==='instr')return g.l.map(x=>INST[x].i+INST[x].k).join('+')+' 파트';return g.l.map(m=>REQ[m].k).join('+')+' 악장';}
+
+/* ================= 화면 ================= */
+function curSel(){return ui.sel;}
+function canTarget(kind,i){const s=ui.sel;if(!s)return false;const t=G.turn.pending[s.pi]&&G.turn.pending[s.pi].type;
+ if(kind==='row'){const id=G.row[i];if(!id)return false;
+  if(t==='D')return CARDS[id].kind==='mem'&&canPay(MEM_SPACE[i]);if(t==='O')return CARDS[id].kind==='opus'&&canPay(opusCost(i));return false;}
+ if(kind==='opus'){const o=P().opus[i],c=CARDS[o.id];if(!['P','PR','SR'].includes(t))return false;if((t==='PR'||t==='SR')&&c.type!=='religious')return false;
+  const cp=!o.rot&&spHave('T')>=c.perf.T&&t!=='SR',cs=spHave('T')>=c.sell.T&&t!=='PR';return cp||cs;}
+ if(kind==='loc'){if(t!=='V')return false;const L=G.map.loc[i];if(!L.tile)return false;const tc=TILE[L.tile].cost;const rc=roadCost(i);return canPay({d:rc+(tc.d||0),T:tc.T,J:tc.J,C:tc.C});}
+ if(kind==='slot'){const sl=G.req[i];if(sl.own)return false;
+  if(t==='N')return sl.mv===G.turn.pending[s.pi].mv;
+  if(t!=='R')return false;if(!G.stacks[sl.mv].length)return false;
+  return Object.keys(MYMK).some(k=>P().mk[k]&&MYMK[k].inst===sl.inst&&reqCheck(i,k));}
+ return false;}
+function render(){const app=document.getElementById('app');if(!G){app.innerHTML='';startScreen();return;}
+ const p=P(),S=G.S;
+ let h=`<header><h1>라크리모사</h1><span class="score">나 ★${p.vp} · 쉬카네더 ★${S.vp}</span>
+ <button id="bUndo" ${HIST.length?'':'disabled'} title="무르기">↶ 무르기${HIST.length?'('+HIST.length+')':''}</button><button id="bMenu">☰</button></header>`;
+ // 상태줄
+ h+=`<section><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:13px">
+ <b>제${ROMAN[G.round]}시대</b> <span>턴 ${Math.min(G.turnNo+1,4)}/4</span>
+ <span class="chip" style="background:#fff">보너스: ${bonusText()}</span><span class="lbl" style="font-size:11px">덱 ${G.deck.filter(x=>x[0]!=='B').length}장</span></div></section>`;
+ // 카드 줄
+ h+=`<section><h2>카드 줄 <small>왼쪽이 새 카드(비쌈) · 오른쪽으로 밀림</small></h2><div class="hs row7">`;
+ G.row.forEach((id,i)=>{const can=canTarget('row',i);
+  h+=`<div>${id?cardHTML(id,can?'can':'',`data-row="${i}"`):'<div class="card empty">빈 칸</div>'}
+  <div class="slotcost">${id&&CARDS[id].kind==='opus'?'추가 '+(chips(OPUS_SPACE[i],!OPUS_SPACE[i].gain)||'없음'):id?'비용 '+chips(MEM_SPACE[i],true):''}</div></div>`;});
+ h+=`</div></section>`;
+ // 지도
+ h+=`<section id="map"><h2>모차르트의 여행 <small>🐎 현재: ${LOCS[G.map.moz].k} · 숫자 = 도시 번호, 길 위 숫자 = 🪙</small></h2>${mapSVG()}
+ <div class="note" id="tileInfo">지도의 타일을 누르면 내용을 볼 수 있어요.</div></section>`;
+ // 레퀴엠
+ h+=`<section><h2>레퀴엠 <small>${COMP[G.comp].k}(♪ 나) vs 쉬카네더(♬) · 다수 쪽이 높은 점수</small></h2><div class="req">`;
+ for(let m=1;m<=5;m++){const R=REQ[m];const a=G.req.filter(s=>s.mv===m&&(s.own==='P'||s.own==='N')).length,b=G.req.filter(s=>s.mv===m&&s.own==='S').length;
+  h+=`<div class="mv"><h4>${m}. ${R.k}</h4><div class="vpv">다수 ★${R.hi} / 소수 ★${R.lo}<br>♪${a} : ♬${b}</div>`;
+  G.req.forEach((s,i)=>{if(s.mv!==m)return;const can=canTarget('slot',i);const o=s.own;
+   h+=`<div class="slot ${o||''} ${can?'can':''}" data-slot="${i}"><span>${INST[s.inst].i}${INST[s.inst].k}</span><span>${o==='P'?'♪나':o==='S'?'♬쉬':o==='N'?'♪중립':o==='X'?'콘스탄체':''}</span></div>`;});
+  const st=G.stacks[m];if(st.length){const t=ctile(G.comp,m,st[0]);h+=`<div class="ctile"><b>다음 작곡가 타일</b><br>비용 ${chips(t.cost,true)}<br>보상 ${chips(t.rw)||'-'}${repText(t)}</div>`;}
+  else h+=`<div class="ctile">작곡가 타일 소진</div>`;
+  h+=`</div>`;}
+ h+=`</div></section>`;
+ // 내 보드
+ h+=`<section><h2>나의 후원자 보드</h2><div class="board"><div class="box">
+ <div style="font-size:15px"><span class="chip d">🪙${p.d}</span> <span class="chip vp">★${p.vp}</span></div>
+ ${['T','J','C'].map(k=>`<div class="trk"><span class="nm">${SP[k]}</span><div class="cells">${Array.from({length:TRK_MAX+1},(_,i)=>`<div class="cell ${p.tr[k]===i?'on':''}">${i}</div>`).join('')}</div><span class="chip ${k} tok">●${p.cnt[k]}</span></div>`).join('')}
+ <div class="note">이야기 점수는 트랙 → 토큰 순으로 자동 지불돼요. 트랙은 시대가 끝나면 0으로 돌아가고 토큰은 남아요.</div>
+ ${myTurn()?`<div class="exch">${['T','J','C'].map(k=>`<button data-buy="${k}" ${p.d>=3?'':'disabled'}>🪙3→${SP[k]}●</button>`).join('')}${['T','J','C'].map(k=>`<button data-sellc="${k}" ${p.cnt[k]?'':'disabled'}>${SP[k]}●→🪙1</button>`).join('')}</div>`:''}
+ </div><div class="box"><b style="font-size:12px">재정 트랙</b> <span class="lbl">(정리 때 수입)</span><div class="fin">${FIN_INCOME.map((r,i)=>`<div class="${p.fin===i?'on':''}">${i}: ${plain(r)||'없음'}</div>`).join('')}</div>
+ <div style="margin-top:6px"><b style="font-size:12px">레퀴엠 마커</b><br>${Object.keys(MYMK).map(k=>`<span class="mk ${p.mk[k]?'':'used'}">${INST[MYMK[k].inst].i}${MYMK[k].k}: ${plain(MYMK[k].rw)||'중립마커'}</span>`).join('')}</div></div></div>`;
+ if(p.tiles.length)h+=`<div class="box" style="margin-top:6px"><b style="font-size:12px">고용한 작곡가 타일</b><br>${p.tiles.map(t=>{const T=ctileOf(t);return `<span class="mk">${REQ[T.mv].k}${repText(T)||' (즉시 보상만)'}</span>`;}).join('')}</div>`;
+ // 경험/이야기
+ h+=`<div style="margin-top:8px"><b style="font-size:12px">경험 칸(행동) ↑ / 이야기 칸(점수) ↓</b> <span class="lbl" style="font-size:11px">턴 뒤 뽑기: +2 · +2 · +1 · 0</span><div class="pb">`;
+ for(let i=0;i<4;i++){const e=i===G.turnNo&&G.phase==='place'?G.turn.exp:p.exp[i];h+=e?memHTML(e,'', i===G.turnNo&&G.phase==='place'?'data-unplace="exp"':''):'<div class="card empty">경험 '+(i+1)+'</div>';}
+ for(let i=0;i<4;i++){const e=i===G.turnNo&&G.phase==='place'?G.turn.story:p.story[i];h+=e?memHTML(e,'', i===G.turnNo&&G.phase==='place'?'data-unplace="story"':''):'<div class="card empty">이야기 '+(i+1)+'</div>';}
+ h+=`</div></div>`;
+ h+=`<div style="margin-top:8px"><b style="font-size:12px">손패</b> <span class="lbl" style="font-size:11px">개인 덱 ${p.deck.length}장</span><div class="hs">${p.hand.map(id=>memHTML(id,ui.pick===id?'sel':'',`data-hand="${id}"`)).join('')||'<span class="lbl">없음</span>'}</div></div>`;
+ h+=`<div style="margin-top:8px"><b style="font-size:12px">나의 작품</b><div class="hs">${p.opus.map((o,i)=>opusHTML(o.id,(o.rot?'rot ':'')+(canTarget('opus',i)?'can':''),`data-opus="${i}"`,o)).join('')||'<span class="lbl">없음</span>'}</div></div>`;
+ if(p.courts.length)h+=`<div style="margin-top:6px"><b style="font-size:12px">궁정 타일(게임 끝 목표)</b><br>${p.courts.map(id=>`<span class="mk">${goalText(TILE[id].g)} → ★${TILE[id].vp}</span>`).join('')}</div>`;
+ h+=`</section>`;
+ // 쉬카네더
+ h+=`<section class="solo"><h2>쉬카네더(솔로이스트) <small>${DIFF[G.diff].k}</small></h2>
+ <div style="font-size:13px"><span class="chip vp">★${S.vp}</span> 재정 ${S.fin}/${FIN_MAX} · 남은 레퀴엠 마커 ${S.mk} · 덱 ${S.deck.length}장</div>
+ ${S.courts.length?`<div style="margin-top:4px">${S.courts.map(id=>`<span class="mk">궁정 ★${TILE[id].vp}</span>`).join('')} <span class="lbl">(목표와 상관없이 모두 득점)</span></div>`:''}
+ ${G.lastSolo?`<div class="note" style="margin-top:4px"><b>지난 턴:</b><br>${G.lastSolo.lines.map(x=>x.replace(/^—\s*/,'')).join('<br>')}</div>`:''}</section>`;
+ h+=`<section><h2>기록</h2><div id="log">${G.log.map(l=>`<div class="${l.c}">${l.t}</div>`).join('')}</div></section>`;
+ app.innerHTML=h;bind();renderPrompt();}
+function repText(t){if(t.seq)return ` ∞ 정리 때 ${SP[t.seq]}▲1`;if(t.off)return ` ∞ ${TYPEI[t.off]}${TYPE[t.off]} 위촉·공연·판매 때 ★${t.offvp}`;if(t.ag)return ` ∞ ${ACT[t.ag].k} 1회 추가`;return '';}
+function myTurn(){return G&&!G.over&&['place','choose','act'].includes(G.phase);}
+function mapSVG(){let s=`<svg viewBox="0 0 400 300">`;
+ ROADS.forEach(([a,b,c])=>{const A=LOCS[a],B=LOCS[b];s+=`<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="#9c8358" stroke-width="2" stroke-dasharray="4 3"/>
+ <circle cx="${(A.x+B.x)/2}" cy="${(A.y+B.y)/2}" r="7" fill="#f3d77a" stroke="#9c8358"/><text x="${(A.x+B.x)/2}" y="${(A.y+B.y)/2+3.5}" font-size="9" text-anchor="middle">${c}</text>`;});
+ for(let l=1;l<=11;l++){const L=LOCS[l],T=G.map.loc[l];const can=canTarget('loc',l);const t=T.tile?TILE[T.tile]:null;
+  const fill=t?(t.kind==='court'?'#7b1e2b':'#fffaf0'):'#d8cba9';const tc=t&&t.kind==='court'?'#fff':'#3a2a1c';
+  s+=`<g class="loc ${can?'can':''}" data-loc="${l}"><rect x="${L.x-30}" y="${L.y-16}" width="60" height="32" rx="6" fill="${fill}" stroke="${can?'#2e9e5f':T.gild?'#b88a2e':'#9c8358'}" stroke-width="${can?4:T.gild?3:1.5}"/>
+  <text x="${L.x}" y="${L.y-4}" font-size="9" text-anchor="middle" fill="${tc}">${l}.${L.k}</text>
+  <text x="${L.x}" y="${L.y+9}" font-size="8.5" text-anchor="middle" fill="${tc}">${t?(t.kind==='court'?'궁정 ★'+t.vp:'도시'):'—'}${t?' '+plain(t.cost).replace(/▲/g,''):''}</text></g>`;
+  if(G.map.moz===l)s+=`<text x="${L.x+26}" y="${L.y-14}" font-size="16">🐎</text>`;}
+ return s+`</svg>`;}
+function tileDesc(l){const T=G.map.loc[l];if(!T.tile)return `${LOCS[l].k}: 빈 칸`;const t=TILE[T.tile];const rw=T.gild?t.gr:t.r;
+ return `<b>${l}. ${LOCS[l].k} ${t.kind==='court'?'궁정':'도시'}${T.gild?' (금테 면)':''}</b> — 길 비용 🪙${roadCost(l)}, 타일 비용 ${chips(t.cost,true)}, 즉시 보상 ${chips(rw)||'-'}${t.kind==='court'?`<br>게임 끝 목표: ${goalText(t.g)} → ★${t.vp}`:''}`;}
+function bind(){
+ const q=(sel,f)=>document.querySelectorAll(sel).forEach(e=>e.onclick=()=>f(e));
+ document.getElementById('bUndo').onclick=undo;document.getElementById('bMenu').onclick=menu;
+ q('[data-hand]',e=>{if(G.phase!=='place'||wildBlock())return;ui.pick=ui.pick===e.dataset.hand?null:e.dataset.hand;render();});
+ q('[data-unplace]',e=>{if(G.phase==='place')unplace(e.dataset.unplace);});
+ q('[data-row]',e=>{const i=+e.dataset.row;if(canTarget('row',i)){const t=G.turn.pending[ui.sel.pi].type;t==='D'?doDocument(ui.sel.pi,i):doCommission(ui.sel.pi,i);}});
+ q('[data-opus]',e=>{const i=+e.dataset.opus;if(canTarget('opus',i)){ui.sel.oi=i;renderPrompt();}});
+ q('[data-loc]',e=>{const l=+e.dataset.loc;if(canTarget('loc',l)){doTravel(ui.sel.pi,l);return;}document.getElementById('tileInfo').innerHTML=tileDesc(l);});
+ q('[data-slot]',e=>{const i=+e.dataset.slot;if(!canTarget('slot',i))return;const t=G.turn.pending[ui.sel.pi].type;
+  if(t==='N'){doNeutral(ui.sel.pi,i);return;}
+  const keys=Object.keys(MYMK).filter(k=>P().mk[k]&&MYMK[k].inst===G.req[i].inst&&reqCheck(i,k));
+  if(keys.length===1)doRequiem(ui.sel.pi,i,keys[0]);else{ui.sel.si=i;ui.sel.keys=keys;renderPrompt();}});
+ q('[data-buy]',e=>exchange('buy',e.dataset.buy));q('[data-sellc]',e=>exchange('sell',e.dataset.sellc));}
+function wildBlock(){return G.wild.t>0||G.wild.c>0;}
+function renderPrompt(){const el=document.getElementById('prompt');let msg='',b=[];
+ const B=(t,f,cls,dis)=>{b.push({t,f,cls,dis});};
+ if(G.over){msg=`게임 종료 — ${G.final.win==='P'?'승리!':G.final.win==='S'?'쉬카네더 승리':'공동 승리'} (${G.final.pr.total} : ${G.final.sr.total})`;B('결과 보기',showFinal,'pri');B('새 게임',()=>{G=null;localStorage.removeItem(SAVE);render();});}
+ else if(wildBlock()){const k=G.wild.t>0?'t':'c';msg=`자유(와일드) ${k==='t'?'트랙 전진':'토큰'}을 고르세요 (${k==='t'?G.wild.t:G.wild.c}개 남음)`;['T','J','C'].forEach(x=>B(SP[x],()=>resolveWild(k,x)));}
+ else if(ui.sel){const it=G.turn.pending[ui.sel.pi];const t=it.type;
+  if(ui.sel.keys){msg='어느 호른 마커를 쓸까요? (빈 칸의 보상이 다릅니다)';ui.sel.keys.forEach(k=>B(`${MYMK[k].k}: ${plain(MYMK[k].rw)||'중립 마커 추가'}`,()=>doRequiem(ui.sel.pi,ui.sel.si,k)));}
+  else if(ui.sel.oi!=null){const o=P().opus[ui.sel.oi],c=CARDS[o.id];msg=`『${c.name}』을(를) 어떻게 할까요?`;
+   if(t!=='SR')B(`공연: 재능${c.perf.T} → 🪙${c.perf.d+(t==='PR'?7:0)}`,()=>doPerform(ui.sel.pi,ui.sel.oi,'perf'),'pri',o.rot||spHave('T')<c.perf.T);
+   if(t!=='PR')B(`판매: 재능${c.sell.T} → ★${c.sell.vp}, 재정+${c.sell.fin+(t==='SR'?2:0)}`,()=>doPerform(ui.sel.pi,ui.sel.oi,'sell'),'pri',spHave('T')<c.sell.T);}
+  else msg={D:'카드 줄에서 기억 카드를 고르세요 (초록 테두리 = 지불 가능). 이번 턴 이야기 칸 카드와 교체됩니다.',O:'카드 줄에서 작품 카드를 고르세요 (카드 비용 + 칸 추가 비용).',P:'나의 작품에서 공연 또는 판매할 작품을 고르세요.',PR:'공연할 종교음악 작품을 고르세요.',SR:'판매할 종교음악 작품을 고르세요.',V:'지도에서 목적지를 고르세요 (길 비용 🪙 + 타일 비용).',R:'레퀴엠에서 빈 파트를 고르세요 (내 마커와 악기가 같아야 함).',N:'같은 악장의 빈 칸에 중립 마커를 놓으세요 (♪ 쪽으로 계산됨).'}[t];
+  if(!(it.type==='N'))B('취소',()=>{ui.sel=null;render();});}
+ else if(G.phase==='place'){const ph=G.turn.exp?'이야기':G.turn.story?'경험':null;
+  if(ui.pick){msg='이 카드를 어디에 놓을까요?';if(!G.turn.exp)B('⬆ 경험 칸 (행동)',()=>placeCard(ui.pick,'exp'),'pri');if(!G.turn.story)B('⬇ 이야기 칸 (점수)',()=>placeCard(ui.pick,'story'),'pri');B('취소',()=>{ui.pick=null;render();});}
+  else msg=ph?`손패에서 ${ph} 칸에 놓을 카드를 누르세요.`:'손패에서 카드를 눌러 경험 칸 1장, 이야기 칸 1장을 놓으세요.';}
+ else if(G.phase==='choose'){const c=CARDS[G.turn.exp];msg='경험 칸 카드를 어떻게 쓸까요?';
+  B(`카드 효과: ${plain(c.rw)?plain(c.rw)+' + ':''}${c.acts.split('').map(a=>ACT[a].k).join('·')}`,()=>chooseUse(true),'pri');B(`대신 🪙${G.round} 받기`,()=>chooseUse(false));}
+ else if(G.phase==='act'){const pd=G.turn.pending;msg=pd.length?'할 행동을 고르세요. 남은 행동은 건너뛸 수 있어요.':'행동을 모두 마쳤어요. 턴을 끝내면 카드가 공개되어 무를 수 없어요.';
+  pd.forEach((it,i)=>{if(it.type==='N'){const has=G.req.some(s=>s.mv===it.mv&&!s.own);if(!has){B('중립 마커: 빈 칸 없음(넘기기)',()=>skipNeutral(i));return;}}
+   B(`${ACT[it.type].i} ${ACT[it.type].k}${it.extra?' (추가)':''}`,()=>{ui.sel={pi:i};render();},'pri');});
+  B('턴 종료 ▶',endTurn,'gold',pd.some(x=>x.forced));}
+ el.innerHTML=`<div class="in"><div class="msg">${msg}</div><div class="btns"></div></div>`;
+ const bx=el.querySelector('.btns');b.forEach(x=>{const e=document.createElement('button');e.innerHTML=x.t;if(x.cls)e.className=x.cls;e.disabled=!!x.dis;e.onclick=x.f;bx.appendChild(e);});}
+function showSoloToast(){if(!G.lastSolo||G.over)return;const t=document.createElement('div');t.className='toast';
+ t.innerHTML=`🎭 쉬카네더: ${G.lastSolo.lines.slice(1).map(x=>x.trim()).join(' / ')||'행동 없음'}`;document.body.appendChild(t);setTimeout(()=>t.remove(),3500);}
+function showFinal(){const f=G.final;const r=(k,n)=>`<tr><td>${k}</td><td>${f.pr[n]}</td><td>${f.sr[n]}</td></tr>`;
+ ov(`<h3>${f.win==='P'?'🎉 당신이 콘스탄체의 회고록 최고 후원자!':f.win==='S'?'쉬카네더의 승리':'공동 승리'}</h3>
+ <table class="sc"><tr><th></th><th>나</th><th>쉬카네더</th></tr>${r('게임 중 점수','game')}${r('궁정 타일','court')}${r('레퀴엠','req')}${r('남은 이야기 점수(2당 1)','story')}${r('남은 두캇(3당 1)','money')}<tr><th>합계</th><th>${f.pr.total}</th><th>${f.sr.total}</th></tr></table>
+ <p class="note">달성한 궁정: ${f.courtSel.map(id=>goalText(TILE[id].g)).join(', ')||'없음'}</p><button class="pri" onclick="ov('')">닫기</button>`);}
+function ov(html){document.getElementById('ov').innerHTML=html?`<div class="overlay"><div class="pan">${html}</div></div>`:'';}
+function menu(){ov(`<h3>메뉴</h3><div class="opt"><button onclick="ov('');rules()">규칙 요약</button><button onclick="if(confirm('지금 게임을 버리고 새로 시작할까요?')){G=null;localStorage.removeItem(SAVE);ov('');render();}">새 게임</button><button onclick="ov('')">닫기</button></div>`);}
+function rules(){ov(`<h3>규칙 요약</h3><div class="note">
+<b>목표</b> 5시대 동안 모차르트의 후원자로서 승점(★)을 모아 쉬카네더(솔로이스트)보다 높은 점수를 얻으세요.<br><br>
+<b>내 턴</b> 손패에서 2장을 놓습니다. 경험 칸(위) 카드의 보상과 행동을 실행하고, 이야기 칸(아래) 카드는 시대가 끝날 때 이야기 점수를 줍니다. 행동 대신 '현재 시대 숫자만큼 두캇'을 받을 수도 있어요.<br><br>
+<b>행동</b> 📖회고록 기록(카드 줄의 기억 카드로 덱 강화) · ✒️작품 위촉(작품 카드 구매, 즉시 ★) · 🎭공연(두캇, 시대당 1번)/판매(★·재정, 카드 제거) · 🐎여행(도시 보상/궁정 타일) · ✝️레퀴엠(작곡가 고용, 마커 배치)<br><br>
+<b>이야기 점수</b> 재능·여행·작곡 세 종류. 트랙(시대마다 0으로 초기화)과 토큰(계속 유지)을 합쳐 씁니다. 두캇 3 → 토큰 1, 토큰 1 → 두캇 1 교환 가능.<br><br>
+<b>시대 정리</b> 이야기 칸 카드 점수, 재정 수입, 시대 보너스(경험 칸 행동 아이콘 수만큼)를 받고, 카드 줄 오른쪽 4장이 버려지며 다음 시대 카드가 나옵니다. 남은 궁정·도시 타일은 금테(더 좋은) 면으로 뒤집혀요.<br><br>
+<b>게임 끝</b> 궁정 목표(작품·파트 하나는 한 궁정에만 사용), 레퀴엠 악장별 다수(♪ vs ♬, 동점이면 둘 다 낮은 점수), 남은 이야기 점수 2당 1★, 두캇 3당 1★.<br><br>
+<b>쉬카네더</b> 비용을 내지 않고 카드에 적힌 대로 행동합니다. 판매만 하고, 궁정 타일은 목표 달성과 상관없이 모두 득점합니다.<br><br>
+<b>무르기</b> 내 턴 안의 선택은 얼마든지 되돌릴 수 있어요. 하지만 턴을 끝내는 순간 카드 뽑기·카드 줄 보충·쉬카네더 카드처럼 숨겨진 정보가 공개되므로 그 이전으로는 무를 수 없습니다. (이 게임엔 주사위가 없고, 무작위 요소는 모두 카드 섞기·뽑기입니다.)<br><br>
+<b>안내</b> 규칙서에는 개별 카드·타일의 수치가 실려 있지 않아, 카드 내용(비용·보상·궁정 목표·쉬카네더 카드 등)은 규칙에 맞게 새로 설계한 값입니다. 실물 게임과 수치가 다를 수 있어요.</div>
+<button class="pri" onclick="ov('')">닫기</button>`);}
+function startScreen(){let diff='mid',comp='Eybler';
+ const draw=()=>{document.getElementById('app').innerHTML=`<header><h1>Lacrimosa · 라크리모사</h1></header><section>
+ <p class="note">1791년 12월, 모차르트는 레퀴엠의 '라크리모사' 여덟 마디를 남기고 세상을 떠났습니다. 미망인 콘스탄체가 남편의 후원자들을 만나 이야기를 듣고, 레퀴엠 완성을 도울 작곡가를 고용합니다. 당신은 후원자, 상대는 극작가 쉬카네더입니다.</p>
+ <h2>난이도</h2><div class="opt">${Object.keys(DIFF).map(k=>`<button data-d="${k}" class="${diff===k?'on':''}">${DIFF[k].k}</button>`).join('')}</div>
+ <h2>레퀴엠 작곡가</h2><div class="opt">${Object.keys(COMP).map(k=>`<button data-c="${k}" class="${comp===k?'on':''}">${COMP[k].k}</button>`).join('')}<button data-c="rand">무작위</button></div>
+ <p class="note">${comp!=='rand'?`${COMP[comp].k}: 오페르토리움 보너스 ${COMP[comp].off.map(t=>TYPE[t]).join('/')}, 아뉴스 데이 추가 행동 ${COMP[comp].ag.map(a=>ACT[a].k).join('/')}`:''}</p>
+ <button class="pri" id="go" style="font-size:16px;padding:10px 22px">게임 시작</button> <button id="rl">규칙 요약</button></section>`;
+ document.getElementById('prompt').innerHTML='';
+ document.querySelectorAll('[data-d]').forEach(e=>e.onclick=()=>{diff=e.dataset.d;draw();});
+ document.querySelectorAll('[data-c]').forEach(e=>e.onclick=()=>{comp=e.dataset.c==='rand'?Object.keys(COMP)[Math.floor(Math.random()*4)]:e.dataset.c;draw();});
+ document.getElementById('go').onclick=()=>newGame(diff,comp);document.getElementById('rl').onclick=rules;};draw();}
+/* 시작 */
+try{const s=localStorage.getItem(SAVE);if(s)G=JSON.parse(s);}catch(e){G=null;}
+render();
+</script>
+</body>
+</html>
