@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>하나미 — 컴퓨터와 대전</title>
+<title>하나미 — 컴퓨터·친구와 대전</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -71,6 +71,9 @@ table.res td.nm{text-align:left;font-weight:700}
 .parkinfo td,.parkinfo th{padding:3px 4px;text-align:center}
 .parkinfo th{color:var(--muted);font-weight:500}
 .hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.inp{width:100%;padding:9px 10px;border:2px solid #e3d3e6;border-radius:10px;font-size:16px;margin:4px 0 10px;font-family:inherit;background:#fff}
+.lp{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#fff;margin-bottom:4px;font-size:14px}
+.banner{background:#fff1c9;border-radius:10px;padding:8px 10px;font-size:13px;margin-bottom:8px}
 .sec{border-top:1px solid #eedde6;margin-top:10px;padding-top:8px}
 @keyframes pop{0%{transform:scale(.4);opacity:.2}100%{transform:scale(1);opacity:1}}
 .newtile{animation:pop .35s ease-out;transform-box:fill-box;transform-origin:center}
@@ -79,13 +82,14 @@ table.res td.nm{text-align:left;font-weight:700}
 <body>
 <div class="app">
   <header>
-    <h1>하나미 <small>花見 · 컴퓨터와 대전</small></h1>
+    <h1>하나미 <small>花見 · 컴퓨터·친구와 대전</small></h1>
     <div style="display:flex;gap:6px">
       <button class="hbtn" id="zoomBtn">확대</button>
       <button class="hbtn" id="rulesBtn">규칙</button>
       <button class="hbtn" id="newBtn">새 게임</button>
     </div>
   </header>
+  <div class="banner" id="banner" hidden></div>
   <div class="status" id="status"></div>
   <div class="layout">
     <div class="boardwrap" id="boardwrap"><svg id="board" xmlns="http://www.w3.org/2000/svg"></svg></div>
@@ -113,9 +117,13 @@ table.res td.nm{text-align:left;font-weight:700}
 <div class="overlay" id="setup">
   <div class="modal">
     <h2>🌸 하나미 시작하기</h2>
-    <p style="margin-top:0">벚꽃 명당을 차지하는 타일 놓기 게임. 원판 <b>니혼(일본)</b> 면 지도로 컴퓨터와 대결해요.</p>
-    <div><b>상대 컴퓨터 수</b></div>
-    <div class="opt" id="optN"><button data-v="1" class="on">1명 (2인전)</button><button data-v="2">2명 (3인전)</button><button data-v="3">3명 (4인전)</button></div>
+    <p style="margin-top:0">벚꽃 명당을 차지하는 타일 놓기 게임. 원판 <b>니혼(일본)</b> 면 지도로 컴퓨터나 친구와 대결해요.</p>
+    <div class="opt" id="optM"><button data-v="solo" class="on">🤖 컴퓨터와</button><button data-v="host">🏠 온라인 방 만들기</button><button data-v="join">🔑 방 참가</button></div>
+    <div id="nameRow" hidden><b>내 이름</b><input id="myName" class="inp" maxlength="8" placeholder="이름 (최대 8자)"></div>
+    <div id="joinRow" hidden><b>방 코드</b><input id="joinCode" class="inp" maxlength="4" placeholder="예: K7QX" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:6px;font-weight:700"></div>
+    <div id="gameOpts">
+    <div><b>인원</b> <span class="hint" id="nHint">나 + 컴퓨터</span></div>
+    <div class="opt" id="optN"><button data-v="1" class="on">2인전</button><button data-v="2">3인전</button><button data-v="3">4인전</button></div>
     <div class="hint" style="margin-top:-4px;margin-bottom:8px">2인: 가운데 섬 · 3인: 가운데 + 왼쪽 섬들 · 4인: 모든 섬(홋카이도 포함)</div>
     <div><b>난이도</b></div>
     <div class="opt" id="optD"><button data-v="0">쉬움</button><button data-v="1" class="on">보통</button><button data-v="2">어려움</button></div>
@@ -123,15 +131,36 @@ table.res td.nm{text-align:left;font-weight:700}
     <div class="opt" id="optA"><button data-v="torii" class="on">⛩ 도리이</button><button data-v="takoyaki">🐙 타코야키</button><button data-v="rain">☔ 비 오는 날</button><button data-v="taiyaki">🐟 타이야키</button><button data-v="none">없음</button></div>
     <div class="sec"><b>추가 규칙</b></div>
     <label class="chk"><input type="checkbox" id="optSpecial"> <span><b>특별 행동 타일</b> 넣기 — 뽑기·덮기·복사 (1인당 22장)</span></label>
-    <label class="chk"><input type="checkbox" id="optStrong"> <span><b>강하게 시작</b> — 첫 패 5장을 직접 고르기</span></label>
+    <label class="chk" id="strongRow"><input type="checkbox" id="optStrong"> <span><b>강하게 시작</b> — 첫 패 5장을 직접 고르기</span></label>
     <label class="chk"><input type="checkbox" id="optOpen"> <span>컴퓨터가 딴 토큰 공개 (원래는 가림막 뒤에 숨김)</span></label>
     <div class="sec"><b>미니 확장</b> <span class="hint">(원하는 것만 골라 넣기)</span></div>
     <label class="chk"><input type="checkbox" id="optXN"> <span><b>마네키네코 토큰</b> — 2그루 공원 하나에 추가. 와일드 타일만 세력으로 계산. 점수 낼 때 원하는 종류로 셈</span></label>
     <label class="chk"><input type="checkbox" id="optXK"> <span><b>카니(게) 토큰</b> — 물 칸에 놓임. 둘레의 물 칸이 모두 차면 수여. 점수 낼 때 원하는 종류로 셈</span></label>
     <label class="chk"><input type="checkbox" id="optXD"> <span><b>도소진 토큰</b> — 가운데 3그루 공원 대신 놓임. 그 둘레 세력 합이 가장 큰 사람이 도소진 카드를 가져가고, 토큰 동점에서 이김</span></label>
+    </div>
+    <div class="hint" id="netMsg" style="color:#c0392b;font-size:13px"></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn primary" id="startBtn" style="flex:1">게임 시작</button>
       <button class="btn" id="setupRules">규칙 보기</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="lobby" hidden>
+  <div class="modal">
+    <h2>🏠 온라인 방</h2>
+    <div style="text-align:center;margin:4px 0 12px">
+      <div class="hint">방 코드</div>
+      <div id="lobCode" style="font-size:42px;font-weight:700;letter-spacing:10px;margin:2px 0 6px"></div>
+      <button class="btn" id="copyLink">🔗 초대 링크 복사</button>
+      <div class="hint" id="lobLink" style="word-break:break-all;margin-top:6px"></div>
+    </div>
+    <div><b>참가자</b> <span class="hint" id="lobInfo"></span></div>
+    <div id="lobPlayers" style="margin:6px 0 10px"></div>
+    <div class="hint" id="lobWait"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn primary" id="lobStart" style="flex:1">게임 시작</button>
+      <button class="btn" id="lobLeave">방 나가기</button>
     </div>
   </div>
 </div>
@@ -207,7 +236,14 @@ const KNAME={S:'벚꽃',C:'초칭',O:'오니기리',N:'마네키네코',B:'배',
 const WILD=new Set(['N','B','D','V']);
 const ACTION=new Set(['M','V','X']);
 const PCOL=['#2f8fe0','#e2475b','#f0a51c','#2fb38a'], PCOLD=['#1c63a8','#a8283a','#b87508','#1c7f61'];
-const PNAME=['나','컴퓨터 1','컴퓨터 2','컴퓨터 3'];
+const DEFNAME=['나','컴퓨터 1','컴퓨터 2','컴퓨터 3'];
+// ===== 온라인 대전 설정 =====
+// Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)에서 복사한 firebaseConfig 내용을 아래 null 자리에 붙여 넣으세요.
+// 예) const FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", databaseURL: "https://...firebasedatabase.app", projectId: "...", appId: "..." };
+const FIREBASE_CONFIG = { databaseURL: "https://hanami-online-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "hanami-online" };
+const LOCALNET = /[?&]net=local/.test(location.search);
+let MODE='solo', ME=0, ROOM=null, LOBBY=[], MYNAME='';
+function nm(i){ const p=G&&G.players[i]; if(!p) return '?'; return (p.human||MODE==='solo'?'':'🤖')+p.name+(MODE!=='solo'&&i===ME?' (나)':''); }
 const TOKCOUNT={2:7,3:10,4:13}, OPENISL={2:'M',3:'MK',4:'MKN'};
 const ABIL={torii:{ic:'⛩',nm:'도리이'},takoyaki:{ic:'🐙',nm:'타코야키'},rain:{ic:'☔',nm:'비 오는 날'},taiyaki:{ic:'🐟',nm:'타이야키'},none:{ic:'',nm:'없음'}};
 const HR=20, S3=Math.sqrt(3);
@@ -245,11 +281,12 @@ let opts={n:1,d:1,abil:'torii',open:false,strong:false,special:false,xN:false,xK
 let ui={sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,busy:false,last:new Set(),snap:null,zoom:false,info:null};
 
 function isOpen(c){ if(c.t==='W') return [...c.i].some(ch=>G.open.includes(ch)); return G.open.includes(c.i); }
-function newGame(){
+function newGame(seats){
   const np=opts.n+1;
   G={np,open:OPENISL[np],players:[],board:{},ptok:{},ties:[],cur:0,turn:null,over:false,log:[],round:1,
-     abil:opts.abil,special:opts.special,kani:null,doso:null};
-  for(let i=0;i<np;i++) G.players.push({i,human:i===0,hand:[],pile:shuffle(makeSet(opts.special)),tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:opts.abil==='none'});
+     abil:opts.abil,special:opts.special,kani:null,doso:null,opts:{...opts},tn:0,last:[],started:true,result:null,gid:Math.random().toString(36).slice(2,8)};
+  for(let i=0;i<np;i++){ const s=seats?seats[i]:{human:i===0,name:DEFNAME[i]};
+    G.players.push({i,human:s.human,name:s.name,uid:s.uid||null,hand:[],pile:shuffle(makeSet(opts.special)),tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:opts.abil==='none'}); }
   const sup=[]; BASIC.forEach(t=>{for(let k=0;k<TOKCOUNT[np];k++)sup.push(t);});
   const take=t=>sup.splice(sup.indexOf(t),1);
   const parks=cells.filter(c=>c.t==='P'&&isOpen(c));
@@ -262,13 +299,13 @@ function newGame(){
     const w=rnd(ws); G.kani={cell:w.id,done:false};
   }
   ui={sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,busy:false,last:new Set(),snap:null,zoom:ui.zoom,info:null};
-  $('log').innerHTML='';
-  addLog(`새 게임 — ${np}인전 · ${['쉬움','보통','어려움'][opts.d]} · 능력 카드: ${ABIL[opts.abil].nm}${opts.special?' · 특별 행동 타일':''}${opts.xN||opts.xK||opts.xD?' · 미니 확장':''}. 내가 먼저 시작합니다.`);
-  if(opts.strong){ openStrong(); return; }
+  addLog(`새 게임 — ${np}인전 · ${['쉬움','보통','어려움'][opts.d]} · 능력 카드: ${ABIL[opts.abil].nm}${opts.special?' · 특별 행동 타일':''}${opts.xN||opts.xK||opts.xD?' · 미니 확장':''}. ${nm(0).replace(' (나)','')}부터 시작합니다.`);
+  if(opts.strong&&MODE==='solo'){ openStrong(); return; }
   G.players.forEach(refill); startTurn();
 }
 function refill(p){ while(p.hand.length<5&&p.pile.length) p.hand.push(p.pile.pop()); }
-function addLog(s,col){ G.log.push(s); const d=document.createElement('div'); d.innerHTML=(col!==undefined?`<b style="color:${PCOLD[col]}">${PNAME[col]}</b> `:'')+s; $('log').prepend(d); }
+function addLog(s,col){ G.log.push((col!==undefined?`<b style="color:${PCOLD[col]}">${G.players[col].name}</b> `:'')+s); if(G.log.length>150) G.log.splice(0,G.log.length-150); }
+function renderLog(){ $('log').innerHTML=G.log.slice().reverse().map(x=>`<div>${x}</div>`).join(''); }
 
 // ---------- rules ----------
 function eff(board,id){
@@ -323,14 +360,14 @@ function placeTile(pi,tile,cellId,ex={}){
   if(tile.k==='M'){
     const moved=G.board[ex.from]; delete G.board[ex.from];
     G.board[cellId]=moved; G.board[ex.from]={...tile,o:pi};
-    ui.last.add(cellId); ui.last.add(ex.from);
+    G.last.push(cellId); G.last.push(ex.from);
     addLog(`이동 타일로 ${KNAME[moved.k]}(${moved.s}) 타일을 옮김`,pi);
   } else if(tile.k==='V'){
     const under=G.board[cellId]; G.board[cellId]={...tile,o:pi,under};
-    ui.last.add(cellId); addLog(`덮기 타일로 자기 ${KNAME[under.k]} 타일을 덮음 (3점 와일드)`,pi);
+    G.last.push(cellId); addLog(`덮기 타일로 자기 ${KNAME[under.k]} 타일을 덮음 (3점 와일드)`,pi);
   } else {
     const t={...tile,o:pi}; if(tile.k==='X') t.dir=ex.dir; if(ex.taiyaki) t.f=true;
-    G.board[cellId]=t; ui.last.add(cellId);
+    G.board[cellId]=t; G.last.push(cellId);
     addLog(`${KNAME[tile.k]}${tile.s?'('+tile.s+')':''}${tile.f?' [신속]':''} 타일을 놓음${ex.taiyaki?' (🐟 타이야키: 물 칸)':''}`,pi);
     if(tile.k==='D'&&p.pile.length){ p.hand.push(p.pile.pop()); addLog('뽑기 타일 효과로 1장 보충',pi); }
   }
@@ -376,19 +413,21 @@ function validSwap(a,ta,b,tb){
 function useAbil(pi){ G.players[pi].abilUsed=true; G.turn.abil=false; }
 function doSwap(a,ta,b,tb){ const A=G.ptok[a],B=G.ptok[b]; A[A.indexOf(ta)]=tb; B[B.indexOf(tb)]=ta; useAbil(G.cur); addLog(`⛩ 도리이 — ${TNAME[ta]} ↔ ${TNAME[tb]} 토큰 위치 교환`,G.cur); }
 function doTako(pi,mine,tie){ const p=G.players[pi]; p.tok[mine]--; p.tok[tie]++; G.ties[G.ties.indexOf(tie)]=mine; useAbil(pi); addLog(`🐙 타코야키 — 내 토큰 1개를 동점 구역의 ${TNAME[tie]} 토큰과 맞바꿈`,pi); }
-function doRain(pi,id){ G.board[id].down=true; useAbil(pi); ui.last.add(id); addLog(`☔ 비 오는 날 — ${PNAME[G.board[id].o]}의 ${KNAME[G.board[id].k]}(${G.board[id].s}) 타일을 뒤집음`,pi); updateDoso(); }
+function doRain(pi,id){ G.board[id].down=true; useAbil(pi); G.last.push(id); addLog(`☔ 비 오는 날 — ${nm(G.board[id].o)}의 ${KNAME[G.board[id].k]}(${G.board[id].s}) 타일을 뒤집음`,pi); updateDoso(); }
 function rainTargets(board){ return Object.keys(board).map(Number).filter(id=>{const t=board[id];return !t.down&&t.s>=1&&t.s<=2&&!ACTION.has(t.k);}); }
 
 // ---------- turn flow ----------
 function startTurn(){
-  G.turn={main:false,placed:0,abil:true};
+  G.tn=(G.tn||0)+1;
+  G.turn={main:false,placed:0,abil:true,acts:[]};
   Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null});
   const p=G.players[G.cur];
   if(p.hand.length===0||!hasAnyLegal(p)){
     addLog(p.hand.length?'놓을 수 있는 곳이 없어 패스':'남은 타일이 없어 패스',G.cur);
     render(); setTimeout(endTurn,500*(window.SPEED??1)); return;
   }
-  if(p.human){ ui.snap=JSON.stringify({G,log:G.log.length}); ui.busy=false; render(); }
+  if(p.human&&G.cur===ME){ ui.snap=JSON.stringify({G}); ui.busy=false; render(); }
+  else if(p.human){ ui.busy=true; render(); }
   else { ui.busy=true; render(); setTimeout(()=>aiTurn(G.cur),450*(window.SPEED??1)); }
 }
 function endTurn(){
@@ -396,7 +435,7 @@ function endTurn(){
   const why=endCondition();
   if(why){ render(); finish(why); return; }
   G.cur=(G.cur+1)%G.np;
-  if(G.cur===0){ G.round++; ui.last=new Set(); }
+  if(G.cur===0){ G.round++; G.last=[]; }
   startTurn();
 }
 
@@ -409,13 +448,12 @@ function assignOptions(p){
 }
 function baseTot(p){ return {S:p.tok.S,C:p.tok.C,O:p.tok.O}; }
 function finish(why,humanChoice){
-  G.over=true; ui.busy=true; render();
+  G.over=true; ui.busy=true;
   const P=G.players;
-  const hp=P[0], ho=assignOptions(hp);
-  if(ho.wl.length&&!humanChoice){
-    // ask the human first
-    const opt=ho.res.map(r=>r.join(','));
-    const uniq=[...new Set(opt)];
+  const hp=P[ME], ho=hp?assignOptions(hp):{wl:[],res:[]};
+  if(MODE==='solo'&&ho.wl.length&&!humanChoice){
+    render();
+    const uniq=[...new Set(ho.res.map(r=>r.join(',')))];
     $('chooserTitle').textContent='와일드 토큰을 어느 종류로 셀까요?';
     $('chooserOpts').innerHTML=uniq.map(o=>`<button data-o="${o}">${ho.wl.map((w,i)=>`${ico(w,26)}→${ico(o.split(',')[i],26)}`).join('<br>')}</button>`).join('');
     $('chooserOpts').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('chooser').hidden=true; finish(why,b.dataset.o.split(','));});
@@ -424,8 +462,8 @@ function finish(why,humanChoice){
   $('chooserCancel').style.display='';
   addLog(`게임 종료: ${why}`);
   const tots=P.map(baseTot), assign=P.map(()=>[]);
-  if(humanChoice){ ho.wl.forEach((w,i)=>tots[0][humanChoice[i]]++); assign[0]=humanChoice; }
-  for(const p of P){ if(p.human) continue; const o=assignOptions(p); if(!o.wl.length) continue;
+  if(humanChoice){ ho.wl.forEach((w,i)=>tots[ME][humanChoice[i]]++); assign[ME]=humanChoice; }
+  for(const p of P){ if(humanChoice&&p.i===ME) continue; const o=assignOptions(p); if(!o.wl.length) continue;
     let best=null,bk=-1;
     for(const r of o.res){ const t2=tots.map(x=>({...x})); r.forEach(t=>t2[p.i][t]++); const v=vpOf(t2,p.i).length*100+BASIC.reduce((a,t)=>a+t2[p.i][t],0)+Math.random()*.1; if(v>bk){bk=v;best=r;} }
     best.forEach(t=>tots[p.i][t]++); assign[p.i]=best; }
@@ -436,17 +474,26 @@ function finish(why,humanChoice){
   if(maxVp===0) how='아무도 승점을 못 받아 전체 토큰 수로';
   if(cand.length>1&&maxVp>0){ const m=Math.max(...cand.map(other)); cand=cand.filter(i=>other(i)===m); how='승점 동점 → 다른 종류 토큰 수'; }
   if(cand.length>1){ const m=Math.max(...cand.map(total)); cand=cand.filter(i=>total(i)===m); if(maxVp>0) how+=' → 전체 토큰 수'; }
-  const winners=cand, youWin=winners.includes(0);
-  let h=`<h2>${youWin?(winners.length>1?'🌸 공동 승리!':'🌸 승리했어요!'):'게임 종료'}</h2><p class="hint" style="margin-top:0">${why}.</p>`;
+  const winners=cand;
+  let h=`<p class="hint" style="margin-top:0">${why}.</p>`;
   h+=`<table class="res"><tr><th></th>${BASIC.map(t=>`<th>${ico(t,22)}</th>`).join('')}<th>승점</th></tr>`;
-  P.forEach(p=>{const i=p.i; h+=`<tr${winners.includes(i)?' style="background:#fff1c9"':''}><td class="nm" style="color:${PCOLD[i]}">${PNAME[i]}${winners.includes(i)?' 🏆':''}</td>${BASIC.map(t=>`<td>${tots[i][t]}${vp[i].includes(t)?' ★':''}</td>`).join('')}<td><b>${vp[i].length}</b></td></tr>`;});
+  P.forEach(p=>{const i=p.i; h+=`<tr${winners.includes(i)?' style="background:#fff1c9"':''}><td class="nm" style="color:${PCOLD[i]}">${p.name}${winners.includes(i)?' 🏆':''}</td>${BASIC.map(t=>`<td>${tots[i][t]}${vp[i].includes(t)?' ★':''}</td>`).join('')}<td><b>${vp[i].length}</b></td></tr>`;});
   h+=`</table>`;
-  const wnote=P.filter(p=>assign[p.i].length).map(p=>`${PNAME[p.i]}: ${assignOptions(p).wl.map((w,k)=>`${w==='N'?'마네키네코':'카니'}→${TNAME[assign[p.i][k]]}`).join(', ')}`);
-  if(wnote.length) h+=`<p class="hint">와일드 토큰 배정 — ${wnote.join(' · ')}</p>`;
-  h+=`<p>승자: <b>${winners.map(i=>PNAME[i]).join(', ')}</b> <span class="hint">(${how})</span></p><p class="hint">★ = 그 종류 최다 보유로 받은 큰 승점</p>`;
-  h+=`<div style="display:flex;gap:8px"><button class="btn" onclick="$('over').hidden=true">지도 보기</button><button class="btn primary" style="flex:1" onclick="$('over').hidden=true;$('setup').hidden=false">다시 하기</button></div>`;
-  $('overBody').innerHTML=h; render(); setTimeout(()=>{$('over').hidden=false;},600);
+  const wnote=P.filter(p=>assign[p.i].length).map(p=>`${p.name}: ${assignOptions(p).wl.map((w,k)=>`${w==='N'?'마네키네코':'카니'}→${TNAME[assign[p.i][k]]}`).join(', ')}`);
+  if(wnote.length) h+=`<p class="hint">와일드 토큰 배정${MODE==='solo'?'':' (각자 가장 유리하게 자동 배정)'} — ${wnote.join(' · ')}</p>`;
+  h+=`<p>승자: <b>${winners.map(i=>P[i].name).join(', ')}</b> <span class="hint">(${how})</span></p><p class="hint">★ = 그 종류 최다 보유로 받은 큰 승점</p>`;
+  G.result={winners,body:h};
+  render(); showResult();
 }
+function showResult(){
+  if(!G.result) return;
+  const w=G.result.winners, you=w.includes(ME);
+  let h=`<h2>${you?(w.length>1?'🌸 공동 승리!':'🌸 승리했어요!'):'게임 종료'}</h2>`+G.result.body;
+  h+=`<div style="display:flex;gap:8px"><button class="btn" onclick="$('over').hidden=true">지도 보기</button>${MODE==='guest'?'':'<button class="btn primary" style="flex:1" onclick="playAgain()">다시 하기</button>'}</div>`;
+  if(MODE==='guest') h+='<div class="hint">방장이 새 게임을 시작하면 자동으로 이어져요.</div>';
+  $('overBody').innerHTML=h; setTimeout(()=>{$('over').hidden=false;},600);
+}
+function playAgain(){ $('over').hidden=true; if(MODE==='host') showLobby(); else $('setup').hidden=false; }
 
 // ---------- AI ----------
 function typeWeights(me){
@@ -546,9 +593,9 @@ async function aiAbility(pi,d,hard){
 }
 async function aiTurn(pi){
   if(G.over) return;
-  const d=opts.d,noise=[9,2.5,0][d],hard=d>=1;
+  const d=G.opts.d,noise=[9,2.5,0][d],hard=d>=1;
   await aiAbility(pi,d,hard);
-  const m=bestMove(pi,false,noise,hard);
+  const m=bestMove(pi,G.turn.main,noise,hard);
   if(m){ placeTile(pi,m.c.t,m.c.to,{from:m.c.from,dir:m.c.dir}); render(); await sleep(650); }
   for(let k=0;k<6;k++){
     const f=bestMove(pi,true,noise*0.5,hard);
@@ -559,11 +606,24 @@ async function aiTurn(pi){
 }
 
 // ---------- human input ----------
-function humanTurn(){ return G&&!G.over&&G.players[G.cur].human&&!ui.busy; }
-function selTile(){ return G.players[0].hand.find(x=>x.id===ui.sel); }
+function humanTurn(){ return G&&G.started&&!G.over&&G.cur===ME&&G.players[ME]&&G.players[ME].human&&!ui.busy; }
+function myP(){ return G.players[ME]; }
+function selTile(){ return myP().hand.find(x=>x.id===ui.sel); }
+function applyAct(pi,a){
+  const p=G.players[pi], t=a.tile!==undefined?p.hand.find(x=>x.id===a.tile):null;
+  switch(a.a){
+    case 'place': if(!t) return false; placeTile(pi,t,a.cell,a.ex||{}); return true;
+    case 'swap': if(!validSwap(a.p,a.tp,a.q,a.tq)) return false; doSwap(a.p,a.tp,a.q,a.tq); return true;
+    case 'tako': if(!(p.tok[a.mine]>0)||!G.ties.includes(a.tie)) return false; doTako(pi,a.mine,a.tie); return true;
+    case 'rain': if(!G.board[a.id]) return false; doRain(pi,a.id); return true;
+    case 'taiyaki': if(!t) return false; useAbil(pi); placeTile(pi,t,a.cell,{taiyaki:true}); return true;
+  }
+  return false;
+}
+function act(a){ G.turn.acts.push(a); applyAct(ME,a); }
 function selectTile(id){
   if(!humanTurn()) return;
-  const t=G.players[0].hand.find(x=>x.id===id); if(!t) return;
+  const t=myP().hand.find(x=>x.id===id); if(!t) return;
   if(ui.mode==='taiyaki1'||ui.mode==='taiyaki2'){ if(ACTION.has(t.k)) return; ui.sel=id; ui.mode='taiyaki2'; render(); return; }
   if(!canPlaceTile(t)) return;
   if(ui.sel===id&&!ui.mode.startsWith('copy')){ ui.sel=null; ui.mode='idle'; render(); return; }
@@ -574,10 +634,10 @@ function validTargets(){
   if(!humanTurn()) return [];
   const t=selTile();
   switch(ui.mode){
-    case 'place': return t?legalCells(t,G.board,0):[];
-    case 'move1': return movableFrom(0,G.board);
-    case 'move2': return legalCells(t,G.board,0);
-    case 'copy1': return legalCells(t,G.board,0);
+    case 'place': return t?legalCells(t,G.board,ME):[];
+    case 'move1': return movableFrom(ME,G.board);
+    case 'move2': return legalCells(t,G.board,ME);
+    case 'copy1': return legalCells(t,G.board,ME);
     case 'copy2': return copyDirs(ui.copyAt).map(o=>o.d);
     case 'torii1': return Object.keys(G.ptok).map(Number).filter(k=>G.ptok[k].some(x=>BASIC.includes(x)));
     case 'torii2': { const [a,ta]=ui.pickA; return Object.keys(G.ptok).map(Number).filter(b=>G.ptok[b].some(tb=>validSwap(a,ta,b,tb))); }
@@ -594,15 +654,15 @@ function clickCell(id){
   if(!validTargets().includes(id)) return;
   const t=selTile();
   switch(ui.mode){
-    case 'place': placeTile(0,t,id); break;
+    case 'place': act({a:'place',tile:t.id,cell:id}); break;
     case 'move1': ui.moveFrom=id; ui.mode='move2'; render(); return;
-    case 'move2': placeTile(0,t,id,{from:ui.moveFrom}); break;
+    case 'move2': act({a:'place',tile:t.id,cell:id,ex:{from:ui.moveFrom}}); break;
     case 'copy1': ui.copyAt=id; ui.mode='copy2'; render(); return;
-    case 'copy2': placeTile(0,t,ui.copyAt,{dir:id}); break;
+    case 'copy2': act({a:'place',tile:t.id,cell:ui.copyAt,ex:{dir:id}}); break;
     case 'torii1': pick(G.ptok[id].filter(x=>BASIC.includes(x)),'옮길 토큰을 고르세요',ty=>{ui.pickA=[id,ty];ui.mode='torii2';render();}); return;
-    case 'torii2': { const [a,ta]=ui.pickA; pick(G.ptok[id].filter(tb=>validSwap(a,ta,id,tb)),'맞바꿀 토큰을 고르세요',tb=>{doSwap(a,ta,id,tb);ui.mode='idle';ui.pickA=null;render();}); return; }
-    case 'rain': doRain(0,id); break;
-    case 'taiyaki2': useAbil(0); placeTile(0,t,id,{taiyaki:true}); break;
+    case 'torii2': { const [a,ta]=ui.pickA; pick(G.ptok[id].filter(tb=>validSwap(a,ta,id,tb)),'맞바꿀 토큰을 고르세요',tb=>{act({a:'swap',p:a,tp:ta,q:id,tq:tb});ui.mode='idle';ui.pickA=null;render();}); return; }
+    case 'rain': act({a:'rain',id}); break;
+    case 'taiyaki2': act({a:'taiyaki',tile:t.id,cell:id}); break;
   }
   ui.sel=null; ui.mode='idle'; ui.moveFrom=null; ui.copyAt=null; render();
 }
@@ -616,7 +676,7 @@ function pick(list,title,cb){
 $('chooserCancel').onclick=()=>{$('chooser').hidden=true;};
 $('abilBtn').onclick=()=>{
   if(!humanTurn()) return;
-  const p=G.players[0];
+  const p=myP();
   if(['torii1','torii2','rain','taiyaki1','taiyaki2'].includes(ui.mode)){ ui.mode='idle'; ui.pickA=null; ui.sel=null; render(); return; }
   if(p.abilUsed||!G.turn.abil) return;
   ui.sel=null;
@@ -626,7 +686,7 @@ $('abilBtn').onclick=()=>{
   else if(G.abil==='takoyaki'){
     const mine=BASIC.filter(t=>p.tok[t]>0), tie=[...new Set(G.ties.filter(t=>BASIC.includes(t)))];
     if(!mine.length||!tie.length) return flash('내 토큰과 동점 구역 토큰이 모두 있어야 쓸 수 있어요.');
-    pick(mine,'내 토큰 중 내줄 것',a=>{ const opts2=tie.filter(b=>b!==a); if(!opts2.length) return flash('맞바꿀 다른 종류가 동점 구역에 없어요.'); pick(opts2,'동점 구역에서 가져올 것',b=>{doTako(0,a,b);render();}); });
+    pick(mine,'내 토큰 중 내줄 것',a=>{ const o2=tie.filter(b=>b!==a); if(!o2.length) return flash('맞바꿀 다른 종류가 동점 구역에 없어요.'); pick(o2,'동점 구역에서 가져올 것',b=>{act({a:'tako',mine:a,tie:b});render();}); });
     return;
   }
   render();
@@ -634,11 +694,16 @@ $('abilBtn').onclick=()=>{
 function flash(msg){ $('status').innerHTML=`<span>${msg}</span>`; setTimeout(render,1600); }
 $('undoBtn').onclick=()=>{
   if(!humanTurn()||!ui.snap) return;
-  const s=JSON.parse(ui.snap); G=s.G; G.log.length=s.log;
-  Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null,last:new Set()});
-  addLog('이번 차례를 되돌림',0); render();
+  G=JSON.parse(ui.snap).G;
+  Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null});
+  render();
 };
-$('endBtn').onclick=()=>{ if(!humanTurn()||G.turn.placed===0) return; ui.busy=true; ui.sel=null; ui.mode='idle'; endTurn(); };
+$('endBtn').onclick=()=>{
+  if(!humanTurn()||G.turn.placed===0) return;
+  ui.busy=true; ui.sel=null; ui.mode='idle';
+  if(MODE==='guest'){ Net.sendAction(ROOM,JSON.stringify({tn:G.tn,gid:G.gid,seat:ME,acts:G.turn.acts})); render(); }
+  else endTurn();
+};
 
 // ---------- drawing ----------
 function icoInner(k){
@@ -702,7 +767,7 @@ function render(){
     if(G.kani&&!G.kani.done&&G.kani.cell===c.id) s+=`<g transform="translate(${x},${y}) scale(1.05)"><circle r="11" fill="#fff4f0" opacity=".85"/>${icoInner('K')}</g>`;
   }
   for(const id in G.board){
-    const c=cells[id],t=G.board[id],{x,y}=pos(c),hl=ui.last.has(+id);
+    const c=cells[id],t=G.board[id],{x,y}=pos(c),hl=G.last.includes(+id);
     s+=tileSVG(t,x,y,HR,{hl,cls:hl?'newtile':'',flat:!ROT});
     if(t.k==='X'&&!t.down&&t.dir!==undefined){ const q=pos(cells[t.dir]); const dx=q.x-x,dy=q.y-y,L=Math.hypot(dx,dy); s+=`<path d="M${x+dx/L*9},${y+dy/L*9} L${x+dx/L*19},${y+dy/L*19}" stroke="#fff" stroke-width="2.6" marker-end="url(#ar)"/>`; }
   }
@@ -714,7 +779,8 @@ function render(){
   const svg=$('board');
   svg.setAttribute('viewBox',`${x0.toFixed(0)} ${y0.toFixed(0)} ${(x1-x0).toFixed(0)} ${(y1-y0).toFixed(0)}`);
   svg.innerHTML=`<defs><marker id="ar" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="3" markerHeight="3" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#fff"/></marker></defs><g pointer-events="none">${s}</g>`;
-  renderSide(); renderHand(); renderStatus(); renderInfo();
+  renderSide(); renderHand(); renderStatus(); renderInfo(); renderLog();
+  if(MODE==='host'&&G.started) schedulePublish();
 }
 window.addEventListener('resize',()=>{ const r=window.innerWidth<760; if(r!==ROT) render(); });
 $('board').addEventListener('click',e=>{
@@ -727,19 +793,20 @@ $('board').addEventListener('click',e=>{
 function renderSide(){
   const P=G.players;
   $('players').innerHTML=P.map(p=>{
-    const show=p.human||opts.open||G.over;
+    const show=p.i===ME||G.opts.open||G.over;
     let toks=BASIC.map(t=>`<span class="tok">${ico(t,18)}${show?p.tok[t]:'?'}</span>`).join('');
-    if(opts.xN) toks+=`<span class="tok">${ico('N',18)}${show?p.tok.N:'?'}</span>`;
-    if(opts.xK) toks+=`<span class="tok">${ico('K',18)}${show?p.tok.K:'?'}</span>`;
+    if(G.opts.xN) toks+=`<span class="tok">${ico('N',18)}${show?p.tok.N:'?'}</span>`;
+    if(G.opts.xK) toks+=`<span class="tok">${ico('K',18)}${show?p.tok.K:'?'}</span>`;
     const ab=G.abil==='none'?'':` · ${ABIL[G.abil].ic}${p.abilUsed?'사용함':'있음'}`;
     const ds=G.doso&&G.doso.holder===p.i?' · 🗿도소진':'';
-    return `<div class="prow ${G.cur===p.i&&!G.over?'cur':''}"><span class="dot" style="background:${PCOL[p.i]}"></span><div><div class="nm" style="color:${PCOLD[p.i]}">${PNAME[p.i]}</div><div class="meta">패 ${p.hand.length} · 더미 ${p.pile.length}${ab}${ds}</div></div><div class="toks">${toks}</div></div>`;
-  }).join('')+`<div class="hint">지도에 남은 토큰: ${BASIC.map(t=>`${TNAME[t]} ${boardCount(t)}`).join(' · ')}${G.doso?` · 도소진 카드: ${G.doso.holder===null?'아직 없음':PNAME[G.doso.holder]}`:''}</div>`;
+    return `<div class="prow ${G.cur===p.i&&!G.over?'cur':''}"><span class="dot" style="background:${PCOL[p.i]}"></span><div><div class="nm" style="color:${PCOLD[p.i]}">${nm(p.i)}</div><div class="meta">패 ${p.hand.length} · 더미 ${p.pile.length}${ab}${ds}</div></div><div class="toks">${toks}</div></div>`;
+  }).join('')+`<div class="hint">지도에 남은 토큰: ${BASIC.map(t=>`${TNAME[t]} ${boardCount(t)}`).join(' · ')}${G.doso?` · 도소진 카드: ${G.doso.holder===null?'아직 없음':nm(G.doso.holder)}`:''}</div>`;
   let t=''; for(let i=0;i<Math.max(4,G.ties.length);i++) t+=`<div class="slot">${G.ties[i]?ico(G.ties[i],26):''}</div>`;
   $('ties').innerHTML=t;
 }
 function renderHand(){
-  const p=G.players[0],my=humanTurn(),tai=ui.mode.startsWith('taiyaki');
+  const p=G.players[ME],my=humanTurn(),tai=ui.mode.startsWith('taiyaki');
+  if(!p){ $('hand').innerHTML='<div class="hint">관전 중이에요 (자리가 모두 찼어요)</div>'; ['endBtn','undoBtn','abilBtn'].forEach(i=>$(i).disabled=true); $('pileinfo').textContent=''; return; }
   $('hand').innerHTML=p.hand.map(t=>{
     const dis=!my||(tai?ACTION.has(t.k):!canPlaceTile(t));
     return `<button class="htile ${ui.sel===t.id?'sel':''}" data-id="${t.id}" ${dis?'disabled':''} title="${KNAME[t.k]} ${t.s}${t.f?' (신속)':''}"><svg viewBox="-24 -24 48 48">${tileSVG({...t,o:0},0,0,23,{flat:false})}</svg></button>`;
@@ -756,7 +823,9 @@ function renderHand(){
 function renderStatus(){
   const p=G.players[G.cur]; let m;
   if(G.over) m='게임이 끝났습니다. <b>새 게임</b>으로 다시 시작할 수 있어요.';
-  else if(!p.human) m=`<b>${PNAME[p.i]}</b>가 생각 중…`;
+  else if(!p.human) m=`<b>${nm(p.i)}</b>가 생각 중…`;
+  else if(G.cur!==ME) m=`<b>${nm(p.i)}</b>의 차례예요. 기다리는 중…`;
+  else if(ui.busy) m='차례를 넘기는 중…';
   else m={place:'빛나는 칸을 눌러 타일을 놓으세요.',move1:'옮길 <b>내 타일</b>을 고르세요 (신속·배·액션 타일 제외).',move2:'옮겨 갈 <b>빈 육지</b>를 고르세요.',
     copy1:'복사 타일을 놓을 <b>빈 육지</b>를 고르세요.',copy2:'복사할 <b>방향</b>(이웃 칸)을 고르세요. 빈 칸이면 나중에 채워질 때 복사돼요.',
     torii1:'⛩ 맞바꿀 첫 번째 토큰이 있는 공원을 누르세요.',torii2:'⛩ 맞바꿀 두 번째 토큰이 있는 공원을 누르세요.',
@@ -770,25 +839,212 @@ function renderInfo(){
   const c=cells[ui.info];
   if(G.doso&&G.doso.cell===c.id){
     const s=dosoStrength(G.board);
-    el.innerHTML=`<h3>🗿 도소진 — 둘레 타일 점 합계 (카드: ${G.doso.holder===null?'없음':PNAME[G.doso.holder]})</h3><table>${G.players.map(p=>`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${PNAME[p.i]}</td><td>${s[p.i]}</td></tr>`).join('')}</table>`; return;
+    el.innerHTML=`<h3>🗿 도소진 — 둘레 타일 점 합계 (카드: ${G.doso.holder===null?'없음':nm(G.doso.holder)})</h3><table>${G.players.map(p=>`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${nm(p.i)}</td><td>${s[p.i]}</td></tr>`).join('')}</table>`; return;
   }
   let tk=G.ptok[c.id]||[];
   if(G.kani&&G.kani.cell===c.id) tk=G.kani.done?[]:['K'];
   if(!tk.length){ el.innerHTML=`<h3>공원 정보</h3><div class="hint">이곳의 토큰은 이미 수여되었습니다.</div>`; return; }
   const emp=emptyAround(c,G.board);
   let h=`<h3>${c.t==='W'?'카니 — 남은 빈 물 칸':'공원 — 남은 빈 육지'} ${emp}칸</h3><table><tr><th></th>${tk.map(t=>`<th>${ico(t,20)}</th>`).join('')}</tr>`;
-  G.players.forEach(p=>{h+=`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${PNAME[p.i]}</td>${tk.map(t=>`<td>${strength(c,t,G.board)[p.i]}</td>`).join('')}</tr>`;});
+  G.players.forEach(p=>{h+=`<tr><td style="text-align:left;color:${PCOLD[p.i]};font-weight:700">${nm(p.i)}</td>${tk.map(t=>`<td>${strength(c,t,G.board)[p.i]}</td>`).join('')}</tr>`;});
   el.innerHTML=h+'</table>'+(tk.includes('N')?'<div class="hint">마네키네코 토큰은 와일드 타일만 셉니다.</div>':'');
 }
 
 // ---------- setup UI ----------
 function bindOpt(id,key,num){ $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{ $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); opts[key]=num?+b.dataset.v:b.dataset.v; }); }
-bindOpt('optN','n',1); bindOpt('optD','d',1); bindOpt('optA','abil',0);
-$('startBtn').onclick=()=>{
+bindOpt('optN','n',1); bindOpt('optD','d',1); bindOpt('optA','abil',0); bindOpt('optM','m',0);
+$('optM').addEventListener('click',setupVis);
+function setupVis(){
+  const m=opts.m||'solo';
+  $('nameRow').hidden=m==='solo'; $('joinRow').hidden=m!=='join'; $('gameOpts').hidden=m==='join';
+  $('strongRow').hidden=m!=='solo'; $('nHint').textContent=m==='solo'?'나 + 컴퓨터':'빈자리는 컴퓨터가 맡아요';
+  $('startBtn').textContent=m==='solo'?'게임 시작':m==='host'?'방 만들기':'참가하기';
+  $('netMsg').textContent='';
+}
+$('startBtn').onclick=async()=>{
   Object.assign(opts,{open:$('optOpen').checked,strong:$('optStrong').checked,special:$('optSpecial').checked,xN:$('optXN').checked,xK:$('optXK').checked,xD:$('optXD').checked});
-  $('setup').hidden=true; $('over').hidden=true; newGame();
+  const m=opts.m||'solo';
+  if(m==='solo'){ leaveRoom(true); MODE='solo'; ME=0; $('setup').hidden=true; $('over').hidden=true; newGame(); return; }
+  MYNAME=($('myName').value.trim()||'친구').slice(0,8); try{localStorage.setItem('hanamiName',MYNAME);}catch(e){}
+  if(!FIREBASE_CONFIG&&!LOCALNET){ $('netMsg').textContent='온라인 기능이 아직 설정되지 않았어요 (Firebase 설정 필요).'; return; }
+  const code=$('joinCode').value.trim().toUpperCase();
+  if(m==='join'&&!/^[A-Z0-9]{4}$/.test(code)){ $('netMsg').textContent='방 코드 4자리를 입력해 주세요.'; return; }
+  $('netMsg').textContent='연결 중…'; $('startBtn').disabled=true;
+  try{
+    await Net.init();
+    if(m==='host'){ const c=await Net.createRoom(MYNAME); enterRoom(c,'host'); }
+    else {
+      const host=await Net.roomHost(code);
+      if(!host){ $('netMsg').textContent='그런 방이 없어요. 코드를 확인해 주세요.'; return; }
+      await Net.presence(code,MYNAME);
+      if(host===Net.uid) await resumeHost(code); else enterRoom(code,'guest');
+    }
+  }catch(e){ $('netMsg').textContent='서버에 연결하지 못했어요: '+(e&&e.message||e); }
+  finally{ $('startBtn').disabled=false; }
 };
-$('newBtn').onclick=()=>{ $('setup').hidden=false; };
+// ---------- network ----------
+function loadScript(src){ return new Promise((ok,no)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=()=>no(new Error('스크립트를 불러오지 못했어요')); document.head.appendChild(s); }); }
+function genCode(){ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s=''; for(let i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
+const Net={
+  uid:(()=>{ try{ let u=sessionStorage.getItem('hanamiUid'); if(!u){ u=Math.random().toString(36).slice(2,10); sessionStorage.setItem('hanamiUid',u); } return u; }catch(e){ return Math.random().toString(36).slice(2,10); } })(),
+  db:null, offs:[], pres:null,
+  async init(){
+    if(this.db) return;
+    if(LOCALNET){ this.db=localDb(); return; }
+    const V='10.12.2';
+    await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-app-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${V}/firebase-database-compat.js`);
+    firebase.initializeApp(FIREBASE_CONFIG); this.db=firebase.database();
+  },
+  r(p){ return this.db.ref(p); },
+  listen(ref,ev,cb){ ref.on(ev,cb); this.offs.push(()=>ref.off(ev,cb)); },
+  async roomHost(code){ const s=await this.r(`rooms/${code}/host`).once('value'); return s.exists()?s.val():null; },
+  async createRoom(name){
+    let code; for(let k=0;k<20;k++){ code=genCode(); if(!(await this.roomHost(code))) break; }
+    await this.r(`rooms/${code}`).set({host:this.uid,created:Date.now()});
+    await this.presence(code,name); return code;
+  },
+  async presence(code,name){
+    const ref=this.r(`rooms/${code}/players/${this.uid}`), t=Date.now(), me=this;
+    const go=()=>{ ref.set({name,t}); ref.onDisconnect().remove(); };
+    this.pres=ref; go();
+    this.listen(this.r('.info/connected'),'value',s=>{ if(s.val()&&me.pres===ref) go(); });
+  },
+  onPlayers(code,cb){ this.listen(this.r(`rooms/${code}/players`),'value',s=>{ const v=s.val()||{}; cb(Object.keys(v).map(uid=>({uid,...v[uid]})).sort((a,b)=>a.t-b.t)); }); },
+  onRoom(code,cb){ this.listen(this.r(`rooms/${code}/host`),'value',s=>cb(s.val())); },
+  onState(code,cb){ this.listen(this.r(`rooms/${code}/state`),'value',s=>{ const v=s.val(); if(v) cb(v); }); },
+  onAction(code,cb){ this.listen(this.r(`rooms/${code}/actions`),'child_added',s=>{ const v=s.val(); s.ref.remove(); cb(v); }); },
+  sendAction(code,str){ return this.r(`rooms/${code}/actions`).push(str); },
+  setState(code,str){ return this.r(`rooms/${code}/state`).set(str); },
+  async getState(code){ const s=await this.r(`rooms/${code}/state`).once('value'); return s.val(); },
+  leave(code,isHost){
+    this.offs.forEach(f=>{try{f();}catch(e){}}); this.offs=[];
+    if(this.pres){ try{ this.pres.onDisconnect().cancel&&this.pres.onDisconnect().cancel(); this.pres.remove(); }catch(e){} this.pres=null; }
+    if(isHost&&code) this.r(`rooms/${code}`).remove();
+  }
+};
+// test-only stand-in for Firebase (?net=local): shares state between tabs via localStorage
+function localDb(){
+  const KEY='hanamiMockDb';
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return {};}};
+  const parts=p=>p.split('/').filter(Boolean);
+  const getAt=(t,p)=>{ for(const k of parts(p)){ if(t==null||typeof t!=='object') return null; t=t[k]; } return t===undefined?null:t; };
+  const setAt=(t,p,v)=>{ const ks=parts(p); let o=t; for(let i=0;i<ks.length-1;i++){ if(typeof o[ks[i]]!=='object'||o[ks[i]]===null) o[ks[i]]={}; o=o[ks[i]]; } if(v===null) delete o[ks[ks.length-1]]; else o[ks[ks.length-1]]=v; };
+  const L=[];
+  const fire=()=>{ const t=load(); for(const l of L.slice()){ const v=getAt(t,l.path);
+    if(l.ev==='value'){ const j=JSON.stringify(v); if(j!==l.last){ l.last=j; l.cb(snap(l.path,v)); } }
+    else { const o=v&&typeof v==='object'?v:{}; for(const k of Object.keys(o)) if(!l.seen.has(k)){ l.seen.add(k); l.cb(snap(l.path+'/'+k,o[k])); } } } };
+  window.addEventListener('storage',e=>{ if(e.key===KEY) setTimeout(fire,0); });
+  const write=(p,v)=>{ const t=load(); setAt(t,p,v); localStorage.setItem(KEY,JSON.stringify(t)); setTimeout(fire,0); };
+  const discs=[]; window.addEventListener('pagehide',()=>discs.forEach(f=>f()));
+  function snap(p,v){ return {key:parts(p).pop(),val:()=>v,exists:()=>v!==null,ref:ref(p)}; }
+  function ref(p){ return {
+    set:v=>{write(p,v);return Promise.resolve();}, remove:()=>{write(p,null);return Promise.resolve();},
+    push:v=>{ write(p+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),v); return Promise.resolve(); },
+    once:()=>Promise.resolve(snap(p,getAt(load(),p))),
+    on:(ev,cb)=>{ if(p==='.info/connected'){ cb(snap(p,true)); return cb; } L.push({path:p,ev,cb,last:undefined,seen:new Set()}); setTimeout(fire,0); return cb; },
+    off:(ev,cb)=>{ const i=L.findIndex(l=>l.cb===cb); if(i>=0) L.splice(i,1); },
+    onDisconnect:()=>({remove:()=>{discs.push(()=>write(p,null));},cancel:()=>{}})
+  }; }
+  return {ref};
+}
+let pubTimer=null, lastPub='';
+function schedulePublish(){ if(pubTimer) return; pubTimer=setTimeout(()=>{ pubTimer=null; const s=JSON.stringify(G); if(s!==lastPub){ lastPub=s; Net.setState(ROOM,s); } },80); }
+function inviteLink(){ return location.origin+location.pathname+'#'+ROOM; }
+function enterRoom(code,role){
+  ROOM=code; MODE=role; $('setup').hidden=true; $('netMsg').textContent='';
+  try{ history.replaceState(null,'','#'+code); }catch(e){}
+  Net.onPlayers(code,list=>{ LOBBY=list; renderLobby(); if(MODE==='host') checkDisconnects(); else checkHost(); });
+  if(role==='guest'){ Net.onState(code,onRemoteState); Net.onRoom(code,h=>{ if(!h&&MODE==='guest'){ leaveRoom(); $('setup').hidden=false; $('netMsg').textContent='방이 닫혔어요.'; } }); }
+  else Net.onAction(code,onRemoteAction);
+  showLobby();
+}
+async function resumeHost(code){
+  enterRoom(code,'host');
+  const s=await Net.getState(code); if(!s) return;
+  G=JSON.parse(s); ME=G.players.findIndex(p=>p.uid===Net.uid); if(ME<0) ME=0;
+  $('lobby').hidden=true;
+  if(G.over){ render(); showResult(); return; }
+  const p=G.players[G.cur];
+  if(G.cur===ME){ ui.busy=false; ui.snap=JSON.stringify({G}); render(); }
+  else if(p.human){ ui.busy=true; render(); }
+  else { ui.busy=true; render(); aiTurn(G.cur); }
+}
+function showLobby(){ $('lobby').hidden=false; renderLobby(); }
+function renderLobby(){
+  if(!ROOM) return;
+  $('lobCode').textContent=ROOM; $('lobLink').textContent=inviteLink();
+  const np=MODE==='host'?opts.n+1:(G&&G.started?G.np:null);
+  $('lobPlayers').innerHTML=LOBBY.map((p,k)=>`<div class="lp"><span class="dot" style="background:${PCOL[k%4]}"></span><b>${p.name}</b>${k===0?' <span class="hint">방장</span>':''}${p.uid===Net.uid?' <span class="hint">(나)</span>':''}${np&&k>=np?' <span class="hint">관전</span>':''}</div>`).join('')||'<div class="hint">연결 중…</div>';
+  if(MODE==='host'){
+    const humans=Math.min(LOBBY.length,np);
+    $('lobInfo').textContent=`${np}인전 · 사람 ${humans}명 + 컴퓨터 ${np-humans}명`;
+    $('lobWait').textContent='친구에게 링크나 방 코드를 보내고, 모두 들어오면 시작하세요. 설정(인원·능력 카드 등)은 방을 만들 때 고른 대로 진행돼요.';
+    $('lobStart').hidden=false;
+  } else { $('lobInfo').textContent=''; $('lobWait').textContent='방장이 게임을 시작하길 기다리는 중…'; $('lobStart').hidden=true; }
+}
+$('copyLink').onclick=async()=>{ try{ await navigator.clipboard.writeText(inviteLink()); $('copyLink').textContent='✅ 복사했어요'; }catch(e){ $('copyLink').textContent='링크를 길게 눌러 복사하세요'; } setTimeout(()=>{$('copyLink').textContent='🔗 초대 링크 복사';},2000); };
+$('lobStart').onclick=()=>{
+  const np=opts.n+1, others=LOBBY.filter(p=>p.uid!==Net.uid).slice(0,np-1);
+  const seats=[{human:true,name:MYNAME,uid:Net.uid}];
+  others.forEach(p=>seats.push({human:true,name:p.name,uid:p.uid}));
+  let k=1; while(seats.length<np) seats.push({human:false,name:'컴퓨터 '+(k++)});
+  ME=0; $('lobby').hidden=true; $('over').hidden=true; dropT={}; newGame(seats);
+};
+$('lobLeave').onclick=()=>{ leaveRoom(); $('setup').hidden=false; };
+function leaveRoom(silent){
+  if(ROOM) Net.leave(ROOM,MODE==='host');
+  ROOM=null; LOBBY=[]; $('lobby').hidden=true; $('banner').hidden=true;
+  if(MODE!=='solo'){ MODE='solo'; ME=0; if(G&&G.started&&!silent){ G.over=true; ui.busy=true; render(); } }
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+}
+function onRemoteAction(str){
+  let m; try{ m=JSON.parse(str); }catch(e){ return; }
+  if(!G||!G.started||G.over||m.gid!==G.gid||m.tn!==G.tn||m.seat!==G.cur||m.seat===ME||!G.players[m.seat].human) return;
+  for(const a of m.acts){ if(!applyAct(m.seat,a)) break; }
+  ui.busy=true; endTurn();
+}
+function onRemoteState(str){
+  const S=JSON.parse(str);
+  const editing=G&&G.started&&!G.over&&G.cur===ME&&!ui.busy&&S.gid===G.gid&&S.tn===G.tn;
+  if(editing) return;
+  G=S; ME=G.players.findIndex(p=>p.uid===Net.uid);
+  $('lobby').hidden=true;
+  const key=G.gid+':'+G.tn;
+  if(!G.over&&G.cur===ME&&ui.tnSeen!==key){ ui.tnSeen=key; ui.busy=false; Object.assign(ui,{sel:null,mode:'idle',moveFrom:null,pickA:null,copyAt:null}); ui.snap=JSON.stringify({G}); }
+  else if(G.over||G.cur!==ME) ui.busy=true;
+  render();
+  if(G.over&&G.result){ if(ui.shown!==G.gid){ ui.shown=G.gid; showResult(); } }
+  else { if(ui.shown){ ui.shown=null; $('over').hidden=true; } }
+}
+let dropT={};
+function checkDisconnects(){
+  if(!G||!G.started||G.over) return;
+  const ids=new Set(LOBBY.map(p=>p.uid)); let ch=false;
+  G.players.forEach(p=>{
+    if(!p.uid||p.i===ME) return;
+    if(ids.has(p.uid)){
+      clearTimeout(dropT[p.uid]); delete dropT[p.uid];
+      if(p.dropped){ p.dropped=false; p.human=true; addLog('다시 연결됐어요 (다음 차례부터 직접 둡니다)',p.i); ch=true; }
+    } else if(p.human&&!dropT[p.uid]){
+      dropT[p.uid]=setTimeout(()=>{ delete dropT[p.uid];
+        if(!G||G.over||!p.human||LOBBY.some(x=>x.uid===p.uid)) return;
+        const q=G.players[p.i]; q.human=false; q.dropped=true; addLog('연결이 끊겨 컴퓨터가 대신 둡니다',p.i);
+        if(G.cur===p.i){ ui.busy=true; render(); aiTurn(p.i); } else render();
+      },20000);
+    }
+  });
+  if(ch){
+    // a returning player whose turn the AI hasn't started yet is fine; AI turns already in progress finish normally
+    render();
+  }
+}
+function checkHost(){
+  const host=LOBBY[0]; const hostGone=G&&G.started&&!G.over&&!LOBBY.some(p=>G.players[0]&&p.uid===G.players[0].uid);
+  $('banner').hidden=!hostGone; if(hostGone) $('banner').textContent='방장의 연결이 끊겼어요. 방장이 돌아오면 이어서 진행돼요.';
+}
+$('newBtn').onclick=()=>{ if(MODE==='host'){ showLobby(); return; } if(MODE==='guest'&&!confirm2()) return; $('setup').hidden=false; };
+function confirm2(){ return true; }
 $('rulesBtn').onclick=$('setupRules').onclick=()=>{ $('rules').hidden=false; };
 $('rulesClose').onclick=()=>{ $('rules').hidden=true; };
 $('zoomBtn').onclick=()=>{ ui.zoom=!ui.zoom; $('boardwrap').classList.toggle('zoom',ui.zoom); $('zoomBtn').textContent=ui.zoom?'축소':'확대'; };
@@ -810,7 +1066,10 @@ function openStrong(){
     $('strong').hidden=true; startTurn();
   };
 }
-G={np:2,open:'M',players:[{i:0,human:true,hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:false},{i:1,hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0}}],board:{},ptok:{},ties:[],cur:0,turn:{main:false,placed:0,abil:true},over:true,log:[],round:1,abil:'torii',kani:null,doso:null};
+G={np:2,open:'M',players:[{i:0,human:true,name:'나',hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0},abilUsed:false},{i:1,human:false,name:'컴퓨터 1',hand:[],pile:[],tok:{S:0,C:0,O:0,N:0,K:0}}],board:{},ptok:{},ties:[],cur:0,turn:{main:false,placed:0,abil:true,acts:[]},over:true,log:[],round:1,abil:'torii',kani:null,doso:null,opts:{...opts},tn:0,last:[],started:false,result:null};
+try{ $('myName').value=localStorage.getItem('hanamiName')||''; }catch(e){}
+{ const h=location.hash.slice(1).toUpperCase(); if(/^[A-Z0-9]{4}$/.test(h)){ opts.m='join'; $('optM').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==='join')); $('joinCode').value=h; } }
+setupVis();
 render();
 </script>
 </body>
