@@ -1,0 +1,2585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>황혼의 투쟁 — 냉전 1대1</title>
+<style>:root {
+  --ink: #1d2230; --paper: #f3ecdc; --paper2: #e8dfc8; --us: #1f5fae; --us-l: #dbe7f7; --ussr: #b8262b; --ussr-l: #f7dcdc;
+  --gold: #e0b43c; --bg: #20262f; --bg2: #2b333f; --line: #6c7686; --ok: #2e8b57;
+  --font: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; min-height: 100%; background: var(--bg); color: #eef1f5; font-family: var(--font); }
+button { font-family: inherit; }
+.hidden { display: none !important; }
+
+/* ---------- 타이틀 ---------- */
+#title { position: fixed; inset: 0; min-height: 100vh; overflow-y: auto; background:
+  radial-gradient(circle at 30% 20%, rgba(184,38,43,.35), transparent 55%),
+  radial-gradient(circle at 75% 80%, rgba(31,95,174,.38), transparent 55%), #161b22; z-index: 50; }
+.title-inner { max-width: 560px; margin: 0 auto; padding: 48px 22px 40px; text-align: center; }
+.title-inner h1 { font-size: 46px; margin: 0; letter-spacing: 6px; font-weight: 900; }
+.title-inner h1 span { color: var(--ussr); }
+.title-inner .sub { color: #b9c2cf; margin: 6px 0 28px; font-size: 15px; letter-spacing: 1px; }
+.side-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.side-btn { border: 2px solid transparent; border-radius: 14px; padding: 18px 10px; color: #fff; font-size: 20px; font-weight: 800; cursor: pointer; }
+.side-btn small { display: block; font-size: 12px; font-weight: 500; opacity: .85; margin-top: 6px; line-height: 1.4; }
+.side-btn.us { background: linear-gradient(160deg, #2b6fc2, #163e75); }
+.side-btn.ussr { background: linear-gradient(160deg, #c8343a, #7a1418); }
+.side-btn.sel { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(224,180,60,.35); }
+.opt-row { display: flex; align-items: center; justify-content: center; gap: 8px; color: #cfd6df; font-size: 14px; margin: 10px 0 22px; }
+.big-btn { width: 100%; padding: 16px; font-size: 19px; font-weight: 800; border: 0; border-radius: 12px; background: var(--gold); color: #231a00; cursor: pointer; }
+.ghost-btn { width: 100%; margin-top: 10px; padding: 12px; font-size: 15px; border: 1px solid #5a6475; border-radius: 12px; background: transparent; color: #dfe5ec; cursor: pointer; }
+.credit { font-size: 12px; color: #8792a2; margin-top: 26px; line-height: 1.6; }
+
+/* ---------- 상단 상태 ---------- */
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; min-height: 620px; }
+#status { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 5px 6px; background: #11151b; border-bottom: 1px solid #333c49; font-size: 12.5px; }
+.pill { padding: 3px 7px; border-radius: 999px; background: var(--bg2); white-space: nowrap; }
+.pill b { font-weight: 800; }
+.defcon { color: #111; font-weight: 800; }
+.d5 { background: #4caf50; } .d4 { background: #9ccc65; } .d3 { background: #ffd54f; } .d2 { background: #ff8a3d; } .d1 { background: #e53935; color: #fff; }
+.vp-us { background: var(--us); } .vp-ussr { background: var(--ussr); } .vp-even { background: #555; }
+.turnpill { background: #3a4352; }
+.phasing-US { box-shadow: inset 0 0 0 2px #6aa6ff; } .phasing-USSR { box-shadow: inset 0 0 0 2px #ff7a7a; }
+#menuBtns { margin-left: auto; display: flex; gap: 4px; }
+.icon-btn { background: var(--bg2); color: #fff; border: 1px solid #3f4a5a; border-radius: 8px; padding: 3px 8px; font-size: 12.5px; cursor: pointer; }
+@media (max-width: 600px) { #status { font-size: 11.5px; } }
+#ticker { font-size: 12.5px; padding: 5px 10px; background: #171c23; color: #d6dde6; min-height: 24px; border-bottom: 1px solid #2b333f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ---------- 지도 ---------- */
+#mapwrap { position: relative; flex: 1 1 auto; min-height: 340px; overflow: auto; background: #2e4a5e; -webkit-overflow-scrolling: touch; }
+#map { display: block; }
+#zoom { position: absolute; right: 10px; top: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+#zoom button { width: 38px; height: 38px; border-radius: 10px; border: 0; background: rgba(17,21,27,.85); color: #fff; font-size: 20px; cursor: pointer; }
+.cty { cursor: pointer; }
+.cty .box { fill: var(--paper); stroke: #50463a; stroke-width: 1.2; }
+.cty.bg .box { stroke: #8a1c1c; stroke-width: 2.2; }
+.cty .band { }
+.cty .nm { font-size: 11.5px; font-weight: 800; fill: #fff; paint-order: stroke; stroke: rgba(0,0,0,.35); stroke-width: 2px; }
+.cty .st { font-size: 12px; font-weight: 800; fill: #3b3326; }
+.cty .num { font-size: 17px; font-weight: 900; }
+.cty .valid { fill: none; stroke: #ffe14d; stroke-width: 4; opacity: 0; }
+.cty.can .valid { opacity: 1; animation: glow 1.1s ease-in-out infinite; }
+.cty.dim { opacity: .45; }
+.cty.flash .box { animation: flash 1.4s ease-out; }
+@keyframes glow { 0%,100% { stroke-opacity: 1; } 50% { stroke-opacity: .35; } }
+@keyframes flash { 0% { fill: #fff59a; } 100% { fill: var(--paper); } }
+.adj { stroke: rgba(255,255,255,.35); stroke-width: 1.6; }
+.adj.sp-us { stroke: rgba(110,170,255,.7); stroke-dasharray: 5 4; }
+.adj.sp-ussr { stroke: rgba(255,120,120,.7); stroke-dasharray: 5 4; }
+.rlabel { font-size: 26px; font-weight: 900; fill: rgba(255,255,255,.16); letter-spacing: 4px; }
+.sp text { font-weight: 900; fill: #fff; }
+
+/* ---------- 하단 패널 ---------- */
+#panel { flex: 0 0 auto; max-height: 45%; overflow-y: auto; background: #141920; border-top: 1px solid #333c49; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); }
+#prompt { min-height: 30px; }
+#prompt .ptitle { font-weight: 800; font-size: 15px; }
+#prompt .pinfo { font-size: 12.5px; color: #b6c0cc; margin-top: 2px; }
+#prompt .pbtns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.pbtn { border: 0; border-radius: 9px; padding: 9px 12px; font-size: 14px; font-weight: 700; background: #3b4657; color: #fff; cursor: pointer; }
+.pbtn.main { background: var(--gold); color: #2a1f00; }
+.pbtn.warn { background: #6b3a3a; }
+.waiting { color: #9fb0c3; font-size: 13.5px; }
+.waiting::after { content: ' ⏳'; }
+#handbar { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #9aa6b4; margin: 8px 2px 4px; }
+#hand { display: flex; gap: 7px; overflow-x: auto; padding: 2px 2px 6px; -webkit-overflow-scrolling: touch; }
+.card { flex: 0 0 auto; width: 104px; min-height: 92px; border-radius: 10px; padding: 7px 7px 6px; position: relative; cursor: pointer; color: #fff; border: 2px solid transparent; display: flex; flex-direction: column; }
+.card.US { background: linear-gradient(170deg, #2f72c4, #173f73); }
+.card.USSR { background: linear-gradient(170deg, #c93a40, #7a171b); }
+.card.BOTH { background: linear-gradient(170deg, #7a6aa8, #3f3566); }
+.card.SC { background: linear-gradient(170deg, #e6c04f, #a07a12); color: #231a00; }
+.card.CHINA { background: linear-gradient(170deg, #d8a630, #8e2a12); }
+.card .ops { position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.92); color: #111; font-weight: 900; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.card .cnum { position: absolute; top: 7px; right: 8px; font-size: 10px; opacity: .8; }
+.card .cname { margin-top: 28px; font-size: 13px; font-weight: 800; line-height: 1.25; word-break: keep-all; }
+.card .ctag { margin-top: auto; font-size: 10px; opacity: .85; }
+.card.playable { border-color: var(--gold); box-shadow: 0 0 10px rgba(224,180,60,.55); }
+.card.disabled { opacity: .45; }
+
+/* ---------- 모달 ---------- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: #1b212a; width: 100%; max-width: 640px; max-height: 86vh; overflow-y: auto; border-radius: 18px 18px 0 0; padding: 16px 16px calc(18px + env(safe-area-inset-bottom)); border-top: 1px solid #3b4554; }
+@media (min-width: 900px) { .modal { align-items: center; } .sheet { border-radius: 18px; } }
+.sheet h3 { margin: 0 0 8px; font-size: 18px; }
+.sheet .close { float: right; background: none; border: 0; color: #aab4c0; font-size: 22px; cursor: pointer; }
+.bigcard { border-radius: 14px; padding: 14px; margin-bottom: 12px; color: #fff; }
+.bigcard.US { background: linear-gradient(170deg, #2f72c4, #173f73); }
+.bigcard.USSR { background: linear-gradient(170deg, #c93a40, #7a171b); }
+.bigcard.BOTH { background: linear-gradient(170deg, #7a6aa8, #3f3566); }
+.bigcard.SC { background: linear-gradient(170deg, #e6c04f, #a07a12); color: #231a00; }
+.bigcard.CHINA { background: linear-gradient(170deg, #d8a630, #8e2a12); }
+.bigcard .bh { display: flex; align-items: center; gap: 10px; }
+.bigcard .bops { width: 38px; height: 38px; border-radius: 50%; background: #fff; color: #111; font-weight: 900; font-size: 20px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.bigcard .bname { font-size: 19px; font-weight: 900; }
+.bigcard .bmeta { font-size: 12px; opacity: .85; margin-top: 2px; }
+.bigcard .btext { margin-top: 10px; font-size: 14.5px; line-height: 1.55; }
+.actbtns { display: flex; flex-direction: column; gap: 8px; }
+.actbtns button { padding: 13px; font-size: 15px; font-weight: 800; border-radius: 11px; border: 0; cursor: pointer; background: #3b4657; color: #fff; text-align: left; }
+.actbtns button.ev { background: #3e7d4f; }
+.actbtns button.sp { background: #5a4a8a; }
+.actbtns button.un { background: #2a6c8f; }
+.cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.cardgrid .card { width: auto; }
+#logList { font-size: 13px; line-height: 1.5; }
+#logList div { padding: 3px 0; border-bottom: 1px solid #262e39; }
+.l-turn { color: var(--gold); font-weight: 800; }
+.l-vp { color: #9fe0a8; } .l-defcon { color: #ffb36b; } .l-score { color: #ffe27a; font-weight: 700; }
+.l-roll { color: #cfd8ff; } .l-event { color: #f0d4ff; } .l-space { color: #9fdcff; } .l-over { color: #fff; font-weight: 900; }
+.rules h4 { margin: 14px 0 6px; color: var(--gold); }
+.rules p, .rules li { font-size: 14px; line-height: 1.6; color: #dde3ea; }
+.rules ul { padding-left: 20px; margin: 4px 0; }
+.ctyinfo .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a323d; font-size: 14px; }
+.over-win { font-size: 30px; font-weight: 900; text-align: center; margin: 10px 0; }
+
+@media (min-width: 1000px) {
+  #app { display: grid; grid-template-columns: 1fr 410px; grid-template-rows: auto auto minmax(0, 1fr); }
+  #status, #ticker { grid-column: 1 / 3; }
+  #mapwrap { grid-column: 1; grid-row: 3; min-height: 0; }
+  #panel { grid-column: 2; grid-row: 3; max-height: none; overflow-y: auto; border-top: 0; border-left: 1px solid #333c49; }
+  #hand { flex-wrap: wrap; overflow: visible; }
+  .card { width: 118px; }
+}
+</style>
+</head>
+<body>
+<div id="title">
+  <div class="title-inner">
+    <h1>황혼의 <span>투쟁</span></h1>
+    <div class="sub">TWILIGHT STRUGGLE · 냉전 1945–1989 · 컴퓨터와 1대1</div>
+    <div class="side-pick">
+      <button class="side-btn ussr sel" data-side="USSR">☭ 소련<small>먼저 움직이고<br>초반에 유리</small></button>
+      <button class="side-btn us" data-side="US">★ 미국<small>후반에 강해지는<br>버티기 진영</small></button>
+    </div>
+    <label class="opt-row"><input type="checkbox" id="optCards" checked> 선택 카드(#104~110) 포함</label>
+    <button class="big-btn hidden" id="resumeBtn" style="margin-bottom:10px;background:#3e7d4f;color:#fff">이어하기</button>
+    <button class="big-btn" id="startBtn">새 게임 시작</button>
+    <button class="ghost-btn" id="rulesBtn">규칙 요약 보기</button>
+    <div class="credit">카드 110장 · 지도 84개국 · 헤드라인/우주 경쟁/중국 카드/DEFCON 전부 구현<br>원작: Twilight Struggle (GMT Games). 개인 학습용 비공식 디지털 버전.</div>
+  </div>
+</div>
+<div id="app" class="hidden">
+  <div id="status"></div>
+  <div id="ticker">게임을 준비하는 중…</div>
+  <div id="mapwrap">
+    <div id="zoom"><button id="zin">＋</button><button id="zout">－</button></div>
+    <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="panel">
+    <div id="prompt"></div>
+    <div id="handbar"></div>
+    <div id="hand"></div>
+  </div>
+</div>
+<script>
+// ---- data.js ----
+(function(){
+// ===== 냉전 (Twilight Struggle) 데이터: 국가, 인접, 카드 =====
+// 좌표는 엑셀 'Mapboard' 시트의 셀 위치(열, 행)에서 가져옴
+const REGION_NAMES = { eu: '유럽', we: '서유럽', ee: '동유럽', me: '중동', as: '아시아', sea: '동남아시아', af: '아프리카', ca: '중앙아메리카', sa: '남아메리카' };
+
+// [id, 한글명, 지역들, 안정도, 전장, 열, 행]
+const COUNTRY_ROWS = [
+  ['mexico', '멕시코', ['ca'], 2, 1, 2, 25],
+  ['guatemala', '과테말라', ['ca'], 1, 0, 6, 29],
+  ['elsalvador', '엘살바도르', ['ca'], 1, 0, 3, 33],
+  ['honduras', '온두라스', ['ca'], 2, 0, 8, 33],
+  ['costarica', '코스타리카', ['ca'], 3, 0, 7, 37],
+  ['panama', '파나마', ['ca'], 2, 1, 12, 37],
+  ['nicaragua', '니카라과', ['ca'], 1, 0, 13, 33],
+  ['cuba', '쿠바', ['ca'], 3, 1, 13, 27],
+  ['haiti', '아이티', ['ca'], 1, 0, 18, 29],
+  ['dominican', '도미니카공', ['ca'], 1, 0, 23, 29],
+  ['venezuela', '베네수엘라', ['sa'], 2, 1, 18, 38],
+  ['colombia', '콜롬비아', ['sa'], 1, 0, 14, 42],
+  ['ecuador', '에콰도르', ['sa'], 2, 0, 9, 44],
+  ['peru', '페루', ['sa'], 2, 0, 11, 48],
+  ['brazil', '브라질', ['sa'], 2, 1, 22, 46],
+  ['bolivia', '볼리비아', ['sa'], 2, 0, 16, 51],
+  ['chile', '칠레', ['sa'], 3, 1, 12, 55],
+  ['paraguay', '파라과이', ['sa'], 2, 0, 18, 55],
+  ['argentina', '아르헨티나', ['sa'], 2, 1, 14, 62],
+  ['uruguay', '우루과이', ['sa'], 2, 0, 19, 60],
+  ['canada', '캐나다', ['eu', 'we'], 4, 0, 16, 11],
+  ['uk', '영국', ['eu', 'we'], 5, 0, 30, 10],
+  ['norway', '노르웨이', ['eu', 'we'], 4, 0, 33, 2],
+  ['sweden', '스웨덴', ['eu', 'we'], 4, 0, 40, 4],
+  ['denmark', '덴마크', ['eu', 'we'], 3, 0, 35, 6],
+  ['benelux', '베네룩스', ['eu', 'we'], 3, 0, 33, 14],
+  ['france', '프랑스', ['eu', 'we'], 3, 1, 31, 18],
+  ['wgermany', '서독', ['eu', 'we'], 4, 1, 38, 14],
+  ['spain', '스페인/포르투갈', ['eu', 'we'], 2, 0, 30, 23],
+  ['italy', '이탈리아', ['eu', 'we'], 2, 1, 39, 22],
+  ['greece', '그리스', ['eu', 'we'], 2, 0, 45, 26],
+  ['turkey', '터키', ['eu', 'we'], 2, 0, 54, 23],
+  ['austria', '오스트리아', ['eu', 'we', 'ee'], 4, 0, 40, 18],
+  ['finland', '핀란드', ['eu', 'we', 'ee'], 4, 0, 47, 2],
+  ['egermany', '동독', ['eu', 'ee'], 3, 1, 40, 10],
+  ['poland', '폴란드', ['eu', 'ee'], 3, 1, 45, 10],
+  ['czech', '체코슬로바키아', ['eu', 'ee'], 3, 0, 44, 14],
+  ['hungary', '헝가리', ['eu', 'ee'], 3, 0, 45, 18],
+  ['yugoslavia', '유고슬라비아', ['eu', 'ee'], 3, 0, 44, 22],
+  ['romania', '루마니아', ['eu', 'ee'], 3, 0, 50, 18],
+  ['bulgaria', '불가리아', ['eu', 'ee'], 3, 0, 49, 22],
+  ['libya', '리비아', ['me'], 2, 1, 42, 32],
+  ['egypt', '이집트', ['me'], 2, 1, 47, 33],
+  ['israel', '이스라엘', ['me'], 4, 1, 50, 29],
+  ['lebanon', '레바논', ['me'], 1, 0, 55, 27],
+  ['syria', '시리아', ['me'], 2, 0, 60, 27],
+  ['iraq', '이라크', ['me'], 3, 1, 56, 31],
+  ['iran', '이란', ['me'], 2, 1, 61, 31],
+  ['jordan', '요르단', ['me'], 2, 0, 53, 35],
+  ['gulf', '걸프 국가들', ['me'], 3, 0, 58, 35],
+  ['saudi', '사우디아라비아', ['me'], 3, 1, 57, 39],
+  ['afghanistan', '아프가니스탄', ['as'], 2, 0, 68, 28],
+  ['pakistan', '파키스탄', ['as'], 2, 1, 68, 33],
+  ['india', '인도', ['as'], 3, 1, 73, 35],
+  ['nkorea', '북한', ['as'], 3, 1, 94, 23],
+  ['skorea', '남한', ['as'], 3, 1, 95, 27],
+  ['japan', '일본', ['as'], 4, 1, 98, 31],
+  ['taiwan', '대만', ['as'], 3, 0, 92, 34],
+  ['australia', '호주', ['as'], 4, 0, 91, 53],
+  ['burma', '버마', ['as', 'sea'], 2, 0, 79, 35],
+  ['laos', '라오스/캄보디아', ['as', 'sea'], 1, 0, 84, 35],
+  ['vietnam', '베트남', ['as', 'sea'], 1, 0, 86, 39],
+  ['thailand', '태국', ['as', 'sea'], 2, 1, 81, 39],
+  ['malaysia', '말레이시아', ['as', 'sea'], 2, 0, 83, 44],
+  ['indonesia', '인도네시아', ['as', 'sea'], 1, 0, 91, 48],
+  ['philippines', '필리핀', ['as', 'sea'], 2, 0, 93, 39],
+  ['morocco', '모로코', ['af'], 3, 0, 30, 30],
+  ['algeria', '알제리', ['af'], 2, 1, 35, 29],
+  ['tunisia', '튀니지', ['af'], 2, 0, 40, 28],
+  ['westafrica', '서아프리카', ['af'], 2, 0, 30, 34],
+  ['saharan', '사하라 국가들', ['af'], 1, 0, 37, 36],
+  ['ivorycoast', '코트디부아르', ['af'], 2, 0, 34, 42],
+  ['nigeria', '나이지리아', ['af'], 1, 1, 39, 41],
+  ['cameroon', '카메룬', ['af'], 1, 0, 41, 46],
+  ['zaire', '자이르', ['af'], 1, 1, 47, 48],
+  ['angola', '앙골라', ['af'], 1, 1, 43, 52],
+  ['botswana', '보츠와나', ['af'], 2, 0, 47, 58],
+  ['southafrica', '남아프리카', ['af'], 3, 1, 45, 62],
+  ['zimbabwe', '짐바브웨', ['af'], 1, 0, 48, 54],
+  ['seafrica', '남동아프리카', ['af'], 1, 0, 53, 51],
+  ['kenya', '케냐', ['af'], 2, 0, 52, 46],
+  ['somalia', '소말리아', ['af'], 2, 0, 57, 43],
+  ['ethiopia', '에티오피아', ['af'], 1, 0, 50, 41],
+  ['sudan', '수단', ['af'], 1, 0, 47, 37],
+];
+
+const ADJ_PAIRS = `mexico-guatemala guatemala-elsalvador guatemala-honduras elsalvador-honduras honduras-nicaragua honduras-costarica
+costarica-nicaragua costarica-panama panama-colombia nicaragua-cuba cuba-haiti haiti-dominican
+colombia-venezuela colombia-ecuador venezuela-brazil ecuador-peru peru-bolivia peru-chile chile-argentina
+argentina-paraguay argentina-uruguay bolivia-paraguay paraguay-uruguay uruguay-brazil
+canada-uk uk-norway uk-benelux uk-france norway-sweden sweden-denmark sweden-finland denmark-wgermany
+benelux-wgermany france-wgermany france-spain france-italy france-algeria spain-italy spain-morocco
+italy-austria italy-greece italy-yugoslavia greece-yugoslavia greece-bulgaria greece-turkey turkey-bulgaria
+turkey-romania turkey-syria wgermany-egermany wgermany-austria egermany-poland egermany-czech egermany-austria
+poland-czech czech-hungary hungary-austria hungary-romania hungary-yugoslavia romania-yugoslavia
+libya-egypt libya-tunisia egypt-israel egypt-sudan israel-lebanon israel-syria israel-jordan lebanon-syria
+lebanon-jordan jordan-iraq jordan-saudi iraq-iran iraq-gulf iraq-saudi saudi-gulf iran-afghanistan iran-pakistan
+afghanistan-pakistan pakistan-india india-burma burma-laos laos-thailand laos-vietnam thailand-vietnam
+thailand-malaysia malaysia-australia malaysia-indonesia indonesia-philippines philippines-japan japan-taiwan
+japan-skorea taiwan-skorea skorea-nkorea morocco-algeria morocco-westafrica algeria-tunisia algeria-saharan
+westafrica-ivorycoast ivorycoast-nigeria saharan-nigeria nigeria-cameroon cameroon-zaire zaire-angola
+zaire-zimbabwe angola-botswana angola-southafrica botswana-southafrica botswana-zimbabwe zimbabwe-seafrica
+seafrica-kenya kenya-somalia somalia-ethiopia ethiopia-sudan`;
+
+const SUPERPOWER_ADJ = {
+  US: ['mexico', 'cuba', 'canada', 'japan'],
+  USSR: ['finland', 'poland', 'romania', 'nkorea', 'afghanistan'],
+};
+
+const COUNTRIES = {};
+for (const [id, name, regions, stab, bg, col, row] of COUNTRY_ROWS) {
+  COUNTRIES[id] = { id, name, regions, stab, bg: !!bg, col, row, adj: [], spAdj: null };
+}
+for (const pair of ADJ_PAIRS.split(/\s+/).filter(Boolean)) {
+  const [a, b] = pair.split('-');
+  if (!COUNTRIES[a] || !COUNTRIES[b]) throw new Error('bad adj ' + pair);
+  COUNTRIES[a].adj.push(b); COUNTRIES[b].adj.push(a);
+}
+for (const sp of ['US', 'USSR']) for (const c of SUPERPOWER_ADJ[sp]) COUNTRIES[c].spAdj = sp;
+const COUNTRY_IDS = Object.keys(COUNTRIES);
+
+const SCORING_INFO = {
+  eu: { name: '유럽', presence: 3, domination: 7, control: 'WIN', adjBonus: true },
+  as: { name: '아시아', presence: 3, domination: 7, control: 9, adjBonus: true },
+  me: { name: '중동', presence: 3, domination: 5, control: 7, adjBonus: false },
+  ca: { name: '중앙아메리카', presence: 1, domination: 3, control: 5, adjBonus: true },
+  sa: { name: '남아메리카', presence: 2, domination: 5, control: 6, adjBonus: false },
+  af: { name: '아프리카', presence: 1, domination: 4, control: 6, adjBonus: false },
+};
+
+// 우주 경쟁 트랙: [이름, 필요 작전, 성공 굴림 최대값, 선착 VP, 후착 VP, 특수능력]
+const SPACE_TRACK = [
+  null,
+  ['인공위성 발사', 2, 3, 2, 1, ''],
+  ['우주 동물', 2, 4, 0, 0, '턴마다 우주 경쟁 2회 시도 가능'],
+  ['유인 우주선', 2, 3, 2, 0, ''],
+  ['유인 지구 궤도', 2, 4, 0, 0, '상대가 헤드라인을 먼저 공개'],
+  ['달 궤도', 3, 3, 3, 1, ''],
+  ['달 착륙', 3, 4, 0, 0, '턴 종료 시 보유 카드 1장 버리기 가능'],
+  ['우주 왕복선', 3, 3, 4, 2, ''],
+  ['우주 정거장', 4, 2, 2, 0, '액션 라운드 8회'],
+];
+
+// 카드: [번호, 한글명, 진영, 작전, 시기(1초/2중/3후), 제거*, 지속_, 텍스트]
+const CARD_ROWS = [
+  [1, '아시아 득점', 'BOTH', 0, 1, 0, 0, '득점: 존재 3 / 우세 7 / 지배 9. 지배하는 전장 국가당 +1 VP, 상대 초강대국과 인접한 지배 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [2, '유럽 득점', 'BOTH', 0, 1, 0, 0, '득점: 존재 3 / 우세 7 / 지배 = 즉시 승리. 지배하는 전장 국가당 +1 VP, 상대 초강대국과 인접한 지배 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [3, '중동 득점', 'BOTH', 0, 1, 0, 0, '득점: 존재 3 / 우세 5 / 지배 7. 지배하는 전장 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [4, '덕 앤 커버', 'US', 3, 1, 0, 0, 'DEFCON을 1단계 낮춘다. 미국은 (5 - 현재 DEFCON)만큼 VP를 얻는다.'],
+  [5, '5개년 계획', 'US', 3, 1, 0, 0, '소련은 무작위로 카드 1장을 버린다. 그 카드가 미국 이벤트이면 즉시 발동하고, 소련/공통 이벤트이면 발동 없이 버린다.'],
+  [6, '중국 카드', 'BOTH', 4, 1, 0, 0, '게임 시작 시 소련이 가진다. 작전을 모두 아시아에 사용하면 작전 +1. 사용 후 상대에게 넘어간다(뒷면). 10턴 종료 시 보유자는 1 VP.'],
+  [7, '사회주의 정부', 'USSR', 3, 1, 0, 0, '서유럽에서 미국 영향력을 총 3 제거한다(국가당 최대 2). "철의 여인" 이후에는 이벤트로 사용할 수 없다.'],
+  [8, '피델*', 'USSR', 2, 1, 1, 0, '쿠바의 미국 영향력을 모두 제거하고, 소련이 쿠바를 지배할 만큼 영향력을 놓는다.'],
+  [9, '베트남 봉기*', 'USSR', 2, 1, 1, 0, '베트남에 소련 영향력 2를 놓는다. 이번 턴 동안 소련은 작전을 모두 동남아시아에 사용하면 작전 +1.'],
+  [10, '베를린 봉쇄*', 'USSR', 1, 1, 1, 0, '미국이 즉시 작전 3 이상의 카드를 버리지 않으면 서독의 미국 영향력을 모두 제거한다.'],
+  [11, '한국 전쟁*', 'USSR', 2, 1, 1, 0, '북한이 남한을 침공. 주사위 - (남한에 인접한 미국 지배 국가 수). 4~6이면 소련 2 VP, 남한의 미국 영향력을 소련 영향력으로 교체. 소련 군사작전 +2.'],
+  [12, '루마니아 퇴위*', 'USSR', 1, 1, 1, 0, '루마니아의 미국 영향력을 모두 제거하고 소련이 지배할 만큼 영향력을 놓는다.'],
+  [13, '아랍-이스라엘 전쟁', 'USSR', 2, 1, 0, 0, '아랍 연합이 이스라엘 침공. 주사위 - (미국 지배 시 이스라엘 1 + 이스라엘에 인접한 미국 지배 국가 수). 4~6이면 소련 2 VP, 이스라엘의 미국 영향력을 소련 영향력으로 교체. 소련 군사작전 +2. "캠프 데이비드 협정" 이후 사용 불가.'],
+  [14, '코메콘*', 'USSR', 3, 1, 1, 0, '미국이 지배하지 않은 동유럽 4개국에 소련 영향력을 1씩 놓는다.'],
+  [15, '나세르*', 'USSR', 1, 1, 1, 0, '이집트에 소련 영향력 2를 놓는다. 미국은 이집트 영향력의 절반(올림)을 제거한다.'],
+  [16, '바르샤바 조약 기구*', 'USSR', 3, 1, 1, 1, '동유럽 4개국의 미국 영향력을 모두 제거하거나, 동유럽에 소련 영향력 5를 놓는다(국가당 최대 2). 이 이벤트로 "NATO"를 이벤트로 쓸 수 있게 된다.'],
+  [17, '드골의 프랑스*', 'USSR', 3, 1, 1, 1, '프랑스의 미국 영향력 2를 제거하고 소련 영향력 1을 놓는다. 프랑스에 대한 "NATO" 효과를 취소한다.'],
+  [18, '나치 과학자 포획*', 'BOTH', 1, 1, 1, 0, '자신의 우주 경쟁 마커를 1칸 전진한다.'],
+  [19, '트루먼 독트린*', 'US', 1, 1, 1, 0, '유럽에서 지배되지 않은 한 국가의 소련 영향력을 모두 제거한다.'],
+  [20, '올림픽 경기', 'BOTH', 2, 1, 0, 0, '주최국이 된다. 상대는 참가 또는 보이콧. 참가 시 둘 다 주사위(주최 +2), 높은 쪽 2 VP(동점 재굴림). 보이콧 시 DEFCON 1 하락, 주최자는 작전 4 사용.'],
+  [21, 'NATO*', 'US', 4, 1, 1, 1, '소련은 유럽의 미국 지배 국가에 쿠데타/재정렬을 할 수 없고, "국지전"으로도 공격할 수 없다. "바르샤바 조약" 또는 "마셜 플랜" 이벤트가 먼저 있어야 이벤트로 사용 가능.'],
+  [22, '독립 공산주의자*', 'US', 2, 1, 1, 0, '유고슬라비아·루마니아·불가리아·헝가리·체코슬로바키아 중 한 국가에 미국 영향력을 소련 영향력과 같아지도록 놓는다.'],
+  [23, '마셜 플랜*', 'US', 4, 1, 1, 1, '소련이 지배하지 않은 서유럽 7개국에 미국 영향력을 1씩 놓는다. 이 이벤트로 "NATO"를 이벤트로 쓸 수 있게 된다.'],
+  [24, '인도-파키스탄 전쟁', 'BOTH', 2, 1, 0, 0, '인도↔파키스탄 침공(선택). 주사위 - (목표에 인접한 적 지배 국가 수). 4~6이면 2 VP, 목표의 상대 영향력을 자기 영향력으로 교체. 군사작전 +2.'],
+  [25, '봉쇄 정책*', 'US', 3, 1, 1, 0, '이번 턴 동안 미국이 작전으로 쓰는 모든 카드는 작전 +1(최대 4).'],
+  [26, 'CIA 창설*', 'US', 1, 1, 1, 0, '소련은 손패를 공개한다. 미국은 이 카드의 작전값(1)으로 작전을 수행할 수 있다.'],
+  [27, '미일 상호 방위 조약*', 'US', 4, 1, 1, 1, '미국이 일본을 지배할 만큼 영향력을 놓는다. 소련은 일본에 쿠데타/재정렬을 할 수 없다.'],
+  [28, '수에즈 위기*', 'USSR', 3, 1, 1, 0, '프랑스·영국·이스라엘에서 미국 영향력을 총 4 제거한다(국가당 최대 2).'],
+  [29, '동유럽 소요', 'US', 3, 1, 0, 0, '초·중반: 동유럽 3개국에서 소련 영향력을 1씩 제거. 후반: 2씩 제거.'],
+  [30, '탈식민지화', 'USSR', 2, 1, 0, 0, '아프리카 및/또는 동남아시아의 4개국에 소련 영향력을 1씩 놓는다.'],
+  [31, '적색 공포/숙청', 'BOTH', 4, 1, 0, 0, '이번 턴 동안 상대가 작전으로 쓰는 모든 카드는 작전 -1(최소 1).'],
+  [32, 'UN 개입', 'BOTH', 1, 1, 0, 0, '상대 이벤트가 있는 카드와 함께 낸다. 그 이벤트는 취소되고 그 카드의 작전값으로 작전을 수행한다. 헤드라인에 낼 수 없다.'],
+  [33, '탈스탈린화*', 'USSR', 3, 1, 1, 0, '소련은 기존 영향력을 최대 4 옮겨, 미국이 지배하지 않은 국가들에 다시 놓을 수 있다(국가당 최대 2).'],
+  [34, '핵실험 금지 조약', 'BOTH', 4, 1, 0, 0, '(현재 DEFCON - 2)만큼 VP를 얻고, DEFCON을 2단계 올린다.'],
+  [35, '포모사 결의안*', 'US', 2, 1, 1, 1, '미국이 대만을 지배하면 아시아 득점 시 대만을 전장 국가로 취급한다. 미국이 "중국 카드"를 사용하면 취소된다.'],
+  [36, '국지전', 'BOTH', 3, 2, 0, 0, '안정도 1 또는 2인 국가를 공격한다. 주사위 - (인접한 적 지배 국가 수). 3~6이면 1 VP, 상대 영향력을 자기 영향력으로 교체. 군사작전 +3.'],
+  [37, '중앙아메리카 득점', 'BOTH', 0, 2, 0, 0, '득점: 존재 1 / 우세 3 / 지배 5. 지배하는 전장 국가당 +1 VP, 상대 초강대국과 인접한 지배 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [38, '동남아시아 득점*', 'BOTH', 0, 2, 1, 0, '버마·라오스/캄보디아·베트남·말레이시아·인도네시아·필리핀 지배당 1 VP, 태국 지배 2 VP.'],
+  [39, '군비 경쟁', 'BOTH', 3, 2, 0, 0, '내 군사작전이 상대보다 높으면 1 VP. 높으면서 필요량(DEFCON)도 채웠다면 3 VP.'],
+  [40, '쿠바 미사일 위기*', 'BOTH', 3, 2, 1, 0, 'DEFCON을 2로 설정. 이번 턴 상대가 쿠데타를 하면 핵전쟁으로 상대가 패배. 소련은 쿠바에서, 미국은 서독이나 터키에서 영향력 2를 제거해 취소할 수 있다.'],
+  [41, '핵잠수함*', 'US', 2, 2, 1, 0, '이번 턴 동안 미국의 전장 국가 쿠데타는 DEFCON을 낮추지 않는다.'],
+  [42, '수렁*', 'USSR', 3, 2, 1, 1, '미국은 다음 액션 라운드부터 작전 2 이상 카드를 버리고 주사위 1~4가 나와야 이 효과를 끝낼 수 있다. 버릴 카드가 없으면 득점 카드를 내야 한다. "NORAD"를 취소한다.'],
+  [43, 'SALT 협상*', 'BOTH', 3, 2, 1, 1, 'DEFCON을 2단계 올린다. 이번 턴 양측 쿠데타 굴림 -1. 버림 더미에서 득점 카드가 아닌 카드 1장을 가져온다.'],
+  [44, '곰의 덫*', 'US', 3, 2, 1, 1, '소련은 다음 액션 라운드부터 작전 2 이상 카드를 버리고 주사위 1~4가 나와야 이 효과를 끝낼 수 있다. 버릴 카드가 없으면 득점 카드를 내야 한다.'],
+  [45, '정상 회담', 'BOTH', 1, 2, 0, 0, '양측 주사위. 우세 또는 지배 중인 지역당 +1. 높은 쪽이 2 VP를 얻고 DEFCON을 1 올리거나 내릴 수 있다(동점은 무효).'],
+  [46, '닥터 스트레인지러브*', 'BOTH', 2, 2, 1, 0, 'DEFCON을 원하는 단계(1~5)로 설정한다. 자신의 군사작전 +5.'],
+  [47, '군사 정권', 'BOTH', 2, 2, 0, 0, '중앙/남아메리카의 한 국가에 영향력 2를 놓는다. 그 후 이 카드 작전값으로 중앙/남아메리카에서 무료 쿠데타 또는 재정렬을 할 수 있다.'],
+  [48, '부엌 논쟁*', 'US', 1, 2, 1, 0, '미국이 소련보다 더 많은 전장 국가를 지배하면 미국 2 VP!'],
+  [49, '미사일 질투', 'BOTH', 2, 2, 0, 0, '이 카드를 상대의 작전값이 가장 높은 카드와 교환한다. 받은 카드가 내/공통 이벤트면 즉시 발동, 상대 이벤트면 작전으로 사용. 상대는 다음 라운드에 이 카드를 작전으로 써야 한다.'],
+  [50, '"너희를 묻어 버리겠다"*', 'USSR', 4, 2, 1, 0, 'DEFCON 1 하락. 미국이 다음 액션 라운드에 "UN 개입"을 이벤트로 내지 않으면 소련 3 VP.'],
+  [51, '브레즈네프 독트린*', 'USSR', 3, 2, 1, 0, '이번 턴 동안 소련이 작전으로 쓰는 모든 카드는 작전 +1(최대 4).'],
+  [52, '포르투갈 제국 붕괴*', 'USSR', 2, 2, 1, 0, '앙골라와 남동아프리카에 소련 영향력을 2씩 놓는다.'],
+  [53, '남아프리카 소요', 'USSR', 2, 2, 0, 0, '남아프리카에 소련 영향력 2, 또는 남아프리카 1 + 인접한 한 국가에 2를 놓는다.'],
+  [54, '아옌데*', 'USSR', 1, 2, 1, 0, '칠레에 소련 영향력 2를 놓는다.'],
+  [55, '빌리 브란트*', 'USSR', 2, 2, 1, 1, '소련 1 VP, 서독에 소련 영향력 1. 서독에 대한 "NATO" 효과 취소. "베를린 장벽을 허물라"가 있으면 무효.'],
+  [56, '이슬람 혁명', 'USSR', 4, 2, 0, 0, '수단·이란·이라크·이집트·리비아·사우디·시리아·요르단 중 2개국의 미국 영향력을 모두 제거. "AWACS 판매" 이후 사용 불가.'],
+  [57, 'ABM 조약', 'BOTH', 4, 2, 0, 0, 'DEFCON을 1 올리고, 이 카드의 작전값(4)으로 작전을 수행한다.'],
+  [58, '문화 대혁명*', 'USSR', 3, 2, 1, 0, '미국이 "중국 카드"를 가지고 있으면 소련에게 준다(앞면, 사용 가능). 이미 소련이 가지고 있으면 소련 1 VP.'],
+  [59, '플라워 파워*', 'USSR', 4, 2, 1, 1, '이후 미국이 "전쟁" 카드(아랍-이스라엘, 한국, 국지전, 인도-파키스탄, 이란-이라크)를 낼 때마다 소련 2 VP. "악의 제국"으로 취소.'],
+  [60, 'U2 사건*', 'USSR', 3, 2, 1, 0, '소련 1 VP. 이번 턴 "UN 개입"이 이벤트로 쓰이면 소련 추가 1 VP.'],
+  [61, 'OPEC', 'USSR', 3, 2, 0, 0, '이집트·이란·리비아·사우디·이라크·걸프 국가들·베네수엘라 중 소련이 지배하는 국가당 1 VP. "북해 유전" 이후 사용 불가.'],
+  [62, '"외로운 총잡이"*', 'USSR', 1, 2, 1, 0, '미국은 손패를 공개한다. 소련은 이 카드의 작전값(1)으로 작전을 수행할 수 있다.'],
+  [63, '식민지 후위대', 'US', 2, 2, 0, 0, '아프리카 및/또는 동남아시아의 4개국에 미국 영향력을 1씩 놓는다.'],
+  [64, '파나마 운하 반환*', 'US', 1, 2, 1, 0, '파나마, 코스타리카, 베네수엘라에 미국 영향력 1씩.'],
+  [65, '캠프 데이비드 협정*', 'US', 2, 2, 1, 1, '미국 1 VP, 이스라엘·요르단·이집트에 미국 영향력 1씩. "아랍-이스라엘 전쟁"을 이벤트로 쓸 수 없게 된다.'],
+  [66, '괴뢰 정부*', 'US', 2, 2, 1, 0, '양측 영향력이 전혀 없는 3개국에 미국 영향력을 1씩 놓는다.'],
+  [67, '소련에 곡물 판매', 'US', 2, 2, 0, 0, '소련 손패에서 무작위로 1장을 뽑는다. 그 카드를 내거나 돌려준다. 돌려주거나 소련 손패가 없으면 이 카드 작전값으로 작전 수행.'],
+  [68, '요한 바오로 2세 교황 선출*', 'US', 2, 2, 1, 1, '폴란드의 소련 영향력 2를 제거하고 미국 영향력 1을 놓는다. "연대"를 이벤트로 쓸 수 있게 된다.'],
+  [69, '중남미 암살단', 'BOTH', 2, 2, 0, 0, '이번 턴 동안 내 중앙/남아메리카 쿠데타 굴림 +1, 상대는 -1.'],
+  [70, '미주기구 창설*', 'US', 1, 2, 1, 0, '중앙/남아메리카에 미국 영향력을 총 2 놓는다.'],
+  [71, '닉슨의 중국 카드*', 'US', 2, 2, 1, 0, '소련이 "중국 카드"를 가지고 있으면 미국에 준다(뒷면, 즉시 사용 불가). 이미 미국이 가지고 있으면 미국 2 VP.'],
+  [72, '사다트의 소련 추방*', 'US', 1, 2, 1, 0, '이집트의 소련 영향력을 모두 제거하고 미국 영향력 1을 놓는다.'],
+  [73, '왕복 외교', 'US', 3, 2, 0, 1, '다음 중동 또는 아시아 득점 시 소련의 전장 국가 수를 1 줄이고, 그 후 이 카드를 버린다.'],
+  [74, '미국의 소리', 'US', 2, 2, 0, 0, '유럽이 아닌 국가들에서 소련 영향력을 총 4 제거한다(국가당 최대 2).'],
+  [75, '해방 신학', 'USSR', 2, 2, 0, 0, '중앙아메리카에 소련 영향력을 총 3 놓는다(국가당 최대 2).'],
+  [76, '우수리강 분쟁*', 'US', 3, 2, 1, 0, '소련이 "중국 카드"를 가지고 있으면 미국에 준다(앞면, 사용 가능). 이미 미국이 가지고 있으면 아시아에 미국 영향력 총 4(국가당 최대 2).'],
+  [77, '"국가에 무엇을 해줄지 물어라"*', 'US', 3, 2, 1, 0, '미국은 손패 일부 또는 전부를 버리고 같은 수만큼 새로 뽑는다.'],
+  [78, '진보를 위한 동맹*', 'US', 3, 2, 1, 0, '중앙/남아메리카에서 미국이 지배하는 전장 국가당 미국 1 VP.'],
+  [79, '아프리카 득점', 'BOTH', 0, 2, 0, 0, '득점: 존재 1 / 우세 4 / 지배 6. 지배하는 전장 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [80, '"작은 한 걸음"', 'BOTH', 2, 2, 0, 0, '우주 경쟁에서 뒤처져 있으면 마커를 2칸 전진한다(마지막 칸의 VP만 획득).'],
+  [81, '남아메리카 득점', 'BOTH', 0, 2, 0, 0, '득점: 존재 2 / 우세 5 / 지배 6. 지배하는 전장 국가당 +1 VP. 손에 보유할 수 없음!'],
+  [82, '이란 인질 사태*', 'USSR', 3, 3, 1, 1, '이란의 미국 영향력을 모두 제거하고 소련 영향력 2를 놓는다. 이후 "테러리즘"은 미국에게 2장을 버리게 한다.'],
+  [83, '철의 여인*', 'US', 3, 3, 1, 1, '아르헨티나에 소련 영향력 1을 놓고, 영국의 소련 영향력을 모두 제거한다. 미국 1 VP. "사회주의 정부"를 이벤트로 쓸 수 없게 된다.'],
+  [84, '레이건의 리비아 폭격*', 'US', 2, 3, 1, 0, '리비아의 소련 영향력 2당 미국 1 VP.'],
+  [85, '스타워즈*', 'US', 2, 3, 1, 0, '미국이 우주 경쟁에서 앞서 있으면, 버림 더미에서 득점 카드가 아닌 카드 1장을 골라 즉시 이벤트로 사용한다.'],
+  [86, '북해 유전*', 'US', 3, 3, 1, 1, '이번 턴 미국은 액션 라운드를 8회 할 수 있다. "OPEC"을 이벤트로 쓸 수 없게 된다.'],
+  [87, '개혁가*', 'USSR', 3, 3, 1, 1, '유럽에 소련 영향력 4(소련이 VP에서 앞서면 6)를 놓는다(국가당 최대 2). 이후 소련은 유럽에서 쿠데타를 할 수 없다.'],
+  [88, '해병대 막사 폭탄 테러*', 'USSR', 2, 3, 1, 0, '레바논의 미국 영향력을 모두 제거하고, 중동에서 미국 영향력을 총 2 더 제거한다.'],
+  [89, 'KAL-007 격추*', 'US', 4, 3, 1, 0, 'DEFCON 1 하락, 미국 2 VP. 남한을 미국이 지배하면 이 카드로 재정렬을 할 수 있다.'],
+  [90, '글라스노스트*', 'USSR', 4, 3, 1, 0, 'DEFCON 1 상승, 소련 2 VP. "개혁가"가 발동되어 있으면 이 카드로 재정렬 또는 영향력 배치를 할 수 있다.'],
+  [91, '니카라과 오르테가 당선*', 'USSR', 2, 3, 1, 0, '니카라과의 미국 영향력을 모두 제거. 니카라과에 인접한 국가에 이 카드 작전값으로 무료 쿠데타를 할 수 있다.'],
+  [92, '테러리즘', 'BOTH', 2, 3, 0, 0, '상대는 무작위로 손패 1장을 버린다("이란 인질 사태" 이후 미국은 2장).'],
+  [93, '이란-콘트라 스캔들*', 'USSR', 2, 3, 1, 0, '이번 턴 동안 미국의 재정렬 굴림 -1.'],
+  [94, '체르노빌*', 'US', 3, 3, 1, 0, '미국이 한 지역을 지정한다. 이번 턴 동안 소련은 작전으로 그 지역에 영향력을 놓을 수 없다.'],
+  [95, '중남미 외채 위기', 'USSR', 2, 3, 0, 0, '미국이 즉시 작전 3 이상 카드를 버리지 않으면, 소련은 남아메리카 2개국의 소련 영향력을 두 배로 만든다.'],
+  [96, '베를린 장벽을 허물라*', 'US', 3, 3, 1, 1, '동독에 미국 영향력 3. 이 카드 작전값으로 유럽에서 무료 쿠데타 또는 재정렬. "빌리 브란트"를 막거나 취소한다.'],
+  [97, '"악의 제국"*', 'US', 3, 3, 1, 1, '미국 1 VP. "플라워 파워"를 막거나 취소한다.'],
+  [98, '앨드리치 에임스*', 'USSR', 3, 3, 1, 0, '미국은 이번 턴 손패를 공개하고, 소련이 그중 1장을 골라 버린다.'],
+  [99, '퍼싱 II 배치*', 'USSR', 3, 3, 1, 0, '소련 1 VP. 서유럽 3개국에서 미국 영향력을 1씩 제거한다.'],
+  [100, '워게임*', 'BOTH', 4, 3, 1, 0, 'DEFCON이 2이면, 상대에게 6 VP를 준 뒤 즉시 게임을 끝낸다(점수로 승부). 체스 한 판 어때요?'],
+  [101, '연대*', 'US', 2, 3, 1, 0, '폴란드에 미국 영향력 3. "요한 바오로 2세" 이벤트가 먼저 있어야 이벤트로 사용 가능.'],
+  [102, '이란-이라크 전쟁*', 'BOTH', 2, 3, 1, 0, '이란↔이라크 침공(선택). 주사위 - (목표에 인접한 적 지배 국가 수). 4~6이면 2 VP, 목표의 상대 영향력을 자기 영향력으로 교체. 군사작전 +2.'],
+  [103, '망명자', 'US', 2, 1, 0, 0, '헤드라인에서 미국이 내면 소련 헤드라인 이벤트(득점 포함)를 취소한다. 소련이 액션 라운드에 이 카드를 내면 미국 1 VP.'],
+  [104, '케임브리지 5인조', 'USSR', 2, 1, 0, 0, '미국은 손패의 득점 카드를 공개한다. 소련은 공개된 득점 카드의 한 지역에 영향력 1을 놓는다. 후반에는 이벤트 불가.'],
+  [105, '특별한 관계', 'US', 2, 1, 0, 0, '영국을 미국이 지배하고 NATO가 없으면 영국 인접국 하나에 미국 1. NATO가 있으면 서유럽 한 국가에 미국 2 + 2 VP.'],
+  [106, 'NORAD*', 'US', 3, 1, 1, 1, '캐나다를 미국이 지배하고 액션 라운드 중 DEFCON이 2가 되면, 그 라운드 끝에 미국 영향력이 있는 국가 하나에 미국 1. "수렁"으로 취소.'],
+  [107, '체 게바라', 'USSR', 3, 2, 0, 0, '중앙/남아메리카·아프리카의 비전장 국가에 이 카드 작전값으로 쿠데타. 미국 영향력을 제거했다면 다른 국가에 두 번째 쿠데타 가능.'],
+  [108, '테헤란의 우리 사람*', 'US', 2, 2, 1, 0, '미국이 중동 국가를 1개 이상 지배하면 덱 위 5장을 보고 원하는 카드를 이벤트 발동 없이 버린다. 나머지는 덱에 섞는다.'],
+  [109, '유리와 사만다*', 'USSR', 2, 3, 1, 0, '이번 턴 남은 동안 미국이 쿠데타를 할 때마다 소련 1 VP.'],
+  [110, 'AWACS 사우디 판매*', 'US', 3, 3, 1, 1, '사우디아라비아에 미국 영향력 2. "이슬람 혁명"을 이벤트로 쓸 수 없게 된다.'],
+];
+
+const CARDS = {};
+for (const [id, name, side, ops, era, star, perm, text] of CARD_ROWS) {
+  CARDS[id] = { id, name, side, ops, era, star: !!star, perm: !!perm, text, scoring: [1, 2, 3, 37, 38, 79, 81].includes(id) };
+}
+const WAR_CARDS = [11, 13, 24, 36, 102];
+const SCORING_REGION = { 1: 'as', 2: 'eu', 3: 'me', 37: 'ca', 79: 'af', 81: 'sa' };
+
+const DATA = { REGION_NAMES, COUNTRIES, COUNTRY_IDS, SCORING_INFO, SPACE_TRACK, CARDS, WAR_CARDS, SCORING_REGION, SUPERPOWER_ADJ };
+if (typeof module !== 'undefined') module.exports = DATA; else window.DATA = DATA;
+
+})();
+// ---- engine.js ----
+(function(){
+// ===== 냉전 게임 엔진 =====
+// 모든 결정은 agent.ask(game, side, request)로 위임된다 (사람=UI, 컴퓨터=AI)
+const D = (typeof module !== 'undefined') ? require('./data.js') : DATA;
+const { COUNTRIES: C, COUNTRY_IDS, CARDS, SCORING_INFO, SPACE_TRACK, WAR_CARDS, SCORING_REGION, REGION_NAMES } = D;
+
+const SIDE_KO = { US: '미국', USSR: '소련' };
+const opp = s => (s === 'US' ? 'USSR' : 'US');
+const inRegion = (cid, r) => C[cid].regions.includes(r);
+const cname = cid => C[cid].name;
+const cardName = id => `「${CARDS[id].name.replace(/\*$/, '')}」`;
+
+class GameOver { constructor(winner, reason) { this.gameOver = true; this.winner = winner; this.reason = reason; } }
+
+class Game {
+  constructor({ agents, rng, optional = true, onUpdate, onLog, pause }) {
+    this.agents = agents;
+    this.rng = rng || Math.random;
+    this.optional = optional;
+    this.onUpdate = onUpdate || (() => {});
+    this.onLog = onLog || (() => {});
+    this.pause = pause || (async () => {});
+    this.G = null;
+  }
+
+  // ---------- 기본 유틸 ----------
+  roll() { return 1 + Math.floor(this.rng() * 6); }
+  shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(this.rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  log(msg, cls) { this.G.log.push({ msg, cls, turn: this.G.turn }); this.onLog(msg, cls); }
+  update() { this.onUpdate(this.G); }
+  async ask(side, req) {
+    req.side = side;
+    const ans = await this.agents[side].ask(this, side, req);
+    return ans;
+  }
+  inf(cid, s) { return this.G.inf[cid][s]; }
+  control(cid) {
+    const i = this.G.inf[cid], st = C[cid].stab;
+    if (i.US - i.USSR >= st) return 'US';
+    if (i.USSR - i.US >= st) return 'USSR';
+    return null;
+  }
+  addInf(cid, s, n) { if (n <= 0) return; this.G.inf[cid][s] += n; }
+  removeInf(cid, s, n) { const r = Math.min(n, this.G.inf[cid][s]); this.G.inf[cid][s] -= r; return r; }
+  setInfToControl(cid, s) {
+    const need = this.inf(cid, opp(s)) + C[cid].stab;
+    if (this.inf(cid, s) < need) this.G.inf[cid][s] = need;
+  }
+  countriesIn(r) { return COUNTRY_IDS.filter(c => inRegion(c, r)); }
+  era() { return this.G.turn <= 3 ? 1 : this.G.turn <= 7 ? 2 : 3; }
+
+  vp(side, n, why) {
+    if (!n) return;
+    this.G.vp += side === 'US' ? n : -n;
+    this.log(`${SIDE_KO[side]} ${n > 0 ? '+' : ''}${n} VP${why ? ' (' + why + ')' : ''}`, 'vp');
+    if (this.G.vp >= 20) throw new GameOver('US', '미국이 20 VP에 도달했습니다');
+    if (this.G.vp <= -20) throw new GameOver('USSR', '소련이 20 VP에 도달했습니다');
+  }
+  setDefcon(v, why) {
+    v = Math.max(1, Math.min(5, v));
+    if (v === this.G.defcon) return;
+    const old = this.G.defcon;
+    this.G.defcon = v;
+    this.log(`DEFCON ${old} → ${v}${why ? ' (' + why + ')' : ''}`, 'defcon');
+    if (v <= 1) {
+      const loser = this.G.phasing;
+      throw new GameOver(opp(loser), `DEFCON 1 — 전면 핵전쟁! ${SIDE_KO[loser]} 차례에 일어나 ${SIDE_KO[loser]} 패배`);
+    }
+  }
+  degrade(n = 1, why) { this.setDefcon(this.G.defcon - n, why); }
+  improve(n = 1, why) { this.setDefcon(this.G.defcon + n, why); }
+  addMilops(s, n) { this.G.milops[s] = Math.min(5, this.G.milops[s] + n); }
+
+  // ---------- 셋업 ----------
+  newState() {
+    const inf = {};
+    for (const c of COUNTRY_IDS) inf[c] = { US: 0, USSR: 0 };
+    const set = (s, obj) => { for (const k in obj) inf[k][s] += obj[k]; };
+    set('USSR', { syria: 1, iraq: 1, nkorea: 3, egermany: 3, finland: 1 });
+    set('US', { canada: 2, iran: 1, israel: 1, japan: 1, australia: 4, philippines: 1, skorea: 1, panama: 1, southafrica: 1, uk: 5 });
+    return {
+      turn: 1, ar: 0, phasing: 'USSR', defcon: 5, vp: 0,
+      milops: { US: 0, USSR: 0 }, space: { US: 0, USSR: 0 }, spaceTries: { US: 0, USSR: 0 },
+      inf, hands: { US: [], USSR: [] }, deck: [], discard: [], removed: [],
+      china: { holder: 'USSR', faceUp: true },
+      perm: {}, fx: {}, log: [], revealed: { US: false, USSR: false },
+      headline: null, quagmire: false, bearTrap: false, over: null, phase: 'setup',
+    };
+  }
+  cardsOfEra(era) {
+    return Object.values(CARDS).filter(c => c.era === era && c.id !== 6 && (this.optional || c.id <= 103)).map(c => c.id);
+  }
+  async setup() {
+    this.G = this.newState();
+    this.G.deck = this.shuffle(this.cardsOfEra(1));
+    this.log('게임 시작! 1945년, 냉전이 시작됩니다.', 'turn');
+    this.deal();
+    this.update();
+    // 초기 영향력 배치
+    this.G.phase = 'setup';
+    this.G.phasing = 'USSR';
+    this.log('소련: 동유럽에 영향력 6을 배치합니다.');
+    await this.distribute('USSR', 'USSR', 6, {
+      title: '초기 배치: 동유럽에 소련 영향력 6을 놓으세요', filter: c => inRegion(c, 'ee'), mustAll: true,
+    });
+    this.G.phasing = 'US';
+    this.log('미국: 서유럽에 영향력 7을 배치합니다.');
+    await this.distribute('US', 'US', 7, {
+      title: '초기 배치: 서유럽에 미국 영향력 7을 놓으세요', filter: c => inRegion(c, 'we'), mustAll: true,
+    });
+  }
+
+  // ---------- 카드 ----------
+  draw() {
+    if (!this.G.deck.length) {
+      if (!this.G.discard.length) return null;
+      this.G.deck = this.shuffle(this.G.discard.splice(0));
+      this.log('덱이 떨어져 버림 더미를 섞어 새 덱을 만듭니다.');
+    }
+    return this.G.deck.pop();
+  }
+  handLimit() { return this.G.turn <= 3 ? 8 : 9; }
+  deal() {
+    const lim = this.handLimit();
+    let progress = true;
+    while (progress) {
+      progress = false;
+      for (const s of ['USSR', 'US']) {
+        if (this.G.hands[s].length < lim) { const c = this.draw(); if (c != null) { this.G.hands[s].push(c); progress = true; } }
+      }
+    }
+  }
+  removeFromHand(s, id) { const h = this.G.hands[s]; const i = h.indexOf(id); if (i >= 0) h.splice(i, 1); return i >= 0; }
+  discardCard(id) { if (id === 6) return; this.G.discard.push(id); }
+  // 카드 사용 후 처리
+  finishCard(id, eventFired) {
+    if (id === 6) return;
+    if (id === 49 && this.G.fx.envyKeep) { delete this.G.fx.envyKeep; return; }
+    const card = CARDS[id];
+    if (eventFired && card.perm && this.G.perm[id]) {
+      if (card.star) this.G.removed.push(id);
+      return; // 지속 효과로 테이블에 남음 (73 왕복외교는 perm 객체에 보관)
+    }
+    if (eventFired && card.star) this.G.removed.push(id);
+    else this.G.discard.push(id);
+  }
+  passChina(from, faceUp) {
+    this.G.china = { holder: opp(from), faceUp: !!faceUp };
+    if (from === 'US' && this.G.perm[35]) { delete this.G.perm[35]; this.log('미국의 중국 카드 사용으로 「포모사 결의안」이 취소됩니다.'); }
+  }
+
+  // ---------- 작전값 ----------
+  effOps(side, id) {
+    let ops = CARDS[id].ops;
+    if (id === 6) ops = 4;
+    const fx = this.G.fx;
+    if (side === 'US' && fx.containment) ops = Math.min(4, ops + 1);
+    if (side === 'USSR' && fx.brezhnev) ops = Math.min(4, ops + 1);
+    if (fx.redScare && fx.redScare[opp(side)]) ops = Math.max(1, ops - 1);
+    return ops;
+  }
+
+  // ---------- 이벤트 조건 ----------
+  eventOwner(id, player) { const s = CARDS[id].side; return s === 'BOTH' ? player : s; }
+  canEvent(id, owner) {
+    const G = this.G, P = G.perm;
+    switch (id) {
+      case 6: return false;
+      case 7: return !P[83];
+      case 13: return !P[65];
+      case 21: return !!(P[16] || P[23]);
+      case 32: return false; // UN 개입은 별도 처리
+      case 55: return !P[96];
+      case 56: return !P[110];
+      case 59: return !P[97];
+      case 61: return !P[86];
+      case 101: return !!P[68];
+      case 104: return this.era() < 3;
+      case 49: return G.hands[opp(owner)].length > 0;
+      default: return true;
+    }
+  }
+
+  // ---------- 접근성/규칙 판정 ----------
+  canPlaceSet(side) {
+    const set = new Set();
+    for (const c of COUNTRY_IDS) {
+      if (this.inf(c, side) > 0) { set.add(c); for (const a of C[c].adj) set.add(a); }
+      if (C[c].spAdj === side) set.add(c);
+    }
+    if (side === 'USSR' && this.G.fx.chernobyl) for (const c of [...set]) if (inRegion(c, this.G.fx.chernobyl)) set.delete(c);
+    return set;
+  }
+  defconAllows(cid) {
+    const d = this.G.defcon;
+    if (inRegion(cid, 'eu')) return d >= 5;
+    if (inRegion(cid, 'as')) return d >= 4;
+    if (inRegion(cid, 'me')) return d >= 3;
+    return true;
+  }
+  natoProtected(cid) {
+    const P = this.G.perm;
+    if (!P[21] || !inRegion(cid, 'eu') || this.control(cid) !== 'US') return false;
+    if (cid === 'france' && P[17]) return false;
+    if (cid === 'wgermany' && P[55]) return false;
+    return true;
+  }
+  canAttack(side, cid, { coup, free } = {}) {
+    if (this.inf(cid, opp(side)) <= 0) return false;
+    if (!free && !this.defconAllows(cid)) return false;
+    if (side === 'USSR') {
+      if (this.natoProtected(cid)) return false;
+      if (cid === 'japan' && this.G.perm[27]) return false;
+      if (coup && this.G.perm[87] && inRegion(cid, 'eu')) return false;
+    }
+    return true;
+  }
+
+  // ---------- 득점 ----------
+  regionStatus(r) {
+    const list = r === 'eu' ? this.countriesIn('eu') : this.countriesIn(r);
+    const res = {};
+    for (const s of ['US', 'USSR']) {
+      let n = 0, bg = 0, adj = 0;
+      for (const c of list) {
+        if (this.control(c) !== s) continue;
+        n++;
+        let isBg = C[c].bg;
+        if (r === 'as' && c === 'taiwan' && s === 'US' && this.G.perm[35]) isBg = true;
+        if (isBg) bg++;
+        if (C[c].spAdj === opp(s)) adj++;
+      }
+      res[s] = { n, bg, adj };
+    }
+    if ((r === 'me' || r === 'as') && this.G.perm[73] && res.USSR.bg > 0) { res.USSR.bg--; res.USSR.n--; res.shuttle = true; }
+    let totalBg = list.filter(c => C[c].bg).length;
+    if (r === 'as' && this.G.perm[35] && this.control('taiwan') === 'US') totalBg++;
+    for (const s of ['US', 'USSR']) {
+      const me = res[s], o = res[opp(s)];
+      let level = 0;
+      if (me.n > 0) level = 1;
+      if (me.n > o.n && me.bg > o.bg && me.bg > 0 && me.n > me.bg) level = 2;
+      if (me.n > o.n && me.bg === totalBg && totalBg > 0) level = 3;
+      me.level = level;
+    }
+    return res;
+  }
+  scoreValue(r) {
+    const info = SCORING_INFO[r], st = this.regionStatus(r);
+    const out = { US: 0, USSR: 0, win: null, st };
+    for (const s of ['US', 'USSR']) {
+      const me = st[s];
+      let v = [0, info.presence, info.domination, info.control][me.level];
+      if (v === 'WIN') { out.win = s; v = 0; }
+      v += me.bg;
+      if (info.adjBonus) v += me.adj;
+      out[s] = v;
+    }
+    return out;
+  }
+  scoreRegion(r) {
+    const res = this.scoreValue(r);
+    const LV = ['없음', '존재', '우세', '지배'];
+    this.log(`▶ ${SCORING_INFO[r].name} 득점 — 미국: ${LV[res.st.US.level]}(${res.US}점), 소련: ${LV[res.st.USSR.level]}(${res.USSR}점)`, 'score');
+    if (res.st.shuttle) {
+      this.log('「왕복 외교」로 소련 전장 국가 1개가 제외되었습니다.');
+      delete this.G.perm[73]; this.G.discard.push(73);
+    }
+    if (res.win) throw new GameOver(res.win, `${SIDE_KO[res.win]}가 유럽을 지배했습니다`);
+    const net = res.US - res.USSR;
+    if (net > 0) this.vp('US', net, SCORING_INFO[r].name + ' 득점');
+    else if (net < 0) this.vp('USSR', -net, SCORING_INFO[r].name + ' 득점');
+    else this.log('득점 차이 없음');
+  }
+  scoreSEA() {
+    const v = { US: 0, USSR: 0 };
+    for (const c of this.countriesIn('sea')) { const k = this.control(c); if (k) v[k] += c === 'thailand' ? 2 : 1; }
+    this.log(`▶ 동남아시아 득점 — 미국 ${v.US}점, 소련 ${v.USSR}점`, 'score');
+    const net = v.US - v.USSR;
+    if (net > 0) this.vp('US', net, '동남아시아 득점'); else if (net < 0) this.vp('USSR', -net, '동남아시아 득점');
+  }
+
+  // ---------- 우주 경쟁 ----------
+  hasSpaceAbility(side, box) { return this.G.space[side] >= box && this.G.space[opp(side)] < box; }
+  spaceMaxTries(side) { return this.hasSpaceAbility(side, 2) ? 2 : 1; }
+  canSpace(side, id) {
+    const box = this.G.space[side] + 1;
+    if (box > 8) return false;
+    if (this.G.spaceTries[side] >= this.spaceMaxTries(side)) return false;
+    return this.effOps(side, id) >= SPACE_TRACK[box][1];
+  }
+  advanceSpace(side, n = 1, vpOnlyLast = false) {
+    for (let k = 0; k < n; k++) {
+      if (this.G.space[side] >= 8) return;
+      const box = ++this.G.space[side];
+      const [name, , , v1, v2, ab] = SPACE_TRACK[box];
+      const first = this.G.space[opp(side)] < box;
+      this.log(`🚀 ${SIDE_KO[side]} 우주 경쟁 ${box}칸: ${name}${ab ? ' — ' + ab : ''}`, 'space');
+      if (!vpOnlyLast || k === n - 1) {
+        const v = first ? v1 : v2;
+        if (v) this.vp(side, v, name);
+      }
+    }
+  }
+  async spaceRace(side, id) {
+    const box = this.G.space[side] + 1;
+    const [name, , max] = SPACE_TRACK[box];
+    this.G.spaceTries[side]++;
+    const r = this.roll();
+    this.log(`${SIDE_KO[side]}: ${cardName(id)} → 우주 경쟁 시도 → 「${name}」 (1~${max} 필요) 주사위 ${r}`, 'space');
+    if (r <= max) this.advanceSpace(side, 1);
+    else this.log('우주 경쟁 실패');
+  }
+
+  // ---------- 영향력 배치 공용 도우미 ----------
+  // owner: 영향력의 주인, count: 개수, opts: {filter, maxPer, mustAll, title, distinct}
+  async distribute(chooser, owner, count, opts = {}) {
+    const placed = {};
+    const snapshot = JSON.parse(JSON.stringify(this.G.inf));
+    let left = count;
+    while (left > 0) {
+      const valid = COUNTRY_IDS.filter(c => (!opts.filter || opts.filter(c, placed)) &&
+        (!opts.maxPer || (placed[c] || 0) < opts.maxPer));
+      if (!valid.length) break;
+      const ans = await this.ask(chooser, {
+        type: 'country', title: opts.title || `${SIDE_KO[owner]} 영향력을 놓을 국가 선택`, info: `남은 수: ${left}`,
+        valid, done: opts.mustAll ? null : '그만 놓기', reset: Object.keys(placed).length > 0,
+        intent: { kind: 'add', side: owner },
+      });
+      if (ans === 'RESET') { this.G.inf = JSON.parse(JSON.stringify(snapshot)); for (const k in placed) delete placed[k]; left = count; this.update(); continue; }
+      if (ans == null) break;
+      this.addInf(ans, owner, 1); placed[ans] = (placed[ans] || 0) + 1; left--;
+      this.update();
+    }
+    const summ = Object.entries(placed).map(([c, n]) => `${cname(c)}+${n}`).join(', ');
+    if (summ) this.log(`${SIDE_KO[owner]} 영향력 배치: ${summ}`);
+    return placed;
+  }
+  // target 진영 영향력 제거
+  async removeSome(chooser, target, count, opts = {}) {
+    const removed = {};
+    let left = count;
+    while (left > 0) {
+      const valid = COUNTRY_IDS.filter(c => this.inf(c, target) > 0 && (!opts.filter || opts.filter(c, removed)) &&
+        (!opts.maxPer || (removed[c] || 0) < opts.maxPer));
+      if (!valid.length) break;
+      const ans = await this.ask(chooser, {
+        type: 'country', title: opts.title || `${SIDE_KO[target]} 영향력을 제거할 국가 선택`, info: `남은 수: ${left}`,
+        valid, done: opts.optional ? '그만 제거' : null, intent: { kind: 'remove', side: target },
+      });
+      if (ans == null) break;
+      this.removeInf(ans, target, 1); removed[ans] = (removed[ans] || 0) + 1; left--;
+      this.update();
+    }
+    const summ = Object.entries(removed).map(([c, n]) => `${cname(c)}-${n}`).join(', ');
+    if (summ) this.log(`${SIDE_KO[target]} 영향력 제거: ${summ}`);
+    return removed;
+  }
+  async pickCountry(chooser, title, valid, intent, done) {
+    if (!valid.length) return null;
+    return this.ask(chooser, { type: 'country', title, valid, intent, done });
+  }
+  async pickOption(chooser, title, options, text) {
+    if (options.length === 1) return options[0].value;
+    return this.ask(chooser, { type: 'option', title, options, text });
+  }
+
+  // ---------- 작전 수행 ----------
+  // ops: 기본 작전값, opts: {card, allowed, free, filter, title, noSpace}
+  async conductOps(side, ops, opts = {}) {
+    const card = opts.card;
+    const asiaBonus = (card === 6 ? 1 : 0);
+    const seaBonus = (side === 'USSR' && this.G.fx.vietnam) ? 1 : 0;
+    const allowed = opts.allowed || ['inf', 'realign', 'coup'];
+    const filter = opts.filter || (() => true);
+    const modes = [];
+    const placeSet = this.canPlaceSet(side);
+    if (allowed.includes('inf') && [...placeSet].some(filter)) modes.push({ label: `영향력 배치 (작전 ${ops})`, value: 'inf', ai: 'inf' });
+    const realignOk = COUNTRY_IDS.some(c => filter(c) && this.canAttack(side, c, { free: opts.free }) && !(card === 89 && false));
+    if (allowed.includes('realign') && realignOk) modes.push({ label: '재정렬 굴림', value: 'realign' });
+    const coupOk = COUNTRY_IDS.some(c => filter(c) && this.canAttack(side, c, { coup: true, free: opts.free }));
+    if (allowed.includes('coup') && coupOk) modes.push({ label: '쿠데타', value: 'coup' });
+    if (!modes.length) { this.log(`${SIDE_KO[side]}: 작전을 사용할 곳이 없습니다.`); return; }
+    const mode = await this.pickOption(side, `작전 ${ops}${asiaBonus || seaBonus ? ' (+보너스 가능)' : ''} 사용 방법`, modes);
+    this.G.opsCtx = { side, ops, card };
+    if (mode === 'inf') await this.opsInfluence(side, ops, placeSet, filter, asiaBonus, seaBonus);
+    else if (mode === 'realign') await this.opsRealign(side, ops, filter, asiaBonus, seaBonus, opts.free);
+    else if (mode === 'coup') await this.opsCoup(side, ops, filter, asiaBonus, seaBonus, opts.free);
+    this.G.opsCtx = null;
+  }
+  bonusFor(picks, asiaBonus, seaBonus) {
+    let b = 0;
+    if (asiaBonus && picks.every(c => inRegion(c, 'as'))) b += asiaBonus;
+    if (seaBonus && picks.every(c => inRegion(c, 'sea'))) b += seaBonus;
+    return b;
+  }
+  async opsInfluence(side, ops, placeSet, filter, asiaBonus, seaBonus) {
+    const snapshot = JSON.parse(JSON.stringify(this.G.inf));
+    let picks = [], spent = 0;
+    const cost = c => (this.control(c) === opp(side) ? 2 : 1);
+    while (true) {
+      const valid = [...placeSet].filter(c => filter(c) && spent + cost(c) <= ops + this.bonusFor([...picks, c], asiaBonus, seaBonus));
+      if (!valid.length) break;
+      const budget = ops + this.bonusFor(picks, asiaBonus, seaBonus);
+      const ans = await this.ask(side, {
+        type: 'country', title: '영향력을 놓을 국가 선택', info: `사용 ${spent} / 작전 ${budget}${(asiaBonus || seaBonus) ? ' (아시아/동남아 전용 보너스 포함 가능)' : ''} · 상대 지배국은 2점`,
+        valid, done: '작전 종료', reset: picks.length > 0, intent: { kind: 'add', side, ops: true },
+      });
+      if (ans === 'RESET') { this.G.inf = JSON.parse(JSON.stringify(snapshot)); picks = []; spent = 0; this.update(); continue; }
+      if (ans == null) break;
+      spent += cost(ans); this.addInf(ans, side, 1); picks.push(ans);
+      this.update();
+    }
+    const cnt = {}; picks.forEach(c => cnt[c] = (cnt[c] || 0) + 1);
+    this.log(`${SIDE_KO[side]} 영향력 배치: ${Object.entries(cnt).map(([c, n]) => cname(c) + '+' + n).join(', ') || '없음'}`);
+  }
+  realignMods(side, cid) {
+    let m = 0;
+    for (const a of C[cid].adj) if (this.control(a) === side) m++;
+    if (this.inf(cid, side) > this.inf(cid, opp(side))) m++;
+    if (C[cid].spAdj === side) m++;
+    return m;
+  }
+  async realignRoll(side, cid) {
+    let rS = this.roll(), rO = this.roll();
+    const mS = this.realignMods(side, cid), mO = this.realignMods(opp(side), cid);
+    let iranContra = (side === 'US' && this.G.fx.iranContra) ? -1 : (side === 'USSR' && this.G.fx.iranContra ? 0 : 0);
+    let oIC = (opp(side) === 'US' && this.G.fx.iranContra) ? -1 : 0;
+    const tS = rS + mS + iranContra, tO = rO + mO + oIC;
+    let txt = `재정렬 ${cname(cid)}: ${SIDE_KO[side]} ${rS}+${mS + iranContra}=${tS} vs ${SIDE_KO[opp(side)]} ${rO}+${mO + oIC}=${tO}`;
+    if (tS > tO) { const n = this.removeInf(cid, opp(side), tS - tO); txt += ` → ${SIDE_KO[opp(side)]} 영향력 -${n}`; }
+    else if (tO > tS) { const n = this.removeInf(cid, side, tO - tS); txt += ` → ${SIDE_KO[side]} 영향력 -${n}`; }
+    else txt += ' → 무승부';
+    this.log(txt, 'roll');
+    this.update();
+  }
+  async opsRealign(side, ops, filter, asiaBonus, seaBonus, free) {
+    const picks = [];
+    let spent = 0;
+    while (true) {
+      const valid = COUNTRY_IDS.filter(c => filter(c) && this.canAttack(side, c, { free }) && spent + 1 <= ops + this.bonusFor([...picks, c], asiaBonus, seaBonus));
+      if (!valid.length) break;
+      const ans = await this.ask(side, {
+        type: 'country', title: '재정렬할 국가 선택', info: `남은 굴림: ${ops + this.bonusFor(picks, asiaBonus, seaBonus) - spent}`,
+        valid, done: '재정렬 종료', intent: { kind: 'realign' },
+      });
+      if (ans == null) break;
+      picks.push(ans); spent++;
+      await this.realignRoll(side, ans);
+      await this.pause(300);
+    }
+  }
+  async opsCoup(side, ops, filter, asiaBonus, seaBonus, free) {
+    const valid = COUNTRY_IDS.filter(c => filter(c) && this.canAttack(side, c, { coup: true, free }));
+    const ans = await this.ask(side, { type: 'country', title: `쿠데타 대상 선택 (작전 ${ops})`, valid, intent: { kind: 'coup', ops, free } });
+    if (ans == null) return;
+    const total = ops + this.bonusFor([ans], asiaBonus, seaBonus);
+    await this.coup(side, ans, total, { free });
+  }
+  coupMod(side, cid) {
+    let m = 0;
+    if (this.G.fx.salt) m -= 1;
+    const ds = this.G.fx.deathSquads;
+    if (ds && (inRegion(cid, 'ca') || inRegion(cid, 'sa'))) m += ds === side ? 1 : -1;
+    return m;
+  }
+  async coup(side, cid, ops, { free } = {}) {
+    if (this.G.fx.cmc && this.G.fx.cmc === opp(side)) {
+      throw new GameOver(opp(side), `쿠바 미사일 위기 중 ${SIDE_KO[side]}가 쿠데타를 시도해 핵전쟁이 일어났습니다`);
+    }
+    const r = this.roll(), m = this.coupMod(side, cid);
+    const total = r + ops + m, need = C[cid].stab * 2;
+    const diff = total - need;
+    let txt = `💥 ${SIDE_KO[side]} 쿠데타 → ${cname(cid)}: 주사위 ${r} + 작전 ${ops}${m ? (m > 0 ? ' +' : ' ') + m : ''} = ${total} vs 안정도×2 = ${need}`;
+    if (diff > 0) {
+      const rem = this.removeInf(cid, opp(side), diff);
+      this.addInf(cid, side, diff - rem);
+      txt += ` → 성공! ${SIDE_KO[opp(side)]} -${rem}${diff - rem > 0 ? ', ' + SIDE_KO[side] + ' +' + (diff - rem) : ''}`;
+    } else txt += ' → 실패';
+    this.log(txt, 'roll');
+    this.addMilops(side, ops);
+    if (side === 'US' && this.G.fx.yuri) this.vp('USSR', 1, '유리와 사만다');
+    this.update();
+    if (C[cid].bg && !(side === 'US' && this.G.fx.nuclearSubs)) this.degrade(1, '전장 국가 쿠데타');
+    return diff > 0;
+  }
+
+  // ---------- 전쟁 카드 공용 ----------
+  async war(side, target, extraMinus, minWin, vpGain, mil, name) {
+    let minus = extraMinus || 0;
+    for (const a of C[target].adj) if (this.control(a) === opp(side)) minus++;
+    const r = this.roll();
+    const mod = r - minus;
+    this.addMilops(side, mil);
+    const win = mod >= minWin;
+    this.log(`⚔️ ${name}: ${SIDE_KO[side]}의 ${cname(target)} 공격 — 주사위 ${r} - ${minus} = ${mod} (${minWin}+ 필요) → ${win ? '승리!' : '패배'}`, 'roll');
+    if (win) {
+      const n = this.G.inf[target][opp(side)];
+      this.G.inf[target][opp(side)] = 0; this.addInf(target, side, n);
+      this.update();
+      this.vp(side, vpGain, name);
+    }
+    this.update();
+    return win;
+  }
+
+  // ---------- 이벤트 실행 ----------
+  async playEvent(id, owner, { headline } = {}) {
+    const card = CARDS[id];
+    if (!this.canEvent(id, owner)) {
+      this.log(`${cardName(id)} 이벤트는 현재 발동할 수 없습니다.`);
+      return false;
+    }
+    this.log(`📜 ${SIDE_KO[owner]}: ${cardName(id)} 이벤트 발동`, 'event');
+    if (SCORING_REGION[id]) { this.scoreRegion(SCORING_REGION[id]); }
+    else if (id === 38) this.scoreSEA();
+    else {
+      const fn = EVENTS[id];
+      if (fn) await fn(this, owner, { headline });
+    }
+    if (card.perm && !this.G.perm[id] && ![42, 44].includes(id)) this.G.perm[id] = true;
+    if (this.G.fx.flowerWatch && WAR_CARDS.includes(id) && owner === 'US') { /* handled in flower check */ }
+    this.update();
+    return true;
+  }
+  flowerCheck(id, player) {
+    if (player === 'US' && WAR_CARDS.includes(id) && this.G.perm[59] && !this.G.perm[97]) this.vp('USSR', 2, '플라워 파워');
+  }
+
+  // ---------- 헤드라인 ----------
+  async headline() {
+    const G = this.G;
+    G.phase = 'headline';
+    this.log(`— ${G.turn}턴 헤드라인 단계 —`, 'turn');
+    const choose = async s => {
+      const cards = G.hands[s].filter(id => id !== 32);
+      if (!cards.length) return null;
+      return this.ask(s, { type: 'card', title: '헤드라인으로 낼 카드를 고르세요', cards, intent: { kind: 'headline' }, headline: true });
+    };
+    const order = this.hasSpaceAbility('US', 4) ? ['USSR', 'US'] : this.hasSpaceAbility('USSR', 4) ? ['US', 'USSR'] : ['USSR', 'US'];
+    const hl = {};
+    for (const s of order) {
+      G.headlineReveal = order[0] !== s && (this.hasSpaceAbility(s, 4)) ? hl[order[0]] : null;
+      hl[s] = await choose(s);
+      if (hl[s] != null) this.removeFromHand(s, hl[s]);
+    }
+    G.headlineReveal = null;
+    G.headline = hl;
+    this.log(`헤드라인 — 소련: ${hl.USSR ? cardName(hl.USSR) : '없음'}, 미국: ${hl.US ? cardName(hl.US) : '없음'}`, 'event');
+    this.update();
+    await this.pause(900);
+    // 망명자
+    if (hl.US === 103 && hl.USSR != null) {
+      this.log(`미국의 「망명자」가 소련 헤드라인 ${cardName(hl.USSR)}을(를) 취소합니다!`, 'event');
+      this.G.discard.push(hl.USSR); hl.USSR = null;
+    }
+    const opsOf = s => hl[s] == null ? -1 : CARDS[hl[s]].ops;
+    const seq = opsOf('US') >= opsOf('USSR') ? ['US', 'USSR'] : ['USSR', 'US'];
+    for (const s of seq) {
+      const id = hl[s];
+      if (id == null) continue;
+      if (G.headlineCancelled && G.headlineCancelled[s]) { this.G.discard.push(id); continue; }
+      G.phasing = s;
+      const owner = this.eventOwner(id, s);
+      let fired = false;
+      if (id === 103) { this.discardCard(103); continue; }
+      fired = await this.playEvent(id, owner, { headline: true });
+      this.flowerCheck(id, s);
+      this.finishCard(id, fired);
+      this.update();
+      await this.pause(500);
+    }
+    G.headline = null; G.headlineCancelled = null;
+  }
+
+  // ---------- 액션 라운드 ----------
+  arsFor(side) {
+    let n = this.G.turn <= 3 ? 6 : 7;
+    if (side === 'US' && this.G.fx.northSeaOil) n = 8;
+    if (this.hasSpaceAbility(side, 8)) n = 8;
+    return n;
+  }
+  playableCards(side) {
+    const h = [...this.G.hands[side]];
+    if (this.G.china.holder === side && this.G.china.faceUp) h.push(6);
+    return h;
+  }
+  // 카드별 가능한 행동 목록
+  actionOptions(side, id) {
+    const card = CARDS[id], opts = [];
+    const ops = this.effOps(side, id);
+    if (this.G.fx.missileEnvy === side && this.G.hands[side].includes(49) && id !== 49 && !card.scoring) return [];
+    if (card.scoring) { opts.push({ mode: 'event', label: '득점 카드 사용' }); return opts; }
+    if (this.G.fx.missileEnvy === side && id === 49) { opts.push({ mode: 'ops', label: `작전 ${ops} (미사일 질투 강제)` }); return opts; }
+    const owner = this.eventOwner(id, side);
+    if (id === 32) {
+      const targets = this.G.hands[side].filter(x => CARDS[x].side === opp(side));
+      if (targets.length) opts.push({ mode: 'un', label: 'UN 개입: 상대 이벤트 카드와 함께 내기' });
+      opts.push({ mode: 'ops', label: `작전 ${ops}` });
+    } else if (id === 6) {
+      opts.push({ mode: 'ops', label: `작전 4 (아시아 전부 사용 시 5)` });
+    } else if (owner === side) {
+      if (this.canEvent(id, side)) opts.push({ mode: 'event', label: '이벤트 사용' });
+      opts.push({ mode: 'ops', label: `작전 ${ops}` });
+    } else {
+      const ev = this.canEvent(id, owner);
+      if (ev) {
+        opts.push({ mode: 'ops', eventFirst: true, label: `상대 이벤트 먼저 → 작전 ${ops}` });
+        opts.push({ mode: 'ops', eventFirst: false, label: `작전 ${ops} → 상대 이벤트` });
+      } else opts.push({ mode: 'ops', label: `작전 ${ops} (상대 이벤트 무효)` });
+    }
+    if (this.canSpace(side, id)) opts.push({ mode: 'space', label: `우주 경쟁 (${this.G.space[side] + 1}칸 도전)` });
+    return opts;
+  }
+  async actionRound(side) {
+    const G = this.G;
+    G.phasing = side;
+    G.defconAtArStart = G.defcon;
+    this.update();
+    // 쿠바 미사일 위기 해제 기회
+    if (G.fx.cmc === opp(side)) {
+      const choices = side === 'USSR' ? ['cuba'] : ['wgermany', 'turkey'];
+      const ok = choices.filter(c => this.inf(c, side) >= 2);
+      if (ok.length) {
+        const a = await this.pickOption(side, '쿠바 미사일 위기 해제', [
+          ...ok.map(c => ({ label: `${cname(c)}에서 영향력 2 제거하여 해제`, value: c })), { label: '그대로 두기', value: null, ai: 1 }]);
+        if (a) { this.removeInf(a, side, 2); delete G.fx.cmc; this.log(`${SIDE_KO[side]}이 ${cname(a)}에서 영향력 2를 빼서 쿠바 미사일 위기를 해제했습니다.`); this.update(); }
+      }
+    }
+    // 수렁 / 곰의 덫
+    const trapped = (side === 'US' && G.quagmire) || (side === 'USSR' && G.bearTrap);
+    if (trapped) {
+      const name = side === 'US' ? '수렁' : '곰의 덫';
+      const elig = G.hands[side].filter(id => this.effOps(side, id) >= 2 && !CARDS[id].scoring);
+      const scs = G.hands[side].filter(id => CARDS[id].scoring);
+      let playScoring = false;
+      if (elig.length && scs.length) {
+        playScoring = await this.pickOption(side, `「${name}」 상태입니다`, [
+          { label: '카드를 버리고 탈출 시도', value: false, ai: scs.length >= this.arsFor(side) - G.ar + 1 ? 0 : 1 },
+          { label: '대신 득점 카드 내기', value: true, ai: scs.length >= this.arsFor(side) - G.ar + 1 ? 2 : 0 }]);
+      }
+      if (elig.length && !playScoring) {
+        const d = await this.ask(side, { type: 'card', title: `「${name}」: 작전 2 이상 카드 1장을 버리세요`, cards: elig, intent: { kind: 'discard' } });
+        this.removeFromHand(side, d); this.G.discard.push(d);
+        const r = this.roll();
+        this.log(`${SIDE_KO[side]}이 「${name}」 탈출 시도: ${cardName(d)} 버림, 주사위 ${r} (1~4 필요)`, 'roll');
+        if (r <= 4) { if (side === 'US') G.quagmire = false; else G.bearTrap = false; this.log(`「${name}」에서 벗어났습니다!`); }
+        this.update();
+        return true;
+      }
+      const sc = scs;
+      if (!sc.length) {
+        const r = this.roll();
+        this.log(`${SIDE_KO[side]}: 버릴 카드가 없어 주사위만 굴림 ${r}`, 'roll');
+        if (r <= 4) { if (side === 'US') G.quagmire = false; else G.bearTrap = false; this.log(`「${name}」에서 벗어났습니다!`); }
+        return G.hands[side].length > 0;
+      }
+      // 득점 카드를 내야 함 → 아래 일반 진행에서 득점 카드만 허용
+      G.fx.forceScoring = side;
+    }
+    let playable = this.playableCards(side);
+    if (G.fx.forceScoring === side) playable = playable.filter(id => CARDS[id].scoring);
+    if (G.fx.amesOrder && side === 'US') { /* 공개만 */ }
+    const withOpts = playable.map(id => ({ id, options: this.actionOptions(side, id) })).filter(x => x.options.length);
+    if (!withOpts.length) { this.log(`${SIDE_KO[side]}: 낼 카드가 없어 패스합니다.`); delete G.fx.forceScoring; return false; }
+    const decision = await this.ask(side, { type: 'action', title: `${SIDE_KO[side]} 액션 라운드 ${G.ar}`, choices: withOpts, canPass: withOpts.length === 1 && withOpts[0].id === 6 });
+    delete G.fx.forceScoring;
+    if (!decision || decision.pass) { this.log(`${SIDE_KO[side]}: 패스`); return false; }
+    await this.executeAction(side, decision);
+    // NORAD
+    if (G.perm[106] && G.defcon === 2 && G.defconAtArStart !== 2 && this.control('canada') === 'US') {
+      const v = COUNTRY_IDS.filter(c => this.inf(c, 'US') > 0);
+      const c = await this.pickCountry('US', 'NORAD: 미국 영향력 1을 추가할 국가', v, { kind: 'add', side: 'US' });
+      if (c) { this.addInf(c, 'US', 1); this.log(`NORAD: ${cname(c)}에 미국 영향력 +1`); }
+    }
+    return true;
+  }
+  async executeAction(side, { card: id, mode, eventFirst, unTarget }) {
+    const G = this.G;
+    if (id === 6) { G.china.holder = null; } else this.removeFromHand(side, id);
+    if (G.fx.missileEnvy === side && id === 49) delete G.fx.missileEnvy;
+    const cardOps = this.effOps(side, id);
+    this.update();
+    if (mode === 'space') {
+      await this.spaceRace(side, id);
+      if (id === 6) this.passChina(side, false); else this.discardCard(id);
+      return;
+    }
+    if (mode === 'un') {
+      // UN 개입 + 상대 카드
+      let tgt = unTarget;
+      if (tgt == null) {
+        const targets = G.hands[side].filter(x => CARDS[x].side === opp(side));
+        tgt = await this.ask(side, { type: 'card', title: 'UN 개입과 함께 낼 상대 이벤트 카드', cards: targets, intent: { kind: 'unTarget' } });
+      }
+      this.removeFromHand(side, tgt);
+      this.log(`🇺🇳 ${SIDE_KO[side]}: 「UN 개입」으로 ${cardName(tgt)} 이벤트를 취소하고 작전으로 사용`, 'event');
+      if (G.fx.u2) this.vp('USSR', 1, 'U2 사건');
+      if (side === 'US' && G.fx.wwby) { G.fx.wwbyCancelled = true; this.log('「너희를 묻어 버리겠다」의 3 VP가 취소되었습니다.'); }
+      this.discardCard(32);
+      this.flowerCheck(tgt, side);
+      await this.conductOps(side, this.effOps(side, tgt), { card: tgt });
+      this.discardCard(tgt);
+      return;
+    }
+    this.log(`${SIDE_KO[side]}: ${cardName(id)} → ${mode === 'event' ? '이벤트' : `작전 ${cardOps}`}`, 'play');
+    if (mode === 'event') {
+      const owner = this.eventOwner(id, side);
+      const fired = await this.playEvent(id, owner);
+      this.flowerCheck(id, side);
+      this.finishCard(id, fired);
+      return;
+    }
+    // 작전
+    this.flowerCheck(id, side);
+    const owner = id === 6 ? null : this.eventOwner(id, side);
+    let fired = false;
+    const oppEvent = owner && owner !== side && this.canEvent(id, owner);
+    if (oppEvent && eventFirst) { fired = await this.playEvent(id, owner); }
+    await this.conductOps(side, cardOps, { card: id });
+    if (oppEvent && !eventFirst) { fired = await this.playEvent(id, owner); }
+    if (id === 6) this.passChina(side, false);
+    else this.finishCard(id, fired);
+  }
+
+  // ---------- 턴 진행 ----------
+  async run() {
+    try {
+      await this.setup();
+      while (this.G.turn <= 10) {
+        await this.playTurn();
+        this.G.turn++;
+      }
+      this.G.turn = 10;
+      this.finalScoring();
+    } catch (e) {
+      if (e && e.gameOver) {
+        this.G.over = { winner: e.winner, reason: e.reason };
+        this.log(`🏁 게임 종료: ${e.reason}. ${e.winner ? SIDE_KO[e.winner] + ' 승리!' : '무승부!'}`, 'over');
+        this.update();
+        return this.G.over;
+      }
+      throw e;
+    }
+    return this.G.over;
+  }
+  finalScoring() {
+    this.log('— 최종 득점 (10턴 종료) —', 'turn');
+    for (const r of ['eu', 'as', 'me', 'ca', 'sa', 'af']) this.scoreRegion(r);
+    if (this.G.china.holder) this.vp(this.G.china.holder, 1, '중국 카드 보유');
+    const v = this.G.vp;
+    throw new GameOver(v > 0 ? 'US' : v < 0 ? 'USSR' : null, `최종 점수 ${v > 0 ? '미국 +' + v : v < 0 ? '소련 +' + (-v) : '동점'}`);
+  }
+  async playTurn() {
+    const G = this.G;
+    if (G.turn > 1) {
+      this.log(`═══ ${G.turn}턴 시작 ═══`, 'turn');
+      if (G.turn === 4) { G.deck.push(...this.cardsOfEra(2)); this.shuffle(G.deck); this.log('중반 냉전 카드가 덱에 추가되었습니다.'); }
+      if (G.turn === 8) { G.deck.push(...this.cardsOfEra(3)); this.shuffle(G.deck); this.log('후반 냉전 카드가 덱에 추가되었습니다.'); }
+      this.improve(1, '턴 시작');
+      this.deal();
+    } else this.log('═══ 1턴 시작 ═══', 'turn');
+    G.fx = {}; G.spaceTries = { US: 0, USSR: 0 }; G.revealed = { US: false, USSR: false };
+    G.ar = 0;
+    this.update();
+    await this.headline();
+    G.phase = 'action';
+    const n = Math.max(this.arsFor('US'), this.arsFor('USSR'));
+    const done = { US: 0, USSR: 0 };
+    for (let ar = 1; ar <= 8; ar++) {
+      G.ar = ar;
+      let any = false;
+      for (const s of ['USSR', 'US']) {
+        if (ar > this.arsFor(s)) continue;
+        any = true;
+        await this.actionRound(s);
+        // 너희를 묻어 버리겠다
+        if (s === 'US' && G.fx.wwby && !G.fx.wwbyFresh) {
+          if (!G.fx.wwbyCancelled) { G.phasing = 'USSR'; this.vp('USSR', 3, '너희를 묻어 버리겠다'); }
+          delete G.fx.wwby; delete G.fx.wwbyCancelled;
+        }
+        if (G.fx.wwbyFresh) delete G.fx.wwbyFresh;
+        this.update();
+        await this.pause(250);
+      }
+      if (!any || ar >= n) break;
+    }
+    await this.endTurn();
+  }
+  async endTurn() {
+    const G = this.G;
+    G.phase = 'end';
+    // 군사작전 점검
+    const pen = {};
+    for (const s of ['US', 'USSR']) pen[s] = Math.max(0, G.defcon - G.milops[s]);
+    if (pen.US || pen.USSR) {
+      this.log(`군사작전 점검 (필요 ${G.defcon}) — 미국 ${G.milops.US}, 소련 ${G.milops.USSR}`);
+      const net = pen.USSR - pen.US; // 양수면 미국 이득
+      G.phasing = 'US';
+      if (net > 0) this.vp('US', net, '소련 군사작전 부족'); else if (net < 0) this.vp('USSR', -net, '미국 군사작전 부족');
+    }
+    // 달 착륙 능력: 카드 1장 버리기
+    for (const s of ['US', 'USSR']) {
+      if (this.hasSpaceAbility(s, 6) && G.hands[s].length) {
+        const d = await this.ask(s, { type: 'card', title: '달 착륙 능력: 버릴 카드 1장 (선택)', cards: G.hands[s], none: '버리지 않음', intent: { kind: 'discardOptional' } });
+        if (d != null) { this.removeFromHand(s, d); G.discard.push(d); this.log(`${SIDE_KO[s]}이 달 착륙 능력으로 카드 1장을 버렸습니다.`); }
+      }
+    }
+    // 득점 카드 보유 검사
+    const held = s => G.hands[s].some(id => CARDS[id].scoring);
+    if (held('US') && held('USSR')) throw new GameOver(null, '양측 모두 득점 카드를 손에 남겼습니다');
+    if (held('US')) throw new GameOver('USSR', '미국이 득점 카드를 손에 남겼습니다');
+    if (held('USSR')) throw new GameOver('US', '소련이 득점 카드를 손에 남겼습니다');
+    if (G.china.holder && !G.china.faceUp) { G.china.faceUp = true; }
+    G.milops = { US: 0, USSR: 0 };
+    if (G.perm[73] === undefined) { /* noop */ }
+    this.update();
+  }
+}
+
+if (typeof module !== 'undefined') module.exports = { Game, GameOver, opp, SIDE_KO, inRegion, cname, cardName };
+else Object.assign(window, { Game, GameOver, opp, SIDE_KO, inRegion, cname, cardName });
+
+})();
+// ---- events.js ----
+(function(){
+// ===== 카드 이벤트 구현 =====
+// 각 함수: async (g, side) — side는 이벤트의 주인(혜택을 받는 쪽)
+const _E = (typeof module !== 'undefined') ? require('./engine.js') : { opp, SIDE_KO, inRegion, cname, cardName };
+const _D = (typeof module !== 'undefined') ? require('./data.js') : DATA;
+const EV_C = _D.COUNTRIES, EV_IDS = _D.COUNTRY_IDS, EV_CARDS = _D.CARDS;
+
+function evOpp(s) { return s === 'US' ? 'USSR' : 'US'; }
+function evIn(c, r) { return EV_C[c].regions.includes(r); }
+const KO = { US: '미국', USSR: '소련' };
+const nm = c => EV_C[c].name;
+const cn = id => `「${EV_CARDS[id].name.replace(/\*$/, '')}」`;
+
+async function randomDiscard(g, victim, n) {
+  for (let k = 0; k < n; k++) {
+    const h = g.G.hands[victim];
+    if (!h.length) return null;
+    const i = Math.floor(g.rng() * h.length);
+    const id = h.splice(i, 1)[0];
+    g.G.discard.push(id);
+    g.log(`${KO[victim]}이 무작위로 ${cn(id)}을(를) 버렸습니다.`);
+    if (k === n - 1) return id;
+  }
+}
+async function discardHighOps(g, victim, title) {
+  const elig = g.G.hands[victim].filter(id => g.effOps(victim, id) >= 3);
+  if (!elig.length) return null;
+  const ans = await g.ask(victim, { type: 'card', title, cards: elig, none: '버리지 않음', intent: { kind: 'discardToPrevent' } });
+  if (ans == null) return null;
+  g.removeFromHand(victim, ans); g.G.discard.push(ans);
+  g.log(`${KO[victim]}이 ${cn(ans)}을(를) 버렸습니다.`);
+  return ans;
+}
+async function freeCoupOrRealign(g, side, ops, filter, title) {
+  const coupOk = EV_IDS.some(c => filter(c) && g.canAttack(side, c, { coup: true, free: true }));
+  if (!coupOk) { g.log('무료 쿠데타/재정렬 대상이 없습니다.'); return; }
+  await g.conductOps(side, ops, { allowed: ['realign', 'coup'], filter, free: true, title });
+}
+
+const EVENTS = {
+  // ----- 초반 -----
+  4: async (g) => { g.degrade(1, '덕 앤 커버'); g.vp('US', 5 - g.G.defcon, '덕 앤 커버'); },
+  5: async (g) => {
+    const id = await randomDiscard(g, 'USSR', 1);
+    if (id != null && EV_CARDS[id].side === 'US') {
+      g.G.discard.pop();
+      const fired = await g.playEvent(id, 'US');
+      g.finishCard(id, fired);
+    }
+  },
+  7: async (g, s) => { await g.removeSome(s, 'US', 3, { filter: c => evIn(c, 'we'), maxPer: 2, title: '사회주의 정부: 서유럽 미국 영향력 제거' }); },
+  8: async (g) => { g.G.inf.cuba.US = 0; g.setInfToControl('cuba', 'USSR'); g.log('쿠바: 미국 영향력 제거, 소련 지배'); },
+  9: async (g) => { g.addInf('vietnam', 'USSR', 2); g.G.fx.vietnam = true; g.log('베트남 소련 +2'); },
+  10: async (g) => {
+    const d = await discardHighOps(g, 'US', '베를린 봉쇄: 작전 3 이상 카드를 버리면 서독을 지킵니다');
+    if (d == null) { g.G.inf.wgermany.US = 0; g.log('서독의 미국 영향력이 모두 제거되었습니다.'); }
+  },
+  11: async (g, s) => { await g.war(s, 'skorea', 0, 4, 2, 2, '한국 전쟁'); },
+  12: async (g) => { g.G.inf.romania.US = 0; g.setInfToControl('romania', 'USSR'); g.log('루마니아: 소련 지배'); },
+  13: async (g, s) => { await g.war(s, 'israel', g.control('israel') === 'US' ? 1 : 0, 4, 2, 2, '아랍-이스라엘 전쟁'); },
+  14: async (g, s) => {
+    await g.distribute(s, 'USSR', 4, { filter: (c, p) => evIn(c, 'ee') && g.control(c) !== 'US' && !p[c], maxPer: 1, mustAll: true, title: '코메콘: 동유럽 4개국에 소련 +1' });
+  },
+  15: async (g) => {
+    g.addInf('egypt', 'USSR', 2);
+    const half = Math.ceil(g.inf('egypt', 'US') / 2); g.removeInf('egypt', 'US', half);
+    g.log(`이집트 소련 +2, 미국 -${half}`);
+  },
+  16: async (g, s) => {
+    const opt = await g.pickOption(s, '바르샤바 조약 기구', [
+      { label: '동유럽 4개국의 미국 영향력 모두 제거', value: 'rm' },
+      { label: '동유럽에 소련 영향력 5 추가 (국가당 최대 2)', value: 'add' }]);
+    if (opt === 'rm') {
+      for (let k = 0; k < 4; k++) {
+        const v = EV_IDS.filter(c => evIn(c, 'ee') && g.inf(c, 'US') > 0);
+        const c = await g.pickCountry(s, `미국 영향력을 모두 제거할 동유럽 국가 (${k + 1}/4)`, v, { kind: 'removeAll', side: 'US' });
+        if (!c) break;
+        g.G.inf[c].US = 0; g.log(`${nm(c)} 미국 영향력 모두 제거`); g.update();
+      }
+    } else await g.distribute(s, 'USSR', 5, { filter: c => evIn(c, 'ee'), maxPer: 2, mustAll: true, title: '바르샤바 조약: 동유럽에 소련 +5' });
+  },
+  17: async (g) => { g.removeInf('france', 'US', 2); g.addInf('france', 'USSR', 1); g.log('프랑스: 미국 -2, 소련 +1'); },
+  18: async (g, s) => { g.advanceSpace(s, 1); },
+  19: async (g, s) => {
+    const v = EV_IDS.filter(c => evIn(c, 'eu') && g.control(c) == null && g.inf(c, 'USSR') > 0);
+    const c = await g.pickCountry(s, '트루먼 독트린: 소련 영향력을 모두 제거할 국가', v, { kind: 'removeAll', side: 'USSR' });
+    if (c) { g.G.inf[c].USSR = 0; g.log(`${nm(c)} 소련 영향력 모두 제거`); }
+  },
+  20: async (g, s) => {
+    const o = evOpp(s);
+    const ans = await g.pickOption(o, `올림픽 경기: ${KO[s]}이 주최합니다`, [
+      { label: '참가 (주사위 대결, 주최 +2)', value: 'go' },
+      { label: '보이콧 (DEFCON -1, 주최자 작전 4)', value: 'boy' }]);
+    if (ans === 'boy') {
+      g.log(`${KO[o]}이 올림픽을 보이콧했습니다.`);
+      g.degrade(1, '올림픽 보이콧');
+      await g.conductOps(s, 4, {});
+    } else {
+      while (true) {
+        const a = g.roll() + 2, b = g.roll();
+        g.log(`올림픽: ${KO[s]} ${a - 2}+2=${a}, ${KO[o]} ${b}`, 'roll');
+        if (a > b) { g.vp(s, 2, '올림픽'); break; }
+        if (b > a) { g.vp(o, 2, '올림픽'); break; }
+      }
+    }
+  },
+  21: async (g) => { g.log('NATO 발효: 유럽의 미국 지배 국가는 소련의 쿠데타/재정렬로부터 보호됩니다.'); },
+  22: async (g, s) => {
+    const v = ['yugoslavia', 'romania', 'bulgaria', 'hungary', 'czech'].filter(c => g.inf(c, 'USSR') > g.inf(c, 'US'));
+    const c = await g.pickCountry(s, '독립 공산주의자: 미국 영향력을 소련과 같게 할 국가', v, { kind: 'add', side: 'US' });
+    if (c) { const d = g.inf(c, 'USSR') - g.inf(c, 'US'); g.addInf(c, 'US', d); g.log(`${nm(c)} 미국 +${d}`); }
+  },
+  23: async (g, s) => {
+    await g.distribute(s, 'US', 7, { filter: (c, p) => evIn(c, 'we') && g.control(c) !== 'USSR' && !p[c], maxPer: 1, mustAll: true, title: '마셜 플랜: 서유럽 7개국에 미국 +1' });
+  },
+  24: async (g, s) => {
+    const t = await g.pickOption(s, '인도-파키스탄 전쟁: 침공 대상', [
+      { label: '파키스탄 침공 (인도가 공격)', value: 'pakistan' }, { label: '인도 침공 (파키스탄이 공격)', value: 'india' }]);
+    await g.war(s, t, 0, 4, 2, 2, '인도-파키스탄 전쟁');
+  },
+  25: async (g) => { g.G.fx.containment = true; },
+  26: async (g, s) => { g.G.revealed.USSR = true; g.log(`소련 손패 공개: ${g.G.hands.USSR.map(cn).join(', ') || '없음'}`); g.update(); await g.conductOps(s, g.effOps('US', 26), {}); },
+  27: async (g) => { g.setInfToControl('japan', 'US'); g.log('일본: 미국 지배'); },
+  28: async (g, s) => { await g.removeSome(s, 'US', 4, { filter: c => ['france', 'uk', 'israel'].includes(c), maxPer: 2, title: '수에즈 위기: 미국 영향력 제거' }); },
+  29: async (g, s) => {
+    const n = g.era() === 3 ? 2 : 1;
+    for (let k = 0; k < 3; k++) {
+      const v = EV_IDS.filter(c => evIn(c, 'ee') && g.inf(c, 'USSR') > 0 && !(g._eeu || []).includes(c));
+      const c = await g.pickCountry(s, `동유럽 소요: 소련 영향력 ${n} 제거 (${k + 1}/3)`, v, { kind: 'remove', side: 'USSR' });
+      if (!c) break;
+      (g._eeu = g._eeu || []).push(c);
+      g.removeInf(c, 'USSR', n); g.log(`${nm(c)} 소련 -${n}`); g.update();
+    }
+    g._eeu = null;
+  },
+  30: async (g, s) => {
+    await g.distribute(s, 'USSR', 4, { filter: (c, p) => (evIn(c, 'af') || evIn(c, 'sea')) && !p[c], maxPer: 1, mustAll: true, title: '탈식민지화: 아프리카/동남아 4개국에 소련 +1' });
+  },
+  31: async (g, s) => { g.G.fx.redScare = g.G.fx.redScare || {}; g.G.fx.redScare[s] = true; g.log(`이번 턴 ${KO[evOpp(s)]}의 작전값 -1`); },
+  33: async (g, s) => {
+    const taken = await g.removeSome(s, 'USSR', 4, { optional: true, title: '탈스탈린화: 옮길 소련 영향력을 뺄 국가 (최대 4)' });
+    const n = Object.values(taken).reduce((a, b) => a + b, 0);
+    if (n) await g.distribute(s, 'USSR', n, { filter: c => g.control(c) !== 'US', maxPer: 2, mustAll: true, title: `탈스탈린화: 소련 영향력 ${n} 재배치 (미국 비지배국, 국가당 최대 2)` });
+  },
+  34: async (g, s) => { const v = g.G.defcon - 2; if (v > 0) g.vp(s, v, '핵실험 금지'); g.improve(2, '핵실험 금지 조약'); },
+  35: async (g) => { g.log('포모사 결의안 발효: 미국이 대만을 지배하면 아시아 득점 시 전장 국가로 취급'); },
+  // ----- 중반 -----
+  36: async (g, s) => {
+    const v = EV_IDS.filter(c => EV_C[c].stab <= 2 && g.inf(c, evOpp(s)) > 0 && !(s === 'USSR' && g.natoProtected(c)));
+    const t = await g.pickCountry(s, '국지전: 공격할 국가 (안정도 1~2)', v, { kind: 'war' });
+    if (t) await g.war(s, t, 0, 3, 1, 3, '국지전');
+    else g.addMilops(s, 3);
+  },
+  39: async (g, s) => {
+    const o = evOpp(s), M = g.G.milops;
+    if (M[s] > M[o]) g.vp(s, M[s] >= g.G.defcon ? 3 : 1, '군비 경쟁');
+    else g.log('군비 경쟁: 효과 없음');
+  },
+  40: async (g, s) => {
+    const old = g.G.defcon; g.G.defcon = 2; g.log(`DEFCON ${old} → 2 (쿠바 미사일 위기)`, 'defcon');
+    g.G.fx.cmc = s; g.log(`이번 턴 ${KO[evOpp(s)]}이 쿠데타를 하면 핵전쟁으로 패배합니다!`);
+  },
+  41: async (g) => { g.G.fx.nuclearSubs = true; },
+  42: async (g) => { g.G.quagmire = true; if (g.G.perm[106]) { delete g.G.perm[106]; g.log('「NORAD」가 취소되었습니다.'); } g.log('미국은 「수렁」에 빠졌습니다.'); },
+  43: async (g, s) => {
+    g.improve(2, 'SALT 협상'); g.G.fx.salt = true;
+    const v = g.G.discard.filter(id => !EV_CARDS[id].scoring);
+    if (v.length) {
+      const c = await g.ask(s, { type: 'card', title: 'SALT: 버림 더미에서 가져올 카드', cards: v, none: '가져오지 않음', intent: { kind: 'take' } });
+      if (c != null) { g.G.discard.splice(g.G.discard.indexOf(c), 1); g.G.hands[s].push(c); g.log(`${KO[s]}이 버림 더미에서 ${cn(c)}을(를) 가져왔습니다.`); }
+    }
+  },
+  44: async (g) => { g.G.bearTrap = true; g.log('소련은 「곰의 덫」에 빠졌습니다.'); },
+  45: async (g, s) => {
+    const bonus = side => ['eu', 'as', 'me', 'ca', 'sa', 'af'].filter(r => g.regionStatus(r)[side].level >= 2).length;
+    const a = g.roll(), b = g.roll(), ma = bonus('US'), mb = bonus('USSR');
+    g.log(`정상 회담: 미국 ${a}+${ma}=${a + ma}, 소련 ${b}+${mb}=${b + mb}`, 'roll');
+    let w = null; if (a + ma > b + mb) w = 'US'; else if (b + mb > a + ma) w = 'USSR';
+    if (!w) { g.log('동점 — 효과 없음'); return; }
+    g.vp(w, 2, '정상 회담');
+    const opts = [{ label: 'DEFCON 유지', value: 0 }];
+    if (g.G.defcon < 5) opts.push({ label: 'DEFCON 1 올리기', value: 1 });
+    if (g.G.defcon > 2) opts.push({ label: 'DEFCON 1 내리기', value: -1 });
+    const d = await g.pickOption(w, '정상 회담 승리: DEFCON 조정', opts);
+    if (d) g.setDefcon(g.G.defcon + d, '정상 회담');
+  },
+  46: async (g, s) => {
+    const opts = [5, 4, 3, 2, 1].map(v => ({ label: `DEFCON ${v}${v === 1 ? ' (핵전쟁: 내 차례면 패배!)' : ''}`, value: v }));
+    const v = await g.pickOption(s, '닥터 스트레인지러브: DEFCON 설정', opts);
+    g.addMilops(s, 5);
+    g.setDefcon(v, '닥터 스트레인지러브');
+  },
+  47: async (g, s) => {
+    const c = await g.pickCountry(s, '군사 정권: 영향력 2를 놓을 중앙/남아메리카 국가', EV_IDS.filter(c => evIn(c, 'ca') || evIn(c, 'sa')), { kind: 'add', side: s, n: 2 });
+    if (c) { g.addInf(c, s, 2); g.log(`${nm(c)} ${KO[s]} +2`); g.update(); }
+    await freeCoupOrRealign(g, s, g.effOps(s, 47), c => evIn(c, 'ca') || evIn(c, 'sa'), '군사 정권: 무료 쿠데타/재정렬');
+  },
+  48: async (g) => {
+    const bg = side => EV_IDS.filter(c => EV_C[c].bg && g.control(c) === side).length;
+    if (bg('US') > bg('USSR')) { g.vp('US', 2, '부엌 논쟁'); g.log('미국이 소련의 가슴을 콕 찌릅니다! 👉'); } else g.log('부엌 논쟁: 조건 불충족');
+  },
+  49: async (g, s) => {
+    const o = evOpp(s), h = g.G.hands[o];
+    if (!h.length) return;
+    const max = Math.max(...h.map(id => EV_CARDS[id].ops));
+    const ties = h.filter(id => EV_CARDS[id].ops === max);
+    const take = ties.length > 1 ? await g.ask(o, { type: 'card', title: '미사일 질투: 상대에게 줄 카드 선택 (최고 작전값 동률)', cards: ties, intent: { kind: 'give' } }) : ties[0];
+    g.removeFromHand(o, take); h.push(49);
+    // 49는 이미 손에서 빠졌으므로 처리 후 버림이 아님 → finishCard에서 버림 방지
+    g.G.fx.missileEnvy = o; g.G.fx.envyKeep = true;
+    g.log(`미사일 질투: ${KO[s]}이 ${cn(take)}을(를) 받고 「미사일 질투」를 넘깁니다.`);
+    const owner = EV_CARDS[take].side;
+    if (owner === o) { await g.conductOps(s, g.effOps(s, take), { card: take }); g.G.discard.push(take); }
+    else { const f = await g.playEvent(take, s); g.finishCard(take, f); }
+  },
+  50: async (g) => {
+    g.degrade(1, '너희를 묻어 버리겠다');
+    g.G.fx.wwby = true; if (g.G.phasing === 'US' && g.G.phase === 'action') g.G.fx.wwbyFresh = true;
+    g.log('미국이 다음 라운드에 UN 개입을 쓰지 않으면 소련 3 VP');
+  },
+  51: async (g) => { g.G.fx.brezhnev = true; },
+  52: async (g) => { g.addInf('angola', 'USSR', 2); g.addInf('seafrica', 'USSR', 2); g.log('앙골라, 남동아프리카 소련 +2'); },
+  53: async (g, s) => {
+    const opt = await g.pickOption(s, '남아프리카 소요', [
+      { label: '남아프리카에 소련 +2', value: 'a' },
+      { label: '남아프리카 +1, 인접국 하나에 +2', value: 'b' }]);
+    if (opt === 'a') { g.addInf('southafrica', 'USSR', 2); g.log('남아프리카 소련 +2'); }
+    else {
+      g.addInf('southafrica', 'USSR', 1);
+      const c = await g.pickCountry(s, '소련 +2를 놓을 남아프리카 인접국', EV_C.southafrica.adj, { kind: 'add', side: 'USSR', n: 2 });
+      if (c) g.addInf(c, 'USSR', 2);
+      g.log(`남아프리카 소련 +1, ${c ? nm(c) + ' +2' : ''}`);
+    }
+  },
+  54: async (g) => { g.addInf('chile', 'USSR', 2); g.log('칠레 소련 +2'); },
+  55: async (g) => { g.vp('USSR', 1, '빌리 브란트'); g.addInf('wgermany', 'USSR', 1); },
+  56: async (g, s) => {
+    const list = ['sudan', 'iran', 'iraq', 'egypt', 'libya', 'saudi', 'syria', 'jordan'];
+    for (let k = 0; k < 2; k++) {
+      const v = list.filter(c => g.inf(c, 'US') > 0);
+      const c = await g.pickCountry(s, `이슬람 혁명: 미국 영향력을 모두 제거할 국가 (${k + 1}/2)`, v, { kind: 'removeAll', side: 'US' });
+      if (!c) break;
+      g.G.inf[c].US = 0; g.log(`${nm(c)} 미국 영향력 모두 제거`); g.update();
+    }
+  },
+  57: async (g, s) => { g.improve(1, 'ABM 조약'); await g.conductOps(s, g.effOps(s, 57), {}); },
+  58: async (g) => {
+    if (g.G.china.holder === 'US') { g.G.china = { holder: 'USSR', faceUp: true }; g.log('중국 카드가 소련으로 넘어갑니다(사용 가능).'); }
+    else if (g.G.china.holder === 'USSR') g.vp('USSR', 1, '문화 대혁명');
+  },
+  59: async (g) => { g.log('플라워 파워 발효: 미국이 전쟁 카드를 낼 때마다 소련 2 VP'); },
+  60: async (g) => { g.vp('USSR', 1, 'U2 사건'); g.G.fx.u2 = true; },
+  61: async (g) => {
+    const n = ['egypt', 'iran', 'libya', 'saudi', 'iraq', 'gulf', 'venezuela'].filter(c => g.control(c) === 'USSR').length;
+    if (n) g.vp('USSR', n, 'OPEC'); else g.log('OPEC: 소련 지배국 없음');
+  },
+  62: async (g, s) => { g.G.revealed.US = true; g.log(`미국 손패 공개: ${g.G.hands.US.map(cn).join(', ') || '없음'}`); g.update(); await g.conductOps(s, g.effOps('USSR', 62), {}); },
+  63: async (g, s) => {
+    await g.distribute(s, 'US', 4, { filter: (c, p) => (evIn(c, 'af') || evIn(c, 'sea')) && !p[c], maxPer: 1, mustAll: true, title: '식민지 후위대: 아프리카/동남아 4개국에 미국 +1' });
+  },
+  64: async (g) => { for (const c of ['panama', 'costarica', 'venezuela']) g.addInf(c, 'US', 1); g.log('파나마, 코스타리카, 베네수엘라 미국 +1'); },
+  65: async (g) => { g.vp('US', 1, '캠프 데이비드'); for (const c of ['israel', 'jordan', 'egypt']) g.addInf(c, 'US', 1); },
+  66: async (g, s) => {
+    await g.distribute(s, 'US', 3, { filter: (c, p) => !p[c] && g.inf(c, 'US') === 0 && g.inf(c, 'USSR') === 0, maxPer: 1, mustAll: true, title: '괴뢰 정부: 영향력이 없는 3개국에 미국 +1' });
+  },
+  67: async (g, s) => {
+    const h = g.G.hands.USSR;
+    if (h.length) {
+      const id = h.splice(Math.floor(g.rng() * h.length), 1)[0];
+      g.log(`소련에 곡물 판매: 미국이 소련 손패에서 ${cn(id)}을(를) 뽑았습니다.`); g._grainCard = id;
+      const opts = g.actionOptions('US', id).map(o => ({ ...o, label: '이 카드 사용: ' + o.label, value: o }));
+      opts.push({ label: '돌려주고 「곡물 판매」 작전 2 사용', value: 'return' });
+      const pick = await g.pickOption('US', `곡물 판매: ${cn(id)}`, opts, EV_CARDS[id].text);
+      if (pick !== 'return') { await g.executeAction('US', { card: id, mode: pick.mode, eventFirst: pick.eventFirst, _fromGrain: true }); return; }
+      h.push(id); g.log('카드를 소련에 돌려줍니다.');
+    }
+    await g.conductOps('US', g.effOps('US', 67), {});
+  },
+  68: async (g) => { g.removeInf('poland', 'USSR', 2); g.addInf('poland', 'US', 1); g.log('폴란드: 소련 -2, 미국 +1'); },
+  69: async (g, s) => { g.G.fx.deathSquads = s; },
+  70: async (g, s) => { await g.distribute(s, 'US', 2, { filter: c => evIn(c, 'ca') || evIn(c, 'sa'), mustAll: true, title: '미주기구: 중앙/남미에 미국 +2' }); },
+  71: async (g) => {
+    if (g.G.china.holder === 'USSR') { g.G.china = { holder: 'US', faceUp: false }; g.log('중국 카드가 미국으로 넘어갑니다(뒷면).'); }
+    else if (g.G.china.holder === 'US') g.vp('US', 2, '닉슨의 중국 카드');
+  },
+  72: async (g) => { g.G.inf.egypt.USSR = 0; g.addInf('egypt', 'US', 1); g.log('이집트: 소련 영향력 제거, 미국 +1'); },
+  73: async (g) => { g.log('왕복 외교 발효'); },
+  74: async (g, s) => { await g.removeSome(s, 'USSR', 4, { filter: c => !evIn(c, 'eu'), maxPer: 2, title: '미국의 소리: 유럽 외 소련 영향력 제거' }); },
+  75: async (g, s) => { await g.distribute(s, 'USSR', 3, { filter: c => evIn(c, 'ca'), maxPer: 2, mustAll: true, title: '해방 신학: 중앙아메리카에 소련 +3' }); },
+  76: async (g, s) => {
+    if (g.G.china.holder === 'USSR') { g.G.china = { holder: 'US', faceUp: true }; g.log('중국 카드가 미국으로 넘어갑니다(사용 가능).'); }
+    else await g.distribute(s, 'US', 4, { filter: c => evIn(c, 'as'), maxPer: 2, mustAll: true, title: '우수리강 분쟁: 아시아에 미국 +4' });
+  },
+  77: async (g, s) => {
+    const h = g.G.hands.US;
+    const sel = [];
+    while (true) {
+      const rest = h.filter(id => !sel.includes(id));
+      if (!rest.length) break;
+      const c = await g.ask(s, { type: 'card', title: `버릴 카드 선택 (${sel.length}장 선택됨)`, cards: rest, none: '선택 완료', intent: { kind: 'askNot' } });
+      if (c == null) break;
+      sel.push(c);
+    }
+    for (const id of sel) { g.removeFromHand('US', id); g.G.discard.push(id); }
+    for (let k = 0; k < sel.length; k++) { const d = g.draw(); if (d != null) h.push(d); }
+    g.log(`미국이 ${sel.length}장을 버리고 새로 뽑았습니다.`);
+  },
+  78: async (g) => {
+    const n = EV_IDS.filter(c => (evIn(c, 'ca') || evIn(c, 'sa')) && EV_C[c].bg && g.control(c) === 'US').length;
+    if (n) g.vp('US', n, '진보를 위한 동맹'); else g.log('진보를 위한 동맹: 해당 국가 없음');
+  },
+  80: async (g, s) => {
+    if (g.G.space[s] < g.G.space[evOpp(s)]) g.advanceSpace(s, 2, true);
+    else g.log('우주 경쟁에서 뒤처져 있지 않아 효과 없음');
+  },
+  // ----- 후반 -----
+  82: async (g) => { g.G.inf.iran.US = 0; g.addInf('iran', 'USSR', 2); g.log('이란: 미국 영향력 제거, 소련 +2'); },
+  83: async (g) => { g.addInf('argentina', 'USSR', 1); g.G.inf.uk.USSR = 0; g.vp('US', 1, '철의 여인'); },
+  84: async (g) => { const n = Math.floor(g.inf('libya', 'USSR') / 2); if (n) g.vp('US', n, '리비아 폭격'); else g.log('리비아 소련 영향력 부족'); },
+  85: async (g, s) => {
+    if (g.G.space.US <= g.G.space.USSR) { g.log('미국이 우주 경쟁에서 앞서지 않아 효과 없음'); return; }
+    const v = g.G.discard.filter(id => !EV_CARDS[id].scoring && id !== 32);
+    if (!v.length) return;
+    const c = await g.ask(s, { type: 'card', title: '스타워즈: 이벤트로 사용할 버림 더미 카드', cards: v, intent: { kind: 'playEvent' } });
+    if (c == null) return;
+    g.G.discard.splice(g.G.discard.indexOf(c), 1);
+    const owner = g.eventOwner(c, 'US');
+    const f = await g.playEvent(c, owner);
+    g.finishCard(c, f);
+  },
+  86: async (g) => { g.G.fx.northSeaOil = true; g.log('미국은 이번 턴 액션 라운드 8회'); },
+  87: async (g, s) => {
+    const n = g.G.vp < 0 ? 6 : 4;
+    await g.distribute(s, 'USSR', n, { filter: c => evIn(c, 'eu'), maxPer: 2, mustAll: true, title: `개혁가: 유럽에 소련 +${n}` });
+  },
+  88: async (g, s) => {
+    g.G.inf.lebanon.US = 0; g.log('레바논 미국 영향력 제거');
+    await g.removeSome(s, 'US', 2, { filter: c => evIn(c, 'me'), title: '해병대 막사 폭탄 테러: 중동 미국 영향력 2 제거' });
+  },
+  89: async (g, s) => {
+    g.degrade(1, 'KAL-007'); g.vp('US', 2, 'KAL-007 격추');
+    if (g.control('skorea') === 'US') await g.conductOps(s, 4, { allowed: ['inf', 'realign'] });
+  },
+  90: async (g, s) => {
+    g.improve(1, '글라스노스트'); g.vp('USSR', 2, '글라스노스트');
+    if (g.G.perm[87]) await g.conductOps(s, 4, { allowed: ['inf', 'realign'] });
+  },
+  91: async (g, s) => {
+    g.G.inf.nicaragua.US = 0; g.log('니카라과 미국 영향력 제거'); g.update();
+    const tg = EV_C.nicaragua.adj.filter(c => g.inf(c, 'US') > 0);
+    if (!tg.length) return;
+    const c = await g.pickCountry(s, '오르테가: 무료 쿠데타 대상 (니카라과 인접국)', tg, { kind: 'coup', ops: 2, free: true }, '쿠데타 안 함');
+    if (c) await g.coup(s, c, g.effOps(s, 91), { free: true });
+  },
+  92: async (g, s) => { const o = evOpp(s); await randomDiscard(g, o, (o === 'US' && g.G.perm[82]) ? 2 : 1); },
+  93: async (g) => { g.G.fx.iranContra = true; },
+  94: async (g, s) => {
+    const r = await g.pickOption(s, '체르노빌: 소련이 이번 턴 작전으로 영향력을 놓을 수 없는 지역', ['eu', 'as', 'me', 'af', 'ca', 'sa'].map(r => ({ label: _D.REGION_NAMES[r], value: r })));
+    g.G.fx.chernobyl = r; g.log(`이번 턴 소련은 ${_D.REGION_NAMES[r]}에 작전으로 영향력을 놓을 수 없습니다.`);
+  },
+  95: async (g, s) => {
+    const d = await discardHighOps(g, 'US', '중남미 외채 위기: 작전 3 이상 카드를 버리면 막을 수 있습니다');
+    if (d != null) return;
+    for (let k = 0; k < 2; k++) {
+      const v = EV_IDS.filter(c => evIn(c, 'sa') && g.inf(c, 'USSR') > 0 && c !== g._ladc);
+      const c = await g.pickCountry(s, `외채 위기: 소련 영향력을 두 배로 할 남미 국가 (${k + 1}/2)`, v, { kind: 'add', side: 'USSR' });
+      if (!c) break;
+      g._ladc = c; const n = g.inf(c, 'USSR'); g.addInf(c, 'USSR', n); g.log(`${nm(c)} 소련 영향력 ${n} → ${n * 2}`); g.update();
+    }
+    g._ladc = null;
+  },
+  96: async (g, s) => {
+    if (g.G.perm[55]) { delete g.G.perm[55]; g.log('「빌리 브란트」 효과가 취소됩니다.'); }
+    g.addInf('egermany', 'US', 3); g.log('동독 미국 +3'); g.update();
+    await freeCoupOrRealign(g, s, g.effOps(s, 96), c => evIn(c, 'eu'), '베를린 장벽: 유럽에서 무료 쿠데타/재정렬');
+  },
+  97: async (g) => { g.vp('US', 1, '악의 제국'); if (g.G.perm[59]) { delete g.G.perm[59]; g.log('「플라워 파워」가 취소됩니다.'); } },
+  98: async (g, s) => {
+    g.G.revealed.US = true; g.update();
+    g.log(`미국 손패 공개: ${g.G.hands.US.map(cn).join(', ') || '없음'}`);
+    const h = g.G.hands.US;
+    if (!h.length) return;
+    const c = await g.ask(s, { type: 'card', title: '앨드리치 에임스: 미국 손패에서 버릴 카드', cards: [...h], intent: { kind: 'discardOpp' }, reveal: true });
+    g.removeFromHand('US', c); g.G.discard.push(c); g.log(`미국의 ${cn(c)}을(를) 버렸습니다.`);
+  },
+  99: async (g, s) => {
+    g.vp('USSR', 1, '퍼싱 II');
+    await g.removeSome(s, 'US', 3, { filter: (c, r) => evIn(c, 'we') && !r[c], maxPer: 1, title: '퍼싱 II: 서유럽 3개국에서 미국 -1' });
+  },
+  100: async (g, s) => {
+    if (g.G.defcon !== 2) { g.log('DEFCON이 2가 아니므로 효과 없음'); return; }
+    const ok = await g.pickOption(s, '워게임: 상대에게 6 VP를 주고 게임을 끝낼까요?', [{ label: '게임 끝내기', value: true }, { label: '하지 않기', value: false }]);
+    if (!ok) return;
+    g.G.vp += (s === 'US' ? -6 : 6);
+    g.log(`워게임! ${KO[evOpp(s)]}에게 6 VP를 주고 게임을 끝냅니다. "체스 한 판 어때요?"`);
+    const v = g.G.vp;
+    throw new (require_GameOver())(v > 0 ? 'US' : v < 0 ? 'USSR' : null, `워게임으로 종료 (점수 ${v > 0 ? '미국 +' + v : v < 0 ? '소련 +' + (-v) : '동점'})`);
+  },
+  101: async (g) => { g.addInf('poland', 'US', 3); g.log('폴란드 미국 +3'); },
+  102: async (g, s) => {
+    const t = await g.pickOption(s, '이란-이라크 전쟁: 침공 대상', [
+      { label: '이라크 침공 (이란이 공격)', value: 'iraq' }, { label: '이란 침공 (이라크가 공격)', value: 'iran' }]);
+    await g.war(s, t, 0, 4, 2, 2, '이란-이라크 전쟁');
+  },
+  103: async (g, s, { headline } = {}) => {
+    if (!headline && g.G.phasing === 'USSR') g.vp('US', 1, '망명자');
+  },
+  104: async (g, s) => {
+    const sc = g.G.hands.US.filter(id => EV_CARDS[id].scoring);
+    g.log(`미국 손패의 득점 카드: ${sc.map(cn).join(', ') || '없음'}`);
+    const regs = [...new Set(sc.map(id => id === 38 ? 'sea' : _D.SCORING_REGION[id]))];
+    if (!regs.length) return;
+    const r = await g.pickOption(s, '케임브리지 5인조: 영향력 1을 놓을 지역', regs.map(r => ({ label: _D.REGION_NAMES[r], value: r })));
+    const c = await g.pickCountry(s, `${_D.REGION_NAMES[r]}에서 소련 +1 국가`, EV_IDS.filter(c => evIn(c, r)), { kind: 'add', side: 'USSR' });
+    if (c) { g.addInf(c, 'USSR', 1); g.log(`${nm(c)} 소련 +1`); }
+  },
+  105: async (g, s) => {
+    if (g.control('uk') !== 'US') { g.log('영국을 미국이 지배하지 않아 효과 없음'); return; }
+    if (g.G.perm[21]) {
+      const c = await g.pickCountry(s, '특별한 관계: 미국 +2를 놓을 서유럽 국가', EV_IDS.filter(c => evIn(c, 'we')), { kind: 'add', side: 'US', n: 2 });
+      if (c) g.addInf(c, 'US', 2);
+      g.vp('US', 2, '특별한 관계');
+    } else {
+      const c = await g.pickCountry(s, '특별한 관계: 미국 +1을 놓을 영국 인접국', EV_C.uk.adj, { kind: 'add', side: 'US' });
+      if (c) g.addInf(c, 'US', 1);
+    }
+  },
+  106: async (g) => { g.log('NORAD 발효'); },
+  107: async (g, s) => {
+    const ok = c => (evIn(c, 'ca') || evIn(c, 'sa') || evIn(c, 'af')) && !EV_C[c].bg && g.inf(c, 'US') > 0;
+    const c1 = await g.pickCountry(s, '체 게바라: 쿠데타 대상 (비전장 국가)', EV_IDS.filter(c => ok(c) && g.canAttack(s, c, { coup: true })), { kind: 'coup', ops: 3 }, '하지 않음');
+    if (!c1) return;
+    const before = g.inf(c1, 'US');
+    await g.coup(s, c1, g.effOps(s, 107));
+    if (g.inf(c1, 'US') < before) {
+      const c2 = await g.pickCountry(s, '체 게바라: 두 번째 쿠데타 대상', EV_IDS.filter(c => c !== c1 && ok(c) && g.canAttack(s, c, { coup: true })), { kind: 'coup', ops: 3 }, '하지 않음');
+      if (c2) await g.coup(s, c2, g.effOps(s, 107));
+    }
+  },
+  108: async (g, s) => {
+    if (!EV_IDS.some(c => evIn(c, 'me') && g.control(c) === 'US')) { g.log('미국이 지배하는 중동 국가가 없어 효과 없음'); return; }
+    const top = [];
+    for (let k = 0; k < 5; k++) { const d = g.draw(); if (d != null) top.push(d); }
+    g.log(`테헤란의 우리 사람: 덱 위 카드 — ${top.map(cn).join(', ')}`);
+    while (true) {
+      const rest = top.filter(x => x != null);
+      if (!rest.length) break;
+      const c = await g.ask(s, { type: 'card', title: '버릴 카드 선택 (이벤트 발동 없음)', cards: rest, none: '완료', intent: { kind: 'tehran' } });
+      if (c == null) break;
+      top[top.indexOf(c)] = null; g.G.discard.push(c); g.log(`${cn(c)} 버림`);
+    }
+    g.G.deck.push(...top.filter(x => x != null)); g.shuffle(g.G.deck);
+  },
+  109: async (g) => { g.G.fx.yuri = true; },
+  110: async (g) => { g.addInf('saudi', 'US', 2); g.log('사우디아라비아 미국 +2'); },
+};
+
+function require_GameOver() { return (typeof module !== 'undefined') ? require('./engine.js').GameOver : GameOver; }
+
+if (typeof module !== 'undefined') module.exports = { EVENTS };
+else window.EVENTS = EVENTS;
+
+})();
+// ---- ai.js ----
+(function(){
+// ===== 컴퓨터 상대 (휴리스틱 AI) =====
+const _AD = (typeof module !== 'undefined') ? require('./data.js') : DATA;
+const AC = _AD.COUNTRIES, AIDS = _AD.COUNTRY_IDS, ACARDS = _AD.CARDS;
+const aOpp = s => (s === 'US' ? 'USSR' : 'US');
+const aIn = (c, r) => AC[c].regions.includes(r);
+
+const EV_BASE = {
+  5: 1.5, 7: 2.5, 8: 2.5, 9: 2.5, 10: 2, 11: 2, 12: 2, 13: 2, 14: 3, 15: 2, 16: 4, 17: 2.5, 18: 1.5, 19: 1.5, 20: 1.5,
+  21: 3, 22: 2, 23: 5, 24: 2, 25: 2, 26: 1.2, 27: 3, 28: 2.5, 29: 2.5, 30: 3, 31: 3.5, 33: 2.5, 35: 1, 36: 2,
+  40: 2, 41: 0.5, 42: 3.5, 43: 2, 44: 3.5, 45: 1, 46: 1.5, 47: 3, 49: 1.5, 51: 2.5, 52: 3, 53: 2, 54: 2, 55: 2.5,
+  56: 3.5, 57: 4.5, 58: 1.5, 59: 2.5, 60: 1.5, 62: 1, 63: 3, 64: 2, 65: 3, 66: 2, 67: 2, 68: 2.5, 69: 1, 70: 2,
+  71: 2, 72: 2, 73: 2.5, 74: 3.5, 75: 2.5, 76: 3.5, 77: 1.5, 82: 3, 83: 2.5, 85: 2, 86: 2.5, 87: 4, 88: 2.5,
+  91: 2, 92: 1.5, 93: 0.5, 94: 1.5, 95: 2, 96: 3, 97: 2, 98: 2, 99: 3, 101: 3, 102: 2, 103: 0.8, 104: 1, 105: 1.5,
+  106: 1, 107: 2.5, 108: 1, 109: 1, 110: 2.5,
+};
+
+class AIAgent {
+  constructor() { this.plan = null; }
+
+  // ---------- 국가 가치 ----------
+  weight(g, side, c) {
+    const era = g.era();
+    const RW = era === 1 ? { eu: 1.5, as: 1.3, me: 1.25, af: 0.6, ca: 0.6, sa: 0.5 }
+      : era === 2 ? { eu: 1.25, as: 1.15, me: 1.15, af: 1, ca: 1, sa: 1 }
+        : { eu: 1.15, as: 1.1, me: 1.1, af: 1, ca: 1, sa: 1 };
+    const R = AC[c].regions;
+    const r = R.includes('eu') ? 'eu' : R.includes('as') ? 'as' : R[0];
+    let w = (AC[c].bg ? 3 : 1.1) * (RW[r] || 1);
+    const myScoring = g.G.hands[side].filter(id => _AD.SCORING_REGION[id] === r || (id === 38 && R.includes('sea')));
+    if (myScoring.length) w *= 1.45;
+    if (AC[c].spAdj === aOpp(side) && ['eu', 'as', 'ca'].includes(r)) w += 0.7;
+    if (AC[c].spAdj === side) w += 0.2;
+    return w;
+  }
+  ctrlOf(inf, c) {
+    const st = AC[c].stab;
+    if (inf.US - inf.USSR >= st) return 'US';
+    if (inf.USSR - inf.US >= st) return 'USSR';
+    return null;
+  }
+  local(g, side, c, inf) {
+    const w = this.weight(g, side, c), o = aOpp(side), st = AC[c].stab;
+    const k = this.ctrlOf(inf, c);
+    const margin = inf[side] - inf[o];
+    let s;
+    if (k === side) s = w + 0.06 * w * Math.min(2, margin - st);
+    else if (k === o) s = -w + 0.035 * w * Math.min(3, inf[side]) - 0.04 * w * Math.min(2, -margin - st);
+    else s = 0.35 * w * Math.max(-0.95, Math.min(0.95, margin / st));
+    if (inf[side] > 0) s += k === o ? 0.08 : 0.2;
+    return s;
+  }
+  gainAdd(g, side, c, owner, n = 1) {
+    const inf = g.G.inf[c];
+    const after = { ...inf }; after[owner] += n;
+    return this.local(g, side, c, after) - this.local(g, side, c, inf);
+  }
+  gainRemove(g, side, c, owner, n = 1) {
+    const inf = g.G.inf[c];
+    const after = { ...inf }; after[owner] = Math.max(0, after[owner] - n);
+    return this.local(g, side, c, after) - this.local(g, side, c, inf);
+  }
+  coupEV(g, side, c, ops, free) {
+    if (g.G.fx.cmc === aOpp(side)) return -1000;
+    const o = aOpp(side), inf = g.G.inf[c], st = AC[c].stab;
+    const mod = g.coupMod(side, c);
+    let ev = 0;
+    for (let r = 1; r <= 6; r++) {
+      const diff = r + ops + mod - 2 * st;
+      if (diff <= 0) continue;
+      const after = { ...inf };
+      const rem = Math.min(diff, after[o]); after[o] -= rem; after[side] += diff - rem;
+      ev += (this.local(g, side, c, after) - this.local(g, side, c, inf)) / 6;
+    }
+    // 군사작전
+    const need = g.G.defcon - g.G.milops[side];
+    if (need > 0) {
+      const late = g.G.ar >= g.arsFor(side) - 2 ? 1 : 0.55;
+      ev += Math.min(ops, need) * 0.9 * late;
+    }
+    if (AC[c].bg && !(side === 'US' && g.G.fx.nuclearSubs)) {
+      const nd = g.G.defcon - 1;
+      if (nd <= 1) return -1000;
+      if (nd === 2) ev -= 1.2;
+      if (nd === 3) ev -= 0.3;
+    }
+    if (side === 'US' && g.G.fx.yuri) ev -= 1;
+    return ev;
+  }
+  realignEV(g, side, c) {
+    const o = aOpp(side), inf = g.G.inf[c];
+    const mS = g.realignMods(side, c) + (side === 'US' && g.G.fx.iranContra ? -1 : 0);
+    const mO = g.realignMods(o, c) + (o === 'US' && g.G.fx.iranContra ? -1 : 0);
+    let ev = 0;
+    for (let a = 1; a <= 6; a++) for (let b = 1; b <= 6; b++) {
+      const d = (a + mS) - (b + mO);
+      const after = { ...inf };
+      if (d > 0) after[o] = Math.max(0, after[o] - d); else if (d < 0) after[side] = Math.max(0, after[side] + d);
+      ev += (this.local(g, side, c, after) - this.local(g, side, c, inf)) / 36;
+    }
+    return ev;
+  }
+
+  // ---------- 이벤트 가치 (owner 관점, 작전 단위) ----------
+  eventValue(g, owner, id) {
+    const G = g.G, o = aOpp(owner), d = G.defcon;
+    if (!g.canEvent(id, owner) && id !== 32) return 0;
+    const lethal = () => (G.phasing === owner ? -1000 : 1000);
+    switch (id) {
+      case 4: return d <= 2 ? lethal() : (6 - d) - 0.8;
+      case 50: return d <= 2 ? lethal() : 3.5 - (d === 3 ? 1 : 0);
+      case 89: return d <= 2 ? lethal() : 2.5;
+      case 34: return Math.max(0, d - 2) + 1;
+      case 39: { const M = G.milops; return M[owner] > M[o] ? (M[owner] >= d ? 3 : 1) : 0; }
+      case 48: { const bg = s => AIDS.filter(c => AC[c].bg && g.control(c) === s).length; return bg('US') > bg('USSR') ? 2 : 0; }
+      case 61: return ['egypt', 'iran', 'libya', 'saudi', 'iraq', 'gulf', 'venezuela'].filter(c => g.control(c) === 'USSR').length;
+      case 78: return AIDS.filter(c => (aIn(c, 'ca') || aIn(c, 'sa')) && AC[c].bg && g.control(c) === 'US').length;
+      case 84: return Math.floor(g.inf('libya', 'USSR') / 2);
+      case 80: return G.space[owner] < G.space[o] ? 2 : 0;
+      case 90: return d >= 5 ? 2 : 2.5 + (G.perm[87] ? 3 : 0);
+      case 100: { if (d !== 2) return 0; const v = G.vp + (owner === 'US' ? -6 : 6); return (owner === 'US' ? v > 0 : v < 0) ? 50 : -5; }
+      case 10: return g.inf('wgermany', 'US') * 0.8;
+      case 7: return Math.min(3, AIDS.filter(c => aIn(c, 'we')).reduce((a, c) => a + Math.min(2, g.inf(c, 'US')), 0));
+      case 46: return 1.5;
+      case 20: return d <= 2 ? (G.phasing === owner ? -1000 : 1.5) : 1.5;
+      case 49: return d <= 2 ? -3 : 1.5;
+      case 40: return 2;
+      case 91: { if (d <= 2 && g.inf('cuba', 'US') > 0 && G.phasing !== owner) return 1000; return 2; }
+      case 85: return G.space.US > G.space.USSR ? 2.5 : 0;
+      case 103: return G.phasing === 'USSR' ? 1 : 0;
+      default:
+        if (ACARDS[id].scoring) {
+          if (id === 38) { const v = { US: 0, USSR: 0 }; for (const c of g.countriesIn('sea')) { const k = g.control(c); if (k) v[k] += c === 'thailand' ? 2 : 1; } return v[owner] - v[o]; }
+          const r = _AD.SCORING_REGION[id]; const res = g.scoreValue(r);
+          if (res.win) return res.win === owner ? 1000 : -1000;
+          return res[owner] - res[o];
+        }
+        return EV_BASE[id] != null ? EV_BASE[id] : 1;
+    }
+  }
+  harm(g, side, id) { // 내가 이 카드를 낼 때 상대 이벤트가 주는 피해
+    const s = ACARDS[id].side;
+    if (s !== aOpp(side)) return 0;
+    if (!g.canEvent(id, s)) return 0;
+    const savedPh = g.G.phasing; g.G.phasing = side;
+    const v = this.eventValue(g, s, id);
+    g.G.phasing = savedPh;
+    return v;
+  }
+
+  // ---------- 작전 계획 ----------
+  bestOpsPlan(g, side, ops) {
+    const plans = [];
+    // 영향력
+    const set = [...g.canPlaceSet(side)];
+    if (set.length) {
+      const saved = JSON.parse(JSON.stringify(g.G.inf));
+      let left = ops, total = 0;
+      while (left > 0) {
+        let best = null, bv = -1e9;
+        for (const c of set) {
+          const cost = g.control(c) === aOpp(side) ? 2 : 1;
+          if (cost > left) continue;
+          const v = this.gainAdd(g, side, c, side) / cost;
+          if (v > bv) { bv = v; best = c; }
+        }
+        if (!best) break;
+        const cost = g.control(best) === aOpp(side) ? 2 : 1;
+        g.G.inf[best][side]++; left -= cost; total += bv * cost;
+      }
+      g.G.inf = saved;
+      plans.push({ mode: 'inf', v: total });
+    }
+    // 쿠데타
+    let bc = null, bcv = -1e9;
+    for (const c of AIDS) {
+      if (!g.canAttack(side, c, { coup: true })) continue;
+      const v = this.coupEV(g, side, c, ops + (aIn(c, 'as') && this.curCard === 6 ? 1 : 0));
+      if (v > bcv) { bcv = v; bc = c; }
+    }
+    if (bc) plans.push({ mode: 'coup', v: bcv, target: bc });
+    // 재정렬
+    let br = null, brv = -1e9;
+    for (const c of AIDS) {
+      if (!g.canAttack(side, c)) continue;
+      const v = this.realignEV(g, side, c);
+      if (v > brv) { brv = v; br = c; }
+    }
+    if (br) plans.push({ mode: 'realign', v: brv * ops * 0.8, target: br });
+    plans.sort((a, b) => b.v - a.v);
+    return plans[0] || null;
+  }
+
+  // ---------- 메인 행동 결정 ----------
+  decideAction(g, side, choices) {
+    const G = g.G;
+    const arsLeft = g.arsFor(side) - G.ar + 1;
+    const scoringInHand = G.hands[side].filter(id => ACARDS[id].scoring).length;
+    let best = null;
+    for (const { id, options } of choices) {
+      for (const opt of options) {
+        let v;
+        const ops = g.effOps(side, id);
+        if (opt.mode === 'event') {
+          v = this.eventValue(g, g.eventOwner(id, side), id);
+          if (ACARDS[id].scoring) {
+            if (arsLeft <= scoringInHand) v += 200;
+            else if (v < 1) v -= 4; // 나중으로 미룸
+            else v += 2;
+          }
+        } else if (opt.mode === 'ops') {
+          v = ops;
+          if (id === 6) v = 4.2 - 2.6;
+          const h = this.harm(g, side, id);
+          v -= h;
+          if (opt.eventFirst === false) v -= 0.05;
+          if (G.fx.missileEnvy === side && id === 49) v += 100;
+          if ([4, 50, 89].includes(id) && ACARDS[id].side === aOpp(side) && G.defcon >= 4 && h < 50) v += 1.2;
+        } else if (opt.mode === 'space') {
+          const box = G.space[side] + 1;
+          const [, , max, v1] = _AD.SPACE_TRACK[box];
+          v = (max / 6) * (v1 || 1.2) + 0.3;
+          if (id === 6) v -= 3;
+        } else if (opt.mode === 'un') {
+          const t = G.hands[side].filter(x => ACARDS[x].side === aOpp(side)).sort((a, b) => this.harm(g, side, b) - this.harm(g, side, a))[0];
+          v = g.effOps(side, t) + 0.3 + Math.min(3, this.harm(g, side, t)) * 0.2;
+          opt.unTarget = t;
+        }
+        v += (g.rng() - 0.5) * 0.6;
+        if (!best || v > best.v) best = { v, id, opt };
+      }
+    }
+    if (!best) return { pass: true };
+    if (best.v < -50 && choices.length === 1 && choices[0].id === 6) return { pass: true };
+    this.curCard = best.id;
+    return { card: best.id, mode: best.opt.mode, eventFirst: best.opt.eventFirst !== false, unTarget: best.opt.unTarget };
+  }
+
+  // ---------- 카드 선택 ----------
+  pickCard(g, side, req) {
+    const cards = req.cards, it = (req.intent || {}).kind;
+    const own = id => this.eventValue(g, g.eventOwner(id, side), id) * (ACARDS[id].side === aOpp(side) ? -1 : 1);
+    const by = f => cards.slice().sort((a, b) => f(b) - f(a))[0];
+    switch (it) {
+      case 'headline': {
+        const savedPh = g.G.phasing; g.G.phasing = side;
+        const sc = id => {
+          const s = ACARDS[id].side;
+          if (s === aOpp(side)) return -this.eventValue(g, s, id) - 1;
+          let v = this.eventValue(g, side, id);
+          if (ACARDS[id].scoring && v < 2) v -= 3;
+          if (id === 103 && side === 'US') v = 3;
+          return v - ACARDS[id].ops * 0.15 + g.rng() * 0.4;
+        };
+        const r = by(sc); g.G.phasing = savedPh; return r;
+      }
+      case 'discard': return by(id => this.harm(g, side, id) * 1.5 - ACARDS[id].ops - (ACARDS[id].side === side ? EV_BASE[id] || 1 : 0));
+      case 'discardToPrevent': {
+        const stake = req.title.includes('베를린') ? g.inf('wgermany', 'US') * 1.3 : 3;
+        const c = by(id => this.harm(g, side, id) - ACARDS[id].ops * 0.5);
+        const cost = ACARDS[c].side === aOpp(side) ? 1 : 3;
+        return stake >= cost ? c : null;
+      }
+      case 'discardOptional': { const c = by(id => this.harm(g, side, id)); return this.harm(g, side, c) > 1.2 ? c : null; }
+      case 'take': case 'playEvent': return by(id => ACARDS[id].side === aOpp(side) ? -5 : this.eventValue(g, side, id) + ACARDS[id].ops * 0.3);
+      case 'give': return by(id => ACARDS[id].side === side ? 5 : -this.eventValue(g, aOpp(side), id));
+      case 'unTarget': return by(id => this.harm(g, side, id));
+      case 'askNot': { const c = by(id => -own(id) - ACARDS[id].ops * 0.3); return (own(c) + ACARDS[c].ops * 0.3 < 1.2) ? c : null; }
+      case 'discardOpp': return by(id => ACARDS[id].side === 'US' ? this.eventValue(g, 'US', id) + 1 : ACARDS[id].ops * 0.6);
+      case 'tehran': { const c = by(id => -own(id)); return own(c) < 0 ? c : null; }
+      default: return cards[Math.floor(g.rng() * cards.length)];
+    }
+  }
+
+  // ---------- 국가 선택 ----------
+  pickCountry(g, side, req) {
+    const valid = req.valid, it = req.intent || {};
+    const best = f => { let b = null, bv = -1e9; for (const c of valid) { const v = f(c) + g.rng() * 0.01; if (v > bv) { bv = v; b = c; } } return [b, bv]; };
+    switch (it.kind) {
+      case 'add': {
+        const n = it.n || 1;
+        if (it.side === side) {
+          const [c] = best(c => {
+            const cost = it.ops && g.control(c) === aOpp(side) ? 2 : 1;
+            return this.gainAdd(g, side, c, side, n) / cost;
+          });
+          return c;
+        }
+        return best(c => -this.gainAdd(g, side, c, it.side, n))[0];
+      }
+      case 'remove': return best(c => this.gainRemove(g, side, c, it.side))[0];
+      case 'removeAll': return best(c => this.gainRemove(g, side, c, it.side, 99))[0];
+      case 'coup': {
+        const [c, v] = best(c => this.coupEV(g, side, c, it.ops || 2, it.free) + (this.plan && this.plan.target === c ? 0.2 : 0));
+        if (req.done && v <= 0) return null;
+        if (v < -500 && req.done) return null;
+        return c;
+      }
+      case 'realign': {
+        const [c, v] = best(c => this.realignEV(g, side, c));
+        if (req.done && v < 0.08) return null;
+        return c;
+      }
+      case 'war': return best(c => {
+        let minus = 0; for (const a of AC[c].adj) if (g.control(a) === aOpp(side)) minus++;
+        const p = Math.max(0, Math.min(6, 6 - (2 + minus))) / 6;
+        return p * (1 + this.gainRemove(g, side, c, aOpp(side), 99) + this.weight(g, side, c));
+      })[0];
+      default: return valid[Math.floor(g.rng() * valid.length)];
+    }
+  }
+
+  // ---------- 선택지 ----------
+  pickOption(g, side, req) {
+    const opts = req.options, t = req.title || '';
+    const val = v => opts.find(o => o.value === v) ? v : opts[0].value;
+    if (t.includes('사용 방법')) {
+      const ops = g.G.opsCtx ? g.G.opsCtx.ops : 2;
+      const p = this.bestOpsPlan(g, side, ops);
+      this.plan = p;
+      const allowed = opts.map(o => o.value);
+      if (p && allowed.includes(p.mode) && !(p.mode !== 'inf' && p.v <= 0 && allowed.includes('inf'))) return p.mode;
+      return allowed.includes('inf') ? 'inf' : allowed[0];
+    }
+    if (t.includes('올림픽')) {
+      if (g.G.defcon <= 2 && g.G.phasing !== side) return 'boy';
+      return 'go';
+    }
+    if (t.includes('DEFCON 설정')) return 5;
+    if (t.includes('정상 회담')) return 0;
+    if (t.includes('쿠바 미사일 위기 해제')) return null;
+    if (t.includes('바르샤바')) {
+      const us = AIDS.filter(c => aIn(c, 'ee')).map(c => g.inf(c, 'US')).sort((a, b) => b - a).slice(0, 4).reduce((a, b) => a + b, 0);
+      return us >= 5 ? 'rm' : 'add';
+    }
+    if (t.includes('침공 대상')) {
+      const sc = c => { let m = 0; for (const a of AC[c].adj) if (g.control(a) === aOpp(side)) m++; return (3 - m) * (1 + g.inf(c, aOpp(side)) * 0.4) * this.weight(g, side, c); };
+      const vals = opts.map(o => o.value);
+      return vals.sort((a, b) => sc(b) - sc(a))[0];
+    }
+    if (t.includes('워게임')) return val(this.eventValue(g, side, 100) > 0);
+    if (t.includes('체르노빌')) {
+      const sc = r => AIDS.filter(c => aIn(c, r) && g.control(c) !== 'USSR').reduce((a, c) => a + this.weight(g, 'USSR', c) * (g.canPlaceSet('USSR').has(c) ? 1 : 0.2), 0) / (r === 'eu' ? 1.3 : 1);
+      return opts.map(o => o.value).sort((a, b) => sc(b) - sc(a))[0];
+    }
+    if (t.includes('곡물 판매')) {
+      let bestO = 'return', bv = 2;
+      const id = g._grainCard;
+      for (const o of opts) {
+        if (o.value === 'return') continue;
+        const m = o.value.mode;
+        let v = 0;
+        if (m === 'space') v = 1.2 + this.harm(g, side, id) * 0.5;
+        else if (m === 'event') v = this.eventValue(g, g.eventOwner(id, 'US'), id);
+        else if (m === 'ops') v = g.effOps('US', id) - this.harm(g, side, id);
+        if (v > bv) { bv = v; bestO = o.value; }
+      }
+      return bestO;
+    }
+    if (t.includes('남아프리카')) return 'a';
+    const withAi = opts.filter(o => typeof o.ai === 'number');
+    if (withAi.length) return withAi.sort((a, b) => b.ai - a.ai)[0].value;
+    return opts[0].value;
+  }
+
+  async ask(g, side, req) {
+    switch (req.type) {
+      case 'action': return this.decideAction(g, side, req.choices);
+      case 'card': return this.pickCard(g, side, req);
+      case 'country': return this.pickCountry(g, side, req);
+      case 'option': return this.pickOption(g, side, req);
+    }
+    return null;
+  }
+}
+
+if (typeof module !== 'undefined') module.exports = { AIAgent }; else window.AIAgent = AIAgent;
+
+})();
+// ---- ui.js ----
+// ===== 화면 (UI) =====
+(function () {
+  const $ = s => document.querySelector(s);
+  const el = (tag, attrs = {}, html) => { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (html != null) e.innerHTML = html; return e; };
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const sv = (tag, attrs = {}) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const KO = { US: '미국', USSR: '소련' };
+  const REGION_COLOR = { we: '#7d68b0', ee: '#7d68b0', eu: '#7d68b0', me: '#3f8f86', as: '#d0822f', sea: '#e0a640', af: '#b9a332', ca: '#6c9f47', sa: '#3f8a46' };
+  const BOX_W = 88, BOX_H = 50;
+  const pos = c => ({ x: (DATA.COUNTRIES[c].col - 1) * 20 + 24, y: (DATA.COUNTRIES[c].row - 1) * 17.5 + 26 });
+  const SP_POS = { US: { x: 30, y: 300 }, USSR: { x: 1170, y: 150 } };
+  const W = 2090, H = 1170;
+
+  let game = null, human = 'US', zoom = 1, pending = null, lastInf = null;
+  const ui = window.UI = {};
+
+  // ---------- 지도 그리기 ----------
+  function buildMap() {
+    const svg = $('#map');
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const gl = sv('g'); svg.appendChild(gl);
+    // 지역 라벨
+    const labels = [['중앙아메리카', 10, 470], ['남아메리카', 330, 1140], ['유럽', 600, 120], ['중동', 940, 700], ['아프리카', 560, 1130], ['아시아', 1300, 420], ['동남아시아', 1520, 960]];
+    for (const [t, x, y] of labels) { const tx = sv('text', { x, y, class: 'rlabel' }); tx.textContent = t; gl.appendChild(tx); }
+    // 인접선
+    const drawn = new Set();
+    for (const c of DATA.COUNTRY_IDS) {
+      for (const a of DATA.COUNTRIES[c].adj) {
+        const k = [c, a].sort().join('-'); if (drawn.has(k)) continue; drawn.add(k);
+        const p = pos(c), q = pos(a);
+        gl.appendChild(sv('line', { x1: p.x + BOX_W / 2, y1: p.y + BOX_H / 2, x2: q.x + BOX_W / 2, y2: q.y + BOX_H / 2, class: 'adj' }));
+      }
+    }
+    for (const sp of ['US', 'USSR']) {
+      for (const c of DATA.SUPERPOWER_ADJ[sp]) {
+        const p = pos(c); let q = SP_POS[sp];
+        let x2 = q.x + 60, y2 = q.y + 30;
+        if (sp === 'US' && c === 'japan') { x2 = W - 5; y2 = p.y + BOX_H / 2; }
+        gl.appendChild(sv('line', { x1: p.x + BOX_W / 2, y1: p.y + BOX_H / 2, x2, y2, class: 'adj sp-' + sp.toLowerCase() }));
+      }
+    }
+    // 초강대국
+    for (const sp of ['US', 'USSR']) {
+      const g = sv('g', { class: 'sp' }); const q = SP_POS[sp];
+      g.appendChild(sv('rect', { x: q.x, y: q.y, width: 120, height: 60, rx: 10, fill: sp === 'US' ? '#1f5fae' : '#b8262b', stroke: '#fff', 'stroke-width': 2 }));
+      const t = sv('text', { x: q.x + 60, y: q.y + 38, 'text-anchor': 'middle', 'font-size': 22 }); t.textContent = sp === 'US' ? '★ 미국' : '☭ 소련';
+      g.appendChild(t); gl.appendChild(g);
+    }
+    const jt = sv('text', { x: W - 8, y: pos('japan').y - 6, 'text-anchor': 'end', 'font-size': 13, fill: '#a9c9ff', 'font-weight': 800 }); jt.textContent = '→ 미국'; gl.appendChild(jt);
+    // 국가
+    for (const c of DATA.COUNTRY_IDS) {
+      const C = DATA.COUNTRIES[c], p = pos(c);
+      const g = sv('g', { class: 'cty' + (C.bg ? ' bg' : ''), id: 'c-' + c, transform: `translate(${p.x},${p.y})` });
+      g.appendChild(sv('rect', { class: 'valid', x: -4, y: -4, width: BOX_W + 8, height: BOX_H + 8, rx: 8 }));
+      g.appendChild(sv('rect', { class: 'box', width: BOX_W, height: BOX_H, rx: 5 }));
+      const reg = C.regions.includes('sea') ? 'sea' : C.regions.includes('ee') && !C.regions.includes('we') ? 'ee' : C.regions[C.regions.length - 1];
+      g.appendChild(sv('rect', { class: 'band', width: BOX_W, height: 18, rx: 5, fill: C.bg ? '#9b2226' : REGION_COLOR[reg] }));
+      g.appendChild(sv('rect', { width: BOX_W, height: 6, y: 12, fill: C.bg ? '#9b2226' : REGION_COLOR[reg] }));
+      const nm = sv('text', { class: 'nm', x: BOX_W / 2, y: 13.5, 'text-anchor': 'middle' });
+      nm.textContent = (C.bg ? '★' : '') + C.name;
+      if (C.name.length > 6) nm.setAttribute('font-size', C.name.length > 8 ? 9 : 10);
+      g.appendChild(nm);
+      // 영향력 칸
+      g.appendChild(sv('rect', { class: 'usc', x: 4, y: 22, width: 32, height: 24, rx: 4 }));
+      g.appendChild(sv('rect', { class: 'ussrc', x: BOX_W - 36, y: 22, width: 32, height: 24, rx: 4 }));
+      const us = sv('text', { class: 'num usn', x: 20, y: 40, 'text-anchor': 'middle' }); g.appendChild(us);
+      const ss = sv('text', { class: 'num ussrn', x: BOX_W - 20, y: 40, 'text-anchor': 'middle' }); g.appendChild(ss);
+      g.appendChild(sv('circle', { cx: BOX_W / 2, cy: 34, r: 9, fill: '#e4d9bd', stroke: '#8b7d5c' }));
+      const st = sv('text', { class: 'st', x: BOX_W / 2, y: 38.5, 'text-anchor': 'middle' }); st.textContent = C.stab; g.appendChild(st);
+      if (C.spAdj) g.appendChild(sv('circle', { cx: BOX_W - 5, cy: 5, r: 4, fill: C.spAdj === 'US' ? '#7fb2ff' : '#ff8a8a', stroke: '#fff' }));
+      g.addEventListener('click', () => onCountry(c));
+      gl.appendChild(g);
+    }
+    applyZoom();
+  }
+  function applyZoom() {
+    const svg = $('#map');
+    const base = Math.max(window.innerWidth < 1000 ? 1500 : 1300, ($('#mapwrap').clientWidth || 800));
+    svg.style.width = (base * zoom) + 'px';
+    svg.style.height = (base * zoom * H / W) + 'px';
+  }
+  function renderMap(G) {
+    const valid = pending && pending.req.type === 'country' ? new Set(pending.req.valid) : null;
+    for (const c of DATA.COUNTRY_IDS) {
+      const g = document.getElementById('c-' + c); if (!g) continue;
+      const inf = G.inf[c], k = game.control(c);
+      const usc = g.querySelector('.usc'), ssc = g.querySelector('.ussrc');
+      usc.setAttribute('fill', k === 'US' ? '#1f5fae' : inf.US ? '#dbe7f7' : 'transparent');
+      ssc.setAttribute('fill', k === 'USSR' ? '#b8262b' : inf.USSR ? '#f7dcdc' : 'transparent');
+      const un = g.querySelector('.usn'), sn = g.querySelector('.ussrn');
+      un.textContent = inf.US || ''; un.setAttribute('fill', k === 'US' ? '#fff' : '#1f5fae');
+      sn.textContent = inf.USSR || ''; sn.setAttribute('fill', k === 'USSR' ? '#fff' : '#b8262b');
+      g.classList.toggle('can', !!(valid && valid.has(c)));
+      g.classList.toggle('dim', !!(valid && !valid.has(c)));
+      if (lastInf && (lastInf[c].US !== inf.US || lastInf[c].USSR !== inf.USSR)) {
+        g.classList.remove('flash'); void g.getBBox(); g.classList.add('flash');
+      }
+    }
+    lastInf = JSON.parse(JSON.stringify(G.inf));
+  }
+
+  // ---------- 상태 표시 ----------
+  function renderStatus(G) {
+    const vp = G.vp;
+    const vpTxt = vp > 0 ? `미국 +${vp}` : vp < 0 ? `소련 +${-vp}` : '동점 0';
+    const vpCls = vp > 0 ? 'vp-us' : vp < 0 ? 'vp-ussr' : 'vp-even';
+    const ch = G.china.holder ? `${KO[G.china.holder]}${G.china.faceUp ? '' : '(뒷면)'}` : '사용 중';
+    const phase = G.phase === 'headline' ? '헤드라인' : G.phase === 'setup' ? '초기 배치' : G.phase === 'end' ? '턴 종료' : `액션 ${G.ar}`;
+    $('#status').innerHTML = `
+      <span class="pill turnpill phasing-${G.phasing}"><b>${G.turn}턴</b> · ${phase} · ${KO[G.phasing]}</span>
+      <span class="pill defcon d${G.defcon}">DEFCON ${G.defcon}</span>
+      <span class="pill ${vpCls}">VP <b>${vpTxt}</b></span>
+      <span class="pill">⚔ 미<b>${G.milops.US}</b>·소<b>${G.milops.USSR}</b>/${G.defcon}</span>
+      <span class="pill">🚀 미${G.space.US}·소${G.space.USSR}</span>
+      <span class="pill">🇨🇳 ${ch}</span>
+      <span id="menuBtns"><button class="icon-btn" id="bLog">📜 기록</button><button class="icon-btn" id="bInfo">📊 현황</button><button class="icon-btn" id="bRules">📖</button></span>`;
+    $('#bLog').onclick = showLog; $('#bRules').onclick = showRules; $('#bInfo').onclick = showInfo;
+  }
+  function cardClass(id) {
+    const c = DATA.CARDS[id];
+    if (id === 6) return 'CHINA';
+    if (c.scoring) return 'SC';
+    return c.side;
+  }
+  function cardTile(id, extra = '') {
+    const c = DATA.CARDS[id];
+    const tag = c.scoring ? '득점' : id === 6 ? '특수' : c.side === 'BOTH' ? '공통' : KO[c.side];
+    const era = ['', '초반', '중반', '후반'][c.era];
+    return `<div class="card ${cardClass(id)} ${extra}" data-id="${id}"><div class="ops">${c.scoring ? '-' : c.ops}</div><div class="cnum">#${id}</div><div class="cname">${c.name}</div><div class="ctag">${tag} · ${era}${c.perm ? ' · 지속' : ''}</div></div>`;
+  }
+  function renderHand(G) {
+    const hand = [...G.hands[human]];
+    if (G.china.holder === human) hand.push(6);
+    const actIds = pending && pending.req.type === 'action' ? new Set(pending.req.choices.map(x => x.id)) : null;
+    $('#hand').innerHTML = hand.map(id => cardTile(id, actIds ? (actIds.has(id) ? 'playable' : 'disabled') : '')).join('');
+    $('#hand').querySelectorAll('.card').forEach(e => e.onclick = () => onHandCard(+e.dataset.id));
+    const o = human === 'US' ? 'USSR' : 'US';
+    const rev = G.revealed[o];
+    $('#handbar').innerHTML = `<span>내 손패 (${KO[human]}) ${G.hands[human].length}장</span><span>상대 손패 ${G.hands[o].length}장 ${rev ? '<button class="icon-btn" id="bOppHand">공개됨 보기</button>' : ''} · 덱 ${G.deck.length}</span>`;
+    if (rev) $('#bOppHand').onclick = () => openCardList('상대 손패 (공개)', G.hands[o]);
+  }
+  function render() {
+    if (!game || !game.G) return;
+    const G = game.G;
+    renderStatus(G); renderMap(G); renderHand(G); renderPrompt();
+  }
+
+  // ---------- 프롬프트 ----------
+  function renderPrompt() {
+    const p = $('#prompt');
+    if (game && game.G && game.G.over) { p.innerHTML = `<div class="ptitle">게임 종료</div><div class="pbtns"><button class="pbtn main" id="pAgain">새 게임</button></div>`; $('#pAgain').onclick = () => location.reload(); return; }
+    if (!pending) {
+      const recent = game.G.log.slice(-4).map(l => `<div class="pinfo l-${l.cls || ''}">${l.msg}</div>`).join('');
+      p.innerHTML = `<div class="waiting">컴퓨터(${KO[human === 'US' ? 'USSR' : 'US']})의 차례</div>${recent}`; return;
+    }
+    const r = pending.req;
+    let html = `<div class="ptitle">${r.title || ''}</div>`;
+    if (r.info) html += `<div class="pinfo">${r.info}</div>`;
+    if (r.type === 'action') {
+      const G = game.G, left = game.arsFor(human) - G.ar + 1;
+      const sc = G.hands[human].filter(id => DATA.CARDS[id].scoring).length;
+      html += `<div class="pinfo">빛나는 카드를 눌러 사용 방법을 고르세요. (이번 턴 남은 라운드 ${left})</div>`;
+      if (sc) html += `<div class="pinfo" style="color:${sc >= left ? '#ff6b6b' : '#ffd36b'}">⚠ 득점 카드 ${sc}장 보유 — 턴이 끝나기 전에 반드시 내야 합니다${sc >= left ? ' (지금 내야 해요!)' : ''}</div>`;
+    }
+    if (game.G.headlineReveal != null && r.headline) html += `<div class="pinfo">상대 헤드라인(유인 지구 궤도 능력으로 공개): ${DATA.CARDS[game.G.headlineReveal].name}</div>`;
+    html += '<div class="pbtns">';
+    if (r.type === 'country') {
+      if (r.reset) html += `<button class="pbtn warn" data-a="reset">처음부터 다시</button>`;
+      if (r.done) html += `<button class="pbtn" data-a="done">${r.done}</button>`;
+    } else if (r.type === 'option') {
+      r.options.forEach((o, i) => html += `<button class="pbtn ${i === 0 ? 'main' : ''}" data-o="${i}">${o.label}</button>`);
+    } else if (r.type === 'card') {
+      html += `<button class="pbtn main" data-a="cards">카드 고르기</button>`;
+    } else if (r.type === 'action' && r.canPass) {
+      html += `<button class="pbtn" data-a="pass">패스 (중국 카드 보유)</button>`;
+    }
+    html += '</div>';
+    if (r.type === 'option' && r.text) html += `<div class="pinfo">${r.text}</div>`;
+    p.innerHTML = html;
+    p.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+      const a = b.dataset.a;
+      if (a === 'reset') resolve('RESET');
+      else if (a === 'done') resolve(null);
+      else if (a === 'cards') openCardPick(r);
+      else if (a === 'pass') resolve({ pass: true });
+    });
+    p.querySelectorAll('[data-o]').forEach(b => b.onclick = () => resolve(r.options[+b.dataset.o].value));
+  }
+  function resolve(v) {
+    if (!pending) return;
+    const f = pending.res; pending = null; closeModal(); f(v); render();
+  }
+
+  // ---------- 상호작용 ----------
+  function onCountry(c) {
+    if (pending && pending.req.type === 'country') {
+      const r = pending.req, kind = (r.intent || {}).kind;
+      if (r.valid.includes(c)) {
+        if (['coup', 'realign', 'war'].includes(kind)) { confirmAttack(c, r); return; }
+        resolve(c); return;
+      }
+    }
+    showCountry(c);
+  }
+  function confirmAttack(c, r) {
+    const C = DATA.COUNTRIES[c], G = game.G, kind = r.intent.kind, me = human, o = me === 'US' ? 'USSR' : 'US';
+    let body = '';
+    if (kind === 'coup') {
+      const ops = r.intent.ops || (G.opsCtx ? G.opsCtx.ops : 2);
+      const bonus = (G.opsCtx && G.opsCtx.card === 6 && C.regions.includes('as')) ? 1 : 0;
+      const mod = game.coupMod(me, c);
+      const need = C.stab * 2 - ops - bonus - mod;
+      const p = Math.max(0, Math.min(6, 6 - need));
+      body = `<div class="row"><span>계산</span><b>주사위 + 작전 ${ops + bonus}${mod ? (mod > 0 ? ' +' : ' ') + mod : ''} − ${C.stab * 2}</b></div>
+        <div class="row"><span>성공 확률</span><b>${Math.round(p / 6 * 100)}% (주사위 ${need + 1} 이상)</b></div>
+        <div class="row"><span>상대 영향력</span><b>${G.inf[c][o]}</b></div>
+        ${C.bg && !(me === 'US' && G.fx.nuclearSubs) ? `<div class="row"><span>주의</span><b style="color:#ffb36b">전장 국가 → DEFCON ${G.defcon} → ${G.defcon - 1}${G.defcon - 1 <= 1 ? ' (핵전쟁! 패배)' : ''}</b></div>` : ''}
+        ${G.fx.cmc === o ? '<div class="row"><span>경고</span><b style="color:#ff6b6b">쿠바 미사일 위기 중! 쿠데타 시 패배</b></div>' : ''}`;
+    } else if (kind === 'realign') {
+      const mS = game.realignMods(me, c), mO = game.realignMods(o, c);
+      body = `<div class="row"><span>내 보정</span><b>+${mS}${me === 'US' && G.fx.iranContra ? ' −1' : ''}</b></div><div class="row"><span>상대 보정</span><b>+${mO}</b></div>
+        <div class="row"><span>영향력</span><b>미국 ${G.inf[c].US} · 소련 ${G.inf[c].USSR}</b></div>`;
+    } else {
+      let m = 0; for (const a of C.adj) if (game.control(a) === o) m++;
+      body = `<div class="row"><span>감점</span><b>−${m} (인접한 상대 지배국)</b></div>`;
+    }
+    const title = kind === 'coup' ? '쿠데타' : kind === 'realign' ? '재정렬' : '공격';
+    const m = openModal(`<button class="close" data-x>✕</button><h3>${C.bg ? '★ ' : ''}${C.name} — ${title}</h3><div class="ctyinfo">${body}</div>
+      <div class="actbtns" style="margin-top:14px"><button class="ev" data-go>${title} 실행</button><button data-x2>취소</button></div>`);
+    m.querySelector('[data-go]').onclick = () => resolve(c);
+    m.querySelector('[data-x2]').onclick = closeModal;
+  }
+  function ensureVisible(valid) {
+    const wrap = $('#mapwrap'); if (!wrap || !valid.length) return;
+    const wr = wrap.getBoundingClientRect();
+    const vis = valid.some(c => { const e = document.getElementById('c-' + c); if (!e) return false; const r = e.getBoundingClientRect(); return r.right > wr.left + 10 && r.left < wr.right - 10 && r.bottom > wr.top + 10 && r.top < wr.bottom - 10; });
+    if (vis) return;
+    let sx = 0, sy = 0; for (const c of valid) { const q = pos(c); sx += q.x; sy += q.y; }
+    sx /= valid.length; sy /= valid.length;
+    const scale = $('#map').clientWidth / W;
+    wrap.scrollTo({ left: sx * scale - wrap.clientWidth / 2, top: sy * scale - wrap.clientHeight / 2, behavior: 'smooth' });
+  }
+  function onHandCard(id) {
+    const r = pending && pending.req.type === 'action' ? pending.req : null;
+    const ch = r ? r.choices.find(x => x.id === id) : null;
+    openCard(id, ch ? ch.options : null);
+  }
+  function openCard(id, options) {
+    const c = DATA.CARDS[id];
+    const tag = c.scoring ? '득점 카드' : c.side === 'BOTH' ? '공통 이벤트' : `${KO[c.side]} 이벤트`;
+    let html = `<button class="close" data-x>✕</button><div class="bigcard ${cardClass(id)}"><div class="bh"><div class="bops">${c.scoring ? '-' : c.ops}</div><div><div class="bname">${c.name}</div><div class="bmeta">#${id} · ${tag} · ${['', '초반', '중반', '후반'][c.era]} 냉전${c.star ? ' · 사용 후 제거(*)' : ''}${c.perm ? ' · 지속 효과' : ''}</div></div></div><div class="btext">${c.text}</div></div>`;
+    if (options) {
+      html += '<div class="actbtns">';
+      options.forEach((o, i) => {
+        const cls = o.mode === 'event' ? 'ev' : o.mode === 'space' ? 'sp' : o.mode === 'un' ? 'un' : '';
+        html += `<button class="${cls}" data-i="${i}">${o.label}</button>`;
+      });
+      html += '</div>';
+    }
+    const m = openModal(html);
+    m.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
+      const o = options[+b.dataset.i];
+      resolve({ card: id, mode: o.mode, eventFirst: o.eventFirst !== false });
+    });
+  }
+  function openCardPick(r) {
+    let html = `<button class="close" data-x>✕</button><h3>${r.title}</h3><div class="pinfo" style="margin-bottom:10px;color:#aab4c0;font-size:13px">카드를 누르면 내용을 보고 선택할 수 있어요.</div><div class="cardgrid">${r.cards.map(id => cardTile(id)).join('')}</div>`;
+    if (r.none) html += `<div style="margin-top:12px"><button class="pbtn" data-none>${r.none}</button></div>`;
+    const m = openModal(html);
+    m.querySelectorAll('.card').forEach(e => e.onclick = () => {
+      const id = +e.dataset.id, c = DATA.CARDS[id];
+      const h = `<button class="close" data-x>✕</button><div class="bigcard ${cardClass(id)}"><div class="bh"><div class="bops">${c.scoring ? '-' : c.ops}</div><div><div class="bname">${c.name}</div><div class="bmeta">#${id}</div></div></div><div class="btext">${c.text}</div></div><div class="actbtns"><button class="ev" data-ok>이 카드 선택</button><button data-back>뒤로</button></div>`;
+      const m2 = openModal(h);
+      m2.querySelector('[data-ok]').onclick = () => resolve(id);
+      m2.querySelector('[data-back]').onclick = () => openCardPick(r);
+    });
+    const n = m.querySelector('[data-none]'); if (n) n.onclick = () => resolve(null);
+  }
+  function openCardList(title, ids) {
+    const m = openModal(`<button class="close" data-x>✕</button><h3>${title}</h3><div class="cardgrid">${ids.map(id => cardTile(id)).join('') || '없음'}</div>`);
+    m.querySelectorAll('.card').forEach(e => e.onclick = () => openCard(+e.dataset.id, null));
+  }
+  function openModal(html) {
+    closeModal();
+    const m = el('div', { class: 'modal', id: 'modal' });
+    const s = el('div', { class: 'sheet' }, html);
+    m.appendChild(s);
+    m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+    document.body.appendChild(m);
+    s.querySelectorAll('[data-x]').forEach(b => b.onclick = closeModal);
+    return s;
+  }
+  function closeModal() { const m = $('#modal'); if (m) m.remove(); }
+  function showCountry(c) {
+    const C = DATA.COUNTRIES[c], G = game.G, k = game.control(c);
+    const regs = C.regions.map(r => DATA.REGION_NAMES[r]).join(', ');
+    openModal(`<button class="close" data-x>✕</button><h3>${C.bg ? '★ ' : ''}${C.name}</h3><div class="ctyinfo">
+      <div class="row"><span>지역</span><b>${regs}</b></div>
+      <div class="row"><span>안정도</span><b>${C.stab}</b></div>
+      <div class="row"><span>전장 국가</span><b>${C.bg ? '예' : '아니오'}</b></div>
+      <div class="row"><span>영향력</span><b><span style="color:#7fb2ff">미국 ${G.inf[c].US}</span> · <span style="color:#ff8a8a">소련 ${G.inf[c].USSR}</span></b></div>
+      <div class="row"><span>지배</span><b>${k ? KO[k] : '없음'}</b></div>
+      <div class="row"><span>인접 국가</span><b style="text-align:right;max-width:65%">${C.adj.map(a => DATA.COUNTRIES[a].name).join(', ')}${C.spAdj ? ', ' + KO[C.spAdj] + '(초강대국)' : ''}</b></div>
+      <div class="row"><span>쿠데타 성공 조건</span><b>주사위+작전 > ${C.stab * 2}</b></div></div>`);
+  }
+  function showLog() {
+    const L = game.G.log.slice().reverse();
+    openModal(`<button class="close" data-x>✕</button><h3>게임 기록</h3><div id="logList">${L.map(l => `<div class="l-${l.cls || ''}">${l.msg}</div>`).join('')}</div>`);
+  }
+  function showInfo() {
+    const G = game.G, P = G.perm;
+    const perm = Object.keys(P).filter(k => P[k]).map(k => DATA.CARDS[k].name);
+    const fxName = { containment: '봉쇄 정책(미 작전+1)', brezhnev: '브레즈네프 독트린(소 작전+1)', vietnam: '베트남 봉기', cmc: '쿠바 미사일 위기', nuclearSubs: '핵잠수함', salt: 'SALT(쿠데타 -1)', iranContra: '이란-콘트라', chernobyl: '체르노빌', deathSquads: '중남미 암살단', northSeaOil: '북해 유전', yuri: '유리와 사만다', u2: 'U2 사건', wwby: '너희를 묻어 버리겠다', redScare: '적색 공포', missileEnvy: '미사일 질투' };
+    const fx = Object.keys(G.fx).filter(k => fxName[k]).map(k => fxName[k]);
+    if (G.quagmire) fx.push('미국: 수렁'); if (G.bearTrap) fx.push('소련: 곰의 덫');
+    const sp = s => { const b = G.space[s]; return b ? DATA.SPACE_TRACK[b][0] : '출발 전'; };
+    openModal(`<button class="close" data-x>✕</button><h3>현재 상황</h3><div class="ctyinfo">
+      <div class="row"><span>우주 경쟁 미국</span><b>${G.space.US}칸 (${sp('US')})</b></div>
+      <div class="row"><span>우주 경쟁 소련</span><b>${G.space.USSR}칸 (${sp('USSR')})</b></div>
+      <div class="row"><span>지속 효과</span><b style="text-align:right;max-width:65%">${perm.join(', ') || '없음'}</b></div>
+      <div class="row"><span>이번 턴 효과</span><b style="text-align:right;max-width:65%">${fx.join(', ') || '없음'}</b></div>
+      <div class="row"><span>덱 / 버림 / 제거</span><b>${G.deck.length} / ${G.discard.length} / ${G.removed.length}</b></div></div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="pbtn" id="bDisc">버림 더미 보기</button><button class="pbtn" id="bRem">제거된 카드 보기</button><button class="pbtn warn" id="bNew">새 게임</button></div>
+      <h3 style="margin-top:16px">지역 현황</h3><div class="ctyinfo">${['eu', 'as', 'me', 'ca', 'sa', 'af'].map(r => {
+        const st = game.regionStatus(r), LV = ['없음', '존재', '우세', '지배'];
+        return `<div class="row"><span>${DATA.SCORING_INFO[r].name}</span><b><span style="color:#7fb2ff">미 ${LV[st.US.level]} (${st.US.n}국/전장${st.US.bg})</span> · <span style="color:#ff8a8a">소 ${LV[st.USSR.level]} (${st.USSR.n}국/전장${st.USSR.bg})</span></b></div>`;
+      }).join('')}</div>`);
+    $('#bDisc').onclick = () => openCardList('버림 더미', G.discard);
+    $('#bRem').onclick = () => openCardList('제거된 카드', G.removed);
+    $('#bNew').onclick = () => {
+      const m = openModal(`<h3>새 게임을 시작할까요?</h3><p style="color:#cfd6df">지금 게임 진행 상황은 지워집니다.</p><div class="actbtns"><button class="ev" id="yNew">새 게임 시작</button><button data-x>계속하기</button></div>`);
+      m.querySelector('#yNew').onclick = () => { clearSave(); location.reload(); };
+    };
+  }
+  function showRules() { openModal(`<button class="close" data-x>✕</button><h3>게임 규칙 요약</h3>${RULES_HTML}`); }
+
+  // ---------- 에이전트 ----------
+  let replay = [], record = [], saveMeta = null;
+  const SAVE_KEY = 'twilight_ko_save_v1';
+  function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ ...saveMeta, answers: record })); } catch (e) {} }
+  function loadSave() { try { const v = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return v && v.answers ? v : null; } catch (e) { return null; } }
+  function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const replaying = () => replay.length > 0;
+  class HumanAgent {
+    ask(g, side, req) {
+      if (replay.length) { const v = replay.shift(); record.push(v); if (!replay.length) { setTimeout(render, 0); } return Promise.resolve(v); }
+      return new Promise(res0 => {
+        const res = v => { record.push(v === undefined ? null : v); save(); res0(v); };
+        pending = { req, res };
+        render();
+        if (req.type === 'card') openCardPick(req);
+        if (req.type === 'country') setTimeout(() => ensureVisible(req.valid), 30);
+        if (req.type === 'action' && navigator.vibrate) navigator.vibrate(30);
+      });
+    }
+  }
+  class SlowAI {
+    constructor() { this.ai = new AIAgent(); }
+    async ask(g, side, req) {
+      if (!FAST && !replaying()) await sleep(req.type === 'action' ? 650 : 420);
+      return this.ai.ask(g, side, req);
+    }
+  }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const FAST = location.search.includes('fast');
+
+  // ---------- 시작 ----------
+  ui.start = function (side, optional, restore) {
+    human = side;
+    const seed = restore ? restore.seed : (Math.random() * 2 ** 31) | 0;
+    saveMeta = { seed, side, optional, at: Date.now() };
+    replay = restore ? restore.answers.slice() : []; record = [];
+    $('#title').classList.add('hidden');
+    $('#app').classList.remove('hidden');
+    const agents = { US: side === 'US' ? new HumanAgent() : new SlowAI(), USSR: side === 'USSR' ? new HumanAgent() : new SlowAI() };
+    game = new Game({
+      agents, optional, rng: mulberry32(seed),
+      onUpdate: () => { if (!replaying()) render(); },
+      onLog: (msg) => { if (!replaying()) $('#ticker').textContent = msg; },
+      pause: ms => (FAST || replaying()) ? Promise.resolve() : sleep(ms),
+    });
+    if (!restore) save();
+    buildMap();
+    // 처음 화면 위치: 유럽 쪽으로 스크롤
+    setTimeout(() => { const w = $('#mapwrap'); w.scrollLeft = (w.scrollWidth - w.clientWidth) * 0.3; w.scrollTop = 0; }, 50);
+    game.run().then(over => {
+      render();
+      if (!over) return;
+      clearSave();
+      const win = over.winner === human;
+      openModal(`<div class="over-win">${over.winner ? (win ? '🎉 승리!' : '패배…') : '무승부'}</div><p style="text-align:center;color:#cfd6df">${over.reason}<br>${over.winner ? KO[over.winner] + '이 냉전에서 승리했습니다.' : ''}</p><div class="actbtns"><button class="ev" id="ovAgain">새 게임</button><button id="ovLog">게임 기록 보기</button></div>`);
+      $('#ovAgain').onclick = () => location.reload();
+      $('#ovLog').onclick = showLog;
+    }).catch(e => { console.error(e); $('#ticker').textContent = '오류: ' + e.message; });
+  };
+  ui.init = function () {
+    let side = 'USSR';
+    document.querySelectorAll('.side-btn').forEach(b => b.onclick = () => {
+      document.querySelectorAll('.side-btn').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); side = b.dataset.side;
+    });
+    $('#startBtn').onclick = () => ui.start(side, $('#optCards').checked);
+    const sv0 = loadSave();
+    if (sv0 && sv0.answers.length) {
+      const b = $('#resumeBtn'); b.classList.remove('hidden');
+      const d = new Date(sv0.at || Date.now());
+      b.innerHTML = `이어하기 <small style="font-weight:500;font-size:13px">(${KO[sv0.side]} · ${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')})</small>`;
+      b.onclick = () => ui.start(sv0.side, sv0.optional, sv0);
+    }
+    $('#rulesBtn').onclick = showRules;
+    $('#zin').onclick = () => { zoom = Math.min(2.5, zoom * 1.25); applyZoom(); };
+    $('#zout').onclick = () => { zoom = Math.max(0.35, zoom / 1.25); applyZoom(); };
+    window.addEventListener('resize', () => game && applyZoom());
+  };
+})();
+
+const RULES_HTML = `<div class="rules">
+<p>미국과 소련이 1945~1989년 냉전을 벌이는 2인 게임입니다. 카드를 내서 세계 각국에 <b>영향력</b>을 늘리고, 지역 득점으로 <b>승점(VP)</b>을 얻습니다.</p>
+<h4>승리 조건</h4><ul>
+<li>VP 20점에 먼저 도달하면 즉시 승리</li>
+<li>유럽 득점 시 유럽을 <b>지배</b>하면 즉시 승리</li>
+<li>상대 차례에 DEFCON이 1이 되면(핵전쟁) 그 차례의 플레이어가 패배</li>
+<li>득점 카드를 손에 든 채 턴을 끝내면 패배</li>
+<li>10턴 종료 후 최종 득점에서 VP가 앞선 쪽 승리</li></ul>
+<h4>턴 진행</h4><ul>
+<li>① DEFCON 1 회복 ② 카드 보충 (1~3턴 8장, 4턴부터 9장)</li>
+<li>③ <b>헤드라인</b>: 양측이 1장씩 동시에 이벤트로 냄. 작전값이 높은 쪽 먼저(동률이면 미국)</li>
+<li>④ <b>액션 라운드</b>: 1~3턴 6회, 4턴부터 7회. 소련 → 미국 순서로 카드 1장씩</li>
+<li>⑤ 군사작전 점검 ⑥ 득점 카드 보유 검사 ⑦ 중국 카드 앞면으로</li>
+<li>4턴에 중반 카드, 8턴에 후반 카드가 덱에 섞임</li></ul>
+<h4>카드 사용 방법</h4><ul>
+<li><b>이벤트</b>: 내 진영(또는 공통) 이벤트를 실행</li>
+<li><b>작전</b>: 카드 숫자만큼 영향력 배치 / 재정렬 / 쿠데타 중 하나</li>
+<li>상대 이벤트 카드를 작전으로 쓰면 <b>상대 이벤트도 발동</b>(순서는 내가 선택)</li>
+<li><b>우주 경쟁</b>: 상대 이벤트를 발동시키지 않고 버리는 방법. 턴당 1회</li>
+<li>*표 카드는 이벤트 사용 후 게임에서 제거</li></ul>
+<h4>영향력 배치</h4><ul>
+<li>내 영향력이 있는 국가, 그 인접 국가, 내 초강대국에 인접한 국가에만 배치</li>
+<li>상대가 지배한 국가에 놓을 때는 1점당 작전 2</li>
+<li><b>지배</b>: 내 영향력이 상대보다 안정도 이상 많을 때</li></ul>
+<h4>쿠데타</h4><ul>
+<li>주사위 + 작전값 − (안정도 × 2) = 결과. 양수면 그만큼 상대 영향력 제거, 남으면 내 영향력 추가</li>
+<li>쿠데타한 작전값만큼 군사작전 트랙 증가</li>
+<li><b>전장 국가(★)</b> 쿠데타는 DEFCON을 1 낮춤</li>
+<li>DEFCON 4 이하: 유럽 금지 / 3 이하: 아시아 금지 / 2: 중동 금지</li></ul>
+<h4>재정렬</h4><ul>
+<li>작전 1점당 1회. 양측 주사위 + 보정(인접 지배국 +1씩, 영향력이 더 많으면 +1, 내 초강대국 인접 +1)</li>
+<li>높은 쪽이 차이만큼 상대 영향력 제거</li></ul>
+<h4>지역 득점</h4><ul>
+<li><b>존재</b>: 1개국 이상 지배</li>
+<li><b>우세</b>: 상대보다 지배국 수와 전장 국가 수가 모두 많고, 전장·비전장 국가를 각각 1개 이상 지배</li>
+<li><b>지배</b>: 상대보다 지배국이 많고 그 지역 전장 국가를 모두 지배</li>
+<li>추가: 지배한 전장 국가당 +1, 상대 초강대국에 인접한 지배국당 +1(유럽·아시아·중앙아메리카)</li></ul>
+<h4>군사작전</h4><p>턴 종료 시 군사작전 값이 DEFCON보다 낮으면 부족한 만큼 상대가 VP를 얻습니다.</p>
+<h4>중국 카드</h4><p>작전 4(아시아에 전부 쓰면 5). 사용하면 상대에게 뒷면으로 넘어가고 다음 턴에 사용 가능. 10턴 종료 시 보유자 +1 VP.</p>
+<h4>지도 보는 법</h4><p>국가 칸 왼쪽 파란 숫자 = 미국 영향력, 오른쪽 빨간 숫자 = 소련 영향력, 가운데 = 안정도. 칸이 꽉 찬 색이면 그 나라가 지배 중. 빨간 띠와 ★ = 전장 국가. 오른쪽 위 점 = 초강대국 인접. 국가를 누르면 자세한 정보가 나옵니다.</p>
+<p style="color:#8f9aa8;font-size:12px">원작: Twilight Struggle (GMT Games, Ananda Gupta & Jason Matthews). 이 페이지는 교육·개인 학습용 비공식 디지털 버전입니다.</p>
+</div>`;
+
+UI.init();
+</script>
+</body>
+</html>

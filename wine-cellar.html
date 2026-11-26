@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>와인 저장고</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: warm, candle-lit cellar; calm and legible for a board game at the table
+   IDEA: wine labels laid on a dark wooden rack; each card is a bottle label
+   PICTURE: the cellar column itself, labels stacked with the scoring digit lit
+   COLOUR and TYPE: deep burgundy wood, label paper, gold accent; Gowun Batang titles + Noto Sans KR
+   LAYOUT: phone stacks status, rewards, hand, my cellar, opponent; wide = 3 columns */
+:root{color-scheme:dark;--bg:#25110f;--wood:#3a1c17;--wood2:#4a251e;--paper:#f4ecd9;--ink:#2a1a14;--txt:#f3e7d3;--mute:#c9b39a;--gold:#e0b453;--line:rgba(255,230,200,.14)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#5a2a20 0,transparent 60%),var(--bg);color:var(--txt);font:16px/1.5 "Noto Sans KR",system-ui,sans-serif;overflow-x:clip;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px max(3vw,12px);border-bottom:1px solid var(--line);background:rgba(0,0,0,.25);position:sticky;top:0;z-index:5;backdrop-filter:blur(6px)}
+h1{font:700 26px/1.05 "Gowun Batang",serif;margin:0;letter-spacing:.02em}
+.pill{border:1px solid var(--gold);color:var(--gold);border-radius:99px;padding:2px 12px;font-size:14px;font-weight:600;white-space:nowrap}
+.sp{flex:1}
+.btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--wood2);font-weight:600}
+.btn:hover{background:#5b2e25}.btn:disabled{opacity:.4;cursor:default}
+.btn.pri{background:var(--gold);color:#2a160c;border-color:var(--gold)}
+.btn:focus-visible,.mini:focus-visible,.rw:focus-visible,.slot:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.board{display:grid;gap:14px;padding:14px max(3vw,12px) 40px;max-width:1300px;margin:0 auto;grid-template-areas:"stat" "rew" "hand" "cell" "opp"}
+@media(min-width:980px){.board{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,1fr);grid-template-areas:"cell stat opp" "cell rew opp" "cell hand opp";align-items:start}#cell,#opp{grid-row:1/span 3}}
+.panel{background:linear-gradient(180deg,var(--wood),#2e1612);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+h2{font:700 19px/1.2 "Gowun Batang",serif;margin:0 0 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+h2 small{font:600 13px "Noto Sans KR";color:var(--mute)}
+#stat{font-size:16px}
+#stat .msg{font-weight:600}
+.vs{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;font-size:15px;color:var(--mute)}
+.vs b{font-size:22px;color:var(--txt)}
+.card{display:grid;grid-template-columns:46px minmax(0,1fr);border-radius:9px;overflow:hidden;background:var(--paper);color:var(--ink);box-shadow:0 2px 0 rgba(0,0,0,.35),0 6px 14px rgba(0,0,0,.25);margin:6px 0}
+.cn{background:var(--tc);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 0}
+.cn b{font:800 20px/1 "Noto Sans KR"}
+.cn svg{width:18px;height:18px}
+.lab{padding:5px 8px 5px}
+.mat{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px;font:700 18px/1.25 "Gowun Batang",serif;text-align:center}
+.mat span{border:1px solid rgba(42,26,20,.18);border-radius:4px;color:rgba(42,26,20,.55)}
+.mat span.on{background:var(--tc);color:#fff;border-color:var(--tc);transform:scale(1.08)}
+.nm{font-size:13px;display:flex;align-items:center;gap:6px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flag{flex:none;width:18px;height:12px;border-radius:2px;display:inline-block;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
+.f-FR{background:linear-gradient(90deg,#1f3f9a 33%,#fff 33% 66%,#d8232a 66%)}
+.f-IT{background:linear-gradient(90deg,#1a8c45 33%,#fff 33% 66%,#d8232a 66%)}
+.f-DE{background:linear-gradient(180deg,#111 33%,#d00 33% 66%,#fc0 66%)}
+.f-ES{background:linear-gradient(180deg,#c60b1e 25%,#ffc400 25% 75%,#c60b1e 75%)}
+.f-US{background:linear-gradient(#3c3b6e,#3c3b6e) 0 0/45% 55% no-repeat,repeating-linear-gradient(180deg,#b22234 0 1.7px,#fff 1.7px 3.4px)}
+.f-AR{background:linear-gradient(180deg,#74acdf 33%,#fff 33% 66%,#74acdf 66%)}
+.f-ZA{background:linear-gradient(180deg,#e03c31 30%,#fff 30% 38%,#007749 38% 62%,#fff 62% 70%,#001489 70%)}
+.rws{display:grid;gap:8px}
+.rw{all:unset;display:block;border-radius:11px;cursor:pointer;padding:2px;border:2px solid transparent}
+.rw.sel{border-color:var(--gold);box-shadow:0 0 0 4px rgba(224,180,83,.25)}
+.rw[disabled]{cursor:default}
+.clients{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.client{background:var(--paper);color:var(--ink);border-radius:12px;padding:12px;border:2px solid transparent;text-align:left}
+.client h3{font:700 18px/1.2 "Gowun Batang",serif;margin:0 0 6px}
+.client ul{list-style:none;margin:0;padding:0;font-size:15px}
+.client li{display:flex;align-items:center;gap:6px;padding:2px 0}
+.client li svg{width:16px;height:16px}
+.client li em{font-style:normal;font-weight:800;margin-left:auto}
+button.client:hover{border-color:var(--gold)}
+.hand{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mini{border-radius:10px;border:2px solid transparent;background:var(--paper);color:var(--ink);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 3px 0 rgba(0,0,0,.35);position:relative;overflow:hidden}
+.mini::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--tc)}
+.mini b{font:800 22px/1.1 "Noto Sans KR";margin-top:4px}
+.mini .ic{display:flex;align-items:center;gap:4px}.mini svg{width:16px;height:16px;color:var(--tc)}
+.mini small{font:600 13px/1 "Gowun Batang",serif;letter-spacing:.02em;color:#5a4636}
+.mini.sel{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 0 0 4px rgba(224,180,83,.3)}
+.mini:disabled{opacity:.6;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.slot{width:100%;min-height:44px;border:2px dashed var(--gold);border-radius:10px;background:rgba(224,180,83,.08);color:var(--gold);font-weight:700;margin:4px 0}
+.slot:hover{background:rgba(224,180,83,.18)}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--mute);font-size:15px}
+.score{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;font-size:14px;color:var(--mute);margin:2px 0 6px}
+.score b{color:var(--gold);font-size:20px}
+.chip{font-size:14px;color:var(--mute);display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:6px}
+.chip span{display:inline-flex;align-items:center;gap:4px}.chip svg{width:15px;height:15px}
+.chip strong{color:var(--txt);font-family:"Gowun Batang",serif}
+.log{margin:10px 0 0;padding:0;list-style:none;font-size:14px;color:var(--mute);border-top:1px solid var(--line)}
+.log li{padding:5px 0;border-bottom:1px solid var(--line)}
+.log li:first-child{color:var(--txt)}
+table{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
+tr.tot td{font-weight:800;color:var(--gold);font-size:18px}
+.big{font:700 28px/1.15 "Gowun Batang",serif;margin:4px 0 8px;text-wrap:balance}
+.ov{position:fixed;inset:0;background:rgba(10,4,3,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.ov.on{display:flex}
+.dlg{background:linear-gradient(180deg,var(--wood2),var(--wood));border:1px solid var(--line);border-radius:16px;padding:20px;max-width:560px;width:100%;max-height:88vh;overflow:auto}
+.dlg h2{font-size:24px}
+.opt{display:grid;gap:8px;margin:8px 0 14px}
+.opt label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.opt input{width:20px;height:20px;accent-color:var(--gold);margin-top:2px;flex:none}
+.opt small{display:block;color:var(--mute);font-size:14px}
+.dlg ol{padding-left:20px;margin:6px 0}.dlg li{margin:4px 0}
+.note{font-size:13px;color:var(--mute);margin-top:12px}
+.sm .mat{font-size:15px}.sm .cn b{font-size:16px}.sm{grid-template-columns:38px minmax(0,1fr);margin:4px 0}
+.revealed{display:flex;gap:6px;flex-wrap:wrap}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;background:var(--wood2);border:1px solid var(--line);font-size:13px;font-weight:600}
+@media(prefers-reduced-motion:no-preference){.card,.mini{transition:transform .15s}.flash{animation:fl .6s ease-out}@keyframes fl{from{box-shadow:0 0 0 6px var(--gold)}to{box-shadow:0 0 0 0 transparent}}}
+@media(max-width:420px){.btn{padding:0 10px;font-size:14px}header{gap:6px}.mat{font-size:16px}.hand{gap:6px}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-w" viewBox="0 0 20 20"><path fill="currentColor" d="M10 1.5c-1 2.2-3.6 2.4-5 4.6-1.3 2-.9 4.6.4 6.2-.7 1.4-1.7 2.8-3 4l1 1c1.3-1.2 2.3-2.6 3.1-4 1.9 1.2 4.6 1.2 6.6-.4 2.6-2 3.3-6.4 1.7-9.6-1.4.3-3.3.1-4.8-1.8zM8.6 12.6c1-2.4 2.4-4.4 4.3-6l.8.8c-1.8 1.5-3.1 3.4-4 5.6z"/></symbol>
+ <symbol id="i-s" viewBox="0 0 20 20"><path fill="currentColor" d="M10 0l1.7 5.2 4.9-2.4-2.4 4.9L19.5 9.4l-5.2 1.7 2.4 4.9-4.9-2.4L10 19l-1.7-5.4-4.9 2.4 2.4-4.9L.5 9.4l5.3-1.7L3.4 2.8l4.9 2.4z"/></symbol>
+ <symbol id="i-r" viewBox="0 0 20 20"><g fill="currentColor"><circle cx="6" cy="6" r="2.6"/><circle cx="11" cy="6" r="2.6"/><circle cx="16" cy="6" r="2.4"/><circle cx="8.5" cy="10.3" r="2.6"/><circle cx="13.5" cy="10.3" r="2.6"/><circle cx="11" cy="14.6" r="2.6"/><path d="M11 0v3h1V0z"/></g></symbol>
+ <symbol id="i-o" viewBox="0 0 20 20"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="8"/><path d="M10 4c3 0 5 2.4 4 5-1 2.4-4 2.6-5 1-1-1.6.4-3.4 2-3"/></g></symbol>
+</svg>
+
+<header>
+ <h1>와인 저장고</h1>
+ <span class="pill" id="rnd">라운드 1/8</span>
+ <span class="sp"></span>
+ <button class="btn" id="undo" title="Ctrl+Z">↶ 무르기</button>
+ <button class="btn" id="newb">새 게임</button>
+ <button class="btn" id="rulesb">규칙</button>
+</header>
+
+<main class="board">
+ <section class="panel" id="stat" style="grid-area:stat"></section>
+ <section class="panel" id="rew" style="grid-area:rew"></section>
+ <section class="panel" id="hand" style="grid-area:hand"></section>
+ <section class="panel" id="cell" style="grid-area:cell"></section>
+ <section class="panel" id="opp" style="grid-area:opp"></section>
+</main>
+
+<div class="ov" id="newov"><div class="dlg">
+ <h2>새 게임</h2>
+ <div class="opt" id="modes">
+  <label><input type="radio" name="mode" value="ai" checked><span><b>컴퓨터와 대결</b> (2인 규칙)<small>컴퓨터도 자기 고객을 위해 저장고를 만듭니다. 점수가 높은 쪽이 승리.</small></span></label>
+  <label><input type="radio" name="mode" value="eno"><span><b>에노와의 대결</b> (솔로 규칙)<small>에노는 저장고 없이 와인을 가로채기만 합니다. 내 점수로 등급을 받습니다.</small></span></label>
+ </div>
+ <div class="opt" id="diffs">
+  <label><input type="radio" name="diff" value="normal" checked><span><b>보통</b><small>컴퓨터가 점수를 계산해서 입찰·선택합니다.</small></span></label>
+  <label><input type="radio" name="diff" value="easy"><span><b>쉬움</b><small>컴퓨터가 자주 엉뚱한 선택을 합니다. (컴퓨터 대결에만 적용)</small></span></label>
+ </div>
+ <div class="row"><button class="btn pri" id="start">시작하기</button><button class="btn" data-close>취소</button></div>
+</div></div>
+
+<div class="ov" id="rulesov"><div class="dlg">
+ <h2>규칙 요약</h2>
+ <ol>
+  <li>와인 카드 1–18번을 사용합니다. 각자 8장을 손에 받고, 남은 2장이 첫 라운드 <b>보상 와인</b>입니다.</li>
+  <li>고객 카드 2장 중 1장을 고릅니다. 고객이 좋아하는 와인 유형·원산지 국가에 맞는 병마다 보너스를 받습니다.</li>
+  <li>매 라운드 손패에서 1장을 동시에 내어 입찰합니다. <b>카드 번호가 높은 쪽</b>이 보상 와인을 먼저 고릅니다.</li>
+  <li>받은 와인은 저장고의 <b>맨 위 또는 맨 아래</b>에만 놓을 수 있습니다. 중간에는 넣을 수 없습니다.</li>
+  <li>입찰에 쓴 카드 2장이 다음 라운드의 보상 와인이 됩니다. 8라운드 뒤 저장고에 8병이 쌓이면 끝.</li>
+  <li><b>저장고 점수</b>: 위에서 n번째 병은 그 카드의 n번째 숙성 점수를 얻습니다(카드에서 밝게 표시된 숫자). 여기에 고객 보너스를 더합니다.</li>
+ </ol>
+ <p><b>에노 솔로</b>: 에노는 첫 라운드에 2장, 이후 1장씩 공개해 앞에 남은 카드와 함께 둡니다. 내 입찰이 에노의 높은 카드보다 높으면 내가 먼저 고르고 남은 와인은 버려집니다. 낮으면 에노가 자기 고객 우선순위(유형1 → 유형2 → 국가 → 높은 번호)로 1장을 가져가 버리고, 나는 남은 것을 받습니다.</p>
+ <p class="note">카드의 숙성 점수와 고객 카드는 규칙서 그림에 나온 카드를 바탕으로 재구성한 값입니다.</p>
+ <div class="row"><button class="btn pri" data-close>닫기</button></div>
+</div></div>
+
+<script>
+{
+const T={w:{n:'화이트',c:'#c49a22'},s:{n:'스파클링',c:'#2f8a3c'},r:{n:'레드',c:'#8e1f2f'},o:{n:'로제',c:'#d9488f'}};
+const CO={FR:'프랑스',ES:'스페인',US:'미국',IT:'이탈리아',DE:'독일',AR:'아르헨티나',ZA:'남아공'};
+const RAW=[[1,'Cava','s','ES','23547861'],[2,'Merlot Rosé','o','US','87654321'],[3,'Garnacha Rosé','o','ES','87564321'],[4,'Gewurztraminer','w','FR','34786521'],[5,'Sauvignon Blanc','w','US','78564321'],[6,'Prosecco','s','IT','65874312'],[7,'Chardonnay','w','FR','12436578'],[8,'Syrah','r','FR','12347865'],[9,'Riesling','w','DE','78654321'],[10,'Tempranillo','r','ES','13245678'],[11,'Cinsault Rosé','o','FR','56874321'],[12,'Zinfandel','r','US','12578643'],[13,'Champagne','s','FR','12567843'],[14,'Malbec','r','AR','12385746'],[15,'Chenin Blanc','w','ZA','12364785'],[16,'Sangiovese Rosato','o','IT','46875321'],[17,'Blanc de Noirs','s','US','24687531'],[18,'Pinot Noir','r','FR','12345786']];
+const C={};RAW.forEach(([id,n,t,c,m])=>C[id]={id,n,t,c,m:[...m].map(Number)});
+const CL=[['Kent Stone','w',2,'r',1,'ES'],['Natalia Vallarta','w',2,'o',2,'ES'],['Alley de la Duraznos','s',6,'w',1,'FR'],['Ai Yamada','r',2,'o',2,'US'],['Chloe Michel','w',2,'s',3,'FR'],['Marco Rossi','o',3,'r',1,'IT'],['Sofia Herrera','s',4,'o',1,'ES'],['James Whitaker','r',2,'s',2,'US'],['Hanna Becker','w',3,'o',1,'FR'],['Léa Dubois','r',3,'w',1,'US']].map(([n,t1,v1,t2,v2,co])=>({n,t1,v1,t2,v2,co}));
+const $=s=>document.querySelector(s);
+let S=null,hist=[],sel=null,selBid=null;
+const ico=t=>`<svg style="color:${T[t].c}"><use href="#i-${t}"/></svg>`;
+const flag=c=>`<i class="flag f-${c}" title="${CO[c]}"></i>`;
+function rnd(){let t=(S.seed=(S.seed+0x6D2B79F5)|0);t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const log=m=>{S.log.unshift(m);S.log=S.log.slice(0,8)};
+const opName=()=>S.mode==='ai'?'컴퓨터':'에노';
+const nm=id=>`${id}번 ${C[id].n}`;
+
+function bonusOf(cellar,ci){if(ci==null)return{a:0,b:0,k:0};const c=CL[ci];let a=0,b=0,k=0;for(const id of cellar){const d=C[id];if(d.t===c.t1)a+=c.v1;if(d.t===c.t2)b+=c.v2;if(d.c===c.co)k+=3}return{a,b,k}}
+function scoreOf(cellar,ci){const cel=cellar.reduce((s,id,i)=>s+C[id].m[i],0);const b=bonusOf(cellar,ci);return{cel,...b,tot:cel+b.a+b.b+b.k}}
+// AI evaluation: value of a partial stack given unknown future top/bottom split
+function V(st){const R=8-st.length;let mx=-1,sum=0;for(let t=0;t<=R;t++){let s=0;st.forEach((id,i)=>s+=C[id].m[t+i]);if(s>mx)mx=s;sum+=s}return .5*mx+.5*sum/(R+1)+4.5*R}
+function bestPlace(id,cel){if(!cel.length)return{w:'top',v:V([id])};const a=V([id,...cel]),b=V([...cel,id]);return a>=b?{w:'top',v:a}:{w:'bot',v:b}}
+function marg(id,p){const P=S[p];if(P.cellar.length>=8)return 0;const b=bonusOf([id],P.client);return bestPlace(id,P.cellar).v-V(P.cellar)+b.a+b.b+b.k}
+const want=(id)=>marg(id,'op')+.3*marg(id,'me');
+
+function aiClient(o){let best=0,bs=-1;o.forEach((ci,i)=>{let s=0;for(const id of [...S.opp,...S.rewards]){const b=bonusOf([id],ci);s+=b.a+b.b+b.k}s+=rnd();if(s>bs){bs=s;best=i}});return best}
+function aiBid(){
+ let gain=0;const R=S.rewards;
+ if(R.length===2){const[x,y]=R;const win=want(x)>=want(y)?x:y;const hp=marg(x,'me')>=marg(y,'me')?x:y;gain=Math.max(0,marg(win,'op')-marg(hp===x?y:x,'op'))}
+ const own=[...S.opp].sort((a,b)=>a-b),last=S.round===8,H=S.hand;let best=own[0],bs=-1e9;
+ own.forEach((c,i)=>{const p=H.filter(h=>h<c).length/Math.max(1,H.length);const rank=own.length>1?i/(own.length-1):0;
+  const s=p*gain-(last?0:1.6*rank)+(last?0:.25*(marg(c,'op')-marg(c,'me')))+(rnd()-.5)*(S.diff==='easy'?8:.4);if(s>bs){bs=s;best=c}});
+ return best}
+function aiPickFirst(){const R=S.rewards;if(S.diff==='easy'&&rnd()<.5)return R[Math.floor(rnd()*R.length)];return R.reduce((b,r)=>want(r)>want(b)?r:b)}
+function takeOp(r){const bp=S.diff==='easy'&&rnd()<.4?{w:rnd()<.5?'top':'bot'}:bestPlace(r,S.op.cellar);bp.w==='top'?S.op.cellar.unshift(r):S.op.cellar.push(r);S.rewards=S.rewards.filter(x=>x!==r);return bp.w}
+function enoPick(){const c=CL[S.op.client],[x,y]=S.rewards;if(y==null)return x;for(const f of[d=>d.t===c.t1,d=>d.t===c.t2,d=>d.c===c.co]){const a=f(C[x]),b=f(C[y]);if(a!==b)return a?x:y;if(a&&b)break}return Math.max(x,y)}
+
+function newGame(mode,diff){
+ S={mode,diff,seed:(Math.random()*2**31)|0,round:1,phase:'client',log:[],me:{cellar:[],client:null},op:{cellar:[],client:null},enoKept:null,lastBid:null,first:null,next:[]};
+ const deck=shuffle(Array.from({length:18},(_,i)=>i+1));
+ S.hand=deck.slice(0,8).sort((a,b)=>a-b);S.opp=deck.slice(8,16);if(mode==='ai')S.opp.sort((a,b)=>a-b);S.rewards=deck.slice(16);
+ const cs=shuffle(CL.map((_,i)=>i));S.offer=cs.slice(0,2);
+ if(mode==='ai'){const o=cs.slice(2,4);S.op.client=o[aiClient(o)]}
+ hist=[];sel=null;selBid=null;log(mode==='ai'?'새 게임: 컴퓨터와 대결합니다.':'새 게임: 에노와 대결합니다.');render();
+}
+function snap(){hist.push(JSON.stringify(S));if(hist.length>300)hist.shift()}
+function undo(){if(!hist.length)return;S=JSON.parse(hist.pop());sel=null;selBid=null;render()}
+
+function chooseClient(i){snap();S.me.client=S.offer[i];if(S.mode==='eno')S.op.client=S.offer[1-i];S.phase='bid';log(`고객 ${CL[S.me.client].n}을(를) 골랐습니다.`);render()}
+function bid(c){
+ snap();selBid=null;sel=null;
+ if(S.mode==='ai'){
+  const o=aiBid();S.opp=S.opp.filter(x=>x!==o);S.hand=S.hand.filter(x=>x!==c);
+  S.lastBid={me:c,op:[o]};S.next=[c,o];S.first=c>o?'me':'op';
+  if(S.first==='op'){const r=aiPickFirst(),w=takeOp(r);log(`라운드 ${S.round}: 컴퓨터 ${o} > 나 ${c}. 컴퓨터가 ${nm(r)}을(를) 저장고 ${w==='top'?'맨 위':'맨 아래'}에 놓았습니다.`)}
+  else log(`라운드 ${S.round}: 나 ${c} > 컴퓨터 ${o}. 내가 먼저 고릅니다.`);
+ }else{
+  S.hand=S.hand.filter(x=>x!==c);let show;
+  if(S.round===1)show=S.opp.splice(0,2);else{show=[S.enoKept];if(S.opp.length)show.push(S.opp.shift())}
+  const hi=Math.max(...show),lo=Math.min(...show),two=show.length>1;S.lastBid={me:c,op:show};
+  if(c>hi){S.first='me';S.next=[c,lo];S.enoKept=two?hi:null;log(`라운드 ${S.round}: 나 ${c} > 에노 ${hi}. 내가 먼저 고르고, 남은 와인은 버려집니다.`)}
+  else{S.first='op';S.next=[c,hi];S.enoKept=two?lo:null;const r=enoPick();S.rewards=S.rewards.filter(x=>x!==r);log(`라운드 ${S.round}: 에노 ${hi} > 나 ${c}. 에노가 ${nm(r)}을(를) 가져가 버렸습니다.`)}
+ }
+ S.phase='pick';render();
+}
+function place(w){
+ const id=sel;if(id==null)return;snap();
+ w==='top'?S.me.cellar.unshift(id):S.me.cellar.push(id);S.rewards=S.rewards.filter(x=>x!==id);sel=null;
+ log(`${nm(id)}을(를) 내 저장고${S.me.cellar.length===1?'':w==='top'?' 맨 위':' 맨 아래'}에 놓았습니다.`);
+ if(S.first==='me'&&S.rewards.length){const r=S.rewards[0];if(S.mode==='ai'){const ww=takeOp(r);log(`컴퓨터가 남은 ${nm(r)}을(를) ${ww==='top'?'맨 위':'맨 아래'}에 놓았습니다.`)}else{S.rewards=[];log(`남은 ${nm(r)}은(는) 상자로 돌아갔습니다.`)}}
+ S.rewards=S.next;S.next=[];S.round++;
+ if(S.round>8){S.phase='over';S.round=8;log('게임 종료! 점수를 확인하세요.')}else S.phase='bid';
+ render();
+}
+
+function card(id,hi=-1,cls=''){const d=C[id];return`<div class="card ${cls}" style="--tc:${T[d.t].c}"><div class="cn"><b>${id}</b><svg><use href="#i-${d.t}"/></svg></div><div class="lab"><div class="mat">${d.m.map((v,i)=>`<span class="${i===hi?'on':''}">${v}</span>`).join('')}</div><div class="nm">${flag(d.c)}${d.n} · ${T[d.t].n} · ${CO[d.c]}</div></div></div>`}
+function chip(ci){if(ci==null)return'';const c=CL[ci];return`<div class="chip"><strong>${c.n}</strong><span>${ico(c.t1)}${T[c.t1].n} +${c.v1}</span><span>${ico(c.t2)}${T[c.t2].n} +${c.v2}</span><span>${flag(c.co)}${CO[c.co]} +3</span><span>(병당)</span></div>`}
+function clientCard(ci,btn){const c=CL[ci];const inner=`<h3>${c.n}</h3><ul><li>${ico(c.t1)}${T[c.t1].n} 와인<em>+${c.v1}/병</em></li><li>${ico(c.t2)}${T[c.t2].n} 와인<em>+${c.v2}/병</em></li><li>${flag(c.co)}${CO[c.co]} 와인<em>+3/병</em></li></ul>`;return btn!=null?`<button class="client" data-client="${btn}">${inner}</button>`:`<div class="client">${inner}</div>`}
+const scoreLine=(sc)=>`<div class="score">지금 기준 <b>${sc.tot}</b>점 = 저장고 ${sc.cel} + 고객 ${sc.a+sc.b+sc.k}</div>`;
+
+function render(){
+ if(S.phase==='pick'&&S.rewards.length===1)sel=S.rewards[0];
+ $('#rnd').textContent=S.phase==='over'?'게임 종료':S.phase==='client'?'준비':`라운드 ${S.round}/8`;
+ $('#undo').disabled=!hist.length;
+ const op=opName(),L=S.lastBid;
+ // status
+ let msg='';
+ if(S.phase==='client')msg='고객 카드 2장 중 함께할 고객 1장을 고르세요.';
+ else if(S.phase==='bid')msg='손패에서 입찰할 카드를 고르세요. 번호가 높을수록 보상 와인을 먼저 고릅니다.';
+ else if(S.phase==='pick')msg=S.rewards.length>1?'내가 먼저! 보상 와인 1장을 고른 뒤 저장고 맨 위나 맨 아래에 놓으세요.':'남은 보상 와인을 저장고 맨 위나 맨 아래에 놓으세요.';
+ else msg='8병이 모두 쌓였습니다.';
+ let vs='';
+ if(L&&S.phase!=='client'){vs=`<div class="vs">${S.phase==='bid'?'지난 라운드':'이번 입찰'} · 나 <b>${L.me}</b> vs ${op} <b>${L.op.join(' / ')}</b></div>`}
+ $('#stat').innerHTML=`<div class="msg">${msg}</div>${vs}${S.mode==='eno'&&S.enoKept!=null&&S.phase!=='over'?`<div class="vs">에노 앞에 남은 카드: <span class="tag">${S.enoKept}</span> · 덮인 카드 ${S.opp.length}장</div>`:''}`;
+ // rewards / client choice / results
+ let r='';
+ if(S.phase==='client'){r=`<h2>고객 고르기</h2><div class="clients">${S.offer.map((ci,i)=>clientCard(ci,i)).join('')}</div>${S.mode==='eno'?'<p class="note">고르지 않은 고객은 에노의 고객이 됩니다.</p>':''}`}
+ else if(S.phase==='over'){
+  const a=scoreOf(S.me.cellar,S.me.client);
+  if(S.mode==='ai'){const b=scoreOf(S.op.cellar,S.op.client);const res=a.tot>b.tot?'승리했습니다!':a.tot<b.tot?'컴퓨터가 이겼습니다.':'무승부입니다.';
+   r=`<h2>결과</h2><div class="big">${res}</div><table><tr><th></th><th>나</th><th>컴퓨터</th></tr><tr><td>저장고</td><td>${a.cel}</td><td>${b.cel}</td></tr><tr><td>고객 유형 1</td><td>${a.a}</td><td>${b.a}</td></tr><tr><td>고객 유형 2</td><td>${a.b}</td><td>${b.b}</td></tr><tr><td>원산지 국가</td><td>${a.k}</td><td>${b.k}</td></tr><tr class="tot"><td>합계</td><td>${a.tot}</td><td>${b.tot}</td></tr></table>`}
+  else{const t=a.tot,rank=t>=73?'마스터 소믈리에':t>=67?'유능한 소믈리에':t>=60?'와인 덕후':'아직 발효중';
+   r=`<h2>결과</h2><div class="big">${t}점 · ${rank}</div><table><tr><td>저장고</td><td>${a.cel}</td></tr><tr><td>고객 유형 1</td><td>${a.a}</td></tr><tr><td>고객 유형 2</td><td>${a.b}</td></tr><tr><td>원산지 국가</td><td>${a.k}</td></tr><tr class="tot"><td>합계</td><td>${t}</td></tr></table><p class="note">73+ 마스터 소믈리에 · 67–72 유능한 소믈리에 · 60–66 와인 덕후 · 0–59 아직 발효중</p>`}
+  r+=`<div class="row"><button class="btn pri" id="again">다시 하기</button><button class="btn" id="undo2">마지막 수 무르기</button></div>`}
+ else{r=`<h2>보상 와인 <small>${S.phase==='pick'?'탭해서 고르기':'이번 라운드에 받을 와인'}</small></h2><div class="rws">${S.rewards.map(id=>`<button class="rw ${sel===id?'sel':''}" data-rw="${id}" ${S.phase!=='pick'?'disabled':''}>${card(id)}</button>`).join('')||'<div class="empty">보상 와인 없음</div>'}</div>`}
+ r+=`<ul class="log">${S.log.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+ $('#rew').innerHTML=r;
+ // hand
+ const bidOK=S.phase==='bid';
+ $('#hand').innerHTML=`<h2>내 손패 <small>${S.hand.length}장 · 입찰용</small></h2>${S.hand.length?`<div class="hand">${S.hand.map(id=>{const d=C[id];return`<button class="mini ${selBid===id?'sel':''}" style="--tc:${T[d.t].c}" data-bid="${id}" ${bidOK?'':'disabled'} aria-label="${nm(id)}"><b>${id}</b><span class="ic"><svg><use href="#i-${d.t}"/></svg>${flag(d.c)}</span><small>${d.m.join('')}</small></button>`}).join('')}</div>`:'<div class="empty">손패를 모두 썼습니다.</div>'}${bidOK?`<div class="row"><button class="btn pri" id="dobid" ${selBid==null?'disabled':''}>${selBid==null?'카드를 고르세요':selBid+'번으로 입찰'}</button></div>`:''}`;
+ // my cellar
+ const me=S.me,sc=scoreOf(me.cellar,me.client);let slots=['',''];
+ if(S.phase==='pick'&&sel!=null){
+  if(!me.cellar.length)slots[0]=`<button class="slot" data-place="top">${sel}번을 저장고에 넣기 → ${scoreOf([sel],me.client).tot}점</button>`;
+  else{slots[0]=`<button class="slot" data-place="top">↑ ${sel}번 맨 위에 놓기 → ${scoreOf([sel,...me.cellar],me.client).tot}점</button>`;slots[1]=`<button class="slot" data-place="bot">↓ ${sel}번 맨 아래에 놓기 → ${scoreOf([...me.cellar,sel],me.client).tot}점</button>`}}
+ $('#cell').innerHTML=`<h2>내 저장고 <small>${me.cellar.length}/8병 · 위에서부터 개봉</small></h2>${chip(me.client)}${me.client!=null?scoreLine(sc):''}${slots[0]}${me.cellar.length?me.cellar.map((id,i)=>card(id,i)).join(''):(slots[0]?'':'<div class="empty">아직 비어 있습니다. 위에서 n번째 병은 n번째 숫자를 점수로 얻습니다.</div>')}${slots[1]}`;
+ // opponent
+ if(S.mode==='ai'){const o=S.op,os=scoreOf(o.cellar,o.client);
+  $('#opp').innerHTML=`<h2>컴퓨터 <small>${o.cellar.length}/8병 · 남은 손패 ${S.opp.length}장</small></h2>${chip(o.client)}${scoreLine(os)}<div class="vs" style="margin:0 0 6px">손패: <span class="revealed">${[...S.opp].sort((a,b)=>a-b).map(x=>`<span class="tag">${x}</span>`).join('')||'없음'}</span></div>${o.cellar.length?o.cellar.map((id,i)=>card(id,i,'sm')).join(''):'<div class="empty">컴퓨터 저장고가 비어 있습니다.</div>'}<p class="note">1–18번 카드만 쓰므로 상대 손패는 실제 게임에서도 추론할 수 있어 공개합니다.</p>`}
+ else{$('#opp').innerHTML=`<h2>에노 <small>덮인 카드 ${S.opp.length}장</small></h2>${S.op.client!=null?chip(S.op.client):'<div class="empty">고객을 고르면 남은 1장이 에노의 고객이 됩니다.</div>'}<p class="note">에노는 저장고를 만들지 않습니다. 내 입찰이 에노보다 낮으면 에노가 고객 취향(유형1 → 유형2 → 국가 → 높은 번호)대로 와인 1장을 가로채 버립니다.</p>`}
+}
+
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button,[data-close]');if(!t)return;
+ if(t.dataset.client!=null)return chooseClient(+t.dataset.client);
+ if(t.dataset.bid){selBid=+t.dataset.bid===selBid?null:+t.dataset.bid;return render()}
+ if(t.id==='dobid'&&selBid!=null)return bid(selBid);
+ if(t.dataset.rw&&S.phase==='pick'){sel=+t.dataset.rw;render();const s=document.querySelector('.slot');if(s&&innerWidth<980)s.scrollIntoView({behavior:'smooth',block:'center'});return}
+ if(t.dataset.place)return place(t.dataset.place);
+ if(t.id==='undo'||t.id==='undo2')return undo();
+ if(t.id==='newb'||t.id==='again')return $('#newov').classList.add('on');
+ if(t.id==='rulesb')return $('#rulesov').classList.add('on');
+ if(t.id==='start'){const m=document.querySelector('input[name=mode]:checked').value,d=document.querySelector('input[name=diff]:checked').value;try{localStorage.setItem('wc-set',JSON.stringify({m,d}))}catch(_){}$('#newov').classList.remove('on');return newGame(m,d)}
+ if(t.hasAttribute('data-close'))t.closest('.ov').classList.remove('on');
+});
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')}));
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo()}if(e.key==='Escape')document.querySelectorAll('.ov.on').forEach(o=>o.classList.remove('on'))});
+let set={m:'ai',d:'normal'};try{set=JSON.parse(localStorage.getItem('wc-set'))||set}catch(_){}
+for(const[n,v]of[['mode',set.m],['diff',set.d]]){const i=document.querySelector(`input[name=${n}][value="${v}"]`);if(i)i.checked=true}
+newGame(set.m,set.d);
+}
+</script>
+</body>
+</html>

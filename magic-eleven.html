@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>매직 넘버 일레븐</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 경기장 전광판처럼 또렷하고 경쾌하게
+   IDEA: 실제 보드게임 판(필드·컨트롤 트랙·시너지 보드)을 화면에 옮긴 것
+   PICTURE: 두 팀의 체크무늬 필드 자체가 그림
+   COLOUR and TYPE: 잔디 녹색 바탕, 흰 카드, 포지션 빨강/초록/파랑, 강조 노랑 / Black Han Sans + Noto Sans KR
+   LAYOUT: 점수판 → 상대 정보 → 필드+트랙 → 행동 패널 → 내 카드 */
+:root{color-scheme:light dark;--bg:light-dark(#1d6b3c,#0f2f1d);--pitch:#2f9a50;--pitch2:#278a46;--ink:#f6f8f2;--panel:light-dark(#0f4a29,#0a2214);--card:#fffdf7;--fw:#d9363e;--mf:#2a9a46;--df:#2f74c0;--gold:#ffd23f;--muted:#b9d8c2}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 'Noto Sans KR',-apple-system,'Apple SD Gothic Neo',sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+#app{max-width:620px;margin:0 auto;padding:8px 8px 40px}
+h1,.disp{font-family:'Black Han Sans','Noto Sans KR',sans-serif;font-weight:400;letter-spacing:.5px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--card);color:#123;border:0;border-radius:12px;padding:10px 14px;font-weight:700;min-height:44px}
+.btn.go{background:var(--gold);color:#222}
+.btn.red{background:var(--fw);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid rgba(255,255,255,.45)}
+.btn:disabled{opacity:.4}
+.btn.sm{padding:6px 10px;min-height:36px;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.top{display:flex;align-items:center;gap:8px;justify-content:space-between;background:#0b1f14;border-radius:14px;padding:8px 10px;margin-bottom:8px}
+.sb{display:flex;align-items:center;gap:10px}
+.sb .n{font-family:'Black Han Sans';font-size:30px;color:var(--gold);background:#000;border-radius:8px;padding:0 10px;line-height:1.25;min-width:42px;text-align:center}
+.sb .t{font-size:12px;color:var(--muted);text-align:center;line-height:1.2}
+.meta{font-size:12px;color:var(--muted);text-align:center}
+.panel{background:var(--panel);border-radius:14px;padding:10px;margin:8px 0}
+.small{font-size:12.5px;color:var(--muted)}
+.opp{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px}
+.board{display:flex;gap:6px;justify-content:center;align-items:stretch}
+.halves{display:flex;flex-direction:column;align-items:center}
+.halfwrap{position:relative}
+.halfwrap.flip{transform:rotate(180deg)}
+.flip .txt{transform:rotate(180deg)}
+.strip{position:absolute;left:0;overflow:hidden}
+.grid{position:absolute;left:0;border-radius:4px;box-shadow:0 0 0 2px rgba(255,255,255,.65)}
+.cell{position:absolute;background:var(--pitch)}
+.cell.k{background:var(--pitch2)}
+.cell.ok{box-shadow:inset 0 0 0 2px var(--gold);background-image:linear-gradient(rgba(255,210,63,.28),rgba(255,210,63,.28))}
+.line{position:absolute;left:0;height:0;border-top:2px dashed}
+.mid{height:8px;width:100%;display:flex;align-items:center}
+.mid div{height:2px;background:rgba(255,255,255,.8);width:100%}
+.card{position:absolute;overflow:hidden;border-radius:6px;background:var(--card);color:#222;box-shadow:0 2px 3px rgba(0,0,0,.35)}
+.card .band{position:absolute;top:0;bottom:0;left:0;width:30%}
+.card.FW .band{background:var(--fw)}.card.MF .band{background:var(--mf)}.card.DF .band{background:var(--df)}
+.card .txt{position:absolute;inset:0}
+.card .pos{position:absolute;left:33%;top:12%;font-size:9px;font-weight:900;color:#fff;border-radius:3px;padding:0 3px;line-height:1.3}
+.FW .pos{background:var(--fw)}.MF .pos{background:var(--mf)}.DF .pos{background:var(--df)}
+.card .nm{position:absolute;left:33%;right:3px;top:34%;font-size:10px;font-weight:900;line-height:1.05;letter-spacing:-.3px}
+.FW .nm{color:var(--fw)}.MF .nm{color:var(--mf)}.DF .nm{color:var(--df)}
+.card .ef{position:absolute;left:33%;bottom:15%;font-size:8.5px;font-weight:700;color:#7a5a00}
+.card .star{position:absolute;left:3px;top:3px;font-size:9px;color:#fff;font-weight:900}
+.card.sel{outline:3px solid var(--gold);outline-offset:1px}
+.card.last{box-shadow:0 0 0 3px #fff,0 0 12px 3px var(--gold)}
+.card.da{outline:3px solid var(--fw);outline-offset:1px;cursor:pointer}
+.card.ghost{opacity:.75;outline:2px dashed var(--gold)}
+.card.out{filter:grayscale(1);opacity:.55}
+.hi{position:absolute;transform:translate(-50%,-50%);line-height:0}
+.hi svg,.ci svg{width:100%;height:100%;display:block}
+.ci{position:absolute;transform:translate(-50%,-50%);line-height:0}
+.ring{position:absolute;transform:translate(-50%,-50%);border-radius:50%;border:2.5px solid var(--gold);pointer-events:none;z-index:5}
+.tok{position:absolute;transform:translate(-50%,-50%);border-radius:50%;background:#111;color:#fff;font-size:8px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:6;border:1.5px solid #fff;pointer-events:none}
+.track{display:flex;flex-direction:column;width:34px;border-radius:8px;overflow:hidden;background:#b8262d;padding:3px;gap:3px;align-self:center}
+.tc{flex:1;display:flex;gap:2px;align-items:center;justify-content:center;background:#e2524f;border-radius:4px;position:relative;min-height:30px}
+.tc i{display:block;width:6px;align-self:stretch;border-radius:2px}
+.tc .mk{width:20px;height:20px;border-radius:50%;background:#111;border:2px solid #fff;position:absolute}
+.tlab{font-size:10px;text-align:center;color:#fff;font-weight:700}
+.hand{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x proximity}
+.hand .slot{position:relative;flex:none;scroll-snap-align:start}
+.syn{display:flex;gap:6px;flex-wrap:wrap}
+.sc{background:#123b26;border:2px solid #2f6e48;border-radius:10px;padding:6px 8px;min-width:54px;min-height:44px;text-align:center;color:var(--gold);font-weight:900;font-size:14px;line-height:1.1}
+.sc small{display:block;font-size:10px;color:#ff8f8f;font-weight:700}
+.sc.on{background:var(--gold);color:#222;border-color:#fff}
+.sc.back{color:#8fbca0;background:repeating-linear-gradient(45deg,#174a30,#174a30 5px,#1c5838 5px,#1c5838 10px)}
+button.sc{font:inherit;font-weight:900}
+.prompt{font-weight:700;margin-bottom:8px}
+.log{font-size:12.5px;color:#dfeee3;max-height:150px;overflow:auto;background:#0b1f14;border-radius:10px;padding:8px}
+.log div{padding:1px 0}
+.log .me{color:var(--gold)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.sheet{background:#0f3a22;width:100%;max-width:620px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 14px 22px;box-shadow:0 -6px 30px rgba(0,0,0,.5)}
+.sheet h2{margin:0 0 8px;font-family:'Black Han Sans';font-weight:400;font-size:24px}
+.big{font-family:'Black Han Sans';font-size:40px;color:var(--gold);text-align:center;line-height:1.1;margin:8px 0}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vs>div{background:#0b1f14;border-radius:12px;padding:10px}
+.goal{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:60px 60px;gap:6px;background:repeating-linear-gradient(60deg,#fff1,#fff1 2px,transparent 2px,transparent 10px);border:5px solid #222;border-bottom:0;padding:6px;border-radius:4px 4px 0 0}
+.goal button{border-radius:50%;border:3px solid #fff;background:#fff2;color:#fff;font-weight:900;width:52px;height:52px;justify-self:center;align-self:center}
+.goal .c{grid-column:2;grid-row:1/3}
+.goal button.hit{background:var(--fw)}.goal button.blk{background:var(--df)}
+.cards-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.pick{position:relative;cursor:pointer;border-radius:8px}
+.pick.on{outline:3px solid var(--gold);outline-offset:2px}
+.desc{font-size:11.5px;color:#cfe5d6;text-align:center;max-width:120px;margin-top:3px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111;color:#fff;border-radius:12px;padding:10px 14px;font-size:13px;z-index:80;max-width:92vw;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.home h1{font-size:44px;color:var(--gold);margin:18px 0 0;line-height:1.05;text-align:center}
+.rules{font-size:14px;line-height:1.6}
+.rules h3{margin:14px 0 4px;color:var(--gold);font-size:15px}
+.rules ul{margin:0;padding-left:18px}
+.chip{display:inline-flex;align-items:center;gap:3px;background:#0b1f14;border-radius:8px;padding:2px 7px;font-size:12px;margin:2px}
+.chip i{width:14px;height:14px;display:inline-block}
+@media (prefers-reduced-motion:no-preference){.card.last{animation:pop .5s ease}@keyframes pop{from{transform:scale(1.15)}to{transform:none}}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+{
+//ENGINE START
+const DEFS={
+ striker:{name:'스트라이커',pos:'CF',cls:'FW',s:{tl:'B',tr:'B',l:'B',r:'B',bl:'B',br:'R'}},
+ lwing:{name:'윙어',pos:'LWF',cls:'FW',s:{tr:'B',r:'B',bl:'R',br:'B'},crack:1},
+ rwing:{name:'윙어',pos:'RWF',cls:'FW',s:{tl:'B',l:'B',bl:'B',br:'R'},crack:1},
+ playmaker:{name:'플레이메이커',pos:'CMF',cls:'MF',s:{tl:'R',tr:'B',l:'P',r:'P',bl:'P',br:'R'}},
+ chance:{name:'찬스메이커',pos:'AMF',cls:'MF',s:{tl:'B',tr:'B',l:'P',r:'P',br:'R'}},
+ tempo:{name:'템포조절',pos:'DMF',cls:'MF',s:{tl:'R',tr:'P',l:'P',r:'P',br:'P'},eff:['pick']},
+ cb1:{name:'중앙수비수',pos:'CB',cls:'DF',s:{tl:'P',bl:'S',br:'S'}},
+ cb2:{name:'중앙수비수',pos:'CB',cls:'DF',s:{tr:'P',bl:'S',br:'S'}},
+ lb:{name:'측면수비수',pos:'LB',cls:'DF',s:{tr:'R',r:'P',br:'S'},eff:['draw']},
+ rb:{name:'측면수비수',pos:'RB',cls:'DF',s:{tl:'R',l:'P',bl:'S'},eff:['draw']},
+ targetman:{star:1,name:'타겟맨',pos:'CF',cls:'FW',s:{tl:'B',tr:'B',bl:'B',br:'B'},center:['B']},
+ supercrack:{star:1,name:'슈퍼크랙',pos:'SS',cls:'FW',s:{tl:'R',tr:'R',l:'B',r:'B',bl:'B',br:'B'},crack:2},
+ dribbler:{star:1,name:'드리블러',pos:'SS',cls:'FW',s:{tl:'B',tr:'B',l:'P',r:'P',bl:'R',br:'R'},eff:['ctrl1','steal']},
+ linebreaker:{star:1,name:'라인 브레이커',pos:'CF',cls:'FW',s:{tl:'B',tr:'R',l:'B',r:'B',bl:'R',br:'B'},eff:['ctrl2']},
+ maestro:{star:1,name:'마에스트로',pos:'CMF',cls:'MF',s:{tl:'R',tr:'R',l:'P',r:'P',bl:'P',br:'P'},eff:['ctrl1','draw']},
+ hustle:{star:1,name:'허슬플레이',pos:'CMF',cls:'MF',s:{tl:'R',tr:'R',l:'P',r:'P',bl:'R',br:'R'},eff:['draw','steal']},
+ cannon:{star:1,name:'기습 중거리슛',pos:'DMF',cls:'MF',s:{tl:'R',tr:'P',l:'P',r:'P',bl:'R'},eff:['cannon']},
+ killerpass:{star:1,name:'킬러패스',pos:'AMF',cls:'MF',s:{tl:'B',tr:'B',l:'B',r:'B',br:'R'},center:['P']},
+ sweeper:{star:1,name:'스위퍼',pos:'CB',cls:'DF',s:{tl:'S',tr:'S',l:'P',r:'P',bl:'S',br:'S'},eff:['steal']},
+ overlapL:{star:1,name:'오버래핑',pos:'LB',cls:'DF',s:{tr:'R',r:'P',br:'S'},center:['R']},
+ overlapR:{star:1,name:'오버래핑',pos:'RB',cls:'DF',s:{tl:'R',l:'P',bl:'S'},center:['R']},
+ libero:{star:1,name:'리베로',pos:'CB',cls:'DF',s:{tl:'R',tr:'R',l:'P',r:'P',bl:'S'},center:['S']}
+};
+const BASIC=['striker','lwing','rwing','playmaker','chance','tempo','cb1','cb2','lb','rb'];
+const STARS=['targetman','supercrack','dribbler','linebreaker','maestro','hustle','cannon','killerpass','sweeper','overlapL','overlapR','libero'];
+const RATING={striker:6,lwing:5,rwing:5,playmaker:5,chance:5,tempo:5,cb1:4,cb2:4,lb:4,rb:4,targetman:8,supercrack:7,dribbler:7,linebreaker:8,maestro:8,hustle:7,cannon:6,killerpass:8,sweeper:7,overlapL:6,overlapR:6,libero:8};
+const EFTXT={ctrl1:'컨트롤 1칸 전진',ctrl2:'컨트롤 2칸 전진',draw:'시너지 1장 뽑기',pick:'2장 뽑아 1장 고르기',steal:'상대 시너지 1장 버리게 하기',cannon:'즉시 슈팅(기본 수비력 무시)'};
+const EFSHORT={ctrl1:'⚡컨트롤+1',ctrl2:'⚡컨트롤+2',draw:'⚡드로우',pick:'⚡2장 중 1',steal:'⚡상대 -1',cannon:'⚡중거리슛'};
+const ROWS={FW:[0,1],MF:[1,2],DF:[2,3]};
+const SLOTS={agg:3,norm:2,def:1};
+const STNAME={agg:'공격적',norm:'보통',def:'수비적'};
+const PK_DEF=[[2,0],[2,1],[2,3],[2,4],[0,3],[1,4]];
+const PK_DEFNAME=['가운데+왼쪽 위','가운데+오른쪽 위','가운데+왼쪽 아래','가운데+오른쪽 아래','왼쪽 다이브','오른쪽 다이브'];
+const PK_SPOT=['왼쪽 위','오른쪽 위','가운데','왼쪽 아래','오른쪽 아래'];
+const opp=T=>T==='H'?'A':'H';
+function rnd(st){let t=(st.rng=(st.rng+0x6D2B79F5)|0);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;}
+function shuffle(st,a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd(st)*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function D(st,id){return DEFS[st.cards[id].k];}
+function nm(st,id){const d=D(st,id);return d.name+'('+d.pos+')';}
+function who(st,T){return T===st.human?'나':'컴퓨터';}
+function log(st,t,mine){st.log.push({t,m:mine?1:0});if(st.log.length>120)st.log.splice(0,st.log.length-120);}
+function stars(st,c){const s=st.syn[c];return '★'+s.v+(s.t?'(태클)':'');}
+
+function newGame(human,seed){
+ const st={rng:(seed>>>0)||7,human,phase:'draft',half:1,m:0,turnTeam:'H',deck:[],discard:[],syn:[],cards:{},tokens:[],log:[],injuryNext:false,inInjury:false,teams:{},shot:null,pk:null,lock:false,pick:null,shootCand:null,lastPlaced:null,so:null};
+ for(const T of ['H','A']){const roster=BASIC.map(k=>{const id=T+'_'+k;st.cards[id]={k,team:T};return id;});st.teams[T]={roster,hand:[],field:[],subs:[],subsOut:[],subsUsed:0,sh:[],score:0};}
+ STARS.forEach(k=>{st.cards['S_'+k]={k,team:null};});
+ [[1,0,1],[1,1,2],[2,0,5],[3,0,10],[4,0,5],[5,0,2]].forEach(([v,t,n])=>{for(let i=0;i<n;i++)st.syn.push({v,t:!!t});});
+ st.deck=shuffle(st,st.syn.map((_,i)=>i));
+ const pool=shuffle(st,STARS.map(k=>'S_'+k));
+ st.draft={round:0,pool,revealed:pool.splice(0,3),order:['A','H'],step:0};
+ log(st,'스타 선수 드래프트 시작! 1라운드는 원정팀이 먼저 고릅니다.');
+ advance(st);return st;
+}
+function actor(st){
+ switch(st.phase){
+  case 'draft':return st.draft.order[st.draft.step];
+  case 'team':case 'player':case 'pick':case 'shootAsk':return st.turnTeam;
+  case 'attack':return st.shot.team;
+  case 'defend':return opp(st.shot.team);
+  default:return st.human;
+ }
+}
+function advance(st){let g=0;while(actor(st)!==st.human&&g++<300){if(aiStep(st)===false)break;}}
+
+// ---- 필드 / 아이콘 ----
+function cellMap(field){const m={};for(const f of field){m[f.r+','+f.c]=f;m[f.r+','+(f.c+1)]=f;}return m;}
+function computeIcons(st,T,field){
+ field=field||st.teams[T].field;const m=cellMap(field);const out={};
+ const add=(key,type,ids)=>{if(!out[key])out[key]={key,type,ids};};
+ for(const f of field){const d=D(st,f.id),s=d.s;
+  [['tl',f.c],['tr',f.c+1]].forEach(([sl,col])=>{const t=s[sl];if(!t)return;
+   if(f.r===0){if(t==='B'&&col>=1&&col<=6)add('V:-1:'+col,'B',[f.id]);}
+   else{const o=m[(f.r-1)+','+col];if(o){const os=D(st,o.id).s;const ot=col===o.c?os.bl:os.br;if(ot===t)add('V:'+(f.r-1)+':'+col,t,[o.id,f.id]);}}});
+  if(f.r===3)[['bl',f.c],['br',f.c+1]].forEach(([sl,col])=>{if(s[sl]==='S'&&col>=1&&col<=6)add('V:3:'+col,'S',[f.id]);});
+  if(s.r){const o=m[f.r+','+(f.c+2)];if(o&&o.c===f.c+2&&D(st,o.id).s.l===s.r)add('H:'+f.r+':'+(f.c+2),s.r,[f.id,o.id]);}
+  (d.center||[]).forEach((t,i)=>add('C:'+f.id+':'+i,t,[f.id]));
+ }
+ const tk=new Set(st.tokens.filter(t=>t.team===T).map(t=>t.key));
+ return Object.values(out).filter(i=>!(i.type==='B'&&tk.has(i.key)));
+}
+const cnt=(ic,t)=>ic.filter(i=>i.type===t).length;
+function basicOf(st,T,id,field){return computeIcons(st,T,field).filter(i=>i.type==='B'&&i.ids.includes(id)).length;}
+function canPlace(st,field,id,r,c){
+ if(!ROWS[D(st,id).cls].includes(r)||c<0||c>6)return false;
+ const m=cellMap(field);if(m[r+','+c]||m[r+','+(c+1)])return false;
+ if(r===0&&!field.some(o=>(o.r===0&&(o.c===c-2||o.c===c+2))||(o.r===1&&Math.abs(o.c-c)<=1)))return false;
+ return true;
+}
+function legalPlacements(st,T){const tm=st.teams[T],out=[];for(const id of tm.hand)for(let r=0;r<4;r++)for(let c=0;c<7;c++)if(canPlace(st,tm.field,id,r,c))out.push({id,r,c});return out;}
+function directCands(st,T){const ic=computeIcons(st,T);return st.teams[T].field.map(f=>f.id).filter(id=>ic.some(i=>i.type==='B'&&i.ids.includes(id)));}
+function stateOf(st,T,m){if(m===undefined)m=st.m;const v=T==='H'?m:-m;return v===2?'agg':v>=0?'norm':'def';}
+function ctrlRoom(st,T){return T==='H'?2-st.m:st.m+2;}
+function moveCtrl(st,T,n,why){const k=Math.min(n,ctrlRoom(st,T));if(k<=0){log(st,why+': 컨트롤 마커가 이미 끝이라 효과 없음');return;}st.m+=T==='H'?k:-k;log(st,`${why}: 컨트롤 마커 ${k}칸 전진 → ${who(st,T)} ${STNAME[stateOf(st,T)]}`,T===st.human);}
+
+// ---- 시너지 덱 ----
+function refill(st){if(!st.inInjury&&!st.injuryNext){st.injuryNext=true;log(st,'시너지 덱 소진! 버린 카드를 섞어 새 덱을 만들고, 다음 턴이 추가시간입니다.');}if(st.discard.length)st.deck=shuffle(st,st.discard.splice(0));}
+function drawSyn(st){if(!st.deck.length)refill(st);if(!st.deck.length)return null;const c=st.deck.pop();if(!st.deck.length)refill(st);return c;}
+function drawTo(st,T,n,why){const tm=st.teams[T];const got=[];for(let i=0;i<n&&tm.sh.length<5;i++){const c=drawSyn(st);if(c==null)break;tm.sh.push(c);got.push(c);}
+ if(T===st.human&&got.length)st.lock=true;
+ log(st,`${why}: ${who(st,T)} 시너지 ${got.length}장 뽑음`+(T===st.human&&got.length?' ('+got.map(c=>stars(st,c)).join(', ')+')':''),T===st.human);}
+function steal(st,T){const o=opp(T),sh=st.teams[o].sh;if(!sh.length){log(st,'상대 손패가 없어 효과 없음');return;}const i=Math.floor(rnd(st)*sh.length);const c=sh.splice(i,1)[0];st.discard.push(c);
+ log(st,`${who(st,T)}의 효과로 ${who(st,o)}의 시너지 카드 1장이 버려짐`+(o===st.human?' ('+stars(st,c)+')':''),T===st.human);}
+
+// ---- 드래프트/라인업 ----
+function draftPick(st,T,id){const d=st.draft;if(st.phase!=='draft'||d.order[d.step]!==T||!d.revealed.includes(id))return false;
+ d.revealed=d.revealed.filter(x=>x!==id);st.cards[id].team=T;st.teams[T].roster.push(id);log(st,`${who(st,T)}: 스타 선수 ${nm(st,id)} 영입`,T===st.human);d.step++;
+ if(d.step>=2){if(d.revealed[0])log(st,`남은 ${nm(st,d.revealed[0])}는 제외`);d.revealed=[];d.round++;
+  if(d.round<3){d.revealed=d.pool.splice(0,3);d.order=d.round===1?['H','A']:['A','H'];d.step=0;}
+  else{aiLineup(st,opp(st.human));st.phase='lineup';log(st,'라인업을 정하세요: 13명 중 3명을 교체 선수로.');}}
+ return true;}
+function aiLineup(st,T){const tm=st.teams[T];const need={FW:2,MF:3,DF:3};const ct={FW:0,MF:0,DF:0};tm.roster.forEach(id=>ct[D(st,id).cls]++);
+ const bench=[];const sorted=tm.roster.slice().sort((a,b)=>RATING[st.cards[a].k]-RATING[st.cards[b].k]);
+ for(const id of sorted){if(bench.length>=3)break;const c=D(st,id).cls;if(ct[c]>need[c]){bench.push(id);ct[c]--;}}
+ for(const id of sorted){if(bench.length>=3)break;if(!bench.includes(id))bench.push(id);}
+ tm.subs=bench;tm.hand=tm.roster.filter(id=>!bench.includes(id));}
+function confirmLineup(st,bench){if(st.phase!=='lineup'||bench.length!==3)return false;const tm=st.teams[st.human];tm.subs=bench.slice();tm.hand=tm.roster.filter(id=>!bench.includes(id));
+ log(st,'킥오프! 전반은 홈팀 선공입니다.');st.turnTeam='H';startTurn(st);return true;}
+
+// ---- 턴 진행 ----
+function teamOptions(st,T){const ic=computeIcons(st,T),p=cnt(ic,'P'),r=cnt(ic,'R'),hs=st.teams[T].sh.length,o=[];
+ if(p>0&&hs<5&&st.deck.length+st.discard.length>0)o.push({type:'pass',n:Math.min(p,5-hs),icons:p});
+ if(r>0&&ctrlRoom(st,T)>0)o.push({type:'press',n:Math.min(r,ctrlRoom(st,T)),icons:r});return o;}
+function startTurn(st){const T=st.turnTeam;st.shot=null;st.pick=null;st.shootCand=null;st.pk=null;
+ if(st.injuryNext){st.inInjury=true;st.injuryNext=false;}
+ log(st,`── ${who(st,T)}의 턴${st.inInjury?' (추가시간: 팀 액션 없음, 이번 하프 마지막 턴)':''} ──`,T===st.human);
+ if(st.inInjury){enterPlayer(st);return;}
+ if(teamOptions(st,T).length)st.phase='team';else{log(st,'팀 액션: 할 수 있는 것이 없어 건너뜀');enterPlayer(st);}}
+function doTeam(st,T,type,n){if(st.phase!=='team'||st.turnTeam!==T)return false;const o=teamOptions(st,T).find(x=>x.type===type);if(!o)return false;
+ if(type==='pass'){n=Math.max(1,Math.min(n||o.n,o.n));drawTo(st,T,n,'팀 액션 패스');}else moveCtrl(st,T,o.n,'팀 액션 프레스');
+ enterPlayer(st);return true;}
+function enterPlayer(st){const T=st.turnTeam;st.phase='player';
+ if(!legalPlacements(st,T).length&&!directCands(st,T).length){log(st,'배치하거나 슈팅할 선수가 없어 조직되지 않은 슈팅을 시도합니다.');beginShot(st,T,null,{unorg:true});}}
+function place(st,T,id,r,c){const tm=st.teams[T];if(st.phase!=='player'||st.turnTeam!==T||!tm.hand.includes(id)||!canPlace(st,tm.field,id,r,c))return false;
+ tm.hand=tm.hand.filter(x=>x!==id);tm.field.push({id,r,c});st.lastPlaced=id;
+ log(st,`${who(st,T)}: ${nm(st,id)} 배치 (${['최전방','2선','3선','최종'][r]} 라인)`,T===st.human);
+ let cannon=false;
+ for(const e of D(st,id).eff||[]){
+  if(e==='ctrl1'||e==='ctrl2')moveCtrl(st,T,e==='ctrl1'?1:2,'즉시 효과');
+  else if(e==='draw'){if(tm.sh.length<5)drawTo(st,T,1,'즉시 효과');else log(st,'즉시 효과: 손패가 5장이라 효과 없음');}
+  else if(e==='steal')steal(st,T);
+  else if(e==='cannon')cannon=true;
+  else if(e==='pick'){if(tm.sh.length<5){const a=[];for(let i=0;i<2;i++){const x=drawSyn(st);if(x!=null)a.push(x);}
+    if(a.length){st.pick={T,cards:a,id};if(T===st.human)st.lock=true;st.phase='pick';return true;}}
+   else log(st,'즉시 효과(템포조절): 손패가 5장이라 효과 없음');}
+ }
+ afterPlace(st,T,id,cannon);return true;}
+function choosePick(st,T,c){if(st.phase!=='pick'||!st.pick||!st.pick.cards.includes(c))return false;const p=st.pick;
+ st.teams[T].sh.push(c);p.cards.filter(x=>x!==c).forEach(x=>st.discard.push(x));log(st,`즉시 효과: 2장 중 1장 선택`+(T===st.human?' ('+stars(st,c)+')':''),T===st.human);
+ st.pick=null;afterPlace(st,T,p.id,false);return true;}
+function afterPlace(st,T,id,cannon){if(basicOf(st,T,id)>=1||cannon){st.shootCand={id,cannon};st.phase='shootAsk';}else endTurn(st);}
+function shootDecision(st,T,yes){if(st.phase!=='shootAsk')return false;const sc=st.shootCand;if(yes)beginShot(st,T,sc.id,{cannon:sc.cannon});else{log(st,`${who(st,T)}: 슈팅하지 않고 턴 종료`,T===st.human);endTurn(st);}return true;}
+function directAttack(st,T,id){if(st.phase!=='player'||st.turnTeam!==T||!directCands(st,T).includes(id))return false;log(st,`${who(st,T)}: 직접 공격!`,T===st.human);beginShot(st,T,id,{});return true;}
+function beginShot(st,T,id,o){o=o||{};const ic=computeIcons(st,T);let basic=0,crack=0,tokenKey=null;
+ if(id&&!o.unorg){const balls=ic.filter(i=>i.type==='B'&&i.ids.includes(id));basic=balls.length+(o.cannon?1:0);crack=o.cannon?0:(D(st,id).crack||0);
+  if(!o.cannon&&balls.length){balls.sort((a,b)=>a.ids.length-b.ids.length||(a.key<b.key?-1:1));tokenKey=balls[0].key;st.tokens.push({team:T,key:tokenKey,cardId:id});}}
+ st.shot={team:T,shooter:id,basic,crack,ignoreDef:!!o.cannon,unorg:!!o.unorg,atk:[],def:[],slots:SLOTS[stateOf(st,T)],state:stateOf(st,T),tokenKey};
+ log(st,`${who(st,T)} 슈팅! ${id?nm(st,id):'(조직되지 않은 공격)'} · 기본 공격력 ${basic}`+(crack?` · 크랙 ${crack}`:'')+(o.cannon?' · 기본 수비력 무시':''),T===st.human);
+ const c=drawSyn(st);if(c!=null)st.shot.atk.push(c);
+ if(st.shot.slots>1&&st.teams[T].sh.length)st.phase='attack';else toDefend(st);}
+function attackCommit(st,T,ids){const s=st.shot,tm=st.teams[T];if(st.phase!=='attack'||s.team!==T)return false;ids=[...new Set(ids)].filter(x=>tm.sh.includes(x));if(ids.length>s.slots-1)return false;
+ tm.sh=tm.sh.filter(x=>!ids.includes(x));s.atk.push(...ids);toDefend(st);return true;}
+function toDefend(st){const c=drawSyn(st);if(c!=null)st.shot.def.push(c);st.phase='defend';}
+function defendCommit(st,T,opt){const s=st.shot,tm=st.teams[T];if(st.phase!=='defend'||opp(s.team)!==T)return false;
+ if(opt==='deck'){const c=drawSyn(st);if(c!=null)s.def.push(c);}
+ else if(typeof opt==='number'){if(!tm.sh.includes(opt))return false;tm.sh=tm.sh.filter(x=>x!==opt);s.def.push(opt);}
+ resolveShot(st);return true;}
+function defBase(st,s){const defBasic=cnt(computeIcons(st,opp(s.team)),'S');return{defBasic,Dbase:s.ignoreDef?0:(defBasic>0?Math.max(0,defBasic-s.crack):0)};}
+function resolveShot(st){const s=st.shot,A=s.team;const sum=a=>a.reduce((x,c)=>x+st.syn[c].v,0);
+ s.T=s.basic+sum(s.atk);const b=defBase(st,s);s.defBasic=b.defBasic;s.Dbase=b.Dbase;s.D=s.Dbase+sum(s.def);
+ if(s.T>=12)s.result='out';
+ else{s.defShown=true;if(s.def.some(c=>st.syn[c].t))s.result='tackle';else if(s.T===11&&!s.unorg)s.result='wonder';else s.result=s.T>s.D?'goal':'save';}
+ st.discard.push(...s.atk,...s.def);st.lock=true;
+ const R={out:'볼 아웃! 노골',tackle:'태클! 페널티킥 선언',wonder:'매직 넘버 11, 원더골!',goal:'골!',save:'수비 성공'};
+ log(st,`공격력 ${s.T} vs 수비력 ${s.defShown?s.D:'?'} → ${R[s.result]}`,A===st.human);
+ if(s.result==='goal'||s.result==='wonder')scoreGoal(st,A);
+ st.phase='reveal';}
+function scoreGoal(st,T){st.teams[T].score++;st.m=0;log(st,`⚽ ${who(st,T)} 득점! (${st.teams.H.score} : ${st.teams.A.score}) 컨트롤 마커는 가운데로.`,T===st.human);}
+function revealContinue(st){if(st.phase!=='reveal')return false;const s=st.shot;
+ if(s.result==='tackle'){const att=s.team;st.pk={att,ai:att===st.human?Math.floor(rnd(st)*6):Math.floor(rnd(st)*5)};st.phase='pk';}else endTurn(st);return true;}
+function pkPick(st,choice){const p=st.pk;if(!p||p.result)return false;
+ let spot,blk;if(p.att===st.human){spot=choice;blk=p.ai;}else{spot=p.ai;blk=choice;}
+ p.spot=spot;p.blk=blk;p.result=PK_DEF[blk].includes(spot)?'save':'goal';st.lock=true;
+ log(st,`페널티킥: ${PK_SPOT[spot]} 슈팅 vs ${PK_DEFNAME[blk]} → ${p.result==='goal'?'골!':'막았다!'}`,p.att===st.human);
+ if(p.result==='goal')scoreGoal(st,p.att);return true;}
+function pkContinue(st){if(!st.pk||!st.pk.result)return false;endTurn(st);return true;}
+function endTurn(st){st.shot=null;st.pk=null;st.shootCand=null;st.pick=null;if(st.inInjury){endHalf(st);return;}st.turnTeam=opp(st.turnTeam);startTurn(st);}
+function endHalf(st){st.inInjury=false;st.injuryNext=false;
+ if(st.half===1){log(st,`전반 종료! (${st.teams.H.score} : ${st.teams.A.score})`);
+  for(const T of ['H','A']){const tm=st.teams[T];tm.hand.push(...tm.field.map(f=>f.id));tm.field=[];tm.sh=[];}
+  st.tokens=[];st.discard=[];st.deck=shuffle(st,st.syn.map((_,i)=>i));st.m=0;st.lastPlaced=null;
+  aiHalftimeSubs(st,opp(st.human));st.phase='halftime';}
+ else{st.phase='gameover';log(st,`경기 종료! (${st.teams.H.score} : ${st.teams.A.score})`);}}
+function startSecondHalf(st){if(st.phase!=='halftime')return false;st.half=2;st.turnTeam='A';log(st,'후반 시작! 후반은 원정팀 선공입니다.');startTurn(st);return true;}
+function canSub(st,T){const tm=st.teams[T];return tm.subsUsed<3&&tm.subs.length>0&&(st.phase==='halftime'||((st.phase==='team'||st.phase==='player')&&st.turnTeam===T));}
+function substitute(st,T,out,inn){const tm=st.teams[T];if(!canSub(st,T)||!tm.subs.includes(inn))return false;
+ if(tm.hand.includes(out))tm.hand=tm.hand.filter(x=>x!==out);else if(tm.field.some(f=>f.id===out))tm.field=tm.field.filter(f=>f.id!==out);else return false;
+ st.tokens=st.tokens.filter(t=>t.cardId!==out);tm.subsOut.push(out);tm.subs=tm.subs.filter(x=>x!==inn);tm.hand.push(inn);tm.subsUsed++;
+ log(st,`${who(st,T)} 교체: ${nm(st,out)} OUT → ${nm(st,inn)} IN (${tm.subsUsed}/3)`,T===st.human);return true;}
+// 승부차기
+function startShootout(st){if(st.phase!=='gameover'||st.teams.H.score!==st.teams.A.score||st.so)return false;st.so={k:{H:[],A:[]},idx:0,last:null,winner:null};st.phase='shootout';log(st,'승부차기 시작!');return true;}
+function soKicker(st){return st.so.idx%2===0?'H':'A';}
+function soKick(st,choice){const so=st.so;if(!so||so.winner)return false;const K=soKicker(st);let spot,blk;
+ if(K===st.human){spot=choice;blk=Math.floor(rnd(st)*6);}else{blk=choice;spot=Math.floor(rnd(st)*5);}
+ const g=!PK_DEF[blk].includes(spot);so.k[K].push(g?1:0);so.last={K,spot,blk,g};so.idx++;st.lock=true;
+ const gH=so.k.H.reduce((a,b)=>a+b,0),gA=so.k.A.reduce((a,b)=>a+b,0),nH=so.k.H.length,nA=so.k.A.length;
+ if(nH<=5&&nA<=5){const remH=5-nH,remA=5-nA;if(gH>gA+remA)so.winner='H';else if(gA>gH+remH)so.winner='A';}
+ if(!so.winner&&nH===nA&&nH>=5&&gH!==gA)so.winner=gH>gA?'H':'A';
+ if(so.winner)log(st,`승부차기 결과: ${who(st,so.winner)} 승리! (${gH} : ${gA})`);return true;}
+
+// ---- AI ----
+function poolOf(st,T){const mine=new Set(st.teams[T].sh);return st.syn.map((c,i)=>i).filter(i=>!mine.has(i)).map(i=>st.syn[i]);}
+function vdist(pool){const n=pool.length;const vd={};let pt=0;if(!n)return{vd:{0:1},vn:{0:1},pt:0};pool.forEach(c=>{vd[c.v]=(vd[c.v]||0)+1/n;if(c.t)pt+=1/n;});
+ const vn={};const nn=pool.filter(c=>!c.t);nn.forEach(c=>{vn[c.v]=(vn[c.v]||0)+1/nn.length;});return{vd,vn,pt};}
+function makeAtkEval(Dd,pool,oppHand){const {vd,pt}=vdist(pool);const q=oppHand>0?0.65:0.45;const dd={};
+ for(const a in vd){const pa=vd[a];dd[Dd+ +a]=(dd[Dd+ +a]||0)+pa*(1-q);for(const b in vd){const k=Dd+ +a+ +b;dd[k]=(dd[k]||0)+pa*vd[b]*q;}}
+ const less=T=>{let s=0;for(const k in dd)if(+k<T)s+=dd[k];return s;};
+ return A0=>{let p=0;for(const x in vd){const T=A0+ +x,px=vd[x];if(T>=12)continue;if(T===11)p+=px*(0.85+0.15*0.6);else p+=px*((1-pt)*less(T)+pt*0.6);}return p;};}
+function shotEV(st,T,basic,crack,ignoreDef){const Df=opp(T);const defBasic=cnt(computeIcons(st,Df),'S');const Dd=ignoreDef?0:(defBasic>0?Math.max(0,defBasic-crack):0);
+ const ev=makeAtkEval(Dd,poolOf(st,T),st.teams[Df].sh.length);const k=SLOTS[stateOf(st,T)]-1;const hand=st.teams[T].sh;
+ let best={ids:[],p:ev(basic),score:-1e9};const subs=[[]];
+ if(k>=1)hand.forEach(a=>subs.push([a]));if(k>=2)for(let i=0;i<hand.length;i++)for(let j=i+1;j<hand.length;j++)subs.push([hand[i],hand[j]]);
+ for(const sb of subs){const A0=basic+sb.reduce((s,c)=>s+st.syn[c].v,0);const p=ev(A0);const sc=3*p-0.25*sb.length-sb.filter(c=>st.syn[c].t).length*0.4;if(sc>best.score)best={ids:sb,p,score:sc};}
+ return{ev:best.score-(ignoreDef?0.1:0.5),ids:best.ids,p:best.p};}
+function ctrlVal(st,T,m){return SLOTS[stateOf(st,T,m)]-0.6*SLOTS[stateOf(st,opp(T),m)];}
+function effVal(st,T,id){let v=0;const tm=st.teams[T];
+ for(const e of D(st,id).eff||[]){if(e==='ctrl1'||e==='ctrl2'){const n=Math.min(e==='ctrl1'?1:2,ctrlRoom(st,T));const nm2=st.m+(T==='H'?n:-n);v+=(ctrlVal(st,T,nm2)-ctrlVal(st,T,st.m))*1.3+n*0.1;}
+  else if(e==='draw')v+=tm.sh.length<5?0.9:0;else if(e==='pick')v+=tm.sh.length<5?1.2:0;else if(e==='steal')v+=st.teams[opp(T)].sh.length?0.9:0;}
+ return v;}
+function fieldEval(st,T,field){const ic=computeIcons(st,T,field);const bb={};ic.filter(i=>i.type==='B').forEach(i=>i.ids.forEach(id=>bb[id]=(bb[id]||0)+1));
+ const bv=Object.values(bb);const maxB=bv.length?Math.max(...bv):0;const sumB=bv.reduce((a,b)=>a+b,0);
+ const S=cnt(ic,'S');return 0.8*cnt(ic,'P')+0.7*cnt(ic,'R')+1.2*Math.min(S,6)+0.4*Math.max(0,S-6)+1.3*maxB+0.35*sumB;}
+function aiTeam(st,T){const o=teamOptions(st,T);if(!o.length){enterPlayer(st);return;}let best=o[0],bv=-1e9;const hs=st.teams[T].sh.length;
+ for(const x of o){let v;if(x.type==='pass')v=x.n*(SLOTS[stateOf(st,T)]>1?0.95:0.75)+(hs===0?0.6:0)-(st.deck.length<=x.n&&!st.injuryNext?0.3:0);
+  else{const nm2=st.m+(T==='H'?x.n:-x.n);v=(ctrlVal(st,T,nm2)-ctrlVal(st,T,st.m))*1.5+x.n*0.1;}
+  v+=rnd(st)*0.15;if(v>bv){bv=v;best=x;}}
+ doTeam(st,T,best.type,best.n);}
+function aiSubs(st,T){const tm=st.teams[T];if(!canSub(st,T))return;
+ for(const f of tm.field){const n=st.tokens.filter(t=>t.cardId===f.id).length;if(n>=2){const cls=D(st,f.id).cls;const inn=tm.subs.filter(x=>D(st,x).cls===cls).sort((a,b)=>RATING[st.cards[b].k]-RATING[st.cards[a].k])[0];if(inn){substitute(st,T,f.id,inn);return;}}}}
+function aiHalftimeSubs(st,T){const tm=st.teams[T];if(tm.subsUsed>=3)return;
+ for(const inn of tm.subs.slice()){const cls=D(st,inn).cls;const worst=tm.hand.filter(x=>D(st,x).cls===cls).sort((a,b)=>RATING[st.cards[a].k]-RATING[st.cards[b].k])[0];
+  if(worst&&RATING[st.cards[inn].k]>RATING[st.cards[worst].k]+0.5){const ph=st.phase;st.phase='halftime';substitute(st,T,worst,inn);st.phase=ph;return;}}}
+function aiPlayer(st,T){const tm=st.teams[T];const before=fieldEval(st,T,tm.field);let best=null;
+ for(const p of legalPlacements(st,T)){const f2=tm.field.concat([{id:p.id,r:p.r,c:p.c}]);const d=D(st,p.id);let v=fieldEval(st,T,f2)-before+effVal(st,T,p.id);
+  let sv=0;if((d.eff||[]).includes('cannon'))sv=shotEV(st,T,1,0,true).ev;else{const b=basicOf(st,T,p.id,f2);if(b>0)sv=shotEV(st,T,b,d.crack||0,false).ev;}
+  v+=Math.max(0,sv)-RATING[st.cards[p.id].k]*0.03+rnd(st)*0.08;if(!best||v>best.v)best={v,act:'place',p};}
+ for(const id of directCands(st,T)){const v=shotEV(st,T,basicOf(st,T,id),D(st,id).crack||0,false).ev;if(!best||v>best.v)best={v,act:'da',id};}
+ if(!best){endTurn(st);return;}
+ if(best.act==='place')place(st,T,best.p.id,best.p.r,best.p.c);else directAttack(st,T,best.id);}
+function aiStep(st){const T=actor(st);
+ switch(st.phase){
+  case 'draft':{const r=st.draft.revealed.slice().sort((a,b)=>RATING[st.cards[b].k]-RATING[st.cards[a].k]);draftPick(st,T,r[0]);return true;}
+  case 'team':aiTeam(st,T);return true;
+  case 'player':aiSubs(st,T);aiPlayer(st,T);return true;
+  case 'pick':{const c=st.pick.cards.slice().sort((a,b)=>(st.syn[b].t?1.5:st.syn[b].v)-(st.syn[a].t?1.5:st.syn[a].v))[0];choosePick(st,T,c);return true;}
+  case 'shootAsk':{const sc=st.shootCand,d=D(st,sc.id);const e=sc.cannon?shotEV(st,T,1,0,true):shotEV(st,T,basicOf(st,T,sc.id),d.crack||0,false);shootDecision(st,T,e.ev>0);return true;}
+  case 'attack':{const s=st.shot;const e=shotEV(st,T,s.basic,s.crack,s.ignoreDef);attackCommit(st,T,e.ids.slice(0,s.slots-1));return true;}
+  case 'defend':aiDefend(st,T);return true;
+ }
+ return false;}
+function aiDefend(st,T){const s=st.shot,tm=st.teams[T];const {Dbase}=defBase(st,s);const pool=poolOf(st,T);const {vd,vn,pt}=vdist(pool);
+ let td={[s.basic]:1};for(let i=0;i<s.atk.length;i++){const n={};for(const a in td)for(const x in vd){const k=+a+ +x;n[k]=(n[k]||0)+td[a]*vd[x];}td=n;}
+ const opts=[{o:'none',h:0},{o:'deck',h:0}];const seen=new Set();tm.sh.forEach(c=>{const s2=st.syn[c];const key=s2.v+'|'+s2.t;if(!seen.has(key)){seen.add(key);opts.push({o:c,h:s2.v,t:s2.t});}});
+ const winD=(T0,Dv)=>(T0===11&&!s.unorg)?0:(Dv>=T0?1:0);
+ let best=null;
+ for(const op of opts){let save=0;
+  for(const a in td){const T0=+a,p=td[a];if(T0>=12){save+=p;continue;}
+   if(op.t){save+=p*0.4;continue;}
+   let x=pt*0.4;for(const y1 in vn){const base=Dbase+ +y1+op.h;let w;
+    if(op.o==='deck'){w=pt*0.4;for(const y2 in vn)w+=(1-pt)*vn[y2]*winD(T0,base+ +y2);}else w=winD(T0,base);
+    x+=(1-pt)*vn[y1]*w;}
+   save+=p*x;}
+  const sc=save-(typeof op.o==='number'?0.025*op.h+(op.t?0.05:0):0);if(!best||sc>best.sc)best={sc,o:op.o};}
+ defendCommit(st,T,best.o);}
+//ENGINE END
+
+if(typeof document!=='undefined'){
+// ================= UI =================
+const $=s=>document.querySelector(s);
+let st=null,undo=[],ui={};
+function resetUi(){ui={sel:null,ghost:null,mode:null,atk:[],subOut:null,subIn:null,bench:ui.bench||[],showRules:false,showLog:ui.showLog||false};}
+resetUi();
+function save(){try{localStorage.setItem('magic11-ko',JSON.stringify({st,undo:undo.slice(-40)}));}catch(e){}}
+function load(){try{const o=JSON.parse(localStorage.getItem('magic11-ko')||'null');if(o&&o.st&&o.st.teams){st=o.st;undo=o.undo||[];}}catch(e){}}
+let toastT=null;function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2600);}
+function act(fn){const snap=JSON.stringify(st);const ok=fn();if(ok===false){render();return;}advance(st);
+ if(st.lock){st.lock=false;if(undo.length)toast('비공개 정보가 공개되어 그 이전으로는 무를 수 없어요');undo=[];}else undo.push(snap);
+ const keep=ui.showLog;resetUi();ui.showLog=keep;render();save();}
+function doUndo(){if(!undo.length)return;st=JSON.parse(undo.pop());const keep=ui.showLog;resetUi();ui.showLog=keep;render();save();}
+
+// --- 크기 ---
+let G={};function sizes(){const vw=Math.min(window.innerWidth,620);const cw=Math.max(30,Math.min(48,Math.floor((vw-16-44)/8)));G={cw,ch:Math.round(cw*1.22),d:Math.round(cw*0.44),pad:Math.round(cw*0.26)+2};}
+// --- 아이콘 SVG ---
+function svg(t,crack){let inner='';
+ if(t==='B')inner='<circle cx="10" cy="10" r="9.2" fill="#fff" stroke="#111" stroke-width="1.4"/><polygon points="10,6.2 13.6,8.8 12.2,13 7.8,13 6.4,8.8" fill="#111"/><path d="M10 6.2V1.5M13.6 8.8l4.3-1.4M12.2 13l2.7 3.8M7.8 13l-2.7 3.8M6.4 8.8L2.1 7.4" stroke="#111" stroke-width="1.2"/>';
+ else if(t==='S')inner='<circle cx="10" cy="10" r="9.5" fill="#2f74c0"/><path d="M10 3.6l5.4 2v4.3c0 3.2-2.4 5.3-5.4 6.4-3-1.1-5.4-3.2-5.4-6.4V5.6z" fill="#fff"/><path d="M10 5.6v8.8c2-.9 3.4-2.4 3.4-4.5V6.8z" fill="#9cc3ea"/>';
+ else if(t==='P')inner='<circle cx="10" cy="10" r="9.5" fill="#2a9a46"/><rect x="8" y="4" width="4" height="12" rx="1" fill="#fff"/><rect x="4" y="8" width="12" height="4" rx="1" fill="#fff"/>';
+ else if(t==='R')inner='<circle cx="10" cy="10" r="9.5" fill="#d9363e"/><path d="M10 3.5l5.2 5.6h-3.2V16H8V9.1H4.8z" fill="#fff"/>';
+ if(crack)inner+='<path d="M4 4l12 12M16 4L4 16" stroke="#d9363e" stroke-width="2.6" stroke-linecap="round"/>';
+ return '<svg viewBox="0 0 20 20">'+inner+'</svg>';}
+const TNAME={B:'공격',S:'수비',P:'패스',R:'프레스'};
+// --- 카드 ---
+function cardHTML(id,o){const d=D(st,id);const w=o.w,h=o.h,di=o.d||G.d;let x='';
+ x+='<div class="band"></div>';
+ const pos={tl:[w*.25,0],tr:[w*.75,0],bl:[w*.25,h],br:[w*.75,h],l:[0,h/2],r:[w,h/2]};
+ for(const k in d.s)x+=`<div class="hi" style="left:${pos[k][0]}px;top:${pos[k][1]}px;width:${di}px;height:${di}px">${svg(d.s[k])}</div>`;
+ const ci=[];(d.center||[]).forEach(t=>ci.push([t,0]));for(let i=0;i<(d.crack||0);i++)ci.push(['S',1]);
+ ci.forEach(([t,c],i)=>{const p=centerPos(w,h,i,di);x+=`<div class="ci" style="left:${p[0]}px;top:${p[1]}px;width:${di}px;height:${di}px">${svg(t,c)}</div>`;});
+ const ef=(d.eff||[]).map(e=>EFSHORT[e]).join(' ');
+ x+=`<div class="txt">${d.star?'<span class="star">★</span>':''}<span class="pos">${d.pos}</span><div class="nm" style="font-size:${Math.max(8,Math.round(h*.19))}px">${d.name}</div>${ef?`<div class="ef">${ef}</div>`:''}</div>`;
+ return `<div class="card ${d.cls} ${o.cls||''}" ${o.attr||''} style="left:${o.x||0}px;top:${o.y||0}px;width:${w}px;height:${h}px">${x}</div>`;}
+function centerPos(w,h,i,di){return[w*.5+i*(di*1.05),h*.72];}
+function cardDesc(id){const d=D(st,id);const parts=[];if(d.crack)parts.push('크랙 '+d.crack);(d.eff||[]).forEach(e=>parts.push(EFTXT[e]));return parts.join(' · ')||'특수 효과 없음';}
+// --- 필드 ---
+function keyPos(key,field){const p=key.split(':');const {cw,ch,d}=G;
+ if(p[0]==='V')return[(+p[2]+.5)*cw,(+p[1]+1)*ch];if(p[0]==='H')return[+p[2]*cw,(+p[1]+.5)*ch];
+ const id=p[1];const f=field.find(f=>f.id===id);if(!f)return null;const c=centerPos(2*cw,ch,+p[2],d);return[f.c*cw+c[0],f.r*ch+c[1]];}
+function halfHTML(T){const mine=T===st.human;const tm=st.teams[T];const {cw,ch,d,pad}=G;const W=8*cw,H=4*ch;
+ let field=tm.field.slice();let ghost=null;if(mine&&ui.ghost){ghost=ui.ghost;field=field.concat([ghost]);}
+ let h=`<div class="halfwrap ${mine?'':'flip'}" style="width:${W}px;height:${H+2*pad}px">`;
+ h+=`<div class="strip" style="top:0;height:${pad}px;width:${W}px">`;for(let c=1;c<=6;c++)h+=`<div class="hi" style="left:${(c+.5)*cw}px;top:${pad}px;width:${d}px;height:${d}px">${svg('B')}</div>`;h+='</div>';
+ h+=`<div class="strip" style="top:${pad+H}px;height:${pad}px;width:${W}px">`;for(let c=1;c<=6;c++)h+=`<div class="hi" style="left:${(c+.5)*cw}px;top:0;width:${d}px;height:${d}px">${svg('S')}</div>`;h+='</div>';
+ h+=`<div class="grid" style="top:${pad}px;width:${W}px;height:${H}px">`;
+ let okCells=new Set();if(mine&&ui.sel&&st.phase==='player'){for(let r=0;r<4;r++)for(let c=0;c<7;c++)if(canPlace(st,tm.field,ui.sel,r,c)){okCells.add(r+','+c);okCells.add(r+','+(c+1));}}
+ for(let r=0;r<4;r++)for(let c=0;c<8;c++){const ok=okCells.has(r+','+c);h+=`<div class="cell ${(r+c)%2?'k':''} ${ok?'ok':''}" ${mine?`data-act="cell" data-r="${r}" data-c="${c}"`:''} style="left:${c*cw}px;top:${r*ch}px;width:${cw}px;height:${ch}px"></div>`;}
+ [['#ff6b6b',1],['#7dff9a',2],['#8cc4ff',3]].forEach(([col,r])=>h+=`<div class="line" style="top:${r*ch-1}px;width:${W}px;border-color:${col}"></div>`);
+ const da=mine&&ui.mode==='da'?directCands(st,T):[];
+ for(const f of tm.field){const cls=[];if(st.lastPlaced===f.id)cls.push('last');if(da.includes(f.id))cls.push('da');
+  h+=cardHTML(f.id,{x:f.c*cw,y:f.r*ch,w:2*cw,h:ch,cls:cls.join(' '),attr:da.includes(f.id)?`data-act="da" data-id="${f.id}"`:''});}
+ if(ghost)h+=cardHTML(ghost.id,{x:ghost.c*cw,y:ghost.r*ch,w:2*cw,h:ch,cls:'ghost',attr:'data-act="ghost"'});
+ const ic=computeIcons(st,T,field);
+ ic.forEach(i=>{const p=keyPos(i.key,field);if(p)h+=`<div class="ring" style="left:${p[0]}px;top:${p[1]}px;width:${d+5}px;height:${d+5}px"></div>`;});
+ st.tokens.filter(t=>t.team===T).forEach(t=>{const p=keyPos(t.key,field);if(p)h+=`<div class="tok" style="left:${p[0]}px;top:${p[1]}px;width:${d+2}px;height:${d+2}px"><span class="txt" style="position:static">슛</span></div>`;});
+ h+='</div></div>';return h;}
+function trackHTML(){const me=st.human,ai=opp(me);let h='<div class="track"><div class="tlab">상대</div>';
+ const col={agg:'var(--fw)',norm:'var(--mf)',def:'var(--df)'};
+ for(let i=0;i<5;i++){const m=me==='H'?2-i:i-2;
+  h+=`<div class="tc"><i style="background:${col[stateOf(st,me,m)]}"></i><i style="background:${col[stateOf(st,ai,m)]}"></i>${st.m===m?'<div class="mk"></div>':''}</div>`;}
+ return h+'<div class="tlab">나</div></div>';}
+function synChip(c,o){o=o||{};const s=st.syn[c];return `<${o.btn?'button':'div'} class="sc ${o.on?'on':''}" ${o.attr||''}>${'★'.repeat(s.v)}${s.t?'<small>태클!</small>':''}</${o.btn?'button':'div'}>`;}
+function backs(n){return Array.from({length:n},()=>'<div class="sc back">?</div>').join('');}
+function teamCounts(T){const ic=computeIcons(st,T);return ['B','S','P','R'].map(t=>`<span class="chip"><i>${svg(t)}</i>${cnt(ic,t)}</span>`).join('');}
+
+// --- 화면 ---
+function render(){sizes();const app=$('#app');
+ if(!st){app.innerHTML=homeHTML();return;}
+ const me=st.human,ai=opp(me),M=st.teams[me],A=st.teams[ai];
+ let h=`<div class="top"><div class="sb"><div><div class="t">나 (${me==='H'?'홈':'원정'})</div><div class="n">${M.score}</div></div><div class="disp" style="font-size:16px">:</div><div><div class="t">컴퓨터</div><div class="n">${A.score}</div></div></div>
+  <div class="meta">${st.phase==='draft'||st.phase==='lineup'?'경기 준비':(st.half===1?'전반':'후반')+(st.inInjury?' · 추가시간':st.injuryNext?' · 다음 턴 추가시간':'')}<br>덱 ${st.deck.length}장 · 버림 ${st.discard.length}장</div>
+  <div class="row" style="gap:6px"><button class="btn sm" data-act="undo" ${undo.length?'':'disabled'}>무르기${undo.length?' '+undo.length:''}</button><button class="btn sm ghost" data-act="rules">규칙</button></div></div>`;
+ if(st.phase!=='draft'&&st.phase!=='lineup'){
+  h+=`<div class="panel opp"><div><b>컴퓨터</b> · ${STNAME[stateOf(st,ai)]} · 남은 선수 ${A.hand.length} · 교체 ${A.subsUsed}/3<div class="row" style="gap:4px;margin-top:4px">${backs(A.sh.length)||'<span class="small">시너지 손패 없음</span>'}</div></div><div>${teamCounts(ai)}</div></div>`;
+  if(A.hand.length)h+=`<details class="small" style="margin:-2px 4px 6px"><summary>컴퓨터의 대기 선수 보기</summary>${A.hand.map(id=>nm(st,id)).join(', ')}${A.subs.length?' / 벤치: '+A.subs.map(id=>nm(st,id)).join(', '):''}</details>`;
+  h+=`<div class="board">${trackHTML()}<div class="halves">${halfHTML(ai)}<div class="mid"><div></div></div>${halfHTML(me)}</div></div>`;
+  h+=`<div class="panel">${actionHTML()}</div>`;
+  h+=`<div class="panel"><div class="row" style="justify-content:space-between"><b>내 시너지 카드 (${M.sh.length}/5)</b><span>${teamCounts(me)}</span></div><div class="syn" style="margin-top:6px">${M.sh.slice().sort((a,b)=>st.syn[a].v-st.syn[b].v).map(c=>synChip(c)).join('')||'<span class="small">없음 — 패스(✚)로 뽑아요</span>'}</div>
+   <div class="small" style="margin-top:6px">내 상태: <b style="color:#fff">${STNAME[stateOf(st,me)]}</b> → 공격 시 시너지 최대 ${SLOTS[stateOf(st,me)]}장 (덱 1장 필수${SLOTS[stateOf(st,me)]>1?' + 손패 '+(SLOTS[stateOf(st,me)]-1)+'장':''})</div></div>`;
+  h+=`<div class="panel"><b>대기 선수 (${M.hand.length})</b> <span class="small">· 교체 ${M.subsUsed}/3 · 벤치 ${M.subs.map(id=>nm(st,id)).join(', ')||'없음'}</span><div class="hand">${M.hand.map(id=>handCard(id)).join('')||'<span class="small">모든 선수가 필드에 있어요</span>'}</div></div>`;
+  h+=`<div class="panel"><div class="row" style="justify-content:space-between"><b>경기 기록</b><button class="btn sm ghost" data-act="log">${ui.showLog?'접기':'전체'}</button></div><div class="log" style="margin-top:6px;${ui.showLog?'max-height:400px':''}">${st.log.slice(ui.showLog?-120:-7).map(l=>`<div class="${l.m?'me':''}">${esc(l.t)}</div>`).join('')}</div></div>`;
+  h+=`<div class="row" style="justify-content:center;margin-top:10px"><button class="btn sm ghost" data-act="new">새 게임</button></div>`;
+ }
+ h+=modalHTML();
+ app.innerHTML=h;
+ const lg=app.querySelector('.log');if(lg)lg.scrollTop=lg.scrollHeight;}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function handCard(id){const {cw,ch}=G;const sel=ui.sel===id;const can=st.phase==='player'&&st.turnTeam===st.human&&ui.mode!=='sub';const sub=ui.mode==='sub';
+ return `<div class="slot"><div style="position:relative;width:${2*cw}px;height:${ch}px">${cardHTML(id,{w:2*cw,h:ch,cls:(sel||ui.subOut===id)?'sel':'',attr:(can||sub)?`data-act="${sub?'subout':'selcard'}" data-id="${id}"`:''})}</div><div class="desc" style="max-width:${2*cw}px">${esc(cardDesc(id))}</div></div>`;}
+function homeHTML(){return `<div class="home"><h1>MAGIC NUMBER<br>ELEVEN</h1><p style="text-align:center;margin:6px 0 16px">매직 넘버 일레븐 · 한글판 컴퓨터 대전</p>
+ <div class="panel"><p style="margin:0 0 10px">선수 카드를 필드에 이어 붙여 <b>공격·수비·패스·프레스</b> 아이콘을 완성하고, 시너지 카드로 공격력을 더해 골을 노리세요. 공격력이 정확히 <b>11</b>이면 원더골, <b>12 이상</b>이면 볼 아웃!</p>
+ <div class="row"><button class="btn go" data-act="start" data-t="H">홈팀으로 시작 (전반 선공)</button><button class="btn" data-act="start" data-t="A">원정팀으로 시작</button><button class="btn ghost" data-act="rules">규칙 보기</button></div>
+ <p class="small" style="margin:10px 0 0">무르기: 언제든 내 행동을 되돌릴 수 있지만, 상대의 비공개 정보(시너지 카드 공개, 페널티킥)나 덱에서 뽑은 카드를 본 뒤에는 그 이전으로 되돌릴 수 없어요.</p></div></div>`+(ui.showRules?rulesModal():'');}
+
+function actionHTML(){const me=st.human;const T=st.turnTeam;
+ if(actor(st)!==me&&!['reveal','pk','halftime','gameover','shootout'].includes(st.phase))return '<div class="prompt">컴퓨터가 생각 중…</div>';
+ const subBtn=canSub(st,me)?`<button class="btn sm ghost" data-act="submode">${ui.mode==='sub'?'교체 취소':'선수 교체'}</button>`:'';
+ if(ui.mode==='sub')return subHTML();
+ switch(st.phase){
+  case 'team':{const o=teamOptions(st,me);let b='';
+   o.forEach(x=>{if(x.type==='pass'){for(let n=x.n;n>=1;n--)b+=`<button class="btn ${n===x.n?'go':''}" data-act="team" data-type="pass" data-n="${n}">패스: 시너지 ${n}장 뽑기</button>`;}
+    else b+=`<button class="btn red" data-act="team" data-type="press">프레스: 마커 ${x.n}칸 전진</button>`;});
+   return `<div class="prompt">① 팀 액션 — 패스와 프레스 중 하나를 고르세요 (건너뛸 수 없어요)</div><div class="row">${b}${subBtn}</div><p class="small" style="margin:6px 0 0">필드의 완성된 ✚ ${o.find(x=>x.type==='pass')?o.find(x=>x.type==='pass').icons:0}개 · ⬆ ${o.find(x=>x.type==='press')?o.find(x=>x.type==='press').icons:0}개</p>`;}
+  case 'player':{const das=directCands(st,me);
+   if(ui.ghost){const g=ui.ghost;const tm=st.teams[me];const f2=tm.field.concat([g]);const before=new Set(computeIcons(st,me).map(i=>i.key));const nw=computeIcons(st,me,f2).filter(i=>!before.has(i.key));
+    const b=basicOf(st,me,g.id,f2);const cannon=(D(st,g.id).eff||[]).includes('cannon');
+    return `<div class="prompt">${nm(st,g.id)} 배치 미리보기</div><div class="small">새로 완성: ${nw.length?nw.map(i=>`<span class="chip"><i>${svg(i.type)}</i>${TNAME[i.type]}</span>`).join(''):'없음'} · 이 선수의 기본 공격력 ${b}${cannon?' (+중거리슛 1)':''}</div><div class="row" style="margin-top:8px"><button class="btn go" data-act="place">여기에 배치</button><button class="btn ghost" data-act="cancel">취소</button></div><p class="small" style="margin:6px 0 0">노란 칸을 다시 눌러 위치를 바꿀 수 있어요.</p>`;}
+   if(ui.mode==='da')return `<div class="prompt">빨간 테두리 선수를 눌러 직접 슈팅하세요</div><button class="btn ghost" data-act="cancel">취소</button>`;
+   return `<div class="prompt">② 선수 액션 — ${ui.sel?nm(st,ui.sel)+': 노란 칸을 눌러 위치를 고르세요':'아래 대기 선수를 골라 배치하거나, 직접 슈팅하세요'}</div><div class="row">${das.length?'<button class="btn red" data-act="damode">직접 슈팅</button>':''}${ui.sel?'<button class="btn ghost" data-act="cancel">선택 취소</button>':''}${subBtn}</div>
+    <p class="small" style="margin:6px 0 0">FW는 최전방·2선, MF는 2선·3선, DF는 3선·최종 라인. 최전방은 다른 카드와 붙어 있어야 해요.</p>`;}
+  case 'pick':return `<div class="prompt">템포조절: 2장 중 1장을 손에 넣으세요</div><div class="syn">${st.pick.cards.map(c=>synChip(c,{btn:1,attr:`data-act="pickc" data-c="${c}"`})).join('')}</div>`;
+  case 'shootAsk':{const sc=st.shootCand;const b=sc.cannon?1:basicOf(st,me,sc.id);const d=D(st,sc.id);const s={team:me,ignoreDef:sc.cannon,crack:sc.cannon?0:(d.crack||0)};const db=defBase(st,s);
+   return `<div class="prompt">${nm(st,sc.id)}(으)로 슈팅할까요?</div><div class="small">기본 공격력 <b style="color:#fff">${b}</b>${s.crack?' · 크랙 '+s.crack:''}${sc.cannon?' · 상대 기본 수비력 무시':''} · 상대 기본 수비력 ${db.defBasic}${!sc.cannon&&s.crack&&db.defBasic?' → '+db.Dbase:''} · 슈팅하면 공격 아이콘 1개가 슛 토큰으로 막혀요.</div><div class="row" style="margin-top:8px"><button class="btn go" data-act="shoot" data-y="1">슈팅!</button><button class="btn ghost" data-act="shoot" data-y="0">슈팅 안 하고 턴 종료</button></div>`;}
+ }
+ return '';}
+function subHTML(){const me=st.human,tm=st.teams[me];const pool=tm.hand.concat(tm.field.map(f=>f.id));
+ return `<div class="prompt">선수 교체 (${tm.subsUsed}/3) — 나갈 선수와 들어올 선수를 고르세요. 교체는 행동으로 치지 않아요.</div>
+ <div class="small">나갈 선수 (필드·대기)</div><div class="row" style="margin:4px 0 8px">${pool.map(id=>`<button class="btn sm ${ui.subOut===id?'go':''}" data-act="subout" data-id="${id}">${nm(st,id)}${tm.field.some(f=>f.id===id)?' ·필드':''}</button>`).join('')}</div>
+ <div class="small">들어올 선수 (벤치)</div><div class="row" style="margin:4px 0 8px">${tm.subs.map(id=>`<button class="btn sm ${ui.subIn===id?'go':''}" data-act="subin" data-id="${id}">${nm(st,id)}</button>`).join('')}</div>
+ <div class="row"><button class="btn go" data-act="dosub" ${ui.subOut&&ui.subIn?'':'disabled'}>교체하기</button><button class="btn ghost" data-act="submode">닫기</button></div>`;}
+
+function modalHTML(){const me=st.human;let body='';
+ if(ui.showRules)return rulesModal();
+ switch(st.phase){
+  case 'draft':{const d=st.draft;const mine=d.order[d.step]===me;
+   body=`<h2>스타 선수 드래프트 ${d.round+1}/3</h2><p class="small">공개된 3장 중 번갈아 1장씩 고르고, 남은 1장은 제외됩니다. ${mine?'<b style="color:#fff">내 차례예요.</b>':''}</p><div class="cards-grid">${d.revealed.map(id=>bigCard(id,mine?`data-act="draft" data-id="${id}"`:'' )).join('')}</div>
+   <p class="small">내 스타: ${st.teams[me].roster.filter(id=>D(st,id).star).map(id=>nm(st,id)).join(', ')||'없음'}<br>컴퓨터 스타: ${st.teams[opp(me)].roster.filter(id=>D(st,id).star).map(id=>nm(st,id)).join(', ')||'없음'}</p>`;break;}
+  case 'lineup':{const tm=st.teams[me];
+   body=`<h2>라인업</h2><p class="small">13명 중 <b style="color:#fff">교체 선수 3명</b>을 눌러 고르세요 (회색 = 벤치). 나머지 10명이 선발입니다.</p><div class="cards-grid">${tm.roster.map(id=>bigCard(id,`data-act="bench" data-id="${id}"`,ui.bench.includes(id)?'out':'')).join('')}</div><div class="row" style="justify-content:center;margin-top:12px"><button class="btn go" data-act="lineup" ${ui.bench.length===3?'':'disabled'}>선발 확정 (${ui.bench.length}/3)</button></div>`;break;}
+  case 'attack':{if(st.shot.team!==me)break;const s=st.shot;const k=s.slots-1;
+   body=`<h2>슈팅 — 시너지 카드</h2><p>기본 공격력 <b>${s.basic}</b> · 상태 <b>${STNAME[s.state]}</b></p><p class="small">덱에서 1장을 뒷면으로 놓았어요(확인 불가). 손패에서 최대 <b style="color:#fff">${k}장</b> 더 낼 수 있어요. 합계가 정확히 11이면 원더골, 12 이상이면 볼 아웃!</p>
+   <div class="syn">${backs(1)}${st.teams[me].sh.map(c=>synChip(c,{btn:1,on:ui.atk.includes(c),attr:`data-act="atkc" data-c="${c}"`})).join('')}</div>
+   <p>선택한 손패 합계: ★${ui.atk.reduce((a,c)=>a+st.syn[c].v,0)} → 기본 포함 ${s.basic+ui.atk.reduce((a,c)=>a+st.syn[c].v,0)} + 덱 카드</p><div class="row"><button class="btn go" data-act="attack">공격!</button></div>`;break;}
+  case 'defend':{if(opp(st.shot.team)!==me)break;const s=st.shot;const b=defBase(st,s);
+   body=`<h2>수비! 컴퓨터의 슈팅</h2><div class="vs"><div><b>공격</b><br>${s.shooter?nm(st,s.shooter):'조직되지 않은 공격'}<br>기본 공격력 ${s.basic}${s.crack?' · 크랙 '+s.crack:''}${s.ignoreDef?'<br>기본 수비력 무시!':''}<div class="syn" style="margin-top:6px">${backs(s.atk.length)}</div></div><div><b>내 수비</b><br>기본 수비력 ${b.defBasic}${b.Dbase!==b.defBasic?' → '+b.Dbase:''}<div class="syn" style="margin-top:6px">${backs(s.def.length)}</div><span class="small">덱 1장(필수, 확인 불가)</span></div></div>
+   <p class="small">두 번째 수비 카드를 낼까요? 손패의 태클 카드를 내면 (볼 아웃이 아닌 한) 결과가 취소되고 페널티킥이 됩니다.</p>
+   <div class="row"><button class="btn" data-act="def" data-o="none">추가 안 함</button><button class="btn" data-act="def" data-o="deck">덱에서 1장</button></div><div class="syn" style="margin-top:8px">${st.teams[me].sh.map(c=>synChip(c,{btn:1,attr:`data-act="def" data-o="${c}"`})).join('')}</div>`;break;}
+  case 'reveal':{const s=st.shot;const att=s.team===me;const R={out:'볼 아웃!',tackle:'태클! → 페널티킥',wonder:'원더골!',goal:'골!',save:'노골 · 수비 성공'};
+   body=`<h2>${att?'나의':'컴퓨터의'} 슈팅 결과</h2><div class="vs"><div><b>공격 ${s.T}</b><br><span class="small">기본 ${s.basic}</span><div class="syn">${s.atk.map(c=>synChip(c)).join('')}</div></div><div><b>수비 ${s.defShown?s.D:'?'}</b><br><span class="small">기본 ${s.Dbase}${s.ignoreDef?' (무시됨)':''}</span><div class="syn">${s.defShown?s.def.map(c=>synChip(c)).join(''):backs(s.def.length)}</div></div></div>
+   <div class="big">${R[s.result]}</div><p class="small" style="text-align:center">${s.result==='out'?'12 이상은 무조건 노골. 수비 카드는 공개하지 않고 버립니다.':s.result==='wonder'?'공격력이 정확히 11이면 수비력과 상관없이 골!':''}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="reveal">계속</button></div>`;break;}
+  case 'pk':body=pkHTML(st.pk.att===me,st.pk.result?{spot:st.pk.spot,blk:st.pk.blk,g:st.pk.result==='goal'}:null,'pkc','pkdone','페널티킥');break;
+  case 'shootout':{const so=st.so;const K=soKicker(st);const sum=t=>so.k[t].reduce((a,b)=>a+b,0);
+   const head=`<p style="text-align:center">나 ${sum(me)} : ${sum(opp(me))} 컴퓨터<br><span class="small">나 ${so.k[me].map(x=>x?'●':'○').join(' ')} / 컴퓨터 ${so.k[opp(me)].map(x=>x?'●':'○').join(' ')}</span></p>`;
+   if(so.winner){body=`<h2>승부차기 종료</h2>${head}${so.last?lastKick(so.last):''}<div class="big">${so.winner===me?'승리!':'패배'}</div><div class="row" style="justify-content:center"><button class="btn go" data-act="new">새 게임</button></div>`;}
+   else body=pkHTML(K===me,null,'soc',null,'승부차기',head+(so.last?lastKick(so.last):''));break;}
+  case 'halftime':{const tm=st.teams[me];
+   body=`<h2>하프타임 (${st.teams.H.score} : ${st.teams.A.score})</h2><p class="small">필드의 선수가 모두 돌아왔고, 시너지 카드는 전부 다시 섞였어요. 교체할 수 있습니다 (${tm.subsUsed}/3).</p>${tm.subsUsed<3&&tm.subs.length?subHTMLHalf():''}<div class="row" style="justify-content:center;margin-top:10px"><button class="btn go" data-act="half2">후반 시작 (원정팀 선공)</button></div>`;break;}
+  case 'gameover':{const a=st.teams[me].score,b=st.teams[opp(me)].score;
+   body=`<h2>경기 종료</h2><div class="big">${a} : ${b}</div><p style="text-align:center;font-weight:700">${a>b?'승리했어요!':a<b?'컴퓨터가 이겼어요.':'무승부'}</p><div class="row" style="justify-content:center">${a===b?'<button class="btn go" data-act="so">승부차기</button>':''}<button class="btn" data-act="new">새 게임</button><button class="btn ghost" data-act="close">필드 보기</button></div>`;
+   if(ui.closed)body='';break;}
+ }
+ if(!body)return '';
+ return `<div class="modal"><div class="sheet">${body}</div></div>`;}
+function lastKick(l){return `<p class="small" style="text-align:center">직전 킥: ${who(st,l.K)} ${PK_SPOT[l.spot]} 슈팅 / ${PK_DEFNAME[l.blk]} → ${l.g?'골':'선방'}</p>`;}
+function pkHTML(att,res,act,done,title,extra){let g='<div class="goal">';
+ const ord=[0,2,1,3,4];const cls=['','','c','',''];const style=['grid-column:1;grid-row:1','grid-column:3;grid-row:1','','grid-column:1;grid-row:2','grid-column:3;grid-row:2'];
+ for(const i of [0,1,2,3,4]){let c=cls[i];if(res){if(res.spot===i)c+=' hit';if(PK_DEF[res.blk].includes(i))c+=' blk';}
+  g+=`<button class="${c}" style="${style[i]}" ${att&&!res?`data-act="${act}" data-v="${i}"`:'disabled'}>${res&&res.spot===i?'공':res&&PK_DEF[res.blk].includes(i)?'손':''}</button>`;}
+ g+='</div>';
+ let b=`<h2>${title}</h2>${extra||''}<p class="small">${att?'키커: 찰 위치 5곳 중 하나를 고르세요.':'골키퍼: 막을 두 곳(방향 카드 6장 중 1장)을 고르세요.'}</p>${g}`;
+ if(!att&&!res)b+=`<div class="row" style="margin-top:10px">${PK_DEFNAME.map((n,i)=>`<button class="btn sm" data-act="${act}" data-v="${i}">${n}</button>`).join('')}</div>`;
+ if(res)b+=`<div class="big">${res.g?'골!':'막았다!'}</div><p class="small" style="text-align:center">슈팅 ${PK_SPOT[res.spot]} / 다이브 ${PK_DEFNAME[res.blk]}</p><div class="row" style="justify-content:center"><button class="btn go" data-act="${done}">계속</button></div>`;
+ return b;}
+function subHTMLHalf(){const tm=st.teams[st.human];
+ return `<div class="small">나갈 선수</div><div class="row" style="margin:4px 0 8px">${tm.hand.map(id=>`<button class="btn sm ${ui.subOut===id?'go':''}" data-act="subout" data-id="${id}">${nm(st,id)}</button>`).join('')}</div><div class="small">들어올 선수</div><div class="row" style="margin:4px 0 8px">${tm.subs.map(id=>`<button class="btn sm ${ui.subIn===id?'go':''}" data-act="subin" data-id="${id}">${nm(st,id)}</button>`).join('')}</div><button class="btn" data-act="dosub" ${ui.subOut&&ui.subIn?'':'disabled'}>교체하기</button>`;}
+function bigCard(id,attr,cls){const cw=Math.min(52,G.cw*1.15),ch=Math.round(cw*1.22);return `<div class="pick ${cls||''}" ${attr}><div style="position:relative;width:${2*cw}px;height:${ch}px">${cardHTML(id,{w:2*cw,h:ch,d:Math.round(cw*.44),cls:cls||''})}</div><div class="desc">${esc(cardDesc(id))}</div></div>`;}
+function rulesModal(){return `<div class="modal"><div class="sheet rules"><h2>게임 규칙 요약</h2>
+<h3>준비</h3><ul><li>스타 선수 12장 중 3장씩 공개 → 번갈아 1장씩 3라운드 드래프트 (1·3라운드 원정 먼저, 2라운드 홈 먼저).</li><li>13명 중 선발 10명, 교체 3명. 경기 중·하프타임에 교체 최대 3회.</li></ul>
+<h3>아이콘</h3><ul><li>카드 가장자리의 반쪽 아이콘이 옆 카드(또는 필드 끝의 반쪽 아이콘)와 맞물리면 완성. 노란 고리가 완성 표시예요.</li><li><b>공격</b>(공): 슈터의 기본 공격력 · <b>수비</b>(방패): 팀 기본 수비력 · <b>패스</b>(✚): 시너지 카드 뽑기 · <b>프레스</b>(⬆): 컨트롤 마커 전진.</li><li>최전방 위에는 공 반쪽, 최종 라인 아래엔 방패 반쪽이 있어요.</li></ul>
+<h3>내 턴</h3><ul><li><b>① 팀 액션</b>: 패스(✚ 수만큼 뽑기, 손패 최대 5) 또는 프레스(⬆ 수만큼 마커 전진) 중 하나. 아이콘은 쌓여요.</li><li><b>② 선수 액션</b>: 선수 1장 배치(즉시 효과 적용 후 그 선수로 슈팅 가능) 또는 이미 필드에 있는 선수로 직접 슈팅.</li><li>FW는 최전방·2선, MF는 2선·3선, DF는 3선·최종 라인. 최전방은 다른 카드와 붙어야 해요.</li></ul>
+<h3>슈팅</h3><ul><li>슈터의 공 아이콘에 슛 토큰을 놓고 쏩니다. 이후 그 아이콘은 빈칸 → 같은 선수는 점점 약해져요.</li><li>공격 시너지: 덱 1장(필수, 확인 불가) + 컨트롤 상태에 따라 손패 추가 (공격적 2장, 보통 1장, 수비적 0장).</li><li>수비 시너지: 덱 1장(필수) + 손패나 덱에서 1장(선택). 상태와 무관.</li><li>크랙(방패에 ✕): 슈터가 가진 수만큼 상대 기본 수비력 감소.</li><li>공격력 1~10: 수비력보다 높으면 골 · <b>정확히 11: 원더골</b> · 12 이상: 볼 아웃.</li><li>수비 측 태클 카드가 공개되면 결과 취소 후 페널티킥 (볼 아웃이면 무효).</li><li>골이 나면 컨트롤 마커는 가운데로.</li></ul>
+<h3>시간</h3><ul><li>시너지 덱이 떨어지면 버린 카드를 섞고, 다음 턴이 추가시간(팀 액션 없음) → 그 턴이 끝나면 하프 종료.</li><li>하프타임: 필드 선수 회수, 시너지 전부 재셔플, 후반은 원정팀 선공. 동점이면 승부차기 선택.</li></ul>
+<h3>무르기</h3><ul><li>내 행동은 되돌릴 수 있어요. 단, 덱에서 카드를 뽑아 확인했거나 상대 카드가 공개(슈팅 결과, 페널티킥)되면 그 이전으로는 되돌릴 수 없어요.</li></ul>
+<h3>이 버전에서 단순화한 부분</h3><ul><li>슛 토큰은 다른 선수와 덜 겹치는 공 아이콘에 자동으로 놓여요.</li><li>페널티킥: 키커는 5곳 중 1곳, 골키퍼는 2곳을 막는 방향 6가지 중 1개. GK 카드(확장)는 쓰지 않아요.</li><li>기습 중거리슛의 ⚡공 아이콘은 그 슈팅에서 공격력 1로 계산해요.</li></ul>
+<p class="small">원작: Magic Number Eleven (Bonghwan Ju · Olin Jeong / Pluto Games) 규칙서를 바탕으로 만든 비공식 연습용 구현입니다.</p>
+<div class="row" style="justify-content:center"><button class="btn go" data-act="closerules">닫기</button></div></div></div>`;}
+
+// --- 이벤트 ---
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;const me=st&&st.human;
+ switch(a){
+  case 'start':st=newGame(el.dataset.t,(Date.now()^Math.floor(Math.random()*1e9))>>>0);undo=[];resetUi();ui.bench=[];render();save();break;
+  case 'rules':ui.showRules=true;render();break;
+  case 'closerules':ui.showRules=false;render();break;
+  case 'undo':doUndo();break;
+  case 'log':ui.showLog=!ui.showLog;render();break;
+  case 'new':if(st&&st.phase!=='gameover'&&!(st.so&&st.so.winner)&&!ui.confirmNew){ui.confirmNew=true;toast('한 번 더 누르면 현재 경기를 끝내고 새 게임을 시작해요');setTimeout(()=>ui.confirmNew=false,3000);break;}st=null;undo=[];resetUi();try{localStorage.removeItem('magic11-ko');}catch(e){}render();break;
+  case 'draft':act(()=>draftPick(st,me,el.dataset.id));break;
+  case 'bench':{const id=el.dataset.id;if(ui.bench.includes(id))ui.bench=ui.bench.filter(x=>x!==id);else if(ui.bench.length<3)ui.bench.push(id);render();break;}
+  case 'lineup':{const b=ui.bench.slice();act(()=>confirmLineup(st,b));ui.bench=[];break;}
+  case 'team':act(()=>doTeam(st,me,el.dataset.type,+el.dataset.n||0));break;
+  case 'selcard':ui.sel=ui.sel===el.dataset.id?null:el.dataset.id;ui.ghost=null;ui.mode=null;render();break;
+  case 'cell':{if(!ui.sel||st.phase!=='player')break;const r=+el.dataset.r,c=+el.dataset.c;const f=st.teams[me].field;
+   let cc=null;if(canPlace(st,f,ui.sel,r,c))cc=c;else if(canPlace(st,f,ui.sel,r,c-1))cc=c-1;if(cc===null)break;ui.ghost={id:ui.sel,r,c:cc};render();break;}
+  case 'ghost':{if(!ui.ghost)break;const g=ui.ghost;const f=st.teams[me].field;const alt=[g.c+1,g.c-1].find(c=>canPlace(st,f,g.id,g.r,c));if(alt!==undefined){ui.ghost={...g,c:alt};render();}break;}
+  case 'place':{const g=ui.ghost;if(g)act(()=>place(st,me,g.id,g.r,g.c));break;}
+  case 'cancel':ui.sel=null;ui.ghost=null;ui.mode=null;render();break;
+  case 'damode':ui.mode='da';ui.sel=null;ui.ghost=null;render();break;
+  case 'da':act(()=>directAttack(st,me,el.dataset.id));break;
+  case 'pickc':act(()=>choosePick(st,me,+el.dataset.c));break;
+  case 'shoot':act(()=>shootDecision(st,me,el.dataset.y==='1'));break;
+  case 'atkc':{const c=+el.dataset.c;const k=st.shot.slots-1;if(ui.atk.includes(c))ui.atk=ui.atk.filter(x=>x!==c);else if(ui.atk.length<k)ui.atk.push(c);else toast(`지금 상태에선 손패를 최대 ${k}장까지 낼 수 있어요`);render();break;}
+  case 'attack':{const ids=ui.atk.slice();act(()=>attackCommit(st,me,ids));break;}
+  case 'def':{const o=el.dataset.o;act(()=>defendCommit(st,me,o==='none'||o==='deck'?o:+o));break;}
+  case 'reveal':act(()=>revealContinue(st));break;
+  case 'pkc':act(()=>pkPick(st,+el.dataset.v));break;
+  case 'pkdone':act(()=>pkContinue(st));break;
+  case 'submode':ui.mode=ui.mode==='sub'?null:'sub';ui.sel=null;ui.ghost=null;ui.subOut=null;ui.subIn=null;render();break;
+  case 'subout':ui.subOut=el.dataset.id;render();break;
+  case 'subin':ui.subIn=el.dataset.id;render();break;
+  case 'dosub':{const o=ui.subOut,i=ui.subIn;act(()=>substitute(st,me,o,i));break;}
+  case 'half2':act(()=>startSecondHalf(st));break;
+  case 'so':act(()=>startShootout(st));break;
+  case 'soc':act(()=>soKick(st,+el.dataset.v));break;
+  case 'close':ui.closed=true;render();break;
+ }
+});
+let rt=null;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,120);});
+load();render();
+}
+}
+</script>
+</body>
+</html>
