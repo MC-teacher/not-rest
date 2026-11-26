@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다이노소어 아일랜드: 로어 앤 라이트 (한글판)</title>
+<style>
+:root{--bg:#183526;--bg2:#21452f;--paper:#fffaf0;--paper2:#f6eedb;--ink:#2a2418;--mut:#7b725f;--amber:#f3b43a;--amber2:#e39a1c;--red:#d8412f;--green:#2f9e6e;--blue:#3a7fd0;--cs:28px;--me:#2f7fd0;--ai:#c0532f}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#2a5a3c 0,var(--bg) 900px) no-repeat,var(--bg);min-height:100vh;color:var(--ink);font-size:14px}
+button{font-family:inherit;cursor:pointer}
+#top{display:flex;align-items:center;gap:16px;padding:8px 14px;background:#10261a;color:#f7efd9;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px #0006}
+.brand{display:flex;align-items:center;gap:8px}.brand .logo{font-size:28px}.brand b{display:block;font-size:16px;letter-spacing:-.3px}.brand small{color:#c9b98f;font-size:11px}
+.season{display:flex;align-items:center;gap:3px;background:#0006;padding:4px 10px;border-radius:20px}
+.season .sn{font-weight:800;color:var(--amber);margin:0 2px 0 6px}.season .ph{opacity:.35;font-size:15px}.season .ph.done{opacity:.6;filter:grayscale(1)}.season .ph.now{opacity:1;transform:scale(1.3);filter:drop-shadow(0 0 4px #ffd36a)}
+.season .phname{margin-left:10px;font-weight:700;color:#ffe7a8}
+.scores{display:flex;gap:8px;align-items:center}.sc{padding:3px 10px;border-radius:14px;background:#ffffff14}.sc b{font-size:16px}.sc.me b{color:#8cc4ff}.sc.ai b{color:#ffab8c}.fp{font-size:12px;color:#c9b98f}
+.tbtn{margin-left:auto;display:flex;gap:6px}.tbtn button{background:#f7efd9;border:0;border-radius:8px;padding:7px 12px;font-weight:700;color:#2a2418}
+.tbtn .undo{background:var(--amber)}.tbtn button:disabled{opacity:.4;cursor:not-allowed}.tbtn small{background:#0002;border-radius:8px;padding:0 5px}
+#main{display:grid;grid-template-columns:320px minmax(560px,1fr) 330px;gap:12px;padding:12px;align-items:start}
+.panel{background:var(--paper);border-radius:14px;padding:10px 12px;box-shadow:0 4px 14px #0005}
+h3{margin:10px 0 6px;font-size:14px;color:#3d5a3f;border-bottom:2px dashed #e2d6b8;padding-bottom:3px}h3:first-child{margin-top:0}
+h4{margin:0 0 6px;font-size:13px}h4 small,h3 small{font-weight:400;color:var(--mut);font-size:11px}
+.muted{color:var(--mut);font-size:12px}.small{font-size:11px}.red{color:var(--red)}
+/* dice */
+.die{width:58px;height:58px;border-radius:11px;background:linear-gradient(145deg,#ffd66e,var(--amber) 55%,var(--amber2));box-shadow:inset 0 -3px 0 #c97f10,0 2px 4px #0004;display:flex;align-items:center;justify-content:center;position:relative;padding:3px}
+.die.sm{width:44px;height:44px;border-radius:9px}.die.sm .dna{width:10px;height:10px}.die.sm .ic{font-size:10px}
+.die.mine{outline:3px solid var(--me)}.die.theirs{outline:3px solid var(--ai)}
+.dface{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1px;line-height:1}
+.dopt{display:flex;flex-wrap:wrap;justify-content:center;gap:1px;max-width:48px}.slash{font-weight:900;color:#7a4b00;margin:0 1px}
+.dthr{position:absolute;top:2px;right:3px;display:flex;gap:1px}.dthr i{width:7px;height:7px;border-radius:50%;background:var(--red);box-shadow:0 0 0 1px #fff8}
+.pool,.pdice{display:flex;gap:6px;flex-wrap:wrap;align-items:center;min-height:62px}
+.pd{border-radius:12px;transition:.15s}.pd.pick{cursor:pointer;animation:bob 1.2s infinite}.pd.pick:hover{transform:translateY(-4px) scale(1.05)}
+.pd.sel{outline:3px solid var(--me);outline-offset:2px;animation:none}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.common{display:flex;align-items:center;gap:8px;margin-top:6px;background:#fde7d8;border-radius:10px;padding:4px 8px;font-weight:700;color:#9b3a1d;font-size:12px}
+.dicewrap{margin-top:6px}.pdice{min-height:50px}.pn{font-weight:800;font-size:12px;width:52px}.pn.me{color:var(--me)}.pn.ai{color:var(--ai)}
+.empty{color:var(--mut);font-size:12px;padding:16px 0}
+/* icons */
+.dna{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--c);box-shadow:inset 0 -2px 0 #0003,0 0 0 1px #0004;vertical-align:middle}
+.dna.adv{border-radius:3px;transform:rotate(45deg) scale(.85)}.dna.big{width:18px;height:18px}
+.dna.anyb{background:conic-gradient(#f2c230 0 33%,#e2483d 0 66%,#3a8ee6 0)}.dna.anya{background:conic-gradient(#2f9e6e 0 33%,#8a55c9 0 66%,#f07c22 0)}
+.ic{display:inline-block;font-size:12px;vertical-align:middle;line-height:1}
+.ic.coin{width:14px;height:14px;border-radius:50%;background:#ffcf4a;border:2px solid #c98a0e;font-size:8px;font-weight:900;text-align:center;line-height:10px;color:#8a5a00}
+.ic.road{font-weight:900;color:#6b5a3a}.ic.thr{color:var(--green);font-size:13px}
+.ic.thrt{width:9px;height:9px;border-radius:50%;background:var(--red)}
+.ri{display:inline-flex;align-items:center;gap:1px}.ri b{font-size:11px;margin-right:1px}
+/* actions */
+.acts{display:flex;flex-direction:column;gap:5px}
+.act{display:flex;align-items:center;gap:8px;background:#2c4f7c;color:#fff;border-radius:10px;padding:5px 8px;position:relative;min-height:54px}
+.act.can{cursor:pointer;box-shadow:0 0 0 3px #ffd36a}.act.can:hover{background:#3a6aa6}
+.an{flex:1}.an b{display:block;font-size:13px}.an small{font-size:11px;color:#cfe0ff}
+.aslot{width:48px;height:48px;border-radius:9px;background:#ffffff1c;display:flex;align-items:center;justify-content:center;position:relative}
+.stk{position:absolute;bottom:-4px;right:-6px;background:#fff;color:#2c4f7c;border-radius:8px;font-size:10px;font-weight:800;padding:0 4px}
+.pay{display:block;font-size:11px;color:#ffc0b5;font-weight:700}
+/* cards */
+.cards{display:flex;flex-direction:column;gap:6px}
+.card{border-radius:10px;padding:6px 8px;background:#fff;border:2px solid #e7d9b9;font-size:12px}
+.card.sp{border-color:#efb7ae}.card.bd{border-color:#a9c3ec}
+.card.coinable{cursor:pointer;box-shadow:0 0 0 3px #ffd36a;animation:glow 1.4s infinite}
+@keyframes glow{50%{box-shadow:0 0 0 5px #ffd36a99}}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}.ch b{font-size:13px}
+.cost{background:#ffcf4a;border-radius:10px;padding:0 7px;font-weight:800;font-size:12px}
+.ln{margin:2px 0;line-height:1.35}.ln.warn{color:#9b3a1d}
+.tag{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:0 4px;margin-right:4px;color:#fff}
+.tag.bonus{background:#d9478f}.tag.run{background:#444}.tag.vp{background:#7a5ac9}
+.progs{display:flex;flex-direction:column;gap:2px;margin-top:3px}
+.prog{display:inline-flex;gap:2px;vertical-align:middle}.prog i{width:10px;height:10px;border-radius:50%;border:1.5px solid #c9a44a;background:#fff}
+.prog.me i.f{background:var(--me);border-color:var(--me)}.prog.ai i.f{background:var(--ai);border-color:var(--ai)}
+em.ok{color:var(--green);font-style:normal;font-weight:800;margin-left:4px}em.lost{color:var(--red);font-style:normal;font-weight:800;margin-left:4px}
+.hint{color:#b37400;font-weight:700;font-size:11px}
+.shapeprev{margin-top:3px}
+.mini{display:inline-grid;gap:1px;vertical-align:middle}.mini i{width:9px;height:9px}.mini i.on{background:#7aa5e0;border:1px solid #3c6db0}
+/* sheet */
+.tabs{display:flex;gap:6px;margin-bottom:8px}.tabs button{border:0;border-radius:10px 10px 0 0;padding:7px 14px;background:#e9dfc6;font-weight:700}.tabs button.on{background:#3d5a3f;color:#fff}
+.sheetgrid{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.mapcol{padding:28px 30px 30px}
+.mapwrap{position:relative;width:calc(var(--cs)*16);height:calc(var(--cs)*16)}
+.map{display:grid;grid-template-columns:repeat(16,var(--cs));grid-template-rows:repeat(16,var(--cs));background:#e8f3fb;border:4px solid #4b5560;border-radius:4px;box-shadow:0 0 0 3px #8a6e46;width:calc(var(--cs)*16 + 8px);height:calc(var(--cs)*16 + 8px);margin:-4px}
+.cl{border-right:1px solid #b9d6ec;border-bottom:1px solid #b9d6ec;position:relative;display:flex;align-items:center;justify-content:center;font-size:12px}
+.map.live .cl{cursor:crosshair}
+.cl.bd{border-color:transparent}
+.cl.bd.eN{border-top:2px solid #0008}.cl.bd.eS{border-bottom:2px solid #0008}.cl.bd.eE{border-right:2px solid #0008}.cl.bd.eW{border-left:2px solid #0008}
+.hq{background:#55606b;color:#fff}.pd-herb{background:#9fd8a3}.pd-small{background:#c5a7ea}.pd-large{background:#f8b47f}.pd-compy{background:#8fd4cf}
+.at-M{background:#ffe07a}.at-Ri{background:#cfd5dc}.at-F{background:#ff9f94}
+.cl.bc{background:#8fb6f0}
+.cl.ru{background:repeating-linear-gradient(45deg,#2b2b2b,#2b2b2b 3px,#555 3px,#555 6px)}
+.bl{position:absolute;top:1px;left:2px;font-size:11px;font-weight:800;z-index:2;white-space:nowrap}
+.vx{position:absolute;bottom:-2px;right:1px;font-weight:900;color:#c0221a;font-size:13px;z-index:2}
+.cl.rd svg,.ghost svg{position:absolute;inset:0;width:100%;height:100%}
+.rdbg{stroke:#7a6a4d;stroke-width:12;fill:none;stroke-linecap:butt}.rdfg{stroke:#e9dcc0;stroke-width:2;fill:none;stroke-dasharray:3 3}
+.ghost{position:absolute;inset:0;opacity:.75;pointer-events:none}
+.pv-ok{background:#5bd17b !important;box-shadow:inset 0 0 0 2px #1f8a43}.pv-bad{background:#ff8a80 !important;box-shadow:inset 0 0 0 2px #b3261e}.pv-pick{box-shadow:inset 0 0 0 3px #ffd000 !important;filter:brightness(1.1)}
+.exit{position:absolute;width:26px;height:26px;border-radius:50%;background:#c2412d;color:#ffe9a8;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px #0006}
+.exit.circ{box-shadow:0 0 0 3px #fff,0 0 0 6px #2f9e6e}
+.legend{font-size:11px;color:var(--mut);margin-top:34px;margin-left:-22px;display:flex;align-items:center;gap:3px;flex-wrap:wrap}.legend .lg{display:inline-block;width:11px;height:11px;border-radius:2px;margin-left:5px}
+.legend .lg.bc{background:#8fb6f0}.legend .lg.ru{background:#333}
+.sidecol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.box{background:var(--paper2);border-radius:10px;padding:8px 10px}
+.drow{display:flex;align-items:center;gap:5px;margin:2px 0}.boxes{display:flex;gap:2px;flex:1}.boxes i{width:11px;height:11px;border:1px solid #c7b893;background:#fff;border-radius:2px;position:relative}
+.boxes i.o{background:#fff;border-color:#555;border-radius:50%}.boxes i.o::after{content:"";position:absolute;inset:2px;border-radius:50%;background:#333}
+.boxes i.x{background:#d8ccb0}.boxes i.x::after{content:"✕";position:absolute;inset:-3px 0 0 1px;font-size:10px;color:#777}
+.drow b{width:18px;text-align:right}
+.store{display:flex;align-items:center;gap:6px;margin:3px 0}.sbx{display:flex;gap:3px}.sbx i{width:18px;height:18px;border:1.5px solid #bfa87a;border-radius:4px;background:#fff;font-style:normal;font-size:11px;display:flex;align-items:center;justify-content:center}.sbx i.x{background:#ddd;color:#999}.sbx i.x::after{content:"✕";font-size:11px}
+.anytime{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.mini-b{font-size:11px;border:1px solid #b88a2a;background:#fff2cc;border-radius:6px;padding:3px 7px}
+.secnum{margin-bottom:4px}.warnb{background:var(--red);color:#fff;border-radius:8px;padding:1px 7px;font-weight:800;font-size:12px}.okb{background:var(--green);color:#fff;border-radius:8px;padding:1px 7px;font-size:12px}
+.secbx{display:flex;flex-wrap:wrap;gap:2px}.secbx i{width:13px;height:13px;border:1px solid #ccb98a;background:#fff;border-radius:3px;position:relative}
+.secbx i.s{border:2px solid var(--green);border-radius:50%}.secbx i.t::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--red)}.secbx i.t:not(.s){background:#ffd6d0}
+.dtrack{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}.dc{height:22px;border:1px solid #e3b7b0;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#b9a59f}
+.dc.dis{background:#ffd8d2;color:var(--red);font-weight:900}.dc.law{opacity:.5}.dc.on{background:#7a1f15;color:#fff}.dc.on.dis{background:#c0221a}
+.sheet2{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;margin-top:8px}
+.ttrack{display:grid;grid-template-columns:repeat(10,1fr) 34px;gap:2px}.tc{height:22px;border-radius:3px;background:#fff;border:1px solid #cde4cf;font-size:10px;color:#9bb89f;display:flex;align-items:center;justify-content:center}
+.tc.ic{background:#d6efd9}.tc.on{background:#4caf6e;color:#fff;border-color:#2e7d4a}.tc.on .dna,.tc.on .ic{filter:drop-shadow(0 0 1px #fff)}
+.tvp{font-size:11px;font-weight:800;color:#b9a3e2;display:flex;align-items:center}.tvp.on{color:#6a3fc2}
+.dinos{display:flex;flex-direction:column;gap:6px}.dth{font-weight:800;font-size:12px;padding:2px 6px;border-radius:5px}.dth small{font-weight:400}
+.dth.herb{background:#9fd8a3}.dth.small{background:#c5a7ea}.dth.large{background:#f8b47f}
+.spr{display:flex;align-items:center;gap:4px;font-size:12px;padding:1px 4px}.snm{flex:1;min-width:0}
+.dbx{display:inline-flex;gap:2px;margin-left:4px}.dbx i{width:12px;height:12px;border:1.5px solid #888;border-radius:3px;background:#fff}.dbx i.al{background:#333}.dbx i.dd{background:repeating-linear-gradient(45deg,#c33,#c33 2px,#fff 2px,#fff 4px)}
+.attr{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:3px 0}.attr small{width:100%;color:var(--mut)}
+.sspec{margin:4px 0;padding:4px 6px;border-radius:8px;background:#fff}.sspec small{display:block;color:var(--mut)}.sspec.coinable{cursor:pointer;box-shadow:0 0 0 3px #ffd36a}
+.sct{width:100%;font-size:12px;border-collapse:collapse}.sct td{padding:1px 2px;border-bottom:1px dotted #d9ccaa}.sct td:last-child{text-align:right;font-weight:700}
+/* prompt */
+#side{position:sticky;top:64px;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - 76px)}
+#prompt{background:#fff;border:3px solid var(--amber);min-height:120px}
+.ptitle{font-size:16px;font-weight:800;margin-bottom:4px}.psub{font-size:12px;color:#5a5243;margin-bottom:8px;line-height:1.45}
+.pb{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;margin:3px 3px 3px 0;padding:7px 11px;border-radius:9px;border:2px solid #d2c299;background:#fff8e6;font-weight:700;font-size:13px;color:#2a2418}
+.pb small{font-weight:400;font-size:11px;color:#6b6250}.pb.tall{width:100%;align-items:flex-start;text-align:left}
+.pb.primary{background:#ffe08a;border-color:#e3a21c}.pb.primary:hover{background:#ffd45c}.pb.big{font-size:16px;padding:11px 18px;width:100%}
+.pb.dis{opacity:.35;pointer-events:none}.pb.ghostb{background:#f2efe8;border-color:#ddd;color:#666}.pb.warnbtn{background:#ffd8d2;border-color:#d8412f;width:100%}
+.pb .dna.big{vertical-align:middle}
+.row{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px}
+.hint2{background:#eef5ff;border-radius:8px;padding:6px 8px;font-size:12px;margin:6px 0;display:flex;align-items:center;gap:8px}
+.actbtns .pb{font-size:12px;padding:5px 8px}
+.coinlist{display:flex;flex-direction:column;gap:3px;max-height:260px;overflow:auto}
+.coinitem{flex-direction:row;justify-content:space-between;width:100%;margin:0;padding:5px 8px}.coinitem span{flex:1;text-align:left}
+.dnabtns{display:flex;flex-wrap:wrap}.dnahelp{display:flex;flex-wrap:wrap;gap:3px 10px;font-size:11px;color:var(--mut);margin-top:6px}
+.rshapes{display:flex;gap:4px;margin:4px 0}.rs{width:38px;height:38px;border:2px solid #d2c299;border-radius:8px;background:#e8f3fb;position:relative;padding:0;font-size:11px;font-weight:700}.rs svg{position:absolute;inset:4px;width:26px;height:26px}.rs.on{border-color:#e3a21c;box-shadow:0 0 0 2px #ffd36a}
+.mklist{display:flex;flex-direction:column;gap:3px;margin:4px 0}.mk{display:flex;align-items:center;gap:4px;font-size:12px;padding:3px 6px;border-radius:7px;background:#f7f2e5}
+.mk.herb{background:#e3f4e4}.mk.small{background:#efe6fa}.mk.large{background:#fde9da}
+.stp{display:inline-flex;align-items:center;gap:4px}.stp button{width:24px;height:24px;border-radius:6px;border:1px solid #bbb;background:#fff;font-weight:800}.stp button:disabled{opacity:.3}.stp b{width:14px;text-align:center}
+.gain{color:var(--mut);width:42px;text-align:right}
+#log{background:#10261aee;color:#d9e8d9;font-size:12px;overflow:auto;flex:1;min-height:160px;max-height:44vh}
+.lg{padding:2px 0;border-bottom:1px solid #ffffff10;line-height:1.4}.lg.me{color:#a9d2ff}.lg.ai{color:#ffc4ad}.lg.sys{color:#e6dcb8}.lg.hd{color:var(--amber);font-weight:800;margin-top:6px}
+#flash{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(80px);background:#222;color:#fff;padding:10px 18px;border-radius:20px;transition:.25s;z-index:50;opacity:0}#flash.on{transform:translateX(-50%);opacity:1}
+#modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:40;padding:16px}#modal.on{display:flex}
+.mbox{background:var(--paper);border-radius:16px;padding:20px 24px;max-width:520px;width:100%;max-height:90vh;overflow:auto;position:relative}.mbox.wide{max-width:780px}
+.mbox h2{margin:0 0 8px}.mx{position:absolute;right:12px;top:10px;border:0;background:none;font-size:20px}
+.setup{display:flex;flex-direction:column;gap:10px;margin:14px 0;background:#fff;padding:12px;border-radius:10px}
+.setup select,.setup input{font-family:inherit;font-size:14px;padding:3px}
+.rules{font-size:13px;line-height:1.6}.rules h4{margin:12px 0 2px;color:#3d5a3f}.rules ul,.rules ol{margin:2px 0;padding-left:20px}
+.final{width:100%;border-collapse:collapse;margin:8px 0}.final td,.final th{padding:4px 8px;border-bottom:1px solid #e2d6b8;text-align:right}.final td:first-child{text-align:left}.final tr.tot td{font-weight:900;font-size:18px;border-top:2px solid #333}
+.winner{font-size:22px;font-weight:900;text-align:center;margin:6px 0}
+@media (max-width:1380px){#main{grid-template-columns:300px 1fr}#side{grid-column:1/-1;position:static;max-height:none;flex-direction:row}#prompt{flex:1}#log{flex:1;max-height:280px}}
+@media (max-width:980px){#main{grid-template-columns:1fr;padding:8px;gap:8px}.sheetgrid{grid-template-columns:1fr}:root{--cs:21px}
+ #top{position:static;gap:6px 10px;padding:6px 10px}.brand small{display:none}.brand .logo{font-size:22px}.season{padding:3px 8px}.season .phname{font-size:12px}.tbtn{margin-left:0}.tbtn button{padding:5px 9px;font-size:12px}
+ #side{display:contents}#prompt{position:fixed;left:0;right:0;bottom:0;z-index:30;max-height:46vh;overflow:auto;border-radius:16px 16px 0 0;border-width:3px 0 0;box-shadow:0 -6px 20px #0007;padding-bottom:16px}
+ #log{order:5;max-height:220px;min-height:0}body{padding-bottom:48vh}.mapcol{padding:28px 30px 10px;justify-self:center}.legend{margin-left:0}}
+@media (max-width:420px){:root{--cs:19px}.cl{font-size:9px}.bl{font-size:9px}.die{width:52px;height:52px}.mapcol{padding:28px 28px 10px}}
+</style>
+</head>
+<body>
+<div id="top"></div>
+<div id="main">
+  <div class="panel" id="board"></div>
+  <div class="panel" id="sheet"></div>
+  <div id="side"><div class="panel" id="prompt"></div><div class="panel" id="log"></div></div>
+</div>
+<div id="flash"></div>
+<div id="modal"></div>
+<script>
+'use strict';
+/* ===================== 상수 / 데이터 ===================== */
+const N = 16;
+const DIRS = { N: [-1, 0], E: [0, 1], S: [1, 0], W: [0, -1] };
+const OPP = { N: 'S', S: 'N', E: 'W', W: 'E' };
+const DLIST = ['N', 'E', 'S', 'W'];
+const HQ_CELLS = [[0, 4], [0, 5], [1, 4], [1, 5]];
+const EXITS = [
+  { id: 0, vp: 3, r: 0, c: 10, d: 'N' },
+  { id: 1, vp: 5, r: 3, c: 15, d: 'E' },
+  { id: 2, vp: 4, r: 5, c: 0, d: 'W' },
+  { id: 3, vp: 8, r: 11, c: 15, d: 'E' },
+  { id: 4, vp: 7, r: 13, c: 0, d: 'W' },
+  { id: 5, vp: 10, r: 15, c: 8, d: 'S' },
+];
+const ROAD_SHAPES = ['NS', 'EW', 'NE', 'ES', 'SW', 'WN'];
+const DNA_B = ['Y', 'R', 'B'], DNA_A = ['G', 'P', 'O'], DNA_ALL = ['Y', 'R', 'B', 'G', 'P', 'O'];
+const DNA_NAME = { Y: '노랑', R: '빨강', B: '파랑', G: '초록', P: '보라', O: '주황' };
+const SPECIES = [
+  { id: 'brachio', name: '브라키오사우루스', type: 'herb', dna: ['Y', 'R'], ch: '브' },
+  { id: 'trice', name: '트리케라톱스', type: 'herb', dna: ['R', 'B'], ch: '트' },
+  { id: 'ankylo', name: '안킬로사우루스', type: 'herb', dna: ['B', 'Y'], ch: '안' },
+  { id: 'veloci', name: '벨로시랩터', type: 'small', dna: ['Y', 'G'], ch: '벨' },
+  { id: 'ptera', name: '프테라노돈', type: 'small', dna: ['R', 'P'], ch: '프' },
+  { id: 'dilo', name: '딜로포사우루스', type: 'small', dna: ['B', 'O'], ch: '딜' },
+  { id: 'trex', name: '티라노사우루스 렉스', type: 'large', dna: ['G', 'P'], ch: '티' },
+  { id: 'mega', name: '메가로사우루스', type: 'large', dna: ['P', 'O'], ch: '메' },
+  { id: 'spino', name: '스피노사우루스', type: 'large', dna: ['O', 'G'], ch: '스' },
+];
+const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
+const DTYPE = {
+  herb: { name: '초식 공룡', size: 2, thrill: 1, threat: 0, vp: 2 },
+  small: { name: '소형 육식공룡', size: 3, thrill: 2, threat: 1, vp: 3 },
+  large: { name: '대형 육식공룡', size: 4, thrill: 3, threat: 2, vp: 5 },
+};
+const ATTR = {
+  M: { name: '기념품 가게', shape: [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1]], inc: '주사위 1개 굴려 자원' },
+  Ri: { name: '놀이기구', shape: [[0, 0], [0, 1], [1, 1], [1, 2], [1, 3]], inc: '스릴 1' },
+  F: { name: '음식점', shape: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3]], inc: '코인 1' },
+};
+// 흥분도(스릴) 트랙 아이콘: b=기본DNA, a=고급DNA, c=코인, s=경비
+const THRILL_ICONS = { 1: 'b', 3: 'c', 5: 's', 7: 'b', 9: 'c', 11: 's', 14: 'a', 17: 'c', 20: 's', 23: 'a', 26: 'c', 29: 's', 33: 'c', 37: 's', 41: 'c', 45: 's', 49: 'c', 53: 'c', 57: 'c' };
+const THRILL_ROW_VP = [3, 6, 10, 14, 19, 24];
+const DISASTER_CELLS = [2, 5, 8, 11, 13, 15, 17, 19];
+const DISASTERS = {
+  pad: '우리 1개 파괴', roads: '길 3개 파괴', attr: '어트랙션 1개 파괴', dna: '보관 DNA 4개 유실', spec: '전문가 1명 유실',
+};
+const PHASES = ['A', 'A', 'R', 'A', 'A', 'R', 'A', 'A', 'R'];
+
+/* 주사위 10개 (규칙서에 면 목록이 없어 사진 예시를 바탕으로 구성) */
+function F(t, ...o) { return { t, o }; }
+const DICE = [
+  [F(1, { Y: 2 }), F(1, { G: 1 }), F(0, { c: 1 }), F(0, { M: 1 }), F(1, { s: 2 }), F(1, { Y: 1 }, { P: 1 })],
+  [F(1, { R: 2 }), F(1, { P: 1 }), F(2, { c: 2 }), F(0, { F: 1 }), F(1, { r: 2 }), F(2, { R: 1, B: 1 })],
+  [F(1, { B: 2 }), F(1, { O: 1 }), F(1, { c: 1 }), F(0, { Ri: 1 }), F(1, { s: 1, r: 1 }), F(1, { B: 2 }, { O: 1 })],
+  [F(1, { Y: 1, R: 1 }), F(2, { a: 1 }), F(1, { c: 1, s: 1 }), F(1, { A: 1 }), F(0, { r: 1 }), F(2, { G: 1, Y: 1 })],
+  [F(1, { b: 2 }), F(2, { G: 1, P: 1 }), F(1, { c: 2 }), F(0, { M: 1 }, { c: 1 }), F(1, { s: 2 }), F(1, { B: 1 }, { G: 1 })],
+  [F(1, { R: 2 }, { B: 2 }), F(1, { P: 1 }), F(0, { c: 1 }), F(0, { F: 1 }, { s: 1 }), F(1, { r: 2 }), F(2, { Y: 1, O: 1 })],
+  [F(1, { B: 1, Y: 1 }), F(1, { O: 1 }), F(2, { c: 2 }), F(0, { Ri: 1 }, { r: 1 }), F(1, { s: 2 }), F(1, { a: 1 })],
+  [F(0, { b: 1 }), F(2, { O: 1, G: 1 }), F(0, { c: 1 }), F(0, { M: 1 }), F(0, { s: 1 }), F(1, { R: 1 }, { P: 1 })],
+  [F(1, { Y: 2 }, { R: 2 }), F(1, { G: 1 }), F(1, { c: 2 }), F(0, { F: 1 }), F(2, { r: 3 }), F(1, { b: 2 })],
+  [F(1, { B: 1, R: 1 }), F(1, { a: 1 }), F(1, { c: 1, r: 1 }), F(1, { A: 1 }), F(2, { s: 3 }), F(1, { P: 1 }, { O: 1 })],
+];
+
+/* 전문가 */
+const SHEET_SPECS = ['sec', 'tour', 'sci'];
+const SPECS = {
+  sec: { name: '경비 대장', cost: 3, sheet: true, bonus: [{ g: { s: 2 } }], run: [{ g: { s: 1 } }], bt: '경비 2', rt: '경비 1' },
+  tour: { name: '투어 가이드', cost: 3, sheet: true, bonus: [{ g: { x: 3 } }], run: [{ g: { r: 2 } }], bt: '스릴 3', rt: '도로 2 (보관 가능)' },
+  sci: { name: '신입 과학자', cost: 3, sheet: true, bonus: [{ g: { a: 2 } }], run: [{ make: 2 }], bt: '고급 DNA 2', rt: '공룡 최대 2마리 만들기' },
+  herbres: { name: '초식공룡 연구원', cost: 4, bonus: [{ g: { b: 2 } }], run: [{ per: 'herb', g: { a: 1 } }], bt: '기본 DNA 2', rt: '초식 공룡 1마리당 고급 DNA 1' },
+  union: { name: '노조 사장', cost: 4, exp: true, bonus: [{ attr: 'A' }], run: [{ per: 'attr2', g: { s: 1 } }], bt: '원하는 어트랙션 1개 건설', rt: '어트랙션 2개당 경비 1' },
+  senior: { name: '선임 과학자', cost: 5, bonus: [{ g: { b: 2, a: 2 } }], run: [{ make: 4 }], bt: '기본 DNA 2 + 고급 DNA 2', rt: '공룡 최대 4마리 만들기' },
+  cloner: { name: '복제 전문가', cost: 5, exp: true, bonus: [{ sp: 'copyBonus' }], run: [{ sp: 'copyRun' }], bt: '고용한 다른 전문가의 보너스 복사', rt: '고용한 다른 전문가의 운영 능력 복사' },
+  ad: { name: '광고대행사', cost: 5, exp: true, bonus: [{ g: { x: 1 } }], run: [{ per: 'paddock', g: { x: 1 } }], bt: '스릴 1', rt: '우리 1개당 스릴 1' },
+  guard: { name: '사설경호원', cost: 4, exp: true, bonus: [{ g: { r: 2 } }], run: [{ per: 'otherSpec', g: { s: 1 } }], bt: '도로 2', rt: '고용한 다른 전문가 1명당 경비 1' },
+  architect: { name: '건축가', cost: 3, exp: true, bonus: [{ g: { r: 2 } }], run: [{ sp: 'architect' }], bt: '도로 2', rt: '어트랙션 1개를 파괴하면 모든 건물카드 트랙에 코인 2씩' },
+  mad: { name: '미친 과학자', cost: 3, exp: true, bonus: [{ sp: 'runNow', id: 'mad' }], run: [{ compy: 4 }], bt: '즉시 운영 능력 사용', rt: '컴프소냐투스 최대 4마리 (기본DNA 1 → 위협 1, 스릴 2)' },
+  social: { name: '소셜미디어 매니저', cost: 4, bonus: [{ g: { x: 1 } }], run: [{ per: 'threat5', g: { x: 1 } }], bt: '스릴 1', rt: '위협 5개당 스릴 1' },
+  medic: { name: '구급대원', cost: 4, exp: true, bonus: [{ g: { s: 1 } }], run: [{ sp: 'paramedic' }], bt: '경비 1', rt: '주사위 2개 굴려 위협이 많은 쪽 값만큼 경비' },
+  smalltr: { name: '작은 육식공룡 훈련사', cost: 4, bonus: [{ g: { x: 2 } }], run: [{ per: 'small', g: { x: 1 } }], bt: '스릴 2', rt: '소형 육식공룡 1마리당 스릴 1' },
+  largetr: { name: '대형 육식공룡 훈련사', cost: 4, bonus: [{ g: { s: 1, x: 1 } }], run: [{ per: 'large', g: { s: 1 } }], bt: '경비 1 + 스릴 1', rt: '대형 육식공룡 1마리당 경비 1' },
+  lawyer: { name: '변호사', cost: 3, exp: true, bonus: [], run: [{ per: 'death2', g: { c: 1 } }], bt: '(지속) 사망 트랙 처음 10칸은 재난 없음', rt: '사망 2명당 코인 1' },
+  insider: { name: '내부자', cost: 5, exp: true, bonus: [{ or: [[{ g: { c: 2 } }], [{ g: { s: 2 } }]], labels: ['코인 2', '경비 2'] }], run: [{ sp: 'insider' }], bt: '코인 2 또는 경비 2', rt: '나는 경비 1, 상대는 위협 1' },
+  mascot: { name: '마스코트', cost: 3, bonus: [{ g: { x: 1 } }], run: [{ per: 'merch', g: { x: 1 } }], bt: '스릴 1', rt: '기념품 가게 1개당 스릴 1' },
+  chaos: { name: '카오스 이론가', cost: 3, exp: true, bonus: [{ g: { a: 1 } }], run: [{ sp: 'chaos' }], bt: '고급 DNA 1', rt: '주사위 1개 굴려 자원 획득, 상대도 같은 자원+위협' },
+  jack: { name: '만물 박사', cost: 4, bonus: [{ or: [[{ g: { x: 2 } }], [{ g: { s: 2 } }], [{ g: { r: 2 } }]], labels: ['스릴 2', '경비 2', '도로 2'] }], run: [{ or: [[{ g: { c: 1 } }], [{ g: { s: 1 } }], [{ g: { r: 1 } }]], labels: ['코인 1', '경비 1', '도로 1'] }], bt: '스릴 2 / 경비 2 / 도로 2 중 하나', rt: '코인 1 / 경비 1 / 도로 1 중 하나' },
+  mixer: { name: 'DNA 혼합전문가', cost: 5, bonus: [{ sp: 'runNow', id: 'mixer' }], run: [{ sp: 'freeDino' }], bt: '즉시 운영 능력 사용', rt: '기존 우리에 공룡 1마리 무료 추가 (스릴·위협은 정상)' },
+  rideop: { name: '탑승 운영자', cost: 3, bonus: [{ g: { x: 1 } }], run: [{ per: 'ride', g: { c: 1 } }], bt: '스릴 1', rt: '놀이기구 1개당 코인 1' },
+  chef: { name: '마스터 치프', cost: 4, bonus: [{ g: { x: 1 } }], run: [{ per: 'food', g: { a: 1 } }], bt: '스릴 1', rt: '음식점 1개당 고급 DNA 1' },
+};
+const MARKET_SPECS = Object.keys(SPECS).filter(k => !SPECS[k].sheet);
+
+/* 건물 카드 */
+const BLDS = {
+  goat: { name: '염소 우리', cost: 6, exp: true, shape: [[0, 0], [0, 1], [1, 0], [1, 1]], attach: 'large', bonus: [{ sp: 'attachThrill' }], vp: 'fixed', v: 8, bt: '부착된 우리의 공룡 1마리당 스릴 2', vt: '승점 8', at: '대형 육식공룡 우리에 붙여 지어야 함' },
+  ring: { name: '트리케라톱스 반지 던지기', cost: 6, exp: true, shape: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [1, 0], [1, 1], [1, 4], [1, 5]], attach: 'herb', bonus: [{ sp: 'attachThrill' }], vp: 'fixed', v: 3, bt: '부착된 우리의 공룡 1마리당 스릴 2', vt: '승점 3', at: '초식 공룡 우리에 붙여 지어야 함' },
+  casino: { name: '카지노', cost: 6, shape: [[0, 0], [1, 0], [1, 1], [1, 2], [1, 3], [2, 3]], bonus: [{ attr: 'M' }], vp: 'casino', bt: '기념품 가게 건설', vt: '스릴 트랙에 표시된 코인 아이콘 1개당 2점' },
+  colos: { name: '육식공룡 콜로세움', cost: 6, shape: [[0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]], bonus: [{ g: { s: 2 } }], vp: 'perLarge', bt: '경비 2', vt: '대형 육식공룡 1마리당 2점' },
+  aviary: { name: '익룡 사육장', cost: 7, shape: ring5(), bonus: [{ g: { x: 4, t: 2 } }], vp: 'fixed', v: 12, bt: '스릴 4 + 위협 2', vt: '승점 12' },
+  garden: { name: '선사시대 정원', cost: 10, shape: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2], [1, 3], [1, 4]], bonus: [{ g: { a: 3 } }], vp: 'perHerb', bt: '고급 DNA 3', vt: '초식 공룡 1마리당 2점' },
+  jetski: { name: 'T-REX 제트 스키 공원', cost: 9, shape: hash6(), bonus: [{ g: { x: 7, t: 3 } }], vp: 'fixed', v: 15, bt: '스릴 7 + 위협 3', vt: '승점 15' },
+  firstaid: { name: '응급처치 센터', cost: 8, exp: true, shape: [[0, 1], [1, 0], [1, 1], [1, 2], [2, 1]], bonus: [{ g: { b: 2 } }], vp: 'firstaid', bt: '기본 DNA 2', vt: '6점, 사망 5 이하면 +6, 사망 0이면 또 +6' },
+  deluxe: { name: '디럭스 휴게 공간', cost: 6, shape: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]], bonus: [{ attr: 'Ri' }], vp: 'deluxe', bt: '놀이기구 건설', vt: '이 건물과 연결된 어트랙션 1개당 3점' },
+  gate: { name: '메인 게이트', cost: 8, exp: true, shape: [[0, 0], [0, 4], [1, 0], [1, 1], [1, 2], [1, 3], [1, 4]], attach: 'exit', bonus: [{ g: { r: 2 } }], vp: 'gate', bt: '도로 2', vt: '6점, 연결된 우리 2개 이상 +6, 연결된 어트랙션 2개 이상 +6', at: '공원 출입구에 붙여 지어야 함' },
+  raptor: { name: '벨로시랩터 요리 체험', cost: 6, exp: true, shape: [[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]], attach: 'small', bonus: [{ sp: 'attachThrill' }], vp: 'fixed', v: 5, bt: '부착된 우리의 공룡 1마리당 스릴 2', vt: '승점 5', at: '소형 육식공룡 우리에 붙여 지어야 함' },
+  zoo: { name: '공룡 동물원', cost: 6, exp: true, shape: [[0, 0], [0, 1], [0, 2], [1, 1], [1, 2], [2, 1], [2, 2]], bonus: [{ or: [[{ g: { x: 2 } }], [{ g: { b: 2 } }]], labels: ['스릴 2', '기본 DNA 2'] }], vp: 'zoo', bt: '스릴 2 또는 기본 DNA 2', vt: '6점, 위협이 가장 많지 않으면 +6 (2인 최대 12점)' },
+  hub: { name: '보안 허브', cost: 8, shape: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 1], [1, 2]], bonus: [{ g: { s: 3 } }], vp: 'hub', bt: '경비 3', vt: '경비 2개당 1점' },
+  compy: { name: '컴프 수용소', cost: 8, exp: true, shape: [[0, 2], [0, 3], [0, 4], [1, 0], [1, 1], [1, 2]], bonus: [{ sp: 'spendBasic6' }], vp: 'compy', bt: '기본 DNA를 6개까지 소비, 1개당 스릴 1', vt: '게임 중 모은 노랑+빨강+파랑 세트 1개당 2점' },
+  dnast: { name: 'DNA 저장고', cost: 10, exp: true, shape: [[0, 2], [1, 2], [2, 0], [2, 1], [2, 2], [2, 3]], bonus: [{ sp: 'spendAdv3' }], vp: 'dnast', bt: '고급 DNA를 3개까지 소비, 1개당 코인 1', vt: '게임 중 모은 고급 DNA 1개당 1점' },
+  welcome: { name: '웰컴 센터', cost: 8, shape: [[0, 2], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]], bonus: [{ g: { x: 1, s: 1, r: 1 } }], vp: 'perPaddock', bt: '스릴 1 + 경비 1 + 도로 1', vt: '우리 1개당 2점' },
+  spa: { name: '온천 진흙 스파', cost: 6, shape: [[0, 0], [1, 0], [2, 0], [2, 1], [2, 2], [2, 3]], bonus: [{ attr: 'F' }], vp: 'spa', bt: '음식점 건설', vt: '서로 다른 어트랙션 3종 세트 1개당 6점' },
+  grill: { name: '익룡 그릴', cost: 8, shape: [[0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 2]], bonus: [{ g: { x: 3 } }], vp: 'perSmall', bt: '스릴 3', vt: '소형 육식공룡 1마리당 2점' },
+  mono: { name: '모노레일 정거장', cost: 10, exp: true, shape: [[0, 1], [1, 0], [1, 1]], bonus: [{ g: { r: 3 } }], vp: 'mono', bt: '도로 3', vt: '게임 끝에 본관→모노레일 경로의 건물 1개당 2점' },
+  clone: { name: '클론 구역', cost: 9, exp: true, shape: [[0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1]], bonus: [{ sp: 'clone' }], vp: 'perSpec', bt: '아무 전문가의 운영 능력 즉시 사용', vt: '고용한 전문가 1명당 3점' },
+};
+function ring5() { const a = []; for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) if (r == 0 || r == 4 || c == 0 || c == 4) a.push([r, c]); return a; }
+function hash6() { const a = []; for (let r = 0; r < 6; r++) for (let c = 0; c < 6; c++) if (c == 1 || c == 4 || r == 1 || r == 4) a.push([r, c]); return a; }
+
+/* ===================== 유틸 ===================== */
+const clone = o => JSON.parse(JSON.stringify(o));
+const inB = (r, c) => r >= 0 && c >= 0 && r < N && c < N;
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; }
+function normShape(cells) { const mr = Math.min(...cells.map(x => x[0])), mc = Math.min(...cells.map(x => x[1])); return cells.map(([r, c]) => [r - mr, c - mc]).sort((a, b) => a[0] - b[0] || a[1] - b[1]); }
+function orientations(shape) {
+  const out = [], seen = new Set();
+  let s = shape;
+  for (let f = 0; f < 2; f++) {
+    for (let k = 0; k < 4; k++) {
+      const n = normShape(s), key = JSON.stringify(n);
+      if (!seen.has(key)) { seen.add(key); out.push(n); }
+      s = s.map(([r, c]) => [c, -r]);
+    }
+    s = shape.map(([r, c]) => [r, -c]);
+  }
+  return out;
+}
+function sq(k) { const a = []; for (let r = 0; r < k; r++) for (let c = 0; c < k; c++) a.push([r, c]); return a; }
+function paddockShape(sp) { return sp === 'compy' ? [[0, 0], [0, 1], [0, 2]] : sq(DTYPE[SP[sp].type].size); }
+function resText(g) {
+  const nm = { Y: '노랑DNA', R: '빨강DNA', B: '파랑DNA', G: '초록DNA', P: '보라DNA', O: '주황DNA', b: '기본DNA', a: '고급DNA', c: '코인', s: '경비', r: '도로', t: '위협', x: '스릴', M: '기념품가게', Ri: '놀이기구', F: '음식점', A: '어트랙션' };
+  return Object.entries(g).map(([k, v]) => nm[k] + (v > 1 ? ' ' + v : '')).join(' + ');
+}
+
+/* ===================== 상태 ===================== */
+let G = null;
+let UNDO = [];
+let HOOK = { onRandom: () => { UNDO = []; } };
+
+function mkPlayer(idx, name, ai) {
+  const grid = [];
+  for (let i = 0; i < N * N; i++) grid.push({ b: -1, rd: null, ru: false });
+  const p = {
+    idx, name, ai,
+    dnaG: { Y: 1, R: 1, B: 1, G: 0, P: 0, O: 0 }, dnaS: { Y: 0, R: 0, B: 0, G: 0, P: 0, O: 0 },
+    coinSlots: 0, coinStored: 0, roadSlots: 0, roadStored: 0, pendC: 0, pendR: 0,
+    thrill: 0, thrillOver: 0, sec: 0, thr: 0, deaths: 0, deathsOver: 0,
+    dis: { pad: 0, roads: 0, attr: 0, dna: 0, spec: 0 },
+    made: {}, alive: {}, compies: 0,
+    attrBuilt: { M: 0, Ri: 0, F: 0 },
+    paid: {}, hired: {}, lost: {}, built: {}, noVP: {}, usedRun: {},
+    exits: [], grid, blds: [], pads: {}, dice: [], stage: null,
+  };
+  SPECIES.forEach(s => { p.made[s.id] = 0; p.alive[s.id] = 0; });
+  addBld(p, { kind: 'hq', sub: 'hq', cells: HQ_CELLS });
+  return p;
+}
+function addBld(p, b) {
+  b.i = p.blds.length; b.x = false; b.dead = false; b.host = (b.host == null ? -1 : b.host);
+  p.blds.push(b);
+  b.cells.forEach(([r, c]) => { p.grid[r * N + c].b = b.i; });
+  return b;
+}
+function cell(p, r, c) { return p.grid[r * N + c]; }
+
+function newGame(opts) {
+  opts = opts || {};
+  const beginner = !!opts.beginner;
+  const bl = shuffle(Object.keys(BLDS).filter(k => !beginner || !BLDS[k].exp)).slice(0, 3);
+  const sl = shuffle(MARKET_SPECS.filter(k => !beginner || !SPECS[k].exp)).slice(0, 3);
+  const humanFirst = opts.humanFirst == null ? Math.random() < 0.5 : opts.humanFirst;
+  const names = opts.names || ['나', '컴퓨터'];
+  const ais = opts.ais || [false, true];
+  G = {
+    v: 1, phaseIdx: 0, fp: humanFirst ? 0 : 1,
+    players: [mkPlayer(0, names[0], ais[0]), mkPlayer(1, names[1], ais[1])],
+    market: { b: bl, s: sl },
+    pool: [], board: { make: [], funds: [], extract: [], dup: [], build: [] }, common: null,
+    q: [], log: [], over: false, final: null, nextDieId: 1, opts,
+  };
+  // 두 번째 플레이어: 초록 DNA 1
+  const second = G.players[1 - G.fp];
+  second.dnaG.G += 1;
+  log(`게임 시작! 선 플레이어: ${G.players[G.fp].name}. ${second.name}은(는) 시작 보너스로 초록 DNA 1개를 받습니다.`);
+  log(`이번 게임 건물 카드: ${bl.map(k => BLDS[k].name).join(', ')} / 전문가 카드: ${sl.map(k => SPECS[k].name).join(', ')}`);
+  G.q.push({ t: 'phaseStart' });
+  UNDO = [];
+  pump();
+}
+function fixJosa(s) {
+  return String(s).replace(/([가-힣])([」』)\]]?)(은\(는\)|을\(를\)|이\(가\)|과\(와\)|\(으\)로)/g, (m, ch, close, pat) => {
+    const bat = (ch.charCodeAt(0) - 0xAC00) % 28; const has = bat !== 0;
+    const map = { '은(는)': has ? '은' : '는', '을(를)': has ? '을' : '를', '이(가)': has ? '이' : '가', '과(와)': has ? '과' : '와', '(으)로': has && bat !== 8 ? '으로' : '로' };
+    return ch + close + map[pat];
+  });
+}
+function log(msg, p) { msg = fixJosa(msg); G.log.push({ m: msg, p: p == null ? -1 : p, ph: G.phaseIdx }); if (G.log.length > 400) G.log.shift(); }
+function front(...tasks) { G.q.unshift(...tasks); }
+function other(p) { return G.players[1 - p.idx]; }
+function human() { return G.players.find(p => !p.ai); }
+function itemCost(key) { const [k, id] = key.split(':'); return k === 'sp' ? SPECS[id].cost : BLDS[id].cost; }
+function itemName(key) { const [k, id] = key.split(':'); return k === 'sp' ? SPECS[id].name : BLDS[id].name; }
+function allItems() { return [...SHEET_SPECS.map(s => 'sp:' + s), ...G.market.s.map(s => 'sp:' + s), ...G.market.b.map(b => 'bd:' + b)]; }
+function itemDone(p, key) { return (p.paid[key] || 0) >= itemCost(key); }
+function itemRem(p, key) { return itemCost(key) - (p.paid[key] || 0); }
+function activeSpecs(p) { return [...SHEET_SPECS, ...G.market.s].filter(id => p.hired['sp:' + id] && !p.lost['sp:' + id]); }
+function hasLawyer(p) { return p.hired['sp:lawyer'] && !p.lost['sp:lawyer']; }
+
+/* ===================== 자원 ===================== */
+function stDNA(p, k) { return p.dnaG[k] - p.dnaS[k]; }
+function stTotal(p, list) { return (list || DNA_ALL).reduce((s, k) => s + stDNA(p, k), 0); }
+function addDNA(p, k, n) {
+  for (let i = 0; i < n; i++) {
+    if (p.dnaG[k] < 15) p.dnaG[k]++;
+    else { p.pendC++; front({ t: 'coins', p: p.idx }); log(`${DNA_NAME[k]} DNA 트랙이 가득 차서 코인 1로 바꿉니다.`, p.idx); }
+  }
+}
+function addThrill(p, n) {
+  for (let i = 0; i < n; i++) {
+    if (p.thrill < 60) {
+      p.thrill++;
+      const ic = THRILL_ICONS[p.thrill];
+      if (ic && p.stage === 'thrill') { log(`스릴 단계 중 새 아이콘(${resText({ [ic]: 1 })}) 즉시 획득`, p.idx); gain(p, { [ic]: 1 }); }
+    } else p.thrillOver++;
+  }
+}
+function gain(p, g, opts) {
+  opts = opts || {};
+  const tasks = [];
+  for (const [k, n] of Object.entries(g)) {
+    if (!n) continue;
+    if (DNA_ALL.includes(k)) addDNA(p, k, n);
+    else if (k === 'b' || k === 'a') tasks.push({ t: 'dna', p: p.idx, kind: k, n });
+    else if (k === 'c') { p.pendC += n; tasks.push({ t: 'coins', p: p.idx }); }
+    else if (k === 'r') { p.pendR += n; tasks.push({ t: 'roads', p: p.idx }); }
+    else if (k === 's') p.sec += n;
+    else if (k === 't') { if (!opts.noThreat) p.thr += n; }
+    else if (k === 'x') addThrill(p, n);
+    else if (k === 'M' || k === 'Ri' || k === 'F' || k === 'A') { if (!opts.noAttr) for (let i = 0; i < n; i++) tasks.push({ t: 'attr', p: p.idx, k }); }
+  }
+  front(...tasks);
+}
+function unsafe(p) { return Math.max(0, p.thr - p.sec); }
+
+/* ===================== 공원 지도 ===================== */
+function buildingCellsSet(p) { const s = new Set(); p.blds.forEach(b => { if (!b.dead) b.cells.forEach(([r, c]) => s.add(r * N + c)); }); return s; }
+function canPlace(p, cells, attach) {
+  for (const [r, c] of cells) { if (!inB(r, c)) return false; const g = cell(p, r, c); if (g.b >= 0 || g.rd || g.ru) return false; }
+  const own = new Set(cells.map(([r, c]) => r * N + c));
+  let hostIdx = -1, touchHost = false;
+  const hostOK = b => attach && attach !== 'exit' && b.kind === 'pad' && b.sub !== 'compy' && SP[b.sub].type === attach;
+  for (const [r, c] of cells) {
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      if (!dr && !dc) continue;
+      const rr = r + dr, cc = c + dc;
+      if (!inB(rr, cc) || own.has(rr * N + cc)) continue;
+      const bi = cell(p, rr, cc).b;
+      if (bi < 0) continue;
+      const b = p.blds[bi];
+      if (hostOK(b)) {
+        if (hostIdx >= 0 && hostIdx !== bi) return false;
+        hostIdx = bi;
+        if (dr === 0 || dc === 0) touchHost = true;
+        continue;
+      }
+      return false;
+    }
+  }
+  if (attach === 'exit') {
+    if (!EXITS.some(e => own.has(e.r * N + e.c))) return false;
+  } else if (attach) {
+    if (!touchHost) return false;
+  }
+  return { host: hostIdx };
+}
+function placements(p, shape, attach, limit) {
+  const out = [];
+  for (const o of orientations(shape)) {
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      const cells = o.map(([a, b]) => [a + r, b + c]);
+      const ok = canPlace(p, cells, attach);
+      if (ok) { out.push({ cells, host: ok.host }); if (limit && out.length >= limit) return out; }
+    }
+  }
+  return out;
+}
+function hasPlacement(p, shape, attach) { return placements(p, shape, attach, 1).length > 0; }
+function roadOK(p, r, c) { if (!inB(r, c)) return false; const g = cell(p, r, c); return g.b < 0 && !g.rd && !g.ru; }
+function anyRoadSpace(p) { for (let i = 0; i < N * N; i++) { const g = p.grid[i]; if (g.b < 0 && !g.rd && !g.ru) return true; } return false; }
+
+/* 연결 그래프 */
+function exitAt(r, c, d) { return EXITS.find(e => e.r === r && e.c === c && e.d === d); }
+function graph(p) {
+  const nodes = {}; // id -> {id, kind:'b'|'x', i}
+  const edges = []; const eKeys = new Set();
+  const addN = (id, kind, i) => { if (!nodes[id]) nodes[id] = { id, kind, i, adj: [] }; return nodes[id]; };
+  p.blds.forEach(b => { if (!b.dead) addN('b' + b.i, 'b', b.i); });
+  EXITS.forEach(e => addN('x' + e.id, 'x', e.id));
+  const addE = (a, b, key) => {
+    if (a === b) return;
+    if (eKeys.has(key)) return; eKeys.add(key);
+    const ei = edges.length; edges.push({ a, b, key });
+    nodes[a].adj.push({ to: b, e: ei }); nodes[b].adj.push({ to: a, e: ei });
+  };
+  p.blds.forEach(b => {
+    if (b.dead) return;
+    const A = 'b' + b.i;
+    b.cells.forEach(([r, c]) => {
+      for (const d of DLIST) {
+        const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc;
+        if (!inB(rr, cc)) { const e = exitAt(r, c, d); if (e) addE(A, 'x' + e.id, 'dx' + b.i + '_' + e.id); continue; }
+        const g = cell(p, rr, cc);
+        if (!g.rd || !g.rd.includes(OPP[d])) continue;
+        // 체인 추적
+        let cr = rr, ccc = cc, came = OPP[d]; const visited = [cr * N + ccc]; let end = null;
+        for (let guard = 0; guard < 300; guard++) {
+          const rd = cell(p, cr, ccc).rd; const out = rd[0] === came ? rd[1] : rd[0];
+          const [ddr, ddc] = DIRS[out]; const nr = cr + ddr, nc = ccc + ddc;
+          if (!inB(nr, nc)) { const e = exitAt(cr, ccc, out); if (e) end = 'x' + e.id; break; }
+          const ng = cell(p, nr, nc);
+          if (ng.b >= 0) { if (!p.blds[ng.b].dead) end = 'b' + ng.b; break; }
+          if (ng.rd && ng.rd.includes(OPP[out])) { cr = nr; ccc = nc; came = OPP[out]; visited.push(cr * N + ccc); continue; }
+          break;
+        }
+        if (end) { const key = 'c' + [visited[0], visited[visited.length - 1]].sort((x, y) => x - y).join('_'); addE(A, end, key); }
+      }
+    });
+    if (b.host >= 0 && !p.blds[b.host].dead) addE(A, 'b' + b.host, 'att' + b.i);
+  });
+  return { nodes, edges };
+}
+function attachedOf(p, i) { return p.blds.filter(b => !b.dead && (b.host === i || p.blds[i].host === b.i)).map(b => b.i); }
+function tourOptions(p) {
+  const gr = graph(p); const start = 'b0';
+  const exitsAvail = new Set(EXITS.filter(e => !p.exits.includes(e.id)).map(e => e.id));
+  const canCircle = p.exits.length < 3;
+  const best = {}; // key: exit id or 'none' -> {n, path}
+  let steps = 0;
+  const visitedN = new Set([start]); const usedE = new Set();
+  const consider = (path, exitId) => {
+    const vis = new Set();
+    path.forEach(id => { if (id[0] === 'b') { const i = +id.slice(1); if (i !== 0) vis.add(i); attachedOf(p, i).forEach(j => { if (j !== 0) vis.add(j); }); } });
+    const newOnes = [...vis].filter(i => !p.blds[i].x);
+    let key = 'none';
+    if (exitId != null && canCircle && exitsAvail.has(exitId)) key = exitId;
+    const cur = best[key];
+    if (!cur || newOnes.length > cur.n || (newOnes.length === cur.n && path.length < cur.path.length)) best[key] = { n: newOnes.length, path: path.slice(), newOnes, exit: key === 'none' ? null : exitId, visit: [...vis] };
+  };
+  const dfs = (id, path) => {
+    if (++steps > 60000) return;
+    const node = gr.nodes[id];
+    if (node.kind === 'x') { consider(path, node.i); return; }
+    consider(path, null);
+    for (const { to, e } of node.adj) {
+      if (visitedN.has(to) || usedE.has(e)) continue;
+      visitedN.add(to); usedE.add(e); path.push(to);
+      dfs(to, path);
+      path.pop(); usedE.delete(e); visitedN.delete(to);
+    }
+  };
+  dfs(start, [start]);
+  const opts = Object.values(best).filter(o => o.n > 0 || o.exit != null);
+  opts.forEach(o => { o.vp = o.exit != null ? EXITS[o.exit].vp : 0; });
+  opts.sort((a, b) => (b.n + b.vp) - (a.n + a.vp));
+  return opts;
+}
+function reachableFromHQ(p) {
+  const gr = graph(p); const seen = new Set(['b0']); const st = ['b0'];
+  while (st.length) { const id = st.pop(); if (gr.nodes[id].kind === 'x') continue; for (const { to } of gr.nodes[id].adj) if (!seen.has(to)) { seen.add(to); st.push(to); } }
+  return seen;
+}
+function directNeighbors(p, i) { const gr = graph(p); const n = gr.nodes['b' + i]; return n ? n.adj.map(a => a.to) : []; }
+function monoPathCount(p) {
+  const mono = p.blds.find(b => b.kind === 'card' && b.sub === 'mono' && !b.dead); if (!mono) return 0;
+  const gr = graph(p); const target = 'b' + mono.i; let best = 0, steps = 0;
+  const vis = new Set(['b0']);
+  const dfs = (id, cnt) => {
+    if (++steps > 60000) return;
+    if (id === target) { best = Math.max(best, cnt); return; }
+    for (const { to } of gr.nodes[id].adj) { if (vis.has(to) || gr.nodes[to].kind === 'x') continue; vis.add(to); dfs(to, cnt + 1); vis.delete(to); }
+  };
+  dfs('b0', 0);
+  return best;
+}
+
+/* ===================== 공룡 ===================== */
+function typeAlive(p, type) { return SPECIES.filter(s => s.type === type).reduce((a, s) => a + p.alive[s.id], 0); }
+function dinoTotal(p) { return SPECIES.reduce((a, s) => a + p.alive[s.id], 0); }
+function paddockCount(p) { return p.blds.filter(b => b.kind === 'pad' && !b.dead).length; }
+function canMakeSpecies(p, sid, extra) { // extra: {sid: count planned}
+  const s = SP[sid]; const plannedHere = (extra && extra[sid]) || 0;
+  if (p.made[sid] + plannedHere >= 4) return false;
+  const used = {}; if (extra) for (const [k, v] of Object.entries(extra)) SP[k].dna.forEach(d => used[d] = (used[d] || 0) + v);
+  for (const d of s.dna) if (stDNA(p, d) - (used[d] || 0) < 1) return false;
+  if (!p.pads[sid] && !plannedHere) { if (!hasPlacement(p, paddockShape(sid))) return false; }
+  return true;
+}
+function makeDinos(p, plan) { // plan {sid:n}
+  const tasks = [];
+  for (const [sid, n] of Object.entries(plan)) {
+    if (!n) continue;
+    const s = SP[sid]; const t = DTYPE[s.type];
+    for (let i = 0; i < n; i++) { s.dna.forEach(d => p.dnaS[d]++); p.made[sid]++; p.alive[sid]++; p.thr += t.threat; addThrill(p, t.thrill); }
+    if (p.pads[sid] == null) tasks.push({ t: 'paddock', p: p.idx, sp: sid });
+    log(`${s.name} ${n}마리를 만들었습니다 (스릴 +${t.thrill * n}, 위협 +${t.threat * n}).`, p.idx);
+  }
+  front(...tasks);
+}
+
+/* ===================== 효과 실행 ===================== */
+function perCount(p, what) {
+  switch (what) {
+    case 'herb': return typeAlive(p, 'herb');
+    case 'small': return typeAlive(p, 'small');
+    case 'large': return typeAlive(p, 'large');
+    case 'paddock': return paddockCount(p);
+    case 'attr2': return Math.floor(workingAttr(p).length / 2);
+    case 'threat5': return Math.floor(p.thr / 5);
+    case 'otherSpec': return activeSpecs(p).length - 1;
+    case 'death2': return Math.floor((p.deaths + p.deathsOver) / 2);
+    case 'merch': return workingAttr(p, 'M').length;
+    case 'ride': return workingAttr(p, 'Ri').length;
+    case 'food': return workingAttr(p, 'F').length;
+  }
+  return 0;
+}
+function workingAttr(p, k) { return p.blds.filter(b => b.kind === 'attr' && !b.dead && (!k || b.sub === k)); }
+// 효과 리스트를 실행(작업 큐에 넣음)
+function doEff(p, eff, srcName) {
+  const tasks = [];
+  for (const op of eff) {
+    if (op.g) tasks.push({ t: 'gain', p: p.idx, g: op.g });
+    else if (op.per) { const n = perCount(p, op.per); const g = {}; for (const [k, v] of Object.entries(op.g)) g[k] = v * n; if (n > 0) tasks.push({ t: 'gain', p: p.idx, g }); else log(`${srcName || ''}: 해당 조건이 없어 얻는 것이 없습니다.`, p.idx); }
+    else if (op.or) tasks.push({ t: 'choose', p: p.idx, title: srcName ? `${srcName}: 하나를 고르세요` : '하나를 고르세요', opts: op.or.map((e, i) => ({ label: op.labels[i], eff: e })) });
+    else if (op.make) tasks.push({ t: 'make', p: p.idx, max: op.make });
+    else if (op.compy) tasks.push({ t: 'compy', p: p.idx, max: op.compy });
+    else if (op.attr) tasks.push({ t: 'attr', p: p.idx, k: op.attr });
+    else if (op.sp) tasks.push({ t: 'special', p: p.idx, sp: op.sp, id: op.id });
+  }
+  front(...tasks);
+}
+function specialChoices(p, sp) {
+  if (sp === 'copyBonus') return activeSpecs(p).filter(id => id !== 'cloner' && SPECS[id].bonus.length);
+  if (sp === 'copyRun') return activeSpecs(p).filter(id => id !== 'cloner');
+  if (sp === 'clone') return [...SHEET_SPECS, ...G.market.s].filter(id => id !== 'cloner' && SPECS[id].run.length);
+  return [];
+}
+
+/* ===================== 주사위 ===================== */
+function rollDie(dieIdx) { const f = Math.floor(Math.random() * 6); return { id: G.nextDieId++, die: dieIdx, face: f }; }
+function faceOf(d) { return DICE[d.die][d.face]; }
+function drawDice(n) { const ids = shuffle([...Array(10).keys()]).slice(0, n); HOOK.onRandom(); return ids.map(rollDie); }
+function faceHasAttrOnly(o) { return Object.keys(o).every(k => ['M', 'Ri', 'F', 'A'].includes(k)); }
+// 주사위 면 효과를 얻음: mult 배, noAttr (복제칸), noThreat
+function gainFaceTask(p, d, opts) { return { t: 'gainFace', p: p.idx, die: d.die, face: d.face, noThreat: !!opts.noThreat, noAttr: !!opts.noAttr, withThreat: !!opts.withThreat }; }
+
+/* ===================== 작업 처리기 ===================== */
+const TASK = {};
+// 시스템 작업
+TASK.phaseStart = {
+  run() {
+    if (G.phaseIdx >= PHASES.length) { front({ t: 'endGame' }); return; }
+    const season = Math.floor(G.phaseIdx / 3) + 1;
+    if (PHASES[G.phaseIdx] === 'A') {
+      const n = (G.phaseIdx % 3) + 1;
+      log(`━━ 시즌 ${season} · 액션 단계 ${n} ━━ (선 플레이어: ${G.players[G.fp].name})`);
+      const fp = G.fp, o = 1 - G.fp;
+      front({ t: 'confirm', p: humanIdx(), label: '주사위를 굴립니다', kind: 'roll' }, { t: 'rollPool' },
+        { t: 'draft', p: fp, n: 1 }, { t: 'draft', p: o, n: 1 }, { t: 'draft', p: o, n: 2 }, { t: 'draft', p: fp, n: 2 },
+        { t: 'commonDie' },
+        { t: 'gainOwn', p: fp }, { t: 'gainOwn', p: o }, { t: 'gainCommon', p: fp }, { t: 'gainCommon', p: o },
+        { t: 'placeDie', p: fp }, { t: 'placeDie', p: o }, { t: 'placeDie', p: fp }, { t: 'placeDie', p: o },
+        { t: 'actionCleanup' });
+    } else {
+      log(`━━ 시즌 ${season} · 공원 운영 단계 ━━`);
+      const h = humanIdx(), a = 1 - h;
+      front({ t: 'confirm', p: h, label: '공원 운영을 시작합니다', kind: 'run' },
+        { t: 'runAttr', p: a }, { t: 'runSpec', p: a },
+        { t: 'runAttr', p: h }, { t: 'runSpec', p: h },
+        { t: 'tour', p: a }, { t: 'thrillInc', p: a }, { t: 'death', p: a },
+        { t: 'tour', p: h }, { t: 'thrillInc', p: h }, { t: 'death', p: h },
+        { t: 'runCleanup' });
+    }
+  }
+};
+function humanIdx() { const h = G.players.findIndex(p => !p.ai); return h < 0 ? 0 : h; }
+TASK.confirm = { inter: true, ai() { } };
+TASK.rollPool = {
+  run() {
+    G.pool = drawDice(5); G.common = null;
+    G.board = { make: [], funds: [], extract: [], dup: [], build: [] };
+    G.players.forEach(p => p.dice = []);
+    log(`주사위 5개를 굴렸습니다: ${G.pool.map(d => faceLabel(faceOf(d))).join(' | ')}`);
+  }
+};
+function faceLabel(f) { return f.o.map(resText).join(' / ') + (f.t ? ` (위협${f.t})` : ''); }
+TASK.draft = {
+  inter: true,
+  pre(t) { return G.pool.length > 0; },
+  ai(t, p) { const i = aiDraft(p, t.n); takeDie(p, i); },
+};
+function takeDie(p, i) { const d = G.pool.splice(i, 1)[0]; p.dice.push(d); log(`${p.name}: 주사위 [${faceLabel(faceOf(d))}] 를 가져갑니다.`, p.idx); }
+TASK.commonDie = { run() { G.common = G.pool.shift() || null; if (G.common) log(`공용 주사위: [${faceLabel(faceOf(G.common))}] — 모두 자원과 위협을 얻습니다.`); } };
+TASK.gainOwn = { run(t) { const p = G.players[t.p]; front(...p.dice.map(d => gainFaceTask(p, d, { noThreat: true }))); } };
+TASK.gainCommon = { run(t) { const p = G.players[t.p]; if (G.common) front(gainFaceTask(p, G.common, { withThreat: true })); } };
+TASK.gainFace = {
+  run(t) {
+    const p = G.players[t.p]; const f = DICE[t.die][t.face];
+    let opts = f.o;
+    if (t.noAttr) opts = opts.filter(o => !faceHasAttrOnly(o));
+    if (t.withThreat && f.t) { p.thr += f.t; log(`${p.name}: 공용 주사위 위협 +${f.t}`, p.idx); }
+    if (!opts.length) { log(`${p.name}: 어트랙션은 복제할 수 없어 효과가 없습니다.`, p.idx); return; }
+    if (opts.length === 1) { gain(p, opts[0], { noThreat: true }); return; }
+    front({ t: 'choose', p: p.idx, title: `주사위 [${faceLabel(f)}]: 얻을 쪽을 고르세요`, opts: opts.map(o => ({ label: resText(o), eff: [{ g: o }] })) });
+  }
+};
+TASK.gain = { run(t) { gain(G.players[t.p], t.g, { noThreat: !!t.noThreat }); } };
+TASK.eff = { run(t) { doEff(G.players[t.p], t.eff, t.src); } };
+TASK.choose = {
+  inter: true,
+  ai(t, p) { const i = aiChoose(p, t); front({ t: 'eff', p: p.idx, eff: t.opts[i].eff }); log(`${p.name}: ${t.opts[i].label} 선택`, p.idx); },
+};
+TASK.dna = {
+  inter: true,
+  pre(t) { return t.n > 0; },
+  ai(t, p) { for (let i = 0; i < t.n; i++) { const k = aiPickDNA(p, t.kind); addDNA(p, k, 1); } log(`${p.name}: ${t.kind === 'b' ? '기본' : '고급'} DNA ${t.n}개 획득`, p.idx); },
+};
+TASK.coins = {
+  inter: true,
+  pre(t) { return G.players[t.p].pendC > 0; },
+  ai(t, p) { aiCoins(p); },
+};
+TASK.roads = {
+  inter: true,
+  pre(t) { return G.players[t.p].pendR > 0; },
+  ai(t, p) { aiRoads(p); },
+};
+TASK.attr = {
+  inter: true,
+  pre(t) {
+    const p = G.players[t.p];
+    const kinds = t.k === 'A' ? ['M', 'Ri', 'F'] : [t.k];
+    const ok = kinds.filter(k => p.attrBuilt[k] < 4 && hasPlacement(p, ATTR[k].shape));
+    if (!ok.length) { log(`${p.name}: ${t.k === 'A' ? '어트랙션' : ATTR[t.k].name}을(를) 지을 수 없어(최대 4개 또는 공간 부족) 무효가 됩니다.`, p.idx); return false; }
+    return true;
+  },
+  ai(t, p) { aiAttr(p, t.k); },
+};
+TASK.paddock = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; if (p.pads[t.sp] != null) return false; if (!hasPlacement(p, paddockShape(t.sp))) { log(`${p.name}: 우리를 놓을 공간이 없습니다!`, p.idx); return false; } return true; },
+  ai(t, p) { const pl = aiPlacement(p, paddockShape(t.sp), null); placePaddock(p, t.sp, pl.cells); },
+};
+TASK.placeCard = {
+  inter: true,
+  pre(t) {
+    const p = G.players[t.p]; const B = BLDS[t.id];
+    if (!hasPlacement(p, B.shape, B.attach)) { p.noVP[t.id] = true; log(`${p.name}: ${B.name}을(를) 지을 공간이 없어 보너스만 받고 승점은 얻지 못합니다.`, p.idx); return false; }
+    return true;
+  },
+  ai(t, p) { const B = BLDS[t.id]; const pl = aiPlacement(p, B.shape, B.attach); placeCard(p, t.id, pl.cells, pl.host); },
+};
+TASK.make = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; const ok = SPECIES.some(s => canMakeSpecies(p, s.id)); if (!ok) log(`${p.name}: 만들 수 있는 공룡이 없습니다.`, p.idx); return ok; },
+  ai(t, p) { const plan = aiMakePlan(p, t.max); if (Object.keys(plan).length) makeDinos(p, plan); else log(`${p.name}: 공룡을 만들지 않았습니다.`, p.idx); },
+};
+TASK.compy = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; return stTotal(p, DNA_B) > 0 && (p.pads.compy != null || hasPlacement(p, paddockShape('compy'))); },
+  ai(t, p) { const n = Math.min(t.max, stTotal(p, DNA_B)); const spend = []; for (let i = 0; i < n; i++) { const k = DNA_B.slice().sort((a, b) => stDNA(p, b) - stDNA(p, a))[0]; p.dnaS[k]++; spend.push(k); } makeCompies(p, n); },
+};
+function makeCompies(p, n) {
+  if (n <= 0) return;
+  p.compies += n; p.thr += n; addThrill(p, 2 * n);
+  log(`${p.name}: 컴프소냐투스 ${n}마리 (스릴 +${2 * n}, 위협 +${n})`, p.idx);
+  if (p.pads.compy == null) front({ t: 'paddock', p: p.idx, sp: 'compy' });
+}
+TASK.special = {
+  inter: true,
+  pre(t) {
+    const p = G.players[t.p];
+    switch (t.sp) {
+      case 'runNow': return true;
+      case 'copyBonus': case 'copyRun': case 'clone': if (!specialChoices(p, t.sp).length) { log(`${p.name}: 복사할 전문가가 없습니다.`, p.idx); return false; } return true;
+      case 'architect': return workingAttr(p).length > 0;
+      case 'paramedic': case 'chaos': case 'insider': return true;
+      case 'freeDino': { const ok = SPECIES.some(s => p.pads[s.id] != null && p.made[s.id] < 4); if (!ok) log(`${p.name}: 공룡을 추가할 우리가 없습니다.`, p.idx); return ok; }
+      case 'attachThrill': return true;
+      case 'spendBasic6': return stTotal(p, DNA_B) > 0;
+      case 'spendAdv3': return stTotal(p, DNA_A) > 0;
+    }
+    return true;
+  },
+  // 사람이 선택할 필요 없는 것은 자동 실행
+  auto(t) { return ['runNow', 'paramedic', 'chaos', 'insider', 'attachThrill'].includes(t.sp); },
+  ai(t, p) { aiSpecial(p, t); },
+};
+function runSpecial(p, t, choice) {
+  switch (t.sp) {
+    case 'runNow': log(`${p.name}: ${SPECS[t.id].name}의 운영 능력을 즉시 사용합니다.`, p.idx); doEff(p, SPECS[t.id].run, SPECS[t.id].name); break;
+    case 'copyBonus': log(`${p.name}: ${SPECS[choice].name}의 보너스를 복사합니다.`, p.idx); doEff(p, SPECS[choice].bonus, SPECS[choice].name); break;
+    case 'copyRun': case 'clone': log(`${p.name}: ${SPECS[choice].name}의 운영 능력을 사용합니다.`, p.idx); doEff(p, SPECS[choice].run, SPECS[choice].name); break;
+    case 'architect': {
+      if (choice == null) { log(`${p.name}: 건축가 능력을 사용하지 않습니다.`, p.idx); break; }
+      destroyBld(p, choice); log(`${p.name}: 건축가 — 어트랙션을 파괴하고 모든 건물 카드 트랙에 코인 2개씩 표시합니다.`, p.idx);
+      G.market.b.forEach(id => { const key = 'bd:' + id; if (!itemDone(p, key)) { const add = Math.min(2, itemRem(p, key)); p.paid[key] = (p.paid[key] || 0) + add; if (itemDone(p, key)) completeItem(p, key); } });
+      break;
+    }
+    case 'paramedic': {
+      const ds = drawDice(2); const th = Math.max(...ds.map(d => faceOf(d).t));
+      log(`${p.name}: 구급대원 — 주사위 [${ds.map(d => faceLabel(faceOf(d))).join(' | ')}] → 경비 +${th}`, p.idx);
+      p.sec += th; break;
+    }
+    case 'chaos': {
+      const d = drawDice(1)[0]; const f = faceOf(d);
+      log(`${p.name}: 카오스 이론가 — 주사위 [${faceLabel(f)}]`, p.idx);
+      const o = other(p);
+      front(gainFaceTask(p, d, { noThreat: true }), gainFaceTask(o, d, { withThreat: true }));
+      break;
+    }
+    case 'insider': p.sec += 1; other(p).thr += 1; log(`${p.name}: 내부자 — 경비 +1, ${other(p).name} 위협 +1`, p.idx); break;
+    case 'freeDino': {
+      const s = SP[choice], ty = DTYPE[s.type]; p.made[choice]++; p.alive[choice]++; p.thr += ty.threat; addThrill(p, ty.thrill);
+      log(`${p.name}: DNA 혼합 — ${s.name} 1마리 무료 추가 (스릴 +${ty.thrill}, 위협 +${ty.threat})`, p.idx); break;
+    }
+    case 'attachThrill': {
+      const b = p.blds.find(x => x.kind === 'card' && x.sub === t.id);
+      if (!b || b.host < 0) { log(`${p.name}: 부착된 우리가 없어 보너스가 없습니다.`, p.idx); break; }
+      const host = p.blds[b.host]; const n = p.alive[host.sub] || 0;
+      if (n) { gain(p, { x: 2 * n }); } log(`${p.name}: ${BLDS[t.id].name} 보너스 — 스릴 +${2 * n}`, p.idx); break;
+    }
+    case 'spendBasic6': { // choice: {Y:n,...}
+      let n = 0; for (const [k, v] of Object.entries(choice || {})) { p.dnaS[k] += v; n += v; }
+      if (n) { addThrill(p, n); } log(`${p.name}: 컴프 수용소 — 기본 DNA ${n}개 소비, 스릴 +${n}`, p.idx); break;
+    }
+    case 'spendAdv3': {
+      let n = 0; for (const [k, v] of Object.entries(choice || {})) { p.dnaS[k] += v; n += v; }
+      if (n) gain(p, { c: n }); log(`${p.name}: DNA 저장고 — 고급 DNA ${n}개 소비, 코인 +${n}`, p.idx); break;
+    }
+  }
+}
+
+/* 코인 / 아이템 완성 */
+function payCoin(p, key) {
+  if (p.pendC < 1 || itemDone(p, key) || p.lost[key]) return false;
+  p.pendC--; p.paid[key] = (p.paid[key] || 0) + 1;
+  if (itemDone(p, key)) completeItem(p, key);
+  return true;
+}
+function completeItem(p, key) {
+  const [k, id] = key.split(':');
+  if (k === 'sp') {
+    p.hired[key] = true; log(`${p.name}: 전문가 「${SPECS[id].name}」 고용! 보너스: ${SPECS[id].bt}`, p.idx);
+    front({ t: 'eff', p: p.idx, eff: SPECS[id].bonus, src: SPECS[id].name });
+  } else {
+    p.built[key] = true; log(`${p.name}: 건물 「${BLDS[id].name}」 완성! 보너스: ${BLDS[id].bt}`, p.idx);
+    front({ t: 'placeCard', p: p.idx, id }, { t: 'eff', p: p.idx, eff: BLDS[id].bonus.map(op => op.sp === 'attachThrill' ? { sp: 'attachThrill', id } : op), src: BLDS[id].name });
+  }
+}
+function convertCoins(p, what) { // 2코인 -> 고급DNA/도로/경비
+  if (p.pendC < 2) return false; p.pendC -= 2;
+  if (what === 'a') front({ t: 'dna', p: p.idx, kind: 'a', n: 1 });
+  else if (what === 'r') { p.pendR++; front({ t: 'roads', p: p.idx }); }
+  else p.sec++;
+  log(`${p.name}: 코인 2개로 ${what === 'a' ? '고급 DNA' : what === 'r' ? '도로' : '경비'} 1개를 샀습니다.`, p.idx);
+  return true;
+}
+function storeCoin(p) { if (p.pendC < 1 || p.coinSlots >= 5) return false; p.pendC--; p.coinSlots++; p.coinStored++; return true; }
+function useStoredCoin(p) { if (p.coinStored < 1) return false; p.coinStored--; p.pendC++; front({ t: 'coins', p: p.idx }); return true; }
+function storeRoad(p) { if (p.pendR < 1 || p.roadSlots >= 5) return false; p.pendR--; p.roadSlots++; p.roadStored++; return true; }
+function useStoredRoad(p) { if (p.roadStored < 1) return false; p.roadStored--; p.pendR++; front({ t: 'roads', p: p.idx }); return true; }
+function placeRoad(p, r, c, shape) { if (p.pendR < 1 || !roadOK(p, r, c)) return false; cell(p, r, c).rd = shape; p.pendR--; return true; }
+
+/* 배치 */
+function placeAttr(p, k, cells) { const b = addBld(p, { kind: 'attr', sub: k, cells }); p.attrBuilt[k]++; log(`${p.name}: ${ATTR[k].name}을(를) 지었습니다.`, p.idx); return b; }
+function placePaddock(p, sid, cells) { const b = addBld(p, { kind: 'pad', sub: sid, cells }); p.pads[sid] = b.i; log(`${p.name}: ${sid === 'compy' ? '컴프소냐투스' : SP[sid].name} 우리를 지었습니다.`, p.idx); return b; }
+function placeCard(p, id, cells, host) { const b = addBld(p, { kind: 'card', sub: id, cells, host: host == null ? -1 : host }); log(`${p.name}: ${BLDS[id].name}을(를) 공원에 지었습니다.`, p.idx); return b; }
+function destroyBld(p, i) {
+  const b = p.blds[i]; b.dead = true;
+  b.cells.forEach(([r, c]) => { const g = cell(p, r, c); g.b = -1; g.ru = true; g.rd = null; });
+  if (b.kind === 'pad') { if (b.sub === 'compy') { p.pads.compy = null; delete p.pads.compy; } else { p.alive[b.sub] = 0; delete p.pads[b.sub]; } }
+}
+function destroyRoadCell(p, r, c) { const g = cell(p, r, c); if (!g.rd) return false; g.rd = null; g.ru = true; return true; }
+
+/* 액션 칸 */
+const ACTIONS = {
+  make: { name: '공룡 만들기', desc: 'DNA를 소모해 공룡 최대 4마리' },
+  funds: { name: '자금 증액', desc: '코인 2 또는 경비 2' },
+  extract: { name: 'DNA 추출', desc: '기본 DNA 2 또는 고급 DNA 1' },
+  dup: { name: '복제', desc: '놓은 주사위 면을 2배로 (상대는 1배), 어트랙션 불가' },
+  build: { name: '건설', desc: '도로 3개 또는 원하는 어트랙션 1개' },
+};
+TASK.placeDie = {
+  inter: true,
+  pre(t) { return G.players[t.p].dice.length > 0; },
+  ai(t, p) { const [di, act] = aiPlace(p); doPlace(p, di, act); },
+};
+function topThreat(act) { const st = G.board[act]; return st.length ? faceOf(st[st.length - 1]).t : 0; }
+function doPlace(p, di, act) {
+  const d = p.dice.splice(di, 1)[0];
+  const th = topThreat(act);
+  d.owner = p.idx; G.board[act].push(d);
+  log(`${p.name}: [${faceLabel(faceOf(d))}] 주사위를 「${ACTIONS[act].name}」에 놓습니다${th ? ` (쌓기: 위협 +${th})` : ''}.`, p.idx);
+  if (th) p.thr += th;
+  switch (act) {
+    case 'make': front({ t: 'make', p: p.idx, max: 4 }); break;
+    case 'funds': front({ t: 'choose', p: p.idx, title: '자금 증액: 하나를 고르세요', opts: [{ label: '코인 2', eff: [{ g: { c: 2 } }] }, { label: '경비 2', eff: [{ g: { s: 2 } }] }] }); break;
+    case 'extract': front({ t: 'choose', p: p.idx, title: 'DNA 추출: 하나를 고르세요', opts: [{ label: '기본 DNA 2', eff: [{ g: { b: 2 } }] }, { label: '고급 DNA 1', eff: [{ g: { a: 1 } }] }] }); break;
+    case 'build': {
+      const opts = [{ label: '도로 3개', eff: [{ g: { r: 3 } }] }, { label: '원하는 어트랙션 1개', eff: [{ attr: 'A' }] }];
+      front({ t: 'choose', p: p.idx, title: '건설: 하나를 고르세요', opts }); break;
+    }
+    case 'dup': {
+      const o = other(p);
+      front(gainFaceTask(p, d, { noThreat: true, noAttr: true }), gainFaceTask(p, d, { noThreat: true, noAttr: true }), gainFaceTask(o, d, { noThreat: true, noAttr: true }));
+      break;
+    }
+  }
+}
+TASK.actionCleanup = {
+  run() {
+    G.pool = []; G.common = null;
+    G.fp = 1 - G.fp; G.phaseIdx++;
+    G.q.push({ t: 'phaseStart' });
+  }
+};
+
+/* 공원 운영 */
+TASK.runAttr = {
+  run(t) {
+    const p = G.players[t.p]; p.stage = 'attr'; p.usedRun = {};
+    const rides = workingAttr(p, 'Ri').length, food = workingAttr(p, 'F').length, merch = workingAttr(p, 'M').length;
+    if (rides) { addThrill(p, rides); log(`${p.name}: 놀이기구 ${rides}개 → 스릴 +${rides}`, p.idx); }
+    if (food) { log(`${p.name}: 음식점 ${food}개 → 코인 +${food}`, p.idx); gain(p, { c: food }); }
+    if (merch) front({ t: p.ai ? 'merchRoll' : 'confirm', p: p.idx, label: `기념품 가게 ${merch}개: 주사위 굴리기`, kind: 'merch' }, ...(p.ai ? [] : [{ t: 'merchRoll', p: p.idx }]));
+  }
+};
+TASK.merchRoll = {
+  run(t) {
+    const p = G.players[t.p]; const n = workingAttr(p, 'M').length; if (!n) return;
+    const ds = drawDice(n);
+    log(`${p.name}: 기념품 가게 주사위 → ${ds.map(d => faceLabel(faceOf(d))).join(' | ')} (위협은 무시)`, p.idx);
+    front(...ds.map(d => gainFaceTask(p, d, { noThreat: true })));
+  }
+};
+TASK.runSpec = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; p.stage = 'spec'; return usableSpecs(p).length > 0; },
+  ai(t, p) {
+    const list = aiOrderSpecs(p, usableSpecs(p));
+    if (!list.length) return;
+    front({ t: 'runSpec', p: p.idx });
+    useSpec(p, list[0]);
+  },
+};
+function usableSpecs(p) { return activeSpecs(p).filter(id => !p.usedRun[id] && SPECS[id].run.length); }
+function useSpec(p, id) {
+  p.usedRun[id] = true; log(`${p.name}: 「${SPECS[id].name}」 운영 능력 사용 — ${SPECS[id].rt}`, p.idx);
+  doEff(p, SPECS[id].run, SPECS[id].name);
+}
+TASK.tour = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; p.stage = 'tour'; if (p.ai) return true; const o = tourOptions(p); if (!o.length) { log(`${p.name}: 투어로 갈 수 있는 새 건물이 없습니다.`, p.idx); return false; } return true; },
+  ai(t, p) { aiUseStoredRoads(p); const o = tourOptions(p); if (!o.length) return; const best = o.slice().sort((a, b) => (b.n + b.vp) - (a.n + a.vp))[0]; applyTour(p, best); },
+};
+function applyTour(p, o) {
+  if (!o) { log(`${p.name}: 공룡 투어를 하지 않습니다.`, p.idx); return; }
+  o.newOnes.forEach(i => { p.blds[i].x = true; });
+  if (o.newOnes.length) addThrill(p, o.newOnes.length);
+  if (o.exit != null) p.exits.push(o.exit);
+  log(`${p.name}: 공룡 투어 — 새 건물 ${o.newOnes.length}곳 방문(스릴 +${o.newOnes.length})${o.exit != null ? `, 출입구 ★${EXITS[o.exit].vp} 표시` : ''}`, p.idx);
+}
+TASK.thrillInc = {
+  run(t) {
+    const p = G.players[t.p]; p.stage = 'thrill';
+    const g = {}; for (let i = 1; i <= p.thrill; i++) { const ic = THRILL_ICONS[i]; if (ic) g[ic] = (g[ic] || 0) + 1; }
+    front({ t: 'setStage', p: p.idx, v: 'death' });
+    if (Object.keys(g).length) { log(`${p.name}: 스릴 수입 — ${resText(g)}`, p.idx); gain(p, g); }
+  }
+};
+TASK.setStage = { run(t) { G.players[t.p].stage = t.v; } };
+TASK.death = {
+  run(t) {
+    const p = G.players[t.p]; const u = unsafe(p);
+    if (!u) { log(`${p.name}: 무방비 위협이 없어 사망자가 없습니다. (경비 ${p.sec} ≥ 위협 ${p.thr})`, p.idx); return; }
+    const tasks = [];
+    for (let i = 0; i < u; i++) {
+      if (p.deaths < 20) { p.deaths++; if (DISASTER_CELLS.includes(p.deaths) && !(hasLawyer(p) && p.deaths <= 10)) tasks.push({ t: 'disaster', p: p.idx, at: p.deaths }); }
+      else p.deathsOver++;
+    }
+    log(`${p.name}: 무방비 위협 ${u} → 사망 +${u} (총 ${p.deaths + p.deathsOver})${tasks.length ? `, 재난 ${tasks.length}회!` : ''}`, p.idx);
+    front(...tasks);
+  }
+};
+function disasterOptions(p) {
+  const o = [];
+  if (p.dis.pad < 2 && p.blds.some(b => b.kind === 'pad' && !b.dead)) o.push('pad');
+  if (p.dis.roads < 2 && roadCount(p) + p.roadStored >= 3) o.push('roads');
+  if (p.dis.attr < 2 && workingAttr(p).length) o.push('attr');
+  if (p.dis.dna < 2 && stTotal(p) >= 4) o.push('dna');
+  if (p.dis.spec < 2 && activeSpecs(p).length) o.push('spec');
+  return o;
+}
+function roadCount(p) { return p.grid.filter(g => g.rd).length; }
+TASK.disaster = {
+  inter: true,
+  pre(t) { const p = G.players[t.p]; if (!disasterOptions(p).length) { log(`${p.name}: 실행 가능한 재난이 없습니다.`, p.idx); return false; } return true; },
+  ai(t, p) { aiDisaster(p); },
+};
+TASK.destroyRoads = {
+  inter: true,
+  pre(t) { return t.n > 0 && (roadCount(G.players[t.p]) + G.players[t.p].roadStored) > 0; },
+  ai(t, p) { aiDestroyRoads(p, t.n); },
+};
+TASK.loseDNA = { inter: true, pre(t) { return t.n > 0 && stTotal(G.players[t.p]) > 0; }, ai(t, p) { for (let i = 0; i < t.n; i++) { const k = DNA_ALL.slice().sort((a, b) => stDNA(p, b) - stDNA(p, a))[0]; if (stDNA(p, k) > 0) p.dnaS[k]++; } log(`${p.name}: 보관 DNA ${t.n}개를 잃었습니다.`, p.idx); } };
+function applyDisaster(p, kind, arg) {
+  p.dis[kind]++;
+  switch (kind) {
+    case 'pad': { const b = p.blds[arg]; const nm = b.sub === 'compy' ? '컴프소냐투스' : SP[b.sub].name; destroyBld(p, arg); log(`${p.name}: 재난 — ${nm} 우리 파괴!`, p.idx); break; }
+    case 'attr': { const b = p.blds[arg]; destroyBld(p, arg); log(`${p.name}: 재난 — ${ATTR[b.sub].name} 파괴!`, p.idx); break; }
+    case 'spec': p.lost['sp:' + arg] = true; log(`${p.name}: 재난 — 전문가 ${SPECS[arg].name} 유실!`, p.idx); break;
+    case 'roads': front({ t: 'destroyRoads', p: p.idx, n: 3 }); log(`${p.name}: 재난 — 길 3개 파괴`, p.idx); break;
+    case 'dna': front({ t: 'loseDNA', p: p.idx, n: 4 }); log(`${p.name}: 재난 — 보관 DNA 4개 유실`, p.idx); break;
+  }
+}
+TASK.runCleanup = {
+  run() {
+    G.players.forEach(p => { p.stage = null; p.usedRun = {}; });
+    G.phaseIdx++; G.q.push({ t: 'phaseStart' });
+  }
+};
+TASK.endGame = {
+  run() {
+    G.over = true; G.final = G.players.map(p => score(p));
+    const [a, b] = G.final;
+    let w;
+    if (a.total !== b.total) w = a.total > b.total ? 0 : 1;
+    else { const da = dinoTotal(G.players[0]), db = dinoTotal(G.players[1]); w = da === db ? -1 : (da > db ? 0 : 1); }
+    G.winner = w;
+    log(`게임 종료! ${G.players[0].name} ${a.total}점 vs ${G.players[1].name} ${b.total}점 → ${w < 0 ? '무승부' : G.players[w].name + ' 승리!'}`);
+  }
+};
+
+/* ===================== 점수 ===================== */
+function bldVP(p, id) {
+  const B = BLDS[id]; const b = p.blds.find(x => x.kind === 'card' && x.sub === id && !x.dead); if (!b) return 0;
+  switch (B.vp) {
+    case 'fixed': return B.v;
+    case 'casino': { let n = 0; for (let i = 1; i <= p.thrill; i++) if (THRILL_ICONS[i] === 'c') n++; return 2 * n; }
+    case 'perLarge': return 2 * typeAlive(p, 'large');
+    case 'perHerb': return 2 * typeAlive(p, 'herb');
+    case 'perSmall': return 2 * typeAlive(p, 'small');
+    case 'firstaid': { const d = p.deaths + p.deathsOver; return 6 + (d <= 5 ? 6 : 0) + (d === 0 ? 6 : 0); }
+    case 'deluxe': return 3 * directNeighbors(p, b.i).filter(id2 => id2[0] === 'b' && p.blds[+id2.slice(1)].kind === 'attr').length;
+    case 'gate': { const nb = directNeighbors(p, b.i).filter(x => x[0] === 'b').map(x => p.blds[+x.slice(1)]); return 6 + (nb.filter(x => x.kind === 'pad').length >= 2 ? 6 : 0) + (nb.filter(x => x.kind === 'attr').length >= 2 ? 6 : 0); }
+    case 'zoo': { const o = other(p); return 6 + (p.thr < o.thr ? 6 : 0); }
+    case 'hub': return Math.floor(p.sec / 2);
+    case 'compy': return 2 * Math.min(p.dnaG.Y, p.dnaG.R, p.dnaG.B);
+    case 'dnast': return p.dnaG.G + p.dnaG.P + p.dnaG.O;
+    case 'perPaddock': return 2 * paddockCount(p);
+    case 'spa': { const w = k => workingAttr(p, k).length; return 6 * Math.min(w('M'), w('Ri'), w('F')); }
+    case 'mono': return 2 * monoPathCount(p);
+    case 'perSpec': return 3 * activeSpecs(p).length;
+  }
+  return 0;
+}
+function score(p) {
+  const s = {};
+  s.herb = 2 * typeAlive(p, 'herb'); s.small = 3 * typeAlive(p, 'small'); s.large = 5 * typeAlive(p, 'large');
+  s.spec = 3 * activeSpecs(p).length;
+  s.bld = G.market.b.reduce((a, id) => a + (p.built['bd:' + id] && !p.noVP[id] ? bldVP(p, id) : 0), 0);
+  const reach = reachableFromHQ(p);
+  s.exits = p.exits.reduce((a, e) => a + (reach.has('x' + e) ? EXITS[e].vp : 0), 0);
+  s.thrillRow = p.thrill > 0 ? THRILL_ROW_VP[Math.floor((p.thrill - 1) / 10)] : 0;
+  s.thrillOver = p.thrillOver;
+  s.dna = Math.floor(stTotal(p) / 2);
+  s.deaths = -p.deaths; s.deathsOver = -2 * p.deathsOver;
+  s.total = Object.values(s).reduce((a, b) => a + b, 0);
+  return s;
+}
+
+/* ===================== 엔진 루프 ===================== */
+function pump() {
+  let guard = 0;
+  while (G.q.length && guard++ < 20000) {
+    const t = G.q[0]; const h = TASK[t.t];
+    if (!h) { console.error('unknown task', t); G.q.shift(); continue; }
+    if (h.pre && !h.pre(t)) { G.q.shift(); continue; }
+    if (h.inter) {
+      const p = G.players[t.p];
+      if (t.t === 'special' && h.auto(t)) { G.q.shift(); runSpecial(p, t); continue; }
+      if (t.t === 'confirm' && G.players.every(x => x.ai)) { G.q.shift(); continue; }
+      if (p.ai) { G.q.shift(); h.ai(t, p); continue; }
+      return 'wait';
+    }
+    G.q.shift(); h.run(t);
+  }
+  if (guard >= 20000) console.error('pump guard');
+  return 'idle';
+}
+function head() { return G.q[0]; }
+// 사람 행동: 스냅샷 후 실행
+function act(fn) {
+  const snap = JSON.stringify(G);
+  UNDO.push(snap);
+  if (UNDO.length > 200) UNDO.shift();
+  try { fn(); } catch (e) { console.error(e); }
+  pump();
+}
+function undo() { if (!UNDO.length) return false; G = JSON.parse(UNDO.pop()); return true; }
+
+
+/* ===================== 컴퓨터 AI ===================== */
+function remRuns() { let n = 0; for (let i = G.phaseIdx; i < PHASES.length; i++) if (PHASES[i] === 'R') n++; return n; }
+function secVal(p) { const u = unsafe(p); const r = Math.max(1, remRuns()); return u > 0 ? 0.9 + 0.5 * r : (p.sec - p.thr < 3 ? 0.9 : 0.45); }
+function thrVal(p) { const r = remRuns(); if (r === 0) return 0.05; const buf = p.sec - p.thr; return buf > 0 ? 0.35 : 0.6 + 0.55 * r; }
+function dnaNeed(p, k) {
+  let want = 0;
+  SPECIES.forEach(s => { if (s.dna.includes(k) && p.made[s.id] < 4) want += DTYPE[s.type].vp; });
+  const st = stDNA(p, k);
+  return Math.max(0.35, Math.min(1.4, want / 8)) * (st >= 4 ? 0.6 : st === 0 ? 1.15 : 1);
+}
+function attrVal(p, k) {
+  if (k === 'A') return Math.max(attrVal(p, 'M'), attrVal(p, 'Ri'), attrVal(p, 'F'));
+  if (p.attrBuilt[k] >= 4 || !hasPlacement(p, ATTR[k].shape)) return 0;
+  const r = remRuns();
+  return { M: 1.6 + 1.0 * r, Ri: 1.2 + 0.9 * r, F: 1.2 + 1.0 * r }[k];
+}
+function roadVal(p) { return (p._rv != null && p._rvPhase === G.phaseIdx && p._rvQ === G.q.length) ? p._rv : (p._rvPhase = G.phaseIdx, p._rvQ = G.q.length, p._rv = planRoad(p) ? 1.05 : 0.3); }
+function vRes(p, g) {
+  let v = 0;
+  for (const [k, n] of Object.entries(g)) {
+    if (DNA_B.includes(k)) v += n * 1.0 * dnaNeed(p, k);
+    else if (DNA_A.includes(k)) v += n * 1.6 * dnaNeed(p, k);
+    else if (k === 'b') v += n * 1.1; else if (k === 'a') v += n * 1.8;
+    else if (k === 'c') v += n * 1.0; else if (k === 'r') v += n * roadVal(p);
+    else if (k === 's') v += n * secVal(p); else if (k === 't') v -= n * thrVal(p);
+    else if (k === 'x') v += n * 0.8;
+    else v += n * attrVal(p, k);
+  }
+  return v;
+}
+function faceVal(p, f, opts) {
+  opts = opts || {};
+  let os = f.o; if (opts.noAttr) os = os.filter(o => !faceHasAttrOnly(o));
+  let best = os.length ? Math.max(...os.map(o => vRes(p, o))) : 0;
+  if (opts.withThreat) best -= f.t * thrVal(p);
+  return best;
+}
+function aiDraft(p, n) {
+  let bi = 0, bv = -1e9;
+  G.pool.forEach((d, i) => {
+    let v = faceVal(p, faceOf(d));
+    if (G.pool.length === 2) { const o = G.pool[1 - i]; v += faceVal(p, faceOf(o), { withThreat: true }); }
+    // 액션 단계에서 위협 높은 주사위는 상대 방해에 유리
+    v += 0.15 * faceOf(d).t;
+    if (v > bv + 1e-9) { bv = v; bi = i; }
+  });
+  return bi;
+}
+function evalEff(p, eff) {
+  let v = 0;
+  for (const op of eff) {
+    if (op.g) v += vRes(p, op.g);
+    else if (op.attr) v += attrVal(p, op.attr);
+    else if (op.make) v += makeValue(p, op.make);
+    else v += 1;
+  }
+  return v;
+}
+function aiChoose(p, t) {
+  let bi = 0, bv = -1e9;
+  t.opts.forEach((o, i) => { const v = evalEff(p, o.eff); if (v > bv + 1e-9) { bv = v; bi = i; } });
+  return bi;
+}
+function aiPickDNA(p, kind) {
+  const list = kind === 'b' ? DNA_B : DNA_A;
+  let best = list[0], bv = -1e9;
+  list.forEach(k => {
+    if (p.dnaG[k] >= 15) return;
+    let want = 0;
+    SPECIES.forEach(s => {
+      if (!s.dna.includes(k) || p.made[s.id] >= 4) return;
+      const partner = s.dna.find(d => d !== k);
+      want += DTYPE[s.type].vp * (stDNA(p, partner) > stDNA(p, k) ? 1.6 : 1) * (p.pads[s.id] != null ? 1.3 : 1);
+    });
+    const v = want / (1 + stDNA(p, k));
+    if (v > bv) { bv = v; best = k; }
+  });
+  return best;
+}
+function dinoScore(p, sid, extraThreat) {
+  const t = DTYPE[SP[sid].type];
+  const buf = p.sec - p.thr - extraThreat;
+  const thrCost = t.threat === 0 ? 0 : (buf >= t.threat ? 0.3 * t.threat : t.threat * (0.5 + 0.9 * remRuns()));
+  return t.vp + t.thrill * 0.75 - thrCost + (p.pads[sid] != null ? 0.8 : -0.4 * t.size);
+}
+function aiMakePlan(p, max) {
+  const plan = {}; let n = 0, extraThr = 0;
+  while (n < max) {
+    let best = null, bv = 0.5;
+    SPECIES.forEach(s => {
+      if (!canMakeSpecies(p, s.id, plan)) return;
+      const v = dinoScore(p, s.id, extraThr) + (plan[s.id] ? 0.6 : 0);
+      if (v > bv) { bv = v; best = s.id; }
+    });
+    if (!best) break;
+    plan[best] = (plan[best] || 0) + 1; n++; extraThr += DTYPE[SP[best].type].threat;
+  }
+  return plan;
+}
+function makeValue(p, max) {
+  const plan = aiMakePlan(p, max); let v = 0, et = 0;
+  for (const [sid, k] of Object.entries(plan)) for (let i = 0; i < k; i++) { v += dinoScore(p, sid, et); et += DTYPE[SP[sid].type].threat; }
+  return v;
+}
+/* 아이템 가치 */
+function specRunVal(p, id) {
+  const r = { sec: 1, tour: 1.1, sci: 3.5, herbres: 1.6 * typeAlive(p, 'herb') + 0.5, union: 0.5 * workingAttr(p).length, senior: 5, cloner: 2, ad: paddockCount(p) * 0.8 + 0.5, guard: activeSpecs(p).length + 0.5, architect: 0, mad: 2, social: p.thr / 5 * 0.8, medic: 1, smalltr: typeAlive(p, 'small') * 0.8 + 0.5, largetr: typeAlive(p, 'large') + 0.5, lawyer: 0.5 + p.deaths / 2, insider: 1.5, mascot: workingAttr(p, 'M').length * 0.8 + 0.3, chaos: 1.8, jack: 1, mixer: 3.5, rideop: workingAttr(p, 'Ri').length + 0.3, chef: workingAttr(p, 'F').length * 1.6 + 0.3 };
+  return r[id] || 1;
+}
+function specBonusVal(p, id) { return evalEff(p, SPECS[id].bonus.filter(op => !op.sp)) + (SPECS[id].bonus.some(op => op.sp === 'runNow') ? specRunVal(p, id) : 0) + (id === 'lawyer' ? 2 : 0); }
+function estBldVP(p, id) {
+  const B = BLDS[id];
+  switch (B.vp) {
+    case 'fixed': return B.v;
+    case 'casino': return 6;
+    case 'perLarge': return 2 * typeAlive(p, 'large') + 2;
+    case 'perHerb': return 2 * typeAlive(p, 'herb') + 2;
+    case 'perSmall': return 2 * typeAlive(p, 'small') + 2;
+    case 'firstaid': return 6 + (p.deaths <= 4 ? 5 : 0);
+    case 'deluxe': return 4; case 'gate': return 8; case 'zoo': return 8;
+    case 'hub': return Math.floor((p.sec + 4) / 2);
+    case 'compy': return 2 * Math.min(p.dnaG.Y, p.dnaG.R, p.dnaG.B) + 1;
+    case 'dnast': return p.dnaG.G + p.dnaG.P + p.dnaG.O + 2;
+    case 'perPaddock': return 2 * paddockCount(p) + 2;
+    case 'spa': return 6 * Math.min(p.attrBuilt.M, p.attrBuilt.Ri, p.attrBuilt.F) + 2;
+    case 'mono': return 6; case 'perSpec': return 3 * activeSpecs(p).length + 3;
+  }
+  return 4;
+}
+function itemValue(p, key) {
+  const [k, id] = key.split(':');
+  if (k === 'sp') return 3 + specRunVal(p, id) * remRuns() + specBonusVal(p, id);
+  const B = BLDS[id];
+  const space = hasPlacement(p, B.shape, B.attach);
+  return (space ? estBldVP(p, id) : 0) + evalEff(p, B.bonus.filter(op => !op.sp)) + 1;
+}
+function aiCoins(p) {
+  let guard = 0;
+  while (p.pendC > 0 && guard++ < 50) {
+    if (unsafe(p) > 0 && p.pendC >= 2 && remRuns() > 0) { convertCoins(p, 's'); continue; }
+    const cands = allItems().filter(key => !itemDone(p, key) && !p.lost[key]);
+    let best = null, bv = -1e9;
+    cands.forEach(key => {
+      const rem = itemRem(p, key);
+      let v = itemValue(p, key) / rem;
+      if (rem <= p.pendC) v *= 1.6;
+      if (remRuns() === 0 && G.phaseIdx >= PHASES.length - 1 && rem > p.pendC + p.coinStored) v *= 0.2;
+      if (v > bv) { bv = v; best = key; }
+    });
+    if (best && bv > 0.25) { const done0 = itemDone(p, best); payCoin(p, best); if (!done0 && itemDone(p, best)) return; continue; }
+    if (p.pendC >= 2) { convertCoins(p, unsafe(p) > 0 ? 's' : 'a'); continue; }
+    if (storeCoin(p)) continue;
+    p.pendC = 0;
+  }
+  if (p.pendC > 0) front({ t: 'coins', p: p.idx });
+}
+/* 배치 */
+function anchorCells(p) {
+  const reach = reachableFromHQ(p); const a = [];
+  p.blds.forEach(b => { if (!b.dead && reach.has('b' + b.i)) b.cells.forEach(c => a.push(c)); });
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (cell(p, r, c).rd) a.push([r, c]);
+  return a;
+}
+function aiPlacement(p, shape, attach) {
+  const cands = placements(p, shape, attach);
+  if (!cands.length) return null;
+  const anchors = anchorCells(p);
+  const occupied = buildingCellsSet(p);
+  let best = cands[0], bv = -1e9;
+  cands.forEach(pl => {
+    let dmin = 99;
+    pl.cells.forEach(([r, c]) => anchors.forEach(([ar, ac]) => { const d = Math.abs(r - ar) + Math.abs(c - ac); if (d < dmin) dmin = d; }));
+    let v = -Math.abs(dmin - 2) * 2.5;
+    // HQ 가까이, 공간 효율: 가장자리 붙이기 보너스
+    let edge = 0, dist = 0;
+    pl.cells.forEach(([r, c]) => { if (r === 0 || c === 0 || r === N - 1 || c === N - 1) edge++; dist += Math.abs(r - 1) + Math.abs(c - 5); });
+    v += edge * 0.25 - dist / pl.cells.length * 0.12;
+    // 주변 빈 칸 낭비(고립된 1칸) 억제
+    if (v > bv) { bv = v; best = pl; }
+  });
+  return best;
+}
+function aiAttr(p, k) {
+  let kind = k;
+  if (k === 'A') { kind = ['M', 'F', 'Ri'].sort((a, b) => attrVal(p, b) - attrVal(p, a))[0]; }
+  if (p.attrBuilt[kind] >= 4) return;
+  const pl = aiPlacement(p, ATTR[kind].shape, null); if (!pl) return;
+  placeAttr(p, kind, pl.cells);
+}
+/* 도로 계획 */
+function shapeOf(a, b) { return ROAD_SHAPES.find(s => s.includes(a) && s.includes(b)); }
+function roadSources(p) {
+  const reach = reachableFromHQ(p); const src = [];
+  const seen = new Set();
+  p.blds.forEach(b => {
+    if (b.dead || !reach.has('b' + b.i)) return;
+    b.cells.forEach(([r, c]) => {
+      for (const d of DLIST) {
+        const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc;
+        if (!inB(rr, cc)) continue;
+        if (roadOK(p, rr, cc)) { const k = rr * N + cc + ':' + OPP[d]; if (!seen.has(k)) { seen.add(k); src.push({ r: rr, c: cc, inD: OPP[d] }); } continue; }
+        const g = cell(p, rr, cc);
+        if (!g.rd || !g.rd.includes(OPP[d])) continue;
+        // 체인 끝 찾기
+        let cr = rr, ccc = cc, came = OPP[d];
+        for (let guard = 0; guard < 300; guard++) {
+          const rd = cell(p, cr, ccc).rd; const out = rd[0] === came ? rd[1] : rd[0];
+          const [ddr, ddc] = DIRS[out]; const nr = cr + ddr, nc = ccc + ddc;
+          if (!inB(nr, nc)) break;
+          const ng = cell(p, nr, nc);
+          if (ng.rd && ng.rd.includes(OPP[out])) { cr = nr; ccc = nc; came = OPP[out]; continue; }
+          if (roadOK(p, nr, nc)) { const k = nr * N + nc + ':' + OPP[out]; if (!seen.has(k)) { seen.add(k); src.push({ r: nr, c: nc, inD: OPP[out], ext: true }); } }
+          break;
+        }
+      }
+    });
+  });
+  return src;
+}
+function planRoad(p) {
+  const reach = reachableFromHQ(p);
+  const targets = new Map(); // cellIndex -> {outD}
+  const unconnected = p.blds.filter(b => !b.dead && b.i !== 0 && !reach.has('b' + b.i));
+  if (unconnected.length) {
+    unconnected.forEach(b => b.cells.forEach(([r, c]) => {
+      for (const d of DLIST) { const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc; if (roadOK(p, rr, cc)) { const k = rr * N + cc; if (!targets.has(k)) targets.set(k, OPP[d]); } }
+    }));
+  } else if (p.exits.length < 3) {
+    EXITS.filter(e => !p.exits.includes(e.id) && !reach.has('x' + e.id) && roadOK(p, e.r, e.c)).forEach(e => targets.set(e.r * N + e.c, e.d));
+  }
+  if (!targets.size) return null;
+  const src = roadSources(p);
+  // BFS
+  const prev = new Map(); const q = [];
+  src.forEach(s => { const k = s.r * N + s.c; if (!prev.has(k)) { prev.set(k, { from: -1, inD: s.inD }); q.push(k); } });
+  let goal = -1;
+  for (let qi = 0; qi < q.length; qi++) {
+    const k = q[qi];
+    if (targets.has(k)) { goal = k; break; }
+    const r = Math.floor(k / N), c = k % N;
+    for (const d of DLIST) {
+      const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc;
+      if (!roadOK(p, rr, cc)) continue; const nk = rr * N + cc; if (prev.has(nk)) continue;
+      prev.set(nk, { from: k, inD: OPP[d] }); q.push(nk);
+    }
+  }
+  if (goal < 0) return null;
+  const path = []; let k = goal; let outD = targets.get(goal);
+  while (k >= 0) {
+    const pr = prev.get(k);
+    path.unshift({ r: Math.floor(k / N), c: k % N, shape: shapeOf(pr.inD, outD) });
+    if (pr.from < 0) break;
+    const fr = Math.floor(pr.from / N), fc = pr.from % N;
+    // 이전 칸의 out 방향 = 현재칸으로 가는 방향
+    const r = Math.floor(k / N), c = k % N;
+    outD = r > fr ? 'S' : r < fr ? 'N' : c > fc ? 'E' : 'W';
+    k = pr.from;
+  }
+  return path.filter(x => x.shape);
+}
+function aiRoads(p) {
+  let guard = 0;
+  while (p.pendR > 0 && guard++ < 20) {
+    const path = planRoad(p);
+    if (path && path.length) {
+      const n = Math.min(p.pendR, path.length);
+      for (let i = 0; i < n; i++) placeRoad(p, path[i].r, path[i].c, path[i].shape);
+      log(`${p.name}: 도로 ${n}칸을 놓았습니다.`, p.idx);
+      continue;
+    }
+    if (storeRoad(p)) { log(`${p.name}: 도로를 보관합니다.`, p.idx); continue; }
+    p.pendR = 0;
+  }
+}
+// 보관 도로가 있으면 쓸모 있을 때 꺼내 씀
+function aiUseStoredRoads(p) { while (p.roadStored > 0 && planRoad(p)) { p.roadStored--; p.pendR++; aiRoads(p); } }
+/* 전문가 */
+function aiOrderSpecs(p, list) {
+  const pri = { herbres: 1, chef: 1, chaos: 2, insider: 2, jack: 2, rideop: 2, lawyer: 2, sec: 3, tour: 3, guard: 3, union: 3, largetr: 3, medic: 3, ad: 3, social: 3, smalltr: 3, mascot: 3, mixer: 4, mad: 5, cloner: 6, sci: 7, senior: 7, architect: 9 };
+  const out = [];
+  list.slice().sort((a, b) => (pri[a] || 5) - (pri[b] || 5)).forEach(id => { if (id === 'architect') p.usedRun[id] = true; else out.push(id); });
+  return out;
+}
+function aiSpecial(p, t) {
+  let choice = null;
+  if (t.sp === 'copyBonus') choice = specialChoices(p, t.sp).sort((a, b) => specBonusVal(p, b) - specBonusVal(p, a))[0];
+  else if (t.sp === 'copyRun' || t.sp === 'clone') choice = specialChoices(p, t.sp).sort((a, b) => specRunVal(p, b) - specRunVal(p, a))[0];
+  else if (t.sp === 'architect') choice = null;
+  else if (t.sp === 'freeDino') { const c = SPECIES.filter(s => p.pads[s.id] != null && p.made[s.id] < 4).sort((a, b) => DTYPE[b.type].vp - DTYPE[a.type].vp); choice = c[0].id; }
+  else if (t.sp === 'spendBasic6' || t.sp === 'spendAdv3') {
+    const lim = t.sp === 'spendBasic6' ? 6 : 3; const list = t.sp === 'spendBasic6' ? DNA_B : DNA_A; choice = {};
+    let n = 0; const keep = remRuns() > 0 ? 1 : 0;
+    list.forEach(k => { const can = Math.max(0, stDNA(p, k) - keep); const take = Math.min(can, lim - n); if (take > 0) { choice[k] = take; n += take; } });
+  }
+  runSpecial(p, t, choice);
+}
+/* 주사위 배치 */
+function actionValue(p, act, d) {
+  switch (act) {
+    case 'make': { const v = makeValue(p, 4); return v > 0 ? v : -6; }
+    case 'funds': return Math.max(vRes(p, { c: 2 }), vRes(p, { s: 2 }));
+    case 'extract': return Math.max(vRes(p, { b: 2 }), vRes(p, { a: 1 }));
+    case 'dup': return 2 * faceVal(p, faceOf(d), { noAttr: true }) - 0.3 * faceVal(other(p), faceOf(d), { noAttr: true });
+    case 'build': return Math.max(vRes(p, { r: 3 }), attrVal(p, 'A'));
+  }
+  return 0;
+}
+function aiPlace(p) {
+  let best = [0, 'funds'], bv = -1e9;
+  const acts = Object.keys(ACTIONS);
+  p.dice.forEach((d, i) => acts.forEach(a => {
+    let v = actionValue(p, a, d) - topThreat(a) * thrVal(p) + 0.25 * faceOf(d).t;
+    if (v > bv + 1e-9) { bv = v; best = [i, a]; }
+  }));
+  return best;
+}
+/* 재난 */
+function aiDisaster(p) {
+  const o = disasterOptions(p);
+  const order = ['dna', 'roads', 'attr', 'spec', 'pad'];
+  const kind = order.find(k => o.includes(k));
+  let arg = null;
+  if (kind === 'attr') { const list = workingAttr(p); arg = (list.find(b => b.sub === 'Ri') || list.find(b => b.sub === 'F') || list[0]).i; }
+  if (kind === 'spec') { const l = activeSpecs(p).sort((a, b) => specRunVal(p, a) - specRunVal(p, b)); arg = l[0]; }
+  if (kind === 'pad') { const l = p.blds.filter(b => b.kind === 'pad' && !b.dead).sort((a, b) => (a.sub === 'compy' ? -1 : p.alive[a.sub] * DTYPE[SP[a.sub].type].vp) - (b.sub === 'compy' ? -1 : p.alive[b.sub] * DTYPE[SP[b.sub].type].vp)); arg = l[0].i; }
+  applyDisaster(p, kind, arg);
+}
+function aiDestroyRoads(p, n) {
+  let k = 0;
+  while (k < n && p.roadStored > 0) { p.roadStored--; k++; }
+  const cells = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (cell(p, r, c).rd) cells.push([r, c, Math.abs(r - 1) + Math.abs(c - 5)]);
+  cells.sort((a, b) => b[2] - a[2]);
+  while (k < n && cells.length) { const [r, c] = cells.shift(); destroyRoadCell(p, r, c); k++; }
+  log(`${p.name}: 도로 ${k}개가 파괴되었습니다.`, p.idx);
+}
+
+/* ===================== UI ===================== */
+const ui = { view: 0, selDie: null, orient: 0, hover: null, roadShape: 'auto', attrKind: null, plan: {}, spend: {}, lastHead: null, tourHover: null, logOpen: true };
+const ME = () => G.players[humanIdx()];
+const AIP = () => G.players[1 - humanIdx()];
+const $ = s => document.querySelector(s);
+
+/* ---------- 아이콘 ---------- */
+const DCOL = { Y: '#f2c230', R: '#e2483d', B: '#3a8ee6', G: '#2f9e6e', P: '#8a55c9', O: '#f07c22' };
+function dnaIc(k, big) { return `<span class="dna ${DNA_A.includes(k) ? 'adv' : ''} ${big ? 'big' : ''}" style="--c:${DCOL[k]}" title="${DNA_NAME[k]} ${DNA_A.includes(k) ? '고급' : '기본'} DNA"></span>`; }
+const ICON = {
+  b: '<span class="dna anyb" title="기본 DNA (색 선택)"></span>',
+  a: '<span class="dna adv anya" title="고급 DNA (색 선택)"></span>',
+  c: '<span class="ic coin" title="코인">₩</span>',
+  s: '<span class="ic sec" title="경비">🔒</span>',
+  r: '<span class="ic road" title="도로">⫴</span>',
+  x: '<span class="ic thr" title="스릴">▲</span>',
+  t: '<span class="ic thrt" title="위협"></span>',
+  M: '<span class="ic att" title="기념품 가게">🛍️</span>',
+  Ri: '<span class="ic att" title="놀이기구">🎢</span>',
+  F: '<span class="ic att" title="음식점">🍔</span>',
+  A: '<span class="ic att" title="원하는 어트랙션">🎪</span>',
+};
+function icon(k) { return DNA_ALL.includes(k) ? dnaIc(k) : ICON[k]; }
+function resHTML(g, compact) {
+  return Object.entries(g).map(([k, n]) => {
+    if (n <= 0) return '';
+    if (compact || n > 3) return `<span class="ri">${n > 1 ? `<b>${n}</b>` : ''}${icon(k)}</span>`;
+    return `<span class="ri">${icon(k).repeat(n)}</span>`;
+  }).join('');
+}
+function faceHTML(f, extra) {
+  return `<div class="die ${extra || ''}"><div class="dface">${f.o.map(o => `<span class="dopt">${resHTML(o)}</span>`).join('<span class="slash">/</span>')}</div>${f.t ? `<div class="dthr">${'<i></i>'.repeat(f.t)}</div>` : ''}</div>`;
+}
+const ATTR_EMO = { M: '🛍️', Ri: '🎢', F: '🍔' };
+
+/* ---------- 상단 ---------- */
+function renderTop() {
+  const ph = G.phaseIdx;
+  const season = Math.min(3, Math.floor(ph / 3) + 1);
+  let track = '';
+  for (let i = 0; i < 9; i++) {
+    const cls = i < ph ? 'done' : i === ph ? 'now' : '';
+    if (i % 3 === 0) track += `<span class="sn">${i / 3 + 1}</span>`;
+    track += `<span class="ph ${cls}" title="${PHASES[i] === 'A' ? '액션 단계' : '공원 운영'}">${PHASES[i] === 'A' ? '🎲' : '⚙️'}</span>`;
+  }
+  const phName = G.over ? '게임 종료' : PHASES[ph] === 'A' ? `시즌 ${season} · 액션 단계 ${ph % 3 + 1}` : `시즌 ${season} · 공원 운영`;
+  $('#top').innerHTML = `
+    <div class="brand"><span class="logo">🦖</span><div><b>다이노소어 아일랜드</b><small>로어 앤 라이트 · 한글판</small></div></div>
+    <div class="season">${track}<span class="phname">${phName}</span></div>
+    <div class="scores">${G.players.map(p => { const s = score(p); return `<span class="sc ${p.ai ? 'ai' : 'me'}">${p.name} <b>${s.total}</b>점</span>`; }).join('')}
+      <span class="fp">선: ${G.players[G.fp].name}</span></div>
+    <div class="tbtn">
+      <button class="undo" onclick="H.undo()" ${UNDO.length ? '' : 'disabled'} title="주사위 굴림·카드 공개 이전으로는 되돌릴 수 없습니다">↶ 무르기${UNDO.length ? ` <small>${UNDO.length}</small>` : ''}</button>
+      <button onclick="showRules()">📖 규칙</button>
+      <button onclick="showSetup()">🔄 새 게임</button>
+    </div>`;
+}
+
+/* ---------- 게임 보드 ---------- */
+function renderBoard() {
+  const t = head(); const me = ME(); const myTurn = t && t.p === me.idx && !me.ai;
+  let pool = '';
+  if (G.pool.length) pool = G.pool.map((d, i) => `<div class="pd ${myTurn && t.t === 'draft' ? 'pick' : ''}" ${myTurn && t.t === 'draft' ? `onclick="H.draft(${i})"` : ''}>${faceHTML(faceOf(d))}</div>`).join('');
+  else pool = `<div class="empty">${PHASES[G.phaseIdx] === 'R' ? '공원 운영 중' : '주사위를 굴리면 여기 놓입니다'}</div>`;
+  const common = G.common ? `<div class="common"><span>공용 주사위</span>${faceHTML(faceOf(G.common))}</div>` : '';
+  const dice = G.players.map(p => `<div class="pdice"><span class="pn ${p.ai ? 'ai' : 'me'}">${p.name}</span>${p.dice.map((d, i) => `<div class="pd ${!p.ai && myTurn && t.t === 'placeDie' ? 'pick' : ''} ${!p.ai && ui.selDie === i ? 'sel' : ''}" ${!p.ai && myTurn && t.t === 'placeDie' ? `onclick="ui.selDie=${i};render()"` : ''}>${faceHTML(faceOf(d))}</div>`).join('') || '<span class="muted">—</span>'}</div>`).join('');
+  const canPlace = myTurn && t.t === 'placeDie' && ui.selDie != null;
+  const acts = Object.entries(ACTIONS).map(([k, a]) => {
+    const st = G.board[k]; const top = st[st.length - 1];
+    return `<div class="act ${canPlace ? 'can' : ''}" ${canPlace ? `onclick="H.placeDie('${k}')"` : ''}>
+      <div class="an"><b>${a.name}</b><small>${a.desc}</small>${top && faceOf(top).t ? `<span class="pay">쌓으면 위협 +${faceOf(top).t}</span>` : ''}</div>
+      <div class="aslot">${top ? `${faceHTML(faceOf(top), 'sm ' + (top.owner === me.idx ? 'mine' : 'theirs'))}${st.length > 1 ? `<span class="stk">×${st.length}</span>` : ''}` : '<span class="emptyslot"></span>'}</div>
+    </div>`;
+  }).join('');
+  $('#board').innerHTML = `
+    <h3>주사위</h3>
+    <div class="pool">${pool}</div>${common}
+    <div class="dicewrap">${dice}</div>
+    <h3>액션 칸 <small class="muted">${canPlace ? '← 놓을 칸을 누르세요' : ''}</small></h3>
+    <div class="acts">${acts}</div>
+    <h3>전문가 카드 <small class="muted">(누구나 고용 가능)</small></h3>
+    <div class="cards">${G.market.s.map(id => cardHTML('sp:' + id)).join('')}</div>
+    <h3>건물 카드</h3>
+    <div class="cards">${G.market.b.map(id => cardHTML('bd:' + id)).join('')}</div>`;
+}
+function progHTML(p, key) {
+  const cost = itemCost(key), paid = Math.min(cost, p.paid[key] || 0);
+  let s = ''; for (let i = 0; i < cost; i++) s += `<i class="${i < paid ? 'f' : ''}"></i>`;
+  const st = p.lost[key] ? '<em class="lost">유실</em>' : itemDone(p, key) ? (p.noVP[key.split(':')[1]] ? '<em class="ok">완성(공간없음)</em>' : '<em class="ok">완성</em>') : '';
+  return `<span class="prog ${p.ai ? 'ai' : 'me'}" title="${p.name}: ${paid}/${cost}">${s}</span>${st}`;
+}
+function cardHTML(key) {
+  const [k, id] = key.split(':'); const me = ME(); const t = head();
+  const coinMode = t && t.t === 'coins' && t.p === me.idx && me.pendC > 0 && !itemDone(me, key) && !me.lost[key];
+  const D = k === 'sp' ? SPECS[id] : BLDS[id];
+  const body = k === 'sp'
+    ? `<div class="ln"><span class="tag bonus">⚡보너스</span>${D.bt}</div><div class="ln"><span class="tag run">➜운영</span>${D.rt}</div><div class="ln"><span class="tag vp">★</span>승점 3</div>`
+    : `<div class="ln"><span class="tag bonus">⚡보너스</span>${D.bt}</div><div class="ln"><span class="tag vp">★</span>${D.vt}</div>${D.at ? `<div class="ln warn">📎 ${D.at}</div>` : ''}<div class="shapeprev">${shapeMini(D.shape)}</div>`;
+  return `<div class="card ${k} ${coinMode ? 'coinable' : ''}" ${coinMode ? `onclick="H.pay('${key}')"` : ''}>
+    <div class="ch"><b>${k === 'sp' ? '⚗️' : '🔧'} ${D.name}</b><span class="cost">${D.cost}₩</span></div>${body}
+    <div class="progs">${G.players.map(p => `<div>${p.ai ? '🤖' : '🙂'} ${progHTML(p, key)}</div>`).join('')}</div>
+    ${coinMode ? '<div class="hint">눌러서 코인 1개 지불</div>' : ''}</div>`;
+}
+function shapeMini(shape) {
+  const h = Math.max(...shape.map(x => x[0])) + 1, w = Math.max(...shape.map(x => x[1])) + 1;
+  const set = new Set(shape.map(([r, c]) => r * 10 + c)); let s = '';
+  for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) s += `<i class="${set.has(r * 10 + c) ? 'on' : ''}"></i>`;
+  return `<span class="mini" style="grid-template-columns:repeat(${w},9px)">${s}</span>`;
+}
+
+/* ---------- 공원 지도 ---------- */
+function bldColor(b) {
+  if (b.kind === 'hq') return 'hq';
+  if (b.kind === 'attr') return 'at-' + b.sub;
+  if (b.kind === 'pad') return b.sub === 'compy' ? 'pd-compy' : 'pd-' + SP[b.sub].type;
+  return 'bc';
+}
+function bldLabel(b) {
+  if (b.kind === 'hq') return 'HQ';
+  if (b.kind === 'attr') return ATTR_EMO[b.sub];
+  if (b.kind === 'pad') return b.sub === 'compy' ? '컴' : SP[b.sub].ch;
+  return '🔧';
+}
+function roadSVG(rd) {
+  const pt = { N: [15, 0], S: [15, 30], E: [30, 15], W: [0, 15] };
+  const [a, b] = [rd[0], rd[1]]; const A = pt[a], B = pt[b];
+  const d = (OPP[a] === b) ? `M${A[0]} ${A[1]} L${B[0]} ${B[1]}` : `M${A[0]} ${A[1]} Q15 15 ${B[0]} ${B[1]}`;
+  return `<svg viewBox="0 0 30 30"><path d="${d}" class="rdbg"/><path d="${d}" class="rdfg"/></svg>`;
+}
+function renderMap(p, interactive) {
+  const firstCell = {};
+  p.blds.forEach(b => { if (!b.dead) { const fc = b.cells.slice().sort((x, y) => x[0] - y[0] || x[1] - y[1])[0]; firstCell[fc[0] * N + fc[1]] = b; } });
+  let cells = '';
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const g = cell(p, r, c); let cls = 'cl', inner = '';
+    if (g.b >= 0) {
+      const b = p.blds[g.b]; cls += ' bd ' + bldColor(b);
+      const edges = DLIST.filter(d => { const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc; return !inB(rr, cc) || cell(p, rr, cc).b !== g.b; });
+      cls += ' ' + edges.map(d => 'e' + d).join(' ');
+      if (firstCell[r * N + c] === b) inner = `<span class="bl">${bldLabel(b)}</span>${b.x ? '<span class="vx">✕</span>' : ''}`;
+      if (b.kind === 'card') cls += ' cd';
+    } else if (g.rd) { cls += ' rd'; inner = roadSVG(g.rd); }
+    else if (g.ru) cls += ' ru';
+    cells += `<div class="${cls}" data-r="${r}" data-c="${c}" id="${interactive ? 'm' : 'o'}-${r}-${c}">${inner}</div>`;
+  }
+  const exits = EXITS.map(e => {
+    const circ = p.exits.includes(e.id);
+    const pos = e.d === 'N' ? `top:-26px;left:calc(${e.c} * var(--cs) + var(--cs)/2 - 13px)` : e.d === 'S' ? `bottom:-26px;left:calc(${e.c} * var(--cs) + var(--cs)/2 - 13px)` : e.d === 'E' ? `right:-28px;top:calc(${e.r} * var(--cs) + var(--cs)/2 - 13px)` : `left:-28px;top:calc(${e.r} * var(--cs) + var(--cs)/2 - 13px)`;
+    return `<div class="exit ${circ ? 'circ' : ''}" style="${pos}" title="공원 출입구 (승점 ${e.vp})">★${e.vp}</div>`;
+  }).join('');
+  return `<div class="mapwrap"><div class="map ${interactive ? 'live' : ''}" ${interactive ? 'id="livemap"' : ''}>${cells}</div>${exits}</div>`;
+}
+
+/* ---------- 공원 시트 ---------- */
+function renderSheet() {
+  const p = G.players[ui.view]; const isMe = !p.ai; const t = head();
+  const interactive = isMe && t && t.p === p.idx;
+  // DNA
+  const dnaRows = DNA_ALL.map(k => {
+    let s = ''; for (let i = 0; i < 15; i++) s += `<i class="${i < p.dnaS[k] ? 'x' : i < p.dnaG[k] ? 'o' : ''}"></i>`;
+    return `<div class="drow">${dnaIc(k)}<span class="boxes">${s}</span><b>${stDNA(p, k)}</b></div>`;
+  }).join('');
+  // 스릴
+  let th = '';
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 10; c++) { const n = r * 10 + c + 1; const ic = THRILL_ICONS[n]; th += `<div class="tc ${n <= p.thrill ? 'on' : ''} ${ic ? 'ic' : ''}">${ic ? icon(ic) : n}</div>`; }
+    th += `<div class="tvp ${p.thrill > r * 10 ? 'on' : ''}">★${THRILL_ROW_VP[r]}</div>`;
+  }
+  // 사망
+  let dt = ''; for (let i = 1; i <= 20; i++) { const dis = DISASTER_CELLS.includes(i); dt += `<div class="dc ${i <= p.deaths ? 'on' : ''} ${dis ? 'dis' : ''} ${dis && hasLawyer(p) && i <= 10 ? 'law' : ''}">${dis ? '!' : i}</div>`; }
+  // 경비
+  const u = unsafe(p);
+  let secBoxes = ''; const mx = Math.max(p.sec, p.thr, 10);
+  for (let i = 0; i < mx; i++) secBoxes += `<i class="${i < p.sec ? 's' : ''} ${i < p.thr ? 't' : ''}"></i>`;
+  // 공룡
+  const dinos = ['herb', 'small', 'large'].map(ty => `<div class="dtype"><div class="dth ${ty}">${DTYPE[ty].name} <small>우리 ${DTYPE[ty].size}×${DTYPE[ty].size} · ▲${DTYPE[ty].thrill} ${DTYPE[ty].threat ? '●' + DTYPE[ty].threat : ''} · ★${DTYPE[ty].vp}</small></div>
+    ${SPECIES.filter(s => s.type === ty).map(s => { let bx = ''; for (let i = 0; i < 4; i++) bx += `<i class="${i < p.alive[s.id] ? 'al' : i < p.made[s.id] ? 'dd' : ''}"></i>`; return `<div class="spr"><span class="snm">${s.name}</span>${dnaIc(s.dna[0])}${dnaIc(s.dna[1])}<span class="dbx">${bx}</span></div>`; }).join('')}</div>`).join('');
+  const attrs = ['M', 'Ri', 'F'].map(k => { let bx = ''; const w = workingAttr(p, k).length; for (let i = 0; i < 4; i++) bx += `<i class="${i < w ? 'al' : i < p.attrBuilt[k] ? 'dd' : ''}"></i>`; return `<div class="attr">${ATTR_EMO[k]} <span>${ATTR[k].name}</span> ${shapeMini(ATTR[k].shape)}<span class="dbx">${bx}</span><small>운영: ${ATTR[k].inc}</small></div>`; }).join('');
+  const specs = SHEET_SPECS.map(id => { const key = 'sp:' + id; const D = SPECS[id]; const coinMode = interactive && t.t === 'coins' && p.pendC > 0 && !itemDone(p, key) && !p.lost[key]; return `<div class="sspec ${coinMode ? 'coinable' : ''}" ${coinMode ? `onclick="H.pay('${key}')"` : ''}><b>${D.name}</b> ${progHTML(p, key)}<small>⚡${D.bt} · ➜${D.rt} · ★3</small></div>`; }).join('');
+  const sc = score(p);
+  const store = (n, used, emo) => { let s = ''; for (let i = 0; i < 5; i++) s += `<i class="${i < used - n ? 'x' : i < used ? 'o' : ''}">${i < used && i >= used - n ? emo : ''}</i>`; return s; };
+  const anytime = interactive ? `${p.coinStored ? `<button class="mini-b" onclick="H.useCoin()">보관 코인 꺼내기</button>` : ''}${p.roadStored ? `<button class="mini-b" onclick="H.useRoad()">보관 도로 꺼내기</button>` : ''}` : '';
+  $('#sheet').innerHTML = `
+    <div class="tabs">${G.players.map(q => `<button class="${ui.view === q.idx ? 'on' : ''}" onclick="ui.view=${q.idx};render()">${q.ai ? '🤖' : '🙂'} ${q.name}의 공원 <small>${score(q).total}점</small></button>`).join('')}</div>
+    <div class="sheetgrid">
+      <div class="mapcol">${renderMap(p, isMe)}
+        <div class="legend"><span class="lg pd-herb"></span>초식 <span class="lg pd-small"></span>소형육식 <span class="lg pd-large"></span>대형육식 <span class="lg at-M"></span>어트랙션 <span class="lg bc"></span>건물카드 <span class="lg ru"></span>파괴 · ✕=투어 방문</div>
+      </div>
+      <div class="sidecol">
+        <div class="box"><h4>DNA 보관 <small>○획득 ✕사용 (15칸 넘으면 코인)</small></h4>${dnaRows}</div>
+        <div class="box"><h4>보관함 <small>게임 전체 최대 5칸씩</small></h4>
+          <div class="store">₩ 코인 <span class="sbx">${store(p.coinStored, p.coinSlots, '₩')}</span> <b>${p.coinStored}</b></div>
+          <div class="store">⫴ 도로 <span class="sbx">${store(p.roadStored, p.roadSlots, '⫴')}</span> <b>${p.roadStored}</b></div>
+          ${anytime ? `<div class="anytime">${anytime}</div>` : ''}
+        </div>
+        <div class="box"><h4>경비 & 위협</h4>
+          <div class="secnum">🔒 경비 <b>${p.sec}</b> · <span class="red">● 위협 <b>${p.thr}</b></span> ${u ? `<span class="warnb">무방비 ${u}</span>` : '<span class="okb">안전</span>'}</div>
+          <div class="secbx">${secBoxes}</div></div>
+        <div class="box"><h4>사망자 수 <small>! = 재난${hasLawyer(p) ? ' (변호사: 10칸까지 무시)' : ''}</small></h4><div class="dtrack">${dt}</div>${p.deathsOver ? `<div class="red">21+ : ${p.deathsOver}</div>` : ''}</div>
+      </div>
+    </div>
+    <div class="sheet2">
+      <div class="box thrillbox"><h4>스릴 트랙 <b>${p.thrill}</b>${p.thrillOver ? ` (+${p.thrillOver})` : ''} <small>운영 때 표시된 아이콘 수입</small></h4><div class="ttrack">${th}</div></div>
+      <div class="box"><h4>공룡 <small>■ 살아있음 ▨ 잃음</small></h4><div class="dinos">${dinos}</div>${p.compies ? `<div class="muted">컴프소냐투스 ${p.compies}마리</div>` : ''}</div>
+      <div class="box"><h4>어트랙션 <small>종류별 최대 4</small></h4>${attrs}</div>
+      <div class="box"><h4>시트의 전문가 <small>(코인 3)</small></h4>${specs}
+        ${G.market.s.filter(id => p.hired['sp:' + id]).length ? `<div class="muted">카드 전문가: ${G.market.s.filter(id => p.hired['sp:' + id]).map(id => SPECS[id].name + (p.lost['sp:' + id] ? '(유실)' : '')).join(', ')}</div>` : ''}</div>
+      <div class="box"><h4>현재 점수 <b>${sc.total}</b></h4>${scoreTable(sc)}</div>
+    </div>`;
+  if (isMe) bindMap();
+}
+const SC_NAMES = { herb: '초식 공룡 ×2', small: '소형 육식 ×3', large: '대형 육식 ×5', spec: '전문가 ×3', bld: '건물 카드', exits: '공원 출입구', thrillRow: '스릴 줄 승점', thrillOver: '스릴 60 초과', dna: '보관 DNA 2개당 1', deaths: '사망 ×−1', deathsOver: '21명 넘는 사망 ×−2' };
+function scoreTable(sc) { return `<table class="sct">${Object.entries(SC_NAMES).map(([k, n]) => `<tr><td>${n}</td><td>${sc[k]}</td></tr>`).join('')}</table>`; }
+
+/* ---------- 지도 상호작용 ---------- */
+function mapMode() {
+  const t = head(); const me = ME();
+  if (!t || t.p !== me.idx || me.ai || ui.view !== me.idx) return null;
+  if (t.t === 'roads') return { kind: 'road' };
+  if (t.t === 'destroyRoads') return { kind: 'destroyRoad' };
+  if (t.t === 'attr') { const k = t.k === 'A' ? ui.attrKind : t.k; return k ? { kind: 'shape', shape: ATTR[k].shape, attach: null } : null; }
+  if (t.t === 'paddock') return { kind: 'shape', shape: paddockShape(t.sp), attach: null };
+  if (t.t === 'placeCard') return { kind: 'shape', shape: BLDS[t.id].shape, attach: BLDS[t.id].attach };
+  if (t.t === 'special' && t.sp === 'architect') return { kind: 'pickBld', filter: b => b.kind === 'attr' };
+  if (t.t === 'disasterPick') return { kind: 'pickBld', filter: b => t.kind === 'pad' ? b.kind === 'pad' : b.kind === 'attr' };
+  return null;
+}
+function curCells(mm, r, c) {
+  const os = orientations(mm.shape); const o = os[ui.orient % os.length];
+  const h = Math.max(...o.map(x => x[0])), w = Math.max(...o.map(x => x[1]));
+  const r0 = r - Math.floor(h / 2), c0 = c - Math.floor(w / 2);
+  return o.map(([a, b]) => [a + r0, b + c0]);
+}
+function autoShape(p, r, c) {
+  const want = [];
+  for (const d of DLIST) {
+    const [dr, dc] = DIRS[d]; const rr = r + dr, cc = c + dc;
+    if (!inB(rr, cc)) { if (exitAt(r, c, d)) want.push(d); continue; }
+    const g = cell(p, rr, cc);
+    if (g.b >= 0) want.push(d);
+    else if (g.rd && g.rd.includes(OPP[d])) want.unshift(d);
+  }
+  const uniq = [...new Set(want)];
+  if (uniq.length >= 2) return shapeOf(uniq[0], uniq[1]);
+  if (uniq.length === 1) { const d = uniq[0]; return shapeOf(d, OPP[d]); }
+  return 'EW';
+}
+function roadShapeAt(p, r, c) { return ui.roadShape === 'auto' ? autoShape(p, r, c) : ui.roadShape; }
+function clearPreview() { document.querySelectorAll('#livemap .pv-ok, #livemap .pv-bad, #livemap .pv-pick').forEach(e => e.classList.remove('pv-ok', 'pv-bad', 'pv-pick')); const g = document.getElementById('ghost'); if (g) g.remove(); }
+function showPreview(r, c) {
+  clearPreview(); const mm = mapMode(); if (!mm) return; const p = ME();
+  if (mm.kind === 'shape') {
+    const cells = curCells(mm, r, c); const ok = canPlace(p, cells, mm.attach);
+    cells.forEach(([a, b]) => { const e = document.getElementById(`m-${a}-${b}`); if (e) e.classList.add(ok ? 'pv-ok' : 'pv-bad'); });
+  } else if (mm.kind === 'road') {
+    const e = document.getElementById(`m-${r}-${c}`); if (!e) return;
+    const ok = roadOK(p, r, c); e.classList.add(ok ? 'pv-ok' : 'pv-bad');
+    if (ok) { const gdiv = document.createElement('div'); gdiv.id = 'ghost'; gdiv.className = 'ghost'; gdiv.innerHTML = roadSVG(roadShapeAt(p, r, c)); e.appendChild(gdiv); }
+  } else if (mm.kind === 'destroyRoad') {
+    const e = document.getElementById(`m-${r}-${c}`); if (e && cell(p, r, c).rd) e.classList.add('pv-bad');
+  } else if (mm.kind === 'pickBld') {
+    const bi = cell(p, r, c).b; if (bi < 0) return; const b = p.blds[bi]; if (!mm.filter(b)) return;
+    b.cells.forEach(([a, bb]) => { const e = document.getElementById(`m-${a}-${bb}`); if (e) e.classList.add('pv-pick'); });
+  }
+}
+function bindMap() {
+  const m = document.getElementById('livemap'); if (!m) return;
+  m.onmousemove = e => { const el = e.target.closest('.cl'); if (!el) return; const r = +el.dataset.r, c = +el.dataset.c; if (ui.hover && ui.hover[0] === r && ui.hover[1] === c) return; ui.hover = [r, c]; showPreview(r, c); };
+  m.onmouseleave = () => { ui.hover = null; clearPreview(); };
+  m.onclick = e => { const el = e.target.closest('.cl'); if (!el) return; mapClick(+el.dataset.r, +el.dataset.c); };
+  m.oncontextmenu = e => { if (mapMode() && mapMode().kind === 'shape') { e.preventDefault(); ui.orient++; if (ui.hover) showPreview(...ui.hover); } };
+  if (ui.hover) showPreview(...ui.hover);
+  highlightTour();
+}
+function mapClick(r, c) {
+  const mm = mapMode(); if (!mm) return; const p = ME(); const t = head();
+  if (mm.kind === 'shape') {
+    // 터치 기기: 첫 탭은 미리보기, 같은 칸 두 번째 탭에 배치
+    if (ui.touch && !(ui.hover && ui.hover[0] === r && ui.hover[1] === c && ui.touchArm)) { ui.hover = [r, c]; ui.touchArm = true; showPreview(r, c); return; }
+    ui.touchArm = false;
+    const cells = curCells(mm, r, c); const ok = canPlace(p, cells, mm.attach);
+    if (!ok) { flash('여기에는 놓을 수 없습니다 (다른 건물과 모서리도 닿으면 안 됨)'); return; }
+    H.placeShape(cells, ok.host);
+  } else if (mm.kind === 'road') {
+    if (!roadOK(p, r, c)) { flash('빈 칸에만 도로를 놓을 수 있습니다'); return; }
+    H.road(r, c, roadShapeAt(p, r, c));
+  } else if (mm.kind === 'destroyRoad') {
+    if (!cell(p, r, c).rd) return; H.destroyRoad(r, c);
+  } else if (mm.kind === 'pickBld') {
+    const bi = cell(p, r, c).b; if (bi < 0 || !mm.filter(p.blds[bi])) return;
+    if (t.t === 'special') H.special(bi); else H.disasterPick(bi);
+  }
+}
+function highlightTour() {
+  if (ui.tourHover == null) return; const t = head(); if (!t || t.t !== 'tour') return;
+  const o = tourOptions(ME())[ui.tourHover]; if (!o) return; const p = ME();
+  o.visit.forEach(i => p.blds[i].cells.forEach(([a, b]) => { const e = document.getElementById(`m-${a}-${b}`); if (e) e.classList.add(o.newOnes.includes(i) ? 'pv-ok' : 'pv-pick'); }));
+}
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  const mm = mapMode();
+  if ((e.key === 'r' || e.key === 'R' || e.key === 'ㄱ') && mm) {
+    if (mm.kind === 'shape') ui.orient++;
+    else if (mm.kind === 'road') { const all = ['auto', ...ROAD_SHAPES]; ui.roadShape = all[(all.indexOf(ui.roadShape) + 1) % all.length]; renderPrompt(); }
+    if (ui.hover) showPreview(...ui.hover);
+  }
+  if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) { e.preventDefault(); H.undo(); }
+});
+
+/* ---------- 프롬프트 ---------- */
+function btn(label, onclick, cls) { return `<button class="pb ${cls || ''}" onclick="${onclick}">${label}</button>`; }
+function renderPrompt() {
+  const t = head(); const me = ME(); const el = $('#prompt');
+  if (G.over) { el.innerHTML = `<div class="ptitle">🏁 게임 종료</div><p>${G.winner < 0 ? '무승부!' : G.players[G.winner].ai ? '컴퓨터가 이겼습니다.' : '🎉 승리했습니다!'}</p>${btn('결과 보기', 'showFinal()', 'primary')}${btn('새 게임', 'showSetup()')}`; return; }
+  if (!t) { el.innerHTML = '<div class="ptitle">…</div>'; return; }
+  if (t.p !== me.idx) { el.innerHTML = `<div class="ptitle">컴퓨터 차례…</div>`; return; }
+  const p = me; let h = '';
+  const T = (title, sub) => `<div class="ptitle">${title}</div>${sub ? `<div class="psub">${sub}</div>` : ''}`;
+  switch (t.t) {
+    case 'confirm':
+      h = T(t.kind === 'roll' ? '🎲 새 액션 단계' : t.kind === 'run' ? '⚙️ 공원 운영 단계' : '🛍️ 기념품 가게', t.kind === 'roll' ? '주사위를 굴리면 그 전으로는 무를 수 없습니다.' : t.kind === 'run' ? '순서: 어트랙션 → 전문가 → 공룡 투어 → 스릴 수입 → 사망자 집계' : '주사위를 굴리면 무를 수 없습니다.') + btn(t.label, 'H.confirm()', 'primary big');
+      break;
+    case 'draft': h = T(`주사위 드래프트 (${t.n}번째)`, `왼쪽 주사위 풀에서 하나를 고르세요. 내가 고른 주사위의 위협(●)은 무시하지만, 마지막 남는 <b>공용 주사위</b>는 자원과 위협을 모두에게 줍니다.`); break;
+    case 'placeDie': h = T('액션 수행', `내 주사위를 선택한 뒤 액션 칸을 누르세요. 이미 주사위가 있는 칸에 쌓으면 맨 위 주사위의 위협(●)을 받습니다.`) + (ui.selDie == null ? '<div class="hint2">① 주사위 선택 → ② 액션 칸 선택</div>' : `<div class="hint2">선택한 주사위: ${faceHTML(faceOf(p.dice[ui.selDie]), 'sm')}</div>`) + `<div class="actbtns">${Object.entries(ACTIONS).map(([k, a]) => btn(`${a.name}${topThreat(k) ? ` <small class="red">●${topThreat(k)}</small>` : ''}`, `H.placeDie('${k}')`, ui.selDie == null ? 'dis' : '')).join('')}</div>`; break;
+    case 'choose': h = T(t.title) + t.opts.map((o, i) => btn(o.label + ' ' + effIcons(o.eff), `H.choose(${i})`, 'primary')).join(''); break;
+    case 'dna': {
+      const list = t.kind === 'b' ? DNA_B : DNA_A;
+      h = T(`${t.kind === 'b' ? '기본' : '고급'} DNA ${t.n}개를 받습니다`, '색을 하나씩 고르세요.') + `<div class="dnabtns">${list.map(k => btn(`${dnaIc(k, true)} ${DNA_NAME[k]} <small>(${stDNA(p, k)})</small>`, `H.dna('${k}')`)).join('')}</div>` + dnaHelp(); break;
+    }
+    case 'coins': {
+      const items = allItems().filter(k => !itemDone(p, k) && !p.lost[k]);
+      h = T(`코인 ${p.pendC}개를 쓰세요`, '전문가·건물 카드에 1개씩 표시(카드를 눌러도 됨)하거나, 2개로 다른 자원을 사거나, 보관하세요.') +
+        `<div class="coinlist">${items.map(k => `<button class="pb coinitem" onclick="H.pay('${k}')"><span>${itemName(k)}</span>${progHTML(p, k)}<small>남은 ${itemRem(p, k)}</small></button>`).join('')}</div>` +
+        `<div class="row">${btn('2₩→고급DNA', "H.convert('a')", p.pendC < 2 ? 'dis' : '')}${btn('2₩→도로', "H.convert('r')", p.pendC < 2 ? 'dis' : '')}${btn('2₩→경비', "H.convert('s')", p.pendC < 2 ? 'dis' : '')}</div>` +
+        `<div class="row">${btn(`보관하기 (남은 칸 ${5 - p.coinSlots})`, 'H.storeCoin()', p.coinSlots >= 5 ? 'dis' : '')}${btn('남은 코인 버리기', 'H.discardCoins()', 'ghostb')}</div>`;
+      break;
+    }
+    case 'roads':
+      h = T(`도로 ${p.pendR}개를 놓으세요`, '지도 빈 칸을 누르면 도로가 놓입니다. 모양은 <b>자동</b>(주변에 맞춤) 또는 직접 선택 (R키로 바꾸기). 도로는 갈림길·교차 없이 한 칸에 두 변만 잇습니다.') +
+        `<div class="rshapes">${['auto', ...ROAD_SHAPES].map(s => `<button class="rs ${ui.roadShape === s ? 'on' : ''}" onclick="ui.roadShape='${s}';renderPrompt()">${s === 'auto' ? '자동' : roadSVG(s)}</button>`).join('')}</div>` +
+        `<div class="row">${btn(`보관 (남은 칸 ${5 - p.roadSlots})`, 'H.storeRoad()', p.roadSlots >= 5 ? 'dis' : '')}${btn('도로 1개 버리기', 'H.discardRoad()', 'ghostb')}</div>`;
+      break;
+    case 'attr': {
+      if (t.k === 'A' && !ui.attrKind) {
+        h = T('어트랙션을 고르세요') + ['M', 'Ri', 'F'].map(k => { const ok = p.attrBuilt[k] < 4 && hasPlacement(p, ATTR[k].shape); return btn(`${ATTR_EMO[k]} ${ATTR[k].name} ${shapeMini(ATTR[k].shape)} <small>${p.attrBuilt[k]}/4</small>`, `ui.attrKind='${k}';ui.orient=0;render()`, ok ? '' : 'dis'); }).join('');
+      } else {
+        const k = t.k === 'A' ? ui.attrKind : t.k;
+        h = T(`${ATTR_EMO[k]} ${ATTR[k].name}을(를) 지도에 그리세요`, placeHelp()) + rotBtns() + (t.k === 'A' ? btn('다른 어트랙션 고르기', "ui.attrKind=null;render()", 'ghostb') : '');
+      }
+      break;
+    }
+    case 'paddock': h = T(`${t.sp === 'compy' ? '컴프소냐투스' : SP[t.sp].name} 우리를 지도에 그리세요`, `${t.sp === 'compy' ? '1×3' : DTYPE[SP[t.sp].type].size + '×' + DTYPE[SP[t.sp].type].size} 크기. ` + placeHelp()) + rotBtns(); break;
+    case 'placeCard': h = T(`🔧 ${BLDS[t.id].name}을(를) 지도에 그리세요`, (BLDS[t.id].at ? `<b>📎 ${BLDS[t.id].at}.</b> ` : '') + placeHelp()) + rotBtns(); break;
+    case 'make': case 'compy': h = makeHTML(t); break;
+    case 'special': h = specialHTML(t); break;
+    case 'runSpec': {
+      const list = usableSpecs(p);
+      h = T('전문가 운영 능력', '원하는 순서로 사용하세요 (꼭 쓰지 않아도 됩니다).') + list.map(id => btn(`⚗️ ${SPECS[id].name}<small>${SPECS[id].rt}</small>`, `H.useSpec('${id}')`, 'primary tall')).join('') + btn('전문가 단계 끝내기', 'H.endSpec()', 'ghostb');
+      break;
+    }
+    case 'tour': {
+      const opts = tourOptions(p);
+      h = T('🚙 공룡 투어', `본관(HQ)에서 출발해 도로로 연결된 건물을 지나갑니다. 처음 방문하는 건물마다 스릴 1. 출입구에서 끝나면 그 출입구에 동그라미(게임당 최대 3번, 끝까지 연결되어 있어야 점수). <br>마우스를 올리면 경로가 지도에 표시됩니다.`) +
+        opts.map((o, i) => `<button class="pb primary tall" onmouseenter="ui.tourHover=${i};clearPreview();highlightTour()" onmouseleave="ui.tourHover=null;clearPreview()" onclick="H.tour(${i})">새 건물 ${o.n}곳 → 스릴 +${o.n}${o.exit != null ? ` · 출입구 ★${o.vp} 동그라미` : ''}</button>`).join('') + btn('투어 하지 않기', 'H.tour(-1)', 'ghostb');
+      break;
+    }
+    case 'disaster': {
+      const o = disasterOptions(p);
+      h = T(`⚠️ 재난 발생! (사망 ${t.at}칸)`, '실행 가능한 재난 하나를 고르세요. 같은 재난은 2번까지만.') + o.map(k => btn(`${DISASTERS[k]} <small>(${p.dis[k]}/2)</small>`, `H.disaster('${k}')`, 'warnbtn')).join('');
+      break;
+    }
+    case 'disasterPick': {
+      if (t.kind === 'spec') h = T('잃을 전문가를 고르세요') + activeSpecs(p).map(id => btn(SPECS[id].name, `H.disasterPick('${id}')`)).join('');
+      else h = T(t.kind === 'pad' ? '파괴할 우리를 지도에서 누르세요' : '파괴할 어트랙션을 지도에서 누르세요') + p.blds.filter(b => !b.dead && (t.kind === 'pad' ? b.kind === 'pad' : b.kind === 'attr')).map(b => btn(b.kind === 'pad' ? (b.sub === 'compy' ? '컴프소냐투스 우리' : SP[b.sub].name + ' 우리 (' + p.alive[b.sub] + '마리)') : ATTR_EMO[b.sub] + ' ' + ATTR[b.sub].name, `H.disasterPick(${b.i})`)).join('');
+      break;
+    }
+    case 'destroyRoads': h = T(`파괴할 도로 ${t.n}개`, '지도에서 도로를 누르거나 보관 도로를 쓰세요.') + btn(`보관 도로 1개 잃기 (${p.roadStored})`, 'H.destroyStored()', p.roadStored ? '' : 'dis'); break;
+    case 'loseDNA': h = T(`잃을 보관 DNA ${t.n}개`, '하나씩 고르세요.') + `<div class="dnabtns">${DNA_ALL.map(k => btn(`${dnaIc(k, true)} ${DNA_NAME[k]} (${stDNA(p, k)})`, `H.loseDNA('${k}')`, stDNA(p, k) ? '' : 'dis')).join('')}</div>`; break;
+    default: h = T(t.t);
+  }
+  el.innerHTML = fixJosa(h);
+}
+function effIcons(eff) { return eff.map(op => op.g ? resHTML(op.g, true) : op.attr ? ICON[op.attr] || ICON.A : '').join(''); }
+function rotBtns() { return `<div class="row">${btn('↻ 회전/뒤집기 (R / 우클릭)', 'ui.orient++;if(ui.hover)showPreview(...ui.hover)')}</div>`; }
+function placeHelp() { return '초록 미리보기가 놓을 수 있는 자리입니다. 다른 건물과 변·모서리 모두 닿으면 안 됩니다(도로·파괴된 칸·지도 가장자리는 OK).' + (ui.touch ? ' 터치: 한 번 탭 = 미리보기, 같은 칸 다시 탭 = 놓기.' : ''); }
+function dnaHelp() { return `<div class="dnahelp">${SPECIES.map(s => `<span>${dnaIc(s.dna[0])}${dnaIc(s.dna[1])} ${s.name}</span>`).join('')}</div>`; }
+function makeHTML(t) {
+  const p = ME(); const isCompy = t.t === 'compy';
+  if (isCompy) {
+    const tot = Object.values(ui.spend).reduce((a, b) => a + b, 0);
+    return `<div class="ptitle">🦎 컴프소냐투스 만들기 (최대 ${t.max})</div><div class="psub">기본 DNA 1개당 1마리: 위협 1, 스릴 2. 승점은 없습니다.</div>${spendRows(DNA_B, t.max)}${btn(`${tot}마리 만들기`, 'H.compy()', 'primary')}${btn('만들지 않기', 'H.compy(true)', 'ghostb')}`;
+  }
+  const plan = ui.plan; const tot = Object.values(plan).reduce((a, b) => a + b, 0);
+  const rows = SPECIES.map(s => {
+    const n = plan[s.id] || 0; const canAdd = tot < t.max && canMakeSpecies(p, s.id, plan);
+    const ty = DTYPE[s.type];
+    return `<div class="mk ${s.type}"><span class="snm">${s.name}</span>${dnaIc(s.dna[0])}${dnaIc(s.dna[1])}<small>${p.made[s.id]}/4 ${p.pads[s.id] != null ? '' : '· 새 우리'}</small>
+      <span class="stp"><button onclick="H.planAdj('${s.id}',-1)" ${n ? '' : 'disabled'}>−</button><b>${n}</b><button onclick="H.planAdj('${s.id}',1)" ${canAdd ? '' : 'disabled'}>+</button></span><small class="gain">▲${ty.thrill}${ty.threat ? ' ●' + ty.threat : ''}</small></div>`;
+  }).join('');
+  let thr = 0, thrill = 0; for (const [k, v] of Object.entries(plan)) { thr += DTYPE[SP[k].type].threat * v; thrill += DTYPE[SP[k].type].thrill * v; }
+  return `<div class="ptitle">🦕 공룡 만들기 (최대 ${t.max}마리)</div><div class="psub">각 공룡은 표시된 DNA 2개가 필요합니다. 처음 만드는 종은 우리를 지어야 합니다. 종마다 최대 4마리.</div>
+    <div class="mklist">${rows}</div><div class="psub">합계 ${tot}마리 · 스릴 +${thrill} · 위협 +${thr} ${thr && p.thr + thr > p.sec ? `<span class="red">(무방비 위협 ${p.thr + thr - p.sec})</span>` : ''}</div>
+    ${btn(`${tot}마리 만들기`, 'H.make()', tot ? 'primary' : 'dis')}${btn('만들지 않기', 'H.make(true)', 'ghostb')}`;
+}
+function spendRows(list, max) {
+  const p = ME(); const tot = Object.values(ui.spend).reduce((a, b) => a + b, 0);
+  return `<div class="mklist">${list.map(k => { const n = ui.spend[k] || 0; return `<div class="mk">${dnaIc(k, true)} <span class="snm">${DNA_NAME[k]} (보관 ${stDNA(p, k)})</span><span class="stp"><button onclick="H.spendAdj('${k}',-1)" ${n ? '' : 'disabled'}>−</button><b>${n}</b><button onclick="H.spendAdj('${k}',1,${max})" ${tot < max && n < stDNA(p, k) ? '' : 'disabled'}>+</button></span></div>`; }).join('')}</div>`;
+}
+function specialHTML(t) {
+  const p = ME();
+  switch (t.sp) {
+    case 'copyBonus': return `<div class="ptitle">복제 전문가: 보너스를 복사할 전문가</div>` + specialChoices(p, t.sp).map(id => btn(`${SPECS[id].name}<small>${SPECS[id].bt}</small>`, `H.special('${id}')`, 'primary tall')).join('');
+    case 'copyRun': case 'clone': return `<div class="ptitle">${t.sp === 'clone' ? '클론 구역: 사용할 운영 능력 (고용 안 한 전문가도 가능)' : '복제 전문가: 복사할 운영 능력'}</div>` + specialChoices(p, t.sp).map(id => btn(`${SPECS[id].name}<small>${SPECS[id].rt}</small>`, `H.special('${id}')`, 'primary tall')).join('');
+    case 'architect': return `<div class="ptitle">건축가</div><div class="psub">어트랙션 1개를 파괴하면 모든 건물 카드 트랙에 코인 2씩 표시합니다. 지도에서 어트랙션을 누르거나 건너뛰세요.</div>` + btn('사용하지 않기', 'H.special(null)', 'ghostb');
+    case 'freeDino': return `<div class="ptitle">DNA 혼합전문가: 공룡 1마리 무료 추가</div>` + SPECIES.filter(s => p.pads[s.id] != null && p.made[s.id] < 4).map(s => btn(`${s.name} (${p.made[s.id]}/4)`, `H.special('${s.id}')`, 'primary')).join('');
+    case 'spendBasic6': case 'spendAdv3': {
+      const lim = t.sp === 'spendBasic6' ? 6 : 3; const list = t.sp === 'spendBasic6' ? DNA_B : DNA_A; const tot = Object.values(ui.spend).reduce((a, b) => a + b, 0);
+      return `<div class="ptitle">${t.sp === 'spendBasic6' ? '컴프 수용소: 기본 DNA 소비 → 1개당 스릴 1' : 'DNA 저장고: 고급 DNA 소비 → 1개당 코인 1'}</div><div class="psub">최대 ${lim}개 (점수용 '모은 DNA'는 소비해도 계속 셉니다)</div>${spendRows(list, lim)}${btn(`${tot}개 소비`, 'H.special(Object.assign({},ui.spend))', 'primary')}`;
+    }
+  }
+  return '';
+}
+
+/* ---------- 로그 ---------- */
+function renderLog() {
+  const el = $('#log');
+  const items = G.log.slice(-120).map(l => `<div class="lg ${l.p < 0 ? 'sys' : G.players[l.p].ai ? 'ai' : 'me'} ${l.m.startsWith('━━') ? 'hd' : ''}">${l.m}</div>`).join('');
+  el.innerHTML = items; el.scrollTop = el.scrollHeight;
+}
+
+/* ---------- 렌더 ---------- */
+function render() {
+  const t = head();
+  const key = t ? JSON.stringify([t.t, t.p, t.k, t.sp, t.id]) : '';
+  const changed = key !== ui.lastHead;
+  if (changed) { ui.lastHead = key; ui.orient = 0; ui.attrKind = null; ui.plan = {}; ui.spend = {}; ui.tourHover = null; if (!(t && t.t === 'placeDie')) ui.selDie = null; ui.touchArm = false; }
+  const me = ME();
+  if (ui.selDie != null && ui.selDie >= me.dice.length) ui.selDie = null;
+  // 내 차례 작업이면 내 시트 보기로 전환
+  if (t && t.p === me.idx && mapMode() === null && ['roads', 'attr', 'paddock', 'placeCard'].includes(t.t)) ui.view = me.idx;
+  renderTop(); renderBoard(); renderSheet(); renderPrompt(); renderLog();
+  save();
+  if (changed && window.innerWidth <= 980 && t && t.p === me.idx) {
+    const mapTasks = ['roads', 'attr', 'paddock', 'placeCard', 'destroyRoads', 'disasterPick', 'tour'];
+    const tgt = mapTasks.includes(t.t) || (t.t === 'special' && t.sp === 'architect') ? document.getElementById('livemap') : ['draft', 'placeDie'].includes(t.t) ? document.getElementById('board') : null;
+    if (tgt) setTimeout(() => tgt.scrollIntoView({ block: t.t === 'draft' || t.t === 'placeDie' ? 'start' : 'center', behavior: 'smooth' }), 60);
+  }
+  if (G.over && !ui.shownFinal) { ui.shownFinal = true; setTimeout(showFinal, 300); }
+}
+function flash(msg) { const f = $('#flash'); f.textContent = msg; f.classList.add('on'); clearTimeout(flash._t); flash._t = setTimeout(() => f.classList.remove('on'), 1800); }
+
+/* ---------- 사람 행동 ---------- */
+const H = {
+  undo() { if (undo()) { ui.lastHead = null; ui.shownFinal = G.over; render(); flash('한 수 무르기'); } },
+  confirm() { act(() => G.q.shift()); render(); },
+  draft(i) { act(() => { G.q.shift(); takeDie(ME(), i); }); render(); },
+  choose(i) { act(() => { const t = G.q.shift(); log(`${ME().name}: ${t.opts[i].label} 선택`, ME().idx); front({ t: 'eff', p: t.p, eff: t.opts[i].eff }); }); render(); },
+  dna(k) { act(() => { const t = head(); t.n--; addDNA(ME(), k, 1); log(`${ME().name}: ${DNA_NAME[k]} DNA 획득`, ME().idx); }); render(); },
+  pay(key) { const p = ME(); const t = head(); if (!t || t.t !== 'coins' || p.pendC < 1) return; act(() => payCoin(p, key)); render(); },
+  convert(w) { act(() => convertCoins(ME(), w)); render(); },
+  storeCoin() { act(() => { storeCoin(ME()); }); render(); },
+  discardCoins() { act(() => { const p = ME(); log(`${p.name}: 코인 ${p.pendC}개를 버립니다.`, p.idx); p.pendC = 0; }); render(); },
+  useCoin() { act(() => useStoredCoin(ME())); render(); },
+  useRoad() { act(() => useStoredRoad(ME())); render(); },
+  road(r, c, s) { act(() => placeRoad(ME(), r, c, s)); render(); },
+  storeRoad() { act(() => storeRoad(ME())); render(); },
+  discardRoad() { act(() => { ME().pendR--; }); render(); },
+  placeShape(cells, host) {
+    const t = head(); const p = ME();
+    act(() => {
+      G.q.shift();
+      if (t.t === 'attr') placeAttr(p, t.k === 'A' ? ui.attrKind : t.k, cells);
+      else if (t.t === 'paddock') placePaddock(p, t.sp, cells);
+      else if (t.t === 'placeCard') placeCard(p, t.id, cells, host);
+    });
+    ui.hover = null; render();
+  },
+  planAdj(sid, d) { ui.plan[sid] = Math.max(0, (ui.plan[sid] || 0) + d); if (!ui.plan[sid]) delete ui.plan[sid]; renderPrompt(); },
+  spendAdj(k, d) { ui.spend[k] = Math.max(0, (ui.spend[k] || 0) + d); if (!ui.spend[k]) delete ui.spend[k]; renderPrompt(); },
+  make(skip) { const plan = Object.assign({}, ui.plan); act(() => { G.q.shift(); if (!skip && Object.keys(plan).length) makeDinos(ME(), plan); else log(`${ME().name}: 공룡을 만들지 않았습니다.`, ME().idx); }); render(); },
+  compy(skip) { const sp = Object.assign({}, ui.spend); act(() => { G.q.shift(); const p = ME(); if (skip) return; let n = 0; for (const [k, v] of Object.entries(sp)) { p.dnaS[k] += v; n += v; } makeCompies(p, n); }); render(); },
+  special(choice) { act(() => { const t = G.q.shift(); runSpecial(ME(), t, choice); }); render(); },
+  placeDie(act_) { if (ui.selDie == null) { flash('먼저 내 주사위를 고르세요'); return; } const di = ui.selDie; ui.selDie = null; act(() => { G.q.shift(); doPlace(ME(), di, act_); }); render(); },
+  useSpec(id) { act(() => useSpec(ME(), id)); render(); },
+  endSpec() { act(() => G.q.shift()); render(); },
+  tour(i) { const opts = tourOptions(ME()); act(() => { G.q.shift(); applyTour(ME(), i >= 0 ? opts[i] : null); }); ui.tourHover = null; render(); },
+  disaster(k) {
+    act(() => {
+      const t = G.q.shift(); const p = ME();
+      if (k === 'pad' || k === 'attr' || k === 'spec') front({ t: 'disasterPick', p: p.idx, kind: k });
+      else applyDisaster(p, k);
+    }); render();
+  },
+  disasterPick(arg) { act(() => { const t = G.q.shift(); applyDisaster(ME(), t.kind, arg); }); render(); },
+  destroyRoad(r, c) { act(() => { const t = head(); destroyRoadCell(ME(), r, c); t.n--; }); render(); },
+  destroyStored() { act(() => { const t = head(); const p = ME(); if (p.roadStored > 0) { p.roadStored--; t.n--; } }); render(); },
+  loseDNA(k) { act(() => { const t = head(); const p = ME(); if (stDNA(p, k) > 0) { p.dnaS[k]++; t.n--; } }); render(); },
+};
+TASK.disasterPick = { inter: true, ai(t, p) { } };
+
+/* ---------- 저장 / 모달 ---------- */
+function save() { try { localStorage.setItem('rawr_kr_save', JSON.stringify(G)); } catch (e) { } }
+function modal(html, cls) { const m = $('#modal'); m.innerHTML = `<div class="mbox ${cls || ''}"><button class="mx" onclick="closeModal()">✕</button>${html}</div>`; m.classList.add('on'); }
+function closeModal() { $('#modal').classList.remove('on'); }
+function showFinal() {
+  if (!G.final) return;
+  const rows = Object.entries(SC_NAMES).map(([k, n]) => `<tr><td>${n}</td>${G.final.map(f => `<td>${f[k]}</td>`).join('')}</tr>`).join('');
+  const w = G.winner;
+  const tier = s => s >= 130 ? '인생 최대의 역작!' : s >= 120 ? '올해의 공원!' : s >= 110 ? '올해의 프랜차이즈!' : s >= 100 ? '프랜차이즈로 확장해도 되겠는데요?' : s >= 90 ? '모범적인 운영입니다.' : s >= 80 ? '관리자로 진급했습니다.' : s >= 70 ? '요령을 터득했군요.' : s >= 50 ? '나쁘지 않아요.' : '한 번 다시 도전해 봐요.';
+  modal(`<h2>🏁 최종 점수</h2><div class="winner">${w < 0 ? '무승부!' : G.players[w].ai ? '🤖 컴퓨터 승리' : '🎉 당신의 승리!'}</div>
+    <table class="final"><tr><th></th>${G.players.map(p => `<th>${p.ai ? '🤖' : '🙂'} ${p.name}</th>`).join('')}</tr>${rows}
+    <tr class="tot"><td>총점</td>${G.final.map(f => `<td>${f.total}</td>`).join('')}</tr></table>
+    <p class="muted">내 공원 평가: <b>${tier(G.final[humanIdx()].total)}</b></p>
+    <div class="row">${btn('새 게임', 'showSetup()', 'primary')}${btn('닫고 공원 보기', 'closeModal()')}</div>`);
+}
+function showSetup(first) {
+  const hasSave = first ? ui.hasSave : false;
+  modal(`<h2>🦖 다이노소어 아일랜드: 로어 앤 라이트</h2>
+    <p class="muted">컴퓨터와 1:1로 대결하는 한글판입니다. 3시즌 동안 공룡 공원을 지어 더 많은 승점을 얻으세요.</p>
+    <div class="setup">
+      <label><input type="checkbox" id="optBeg"> 첫 게임 모드 (Expert ◎ 표시 카드 제외)</label>
+      <div>선 플레이어: <select id="optFirst"><option value="r">무작위</option><option value="me">나</option><option value="ai">컴퓨터</option></select></div>
+      <div>내 이름: <input id="optName" value="나" maxlength="8" style="width:90px"></div>
+    </div>
+    <div class="row">${btn('게임 시작', 'startGame()', 'primary big')}${hasSave && first ? btn('이어하기', 'closeModal();render()', 'big') : ''}${!first ? btn('취소', 'closeModal()', 'ghostb') : ''}</div>
+    <p class="muted small">무르기(↶ 또는 Ctrl+Z): 주사위를 굴리기 전까지의 내 선택은 몇 번이든 되돌릴 수 있습니다.</p>`);
+}
+function startGame() {
+  const beg = $('#optBeg').checked; const f = $('#optFirst').value; const nm = ($('#optName').value || '나').trim();
+  newGame({ beginner: beg, humanFirst: f === 'r' ? null : f === 'me', names: [nm, '컴퓨터'], ais: [false, true] });
+  ui.view = humanIdx(); ui.shownFinal = false; ui.lastHead = null; closeModal(); render();
+}
+function showRules() {
+  modal(`<h2>📖 규칙 요약</h2><div class="rules">
+  <h4>목표</h4><p>3시즌 동안 DNA로 공룡을 만들고, 전문가를 고용하고, 어트랙션·건물을 지어 가장 많은 승점(★)을 얻습니다. 각 시즌 = 액션 단계 2번 + 공원 운영 1번.</p>
+  <h4>액션 단계</h4><ol><li><b>드래프트</b>: 주사위 5개를 굴려 선 플레이어 → 상대 → 상대 → 선 플레이어 순으로 1개씩 가져갑니다. 남은 1개는 <b>공용 주사위</b>.</li>
+  <li><b>자원 얻기</b>: 내 주사위 2개의 자원을 얻습니다(위협 ● 무시). "/"가 있으면 한쪽만. 그다음 공용 주사위의 자원 <b>과 위협</b>을 모두가 얻습니다.</li>
+  <li><b>액션</b>: 선 플레이어부터 번갈아 주사위를 액션 칸에 놓습니다. 이미 주사위가 있으면 위에 쌓고 맨 위 주사위의 위협을 받습니다.
+   <ul><li>공룡 만들기: 최대 4마리</li><li>자금 증액: 코인 2 또는 경비 2</li><li>DNA 추출: 기본 DNA 2 또는 고급 DNA 1</li><li>복제: 놓은 주사위 면을 2배(상대는 1배), 어트랙션은 불가</li><li>건설: 도로 3 또는 어트랙션 1</li></ul></li></ol>
+  <h4>자원</h4><ul><li><b>코인</b>은 얻는 즉시 전문가/건물 카드 칸에 표시(완성하면 즉시 ⚡보너스), 2개로 고급 DNA·도로·경비 1개 구매, 또는 보관(게임 전체 5칸).</li>
+  <li><b>도로</b>: 한 칸이 두 변을 잇습니다(갈림길·교차 불가). 보관 5칸.</li><li><b>경비 vs 위협</b>: 운영 단계 끝에 (위협 − 경비)만큼 사망자가 생깁니다. 매 운영 단계마다 다시 계산됩니다!</li>
+  <li><b>스릴</b>: 트랙에 표시된 아이콘이 운영 단계마다 수입이 됩니다. 가장 아래 줄 ★ 점수.</li></ul>
+  <h4>건물 배치</h4><p>회전·뒤집기 가능. 다른 건물과 변/모서리가 닿으면 안 됩니다(본관 포함). 공룡 종마다 우리 1개(초식 2×2, 소형 육식 3×3, 대형 육식 4×4). 어트랙션은 종류별 최대 4개. 부착 건물(염소 우리 등)은 지정된 우리에 붙여야 합니다.</p>
+  <h4>공원 운영</h4><ol><li>어트랙션 수입 (기념품=주사위 굴림, 놀이기구=스릴, 음식점=코인)</li><li>전문가 운영 능력(➜)</li><li>공룡 투어: HQ에서 도로로 연결된 건물을 되돌아가지 않고 지나가며, 새로 방문한 건물마다 스릴 1. 출입구에서 끝나면 출입구 ★ (최대 3번).</li><li>스릴 수입</li><li>사망자 집계 → ! 칸마다 재난</li></ol>
+  <h4>최종 점수</h4><p>초식 2 / 소형 육식 3 / 대형 육식 5 (살아 있는 공룡) · 전문가 3 · 건물 카드 · 연결된 출입구 · 스릴 줄 점수 + 60 초과분 · 보관 DNA 2개당 1 · 사망 1명당 −1 (21명부터 −2). 동점이면 공룡이 많은 쪽 승리.</p>
+  <h4>이 사이트에서</h4><ul><li>↶ <b>무르기</b>: 주사위 굴림 전까지 내 선택을 되돌립니다(Ctrl+Z). 컴퓨터의 행동도 함께 되돌아갑니다.</li><li>지도 배치: 마우스를 올려 미리보기, R키/우클릭으로 회전, 클릭으로 놓기.</li>
+  <li>주사위 10개의 면 구성은 규칙서에 목록이 없어, 규칙서 사진 예시를 바탕으로 재구성했습니다(한 면 최대 위협 2).</li><li>2인 게임이며 3~4인 전용 요소는 빠져 있습니다. 게임은 자동 저장되어 새로고침해도 이어집니다.</li></ul></div>`, 'wide');
+}
+window.addEventListener('touchstart', () => { ui.touch = true; }, { once: true, passive: true });
+window.addEventListener('load', () => {
+  HOOK.onRandom = () => { UNDO = []; };
+  let loaded = false;
+  try { const s = localStorage.getItem('rawr_kr_save'); if (s) { G = JSON.parse(s); loaded = !G.over; } } catch (e) { }
+  if (!G) { newGame({ ais: [false, true] }); }
+  ui.view = humanIdx(); ui.shownFinal = G.over;
+  ui.hasSave = loaded;
+  render();
+  showSetup(true);
+});
+
+</script>
+</body>
+</html>
